@@ -185,6 +185,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
   <main class="content">
     <div class="pane on" id="pane-ov">
       <div class="sh"><div class="st">Tableau de bord</div><div class="ss">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
+      <div id="birthday-notif" style="display:none;align-items:center;gap:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
       <div class="kgrid">
         <div class="kcard bl"><div class="klbl">Equipe</div><div class="kval">15</div><div class="kmeta">TL + INPAK + Prod + Unit</div></div>
         <div class="kcard gn"><div class="klbl">Score &le; 50</div><div class="kval" id="k-ok">-</div><div class="kmeta" id="k-okp">-</div></div>
@@ -199,6 +200,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
       <div class="cc"><div class="cch"><div class="cct">Jours d&rsquo;absence par employ&eacute;</div></div><div class="cw" style="height:220px"><canvas id="cJour"></canvas></div></div>
       <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">Absences &mdash; 30 prochains jours</div></div><div id="mini-cal" style="padding:0 4px"></div></div>
       <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="today-abs-title">Absents aujourd'hui</div></div><div id="today-abs" style="padding:4px"></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127874; Anniversaires à venir</div></div><div id="birthday-cal" style="padding:4px"></div></div>
     </div>
     <div class="pane" id="pane-br">
       <div class="sh"><div class="st">Score Bradford</div><div class="ss">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all">Tous</option><option value="ok">OK</option><option value="wn">A surveiller</option><option value="al">Preoccupant</option><option value="cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
@@ -413,6 +415,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
                 <input id="emp-role" type="text" placeholder="ex: Operateur" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
               </div>
             </div>
+            <div style="margin-top:4px">
+                <label style="font-size:11px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Date de naissance</label>
+                <input id="emp-birthday" type="date" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
+              </div>
             <div id="emp-modal-err" style="font-size:12px;color:var(--red);min-height:16px"></div>
             <div style="display:flex;gap:10px;justify-content:flex-end">
               <button onclick="closeEmpModal()" style="padding:8px 18px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">Annuler</button>
@@ -780,7 +786,7 @@ function buildBT(){
       var cm=BD_COMMENTS[e.n];
       var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+cm.text.replace(/"/g,"&quot;")+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
       h+='<tr id="bdrow-'+e.n.replace(/\s+/g,'-')+'">';
-      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:underline dotted" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="Voir historique">'+e.n+'</b></td>';
+      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="Voir historique">'+e.n+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
       h+='<td style="color:var(--tx3);font-size:12px">'+(emp?emp.r:'')+'</td>';
       h+='<td><span style="font-family:var(--mo)">'+e.D+'</span></td>';
       h+='<td><span style="font-family:var(--mo)">'+e.S+'</span></td>';
@@ -1004,7 +1010,18 @@ function buildPT(){
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit'].forEach(function(g){var emps=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25).filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+g+'</td></tr>';emps.forEach(function(emp){h+='<tr><td class="nc">'+emp.n+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';h+='<td class="'+(col===ti?'td-td':'')+'"><span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span></td>';});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit'].forEach(function(g){var emps=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25).filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+g+'</td></tr>';emps.forEach(function(emp){h+='<tr><td class="nc">'+emp.n+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+      var bd=EMP.find(function(e){return e.n===emp.n;});
+      if(!bd||!bd.birthday) return false;
+      var parts=bd.birthday.split('-');
+      var bm=parseInt(parts[1],10),bday=parseInt(parts[2],10);
+      var parts2=x.d.split('/');
+      return parseInt(parts2[0],10)===bday&&parseInt(parts2[1],10)===bm;
+    })();
+    h+='<td class="'+(col===ti?'td-td':'')+'">'
+      +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span>'
+      +(isBdToday?'<span style="font-size:10px;margin-left:2px" title="Anniversaire de '+emp.n.split(' ')[0]+'">⭐</span>':'')
+      +'</td>';});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
 function openPopup(pill){activePill=pill;popup=document.getElementById('popup');var nm=pill.dataset.n;var emp=EMP.find(function(e){return e.n===nm;});var opts=OPTS[emp?emp.g:'INPAK']||[];var cur=pill.dataset.s;var h='<div class="ptit">'+nm.split(' ')[0]+'</div>';opts.forEach(function(o){h+='<div class="popt" data-v="'+o+'"><span class="sp '+sCls(o)+'" style="'+(o===cur?'outline:1.5px solid #3b82f6':'')+'">'+sLbl(o)+'</span><span style="font-size:11px;color:var(--tx2)">'+(o==='ziek'?'Maladie':o==='verlof'?'Conge':o==='recup'?'Recuperation':o==='TL'?'Present':o==='AW1'?'Vers AW1':o==='AW2'?'Vers AW2':o)+'</span></div>';});h+='<div class="pcancel">Annuler</div>';popup.innerHTML=h;
 var r=pill.getBoundingClientRect();
 var left=r.left+window.scrollX;
@@ -1276,6 +1293,8 @@ function editEmp(idx){
   document.getElementById('emp-name').value = e.n;
   document.getElementById('emp-group').value = e.g;
   document.getElementById('emp-role').value = e.r;
+  var bdEl = document.getElementById('emp-birthday');
+  if(bdEl) bdEl.value = e.birthday || '';
   document.getElementById('emp-modal-err').textContent = '';
   document.getElementById('emp-modal').style.display = 'flex';
 }
@@ -1297,7 +1316,9 @@ function saveEmp(){
   var id = editingEmpId || name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
   var order = editingEmpId ? (EMP.find(function(e){return e.id===editingEmpId;})||{}).order||99 : EMP.length;
 
+  var bday = document.getElementById('emp-birthday')?document.getElementById('emp-birthday').value:'';
   var empData = {name:name, group:group, role:role, active:true, order:order};
+  if(bday) empData.birthday = bday;
   document.getElementById('emp-save-btn').disabled = true;
   document.getElementById('emp-save-btn').textContent = 'Enregistrement...';
 
@@ -1306,8 +1327,11 @@ function saveEmp(){
     var existing = EMP.findIndex(function(e){return (e.id||e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_'))===id;});
     if(existing !== -1){
       EMP[existing] = {n:name, g:group, r:role, id:id};
+      if(bday) EMP[existing].birthday = bday;
     } else {
-      EMP.push({n:name, g:group, r:role, id:id});
+      var newEmp = {n:name, g:group, r:role, id:id};
+      if(bday) newEmp.birthday = bday;
+      EMP.push(newEmp);
       // Ajouter dans SHIFTS26 et SHIFTS25
       var nbDates26 = WEEKS26.reduce(function(a,w){return a+w.d.length;},0);
       var nbDates25 = WEEKS25.reduce(function(a,w){return a+w.d.length;},0);
@@ -1320,6 +1344,8 @@ function saveEmp(){
     buildEmpTable();
     buildPT();
     buildBT();
+    buildBirthdayNotif();
+    buildBirthdayCal();
     toast(name + ' enregistre !', '#10b981');
     document.getElementById('emp-save-btn').disabled = false;
     document.getElementById('emp-save-btn').textContent = 'Enregistrer';
@@ -1703,7 +1729,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();
         buildEmpTable();
       }
     }
@@ -1784,7 +1810,7 @@ function startApp(){
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();
   }
 }
 
@@ -1993,6 +2019,132 @@ function genererRapportExcel(){
   var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
   var zip=new JSZip();zip.file('[Content_Types].xml',ct);zip.file('_rels/.rels',pR);zip.file('xl/workbook.xml',wb);zip.file('xl/_rels/workbook.xml.rels',wbR);zip.file('xl/styles.xml',styles);zip.file('xl/sharedStrings.xml',sst);zip.file('xl/worksheets/sheet1.xml',sh1);zip.file('xl/worksheets/sheet2.xml',sh2);zip.file('xl/worksheets/sheet3.xml',sh3);
   zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Bradford_AW3P5_'+nomMois+'_'+annee+'.xlsx';a.click();toast('Rapport Excel : '+nomMois+' '+annee,'#10b981');});
+}
+
+
+// ============================================================
+// ANNIVERSAIRES
+// ============================================================
+
+function getBirthdays(){
+  // Retourne la liste des employés avec leur date de naissance
+  return EMP.filter(function(e){return e.birthday;}).map(function(e){
+    var parts = e.birthday.split('-');
+    return {n:e.n, month:parseInt(parts[1],10), day:parseInt(parts[2],10), year:parseInt(parts[0],10), full:e.birthday};
+  });
+}
+
+function isBirthdayToday(bday){
+  var now = new Date();
+  return bday.month === now.getMonth()+1 && bday.day === now.getDate();
+}
+
+function buildBirthdayNotif(){
+  // Bannière si anniversaire aujourd'hui
+  var el = document.getElementById('birthday-notif');
+  if(!el) return;
+  var bdToday = getBirthdays().filter(isBirthdayToday);
+  if(!bdToday.length){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML = '<div style="font-size:20px">🎂</div>'
+    +'<div><div style="font-weight:700;font-size:14px;color:#fbbf24">Joyeux anniversaire !</div>'
+    +'<div style="font-size:13px;color:var(--tx2)">'
+    +bdToday.map(function(b){
+      var age = new Date().getFullYear()-b.year;
+      return '<b>'+b.n.split(' ')[0]+'</b> fête ses '+age+' ans aujourd\'hui 🎉';
+    }).join(' &nbsp;·&nbsp; ')
+    +'</div></div>';
+}
+
+function buildBirthdayCal(){
+  var el = document.getElementById('birthday-cal');
+  if(!el) return;
+  var now = new Date();
+  var bdAll = getBirthdays();
+  if(!bdAll.length){
+    el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">Aucune date de naissance enregistrée — ajoutez-les dans Admin > Employés</div>';
+    return;
+  }
+
+  // Calculer les 365 prochains jours
+  var upcoming = bdAll.map(function(b){
+    var thisYear = new Date(now.getFullYear(), b.month-1, b.day);
+    var nextYear = new Date(now.getFullYear()+1, b.month-1, b.day);
+    var next = thisYear >= now ? thisYear : nextYear;
+    var daysUntil = Math.floor((next - now)/(1000*60*60*24));
+    var age = next.getFullYear() - b.year;
+    return {n:b.n, next:next, daysUntil:daysUntil, age:age, month:b.month, day:b.day};
+  }).sort(function(a,b){return a.daysUntil - b.daysUntil;});
+
+  // Trouver le prochain jour de travail (dans WEEKS)
+  function nextWorkDay(date){
+    var yr = String(date.getFullYear());
+    var weeks = yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:WEEKS25;
+    var allD = weeks.reduce(function(a,w){return a.concat(w.d);},[]);
+    // Chercher à partir de cette date
+    for(var offset=0; offset<=7; offset++){
+      var d = new Date(date);
+      d.setDate(d.getDate()+offset);
+      var dd = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+      if(allD.indexOf(dd) !== -1) return {date:d, ddmm:dd, offset:offset};
+    }
+    return null;
+  }
+
+  var MOIS=['jan','fév','mars','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+  var DOW=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  el.innerHTML = upcoming.map(function(b){
+    var isToday = b.daysUntil === 0;
+    var isSoon = b.daysUntil <= 7;
+    var workDay = nextWorkDay(b.next);
+    var workInfo = '';
+    if(workDay && workDay.offset > 0){
+      workInfo = '<span style="font-size:10px;color:var(--tx3);margin-left:6px">→ fêté le '+DOW[workDay.date.getDay()]+' '+workDay.date.getDate()+' '+MOIS[workDay.date.getMonth()]+'</span>';
+    }
+    var bg = isToday?'rgba(251,191,36,.15)':isSoon?'rgba(59,130,246,.07)':'';
+    var border = isToday?'border-left:3px solid #fbbf24':'border-left:3px solid transparent';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 8px;border-bottom:1px solid var(--bd2);'+border+';background:'+bg+'">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +(isToday?'<span style="font-size:18px">🎂</span>':'<span style="font-size:16px">🎁</span>')
+      +'<div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+b.n.split(' ')[0]+'<span style="font-weight:400;color:var(--tx3);font-size:12px"> '+b.n.split(' ').slice(1).join(' ')+'</span></div>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+b.day+' '+MOIS[b.month-1]+' &mdash; '+b.age+' ans'+workInfo+'</div>'
+      +'</div></div>'
+      +'<div style="text-align:right">'
+      +(isToday?'<span style="font-size:12px;font-weight:700;color:#fbbf24">Aujourd\'hui !</span>'
+               :'<span style="font-size:12px;font-weight:600;color:'+(isSoon?'var(--blue)':'var(--tx3)')+'">dans '+b.daysUntil+'j</span>')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// Étoile anniversaire sur le planning — appelée dans buildPT
+function getBirthdayStarForDate(ddmm, yr){
+  var bdAll = getBirthdays();
+  var parts = ddmm.split('/');
+  var day = parseInt(parts[0],10), month = parseInt(parts[1],10);
+  var match = bdAll.filter(function(b){return b.day===day && b.month===month;});
+  if(!match.length) return '';
+  return ' <span title="Anniversaire : '+match.map(function(b){return b.n.split(' ')[0];}).join(', ')+'">⭐</span>';
+}
+
+// Charger les birthdays depuis Firebase dans EMP
+function loadBirthdaysFromFirebase(){
+  if(!db) return;
+  db.ref('employees').once('value').then(function(snap){
+    var data = snap.val();
+    if(!data) return;
+    Object.keys(data).forEach(function(id){
+      var emp = data[id];
+      if(!emp.birthday) return;
+      var found = EMP.find(function(e){return e.n===emp.name;});
+      if(found) found.birthday = emp.birthday;
+    });
+    buildBirthdayNotif();
+    buildBirthdayCal();
+    buildPT(); // refresh planning avec étoiles
+  });
 }
 
 </script>
