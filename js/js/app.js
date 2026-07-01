@@ -1360,4 +1360,3 @@ function startApp(){
     recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();
   }
 }
-
