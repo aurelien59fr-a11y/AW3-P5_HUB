@@ -447,15 +447,16 @@ function calcSaisons(name){
 function getCommentHistory(name){
   var cm=BD_COMMENTS[name];
   if(!cm||!cm.history||!cm.history.length) return '';
-  return '<div style="margin-top:12px">'\
-    +'<div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>'\
-    +cm.history.slice(0,5).map(function(h){
-      return '<div style="font-size:12px;padding:6px 8px;border-radius:6px;background:var(--bg3);margin-bottom:4px">'\
-        +'<div style="color:var(--tx2)">'+h.text+'</div>'\
-        +'<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+h.date+(h.author?' · '+h.author:'')+'</div>'\
-        +'</div>';
-    }).join('')\
-    +'</div>';
+  var html='<div style="margin-top:12px">';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>';
+  cm.history.slice(0,5).forEach(function(h){
+    html+='<div style="font-size:12px;padding:6px 8px;border-radius:6px;background:var(--bg3);margin-bottom:4px">';
+    html+='<div style="color:var(--tx2)">'+(h.text||'')+'</div>';
+    html+='<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(h.date||'')+(h.author?' · '+h.author:'')+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  return html;
 }
 
 function buildTodayAbs(){
