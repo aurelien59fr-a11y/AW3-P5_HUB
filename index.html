@@ -7,7 +7,467 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+// ============================================================
+// Vue "Absents aujourd'hui"
+// ============================================================
+function buildTodayAbs(){
+  var el=document.getElementById('today-abs');
+  var title=document.getElementById('today-abs-title');
+  if(!el) return;
+  var now=new Date();
+  var today=todayStr(); // DD/MM
+  var yr=String(now.getFullYear());
+  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+  // Chercher absences qui couvrent aujourd'hui
+  var absToday=[];
+  ABS.forEach(function(a){
+    var deb=pFR(a.a),fin=pFR(a.b);
+    var todayDate=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    if(deb<=todayDate&&fin>=todayDate){
+      absToday.push(a);
+    }
+  });
+  // Aussi chercher dans les SHIFTS (verlof/recup posés sur le planning)
+  var shifts=yr==='2027'?SHIFTS27:yr==='2026'?SHIFTS26:SHIFTS25;
+  var weeks=yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:WEEKS25;
+  var allDatesYr=weeks.reduce(function(a,w){return a.concat(w.d);},[]);
+  var todayIdx=allDatesYr.indexOf(today);
+  if(todayIdx!==-1){
+    shifts.forEach(function(emp){
+      var sv=emp.s[todayIdx]||'';
+      if(sv==='verlof'||sv==='recup'){
+        // Vérifier pas déjà dans absToday
+        if(!absToday.find(function(a){return a.n===emp.n;})){
+          absToday.push({n:emp.n,t:sv,a:today+'/'+yr,b:today+'/'+yr,d:1});
+        }
+      }
+    });
+  }
+  var dow=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][now.getDay()];
+  var MOIS=['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
+  if(title) title.textContent='Absents aujourd\'hui — '+dow+' '+now.getDate()+' '+MOIS[now.getMonth()];
+  if(!absToday.length){
+    el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">Tout le monde est present aujourd\'hui ✅</div>';
+    return;
+  }
+  el.innerHTML=absToday.map(function(a){
+    var tc=a.t==='ziek'?'#ef4444':a.t==='verlof'?'#3b82f6':'#10b981';
+    var tl=a.t==='ziek'?'Maladie':a.t==='verlof'?'Conge':'Recup';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2)">'\
+      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+a.n+'</div>'\
+      +'<span style="font-size:11px;padding:2px 9px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+tl+'</span>'\
+      +'</div>';
+  }).join('');
+}
 
+// ============================================================
+// Filtre tableau Bradford
+// ============================================================
+// (intégré dans buildBT via le select #bd-filter)
+
+// ============================================================
+// Statistiques absentéisme N vs N-1
+// ============================================================
+function calcStatsTrimestreNvsN1(){
+  var now=new Date();
+  var yr=now.getFullYear();
+  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+  var stats={N:{Q1:0,Q2:0,Q3:0,Q4:0},N1:{Q1:0,Q2:0,Q3:0,Q4:0}};
+  ABS.filter(function(a){return a.t==='ziek';}).forEach(function(a){
+    var deb=pFR(a.a);
+    var y=deb.getFullYear();
+    var m=deb.getMonth();
+    var q=m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4';
+    if(y===yr) stats.N[q]+=a.d;
+    else if(y===yr-1) stats.N1[q]+=a.d;
+  });
+  return {stats:stats,yr:yr};
+}
+
+function buildStatsChart(){
+  var res=calcStatsTrimestreNvsN1();
+  var stats=res.stats,yr=res.yr;
+  var el=document.getElementById('cTrim');
+  if(!el) return;
+  if(window.chTrim) window.chTrim.destroy();
+  window.chTrim=new Chart(el,{
+    type:'bar',
+    data:{
+      labels:['T1 (Jan-Mar)','T2 (Avr-Jun)','T3 (Jul-Sep)','T4 (Oct-Dec)'],
+      datasets:[
+        {label:String(yr),data:[stats.N.Q1,stats.N.Q2,stats.N.Q3,stats.N.Q4],backgroundColor:'rgba(59,130,246,.7)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4},
+        {label:String(yr-1),data:[stats.N1.Q1,stats.N1.Q2,stats.N1.Q3,stats.N1.Q4],backgroundColor:'rgba(148,163,184,.4)',borderColor:'#94a3b8',borderWidth:1,borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'var(--tx2)',font:{size:11}}}},scales:{x:{ticks:{color:'var(--tx3)',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'var(--tx3)',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'},title:{display:true,text:'Jours maladie',color:'var(--tx3)',font:{size:10}}}}}
+  });
+}
+
+// ============================================================
+// Bouton "Marquer comme discuté"
+// ============================================================
+function marquerDiscute(name){
+  var now=new Date().toLocaleString('fr-BE');
+  var author=currentUser?currentUser.name||currentUser.email||'':'';
+  if(!BD_COMMENTS[name]) BD_COMMENTS[name]={text:'',date:'',author:'',history:[]};
+  if(!BD_COMMENTS[name].history) BD_COMMENTS[name].history=[];
+  var entry={text:'[Entretien effectue]',date:now,author:author};
+  BD_COMMENTS[name].history.unshift(entry);
+  if(!BD_COMMENTS[name].text){BD_COMMENTS[name].text='[Entretien effectue]';BD_COMMENTS[name].date=now;BD_COMMENTS[name].author=author;}
+  if(db) db.ref('bradford/comments/'+name.replace(/[.#$\/\[\]]/g,'_')).set(BD_COMMENTS[name]);
+  buildBT();
+  // Fermer le panneau et rouvrir pour refresh
+  var panel=document.getElementById('bradford-panel');
+  if(panel) panel.remove();
+  openBradfordPanel(name);
+  toast('Entretien marque pour '+name.split(' ')[0],'#10b981');
+}
+
+// ============================================================
+// Compteur épisodes par saison
+// ============================================================
+function calcSaisons(name){
+  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+  var saisons={Hiver:0,Printemps:0,Ete:0,Automne:0};
+  ABS.filter(function(a){return a.n===name&&a.t==='ziek';}).forEach(function(a){
+    var m=pFR(a.a).getMonth();
+    if(m===11||m<=1) saisons.Hiver+=a.d;
+    else if(m<=4) saisons.Printemps+=a.d;
+    else if(m<=7) saisons.Ete+=a.d;
+    else saisons.Automne+=a.d;
+  });
+  return saisons;
+}
+
+// ============================================================
+// Historique commentaires propre
+// ============================================================
+function getCommentHistory(name){
+  var cm=BD_COMMENTS[name];
+  if(!cm||!cm.history||!cm.history.length) return '';
+  return '<div style="margin-top:12px">'\
+    +'<div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>'\
+    +cm.history.slice(0,5).map(function(h){
+      return '<div style="font-size:12px;padding:6px 8px;border-radius:6px;background:var(--bg3);margin-bottom:4px">'\
+        +'<div style="color:var(--tx2)">'+h.text+'</div>'\
+        +'<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+h.date+(h.author?' · '+h.author:'')+'</div>'\
+        +'</div>';
+    }).join('')\
+    +'</div>';
+}
+
+// ============================================================
+// Rapport Excel mensuel professionnel
+// ============================================================
+function genererRapportExcel(){
+  var mois=parseInt(document.getElementById('rapport-mois').value);
+  var annee=parseInt(document.getElementById('rapport-annee').value);
+  var MOIS_NOM=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+  var nomMois=MOIS_NOM[mois];
+
+  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+  function statutInfo(sc){
+    if(sc===0) return {label:'Parfait',bg:'D1FAE5',fg:'065F46',bold:true};
+    if(sc<=50) return {label:'OK',bg:'D1FAE5',fg:'065F46',bold:false};
+    if(sc<=200) return {label:'A surveiller',bg:'FEF3C7',fg:'92400E',bold:false};
+    if(sc<=500) return {label:'Preoccupant',bg:'FED7AA',fg:'9A3412',bold:false};
+    return {label:'Critique',bg:'FEE2E2',fg:'991B1B',bold:true};
+  }
+
+  // Construire le XML XLSX manuellement (SpreadsheetML)
+  var HEADER_BG='1E3A5F', HEADER_FG='FFFFFF';
+  var GROUP_BG='1E40AF', GROUP_FG='FFFFFF';
+  var ALT_BG='F8FAFC';
+  var TOTAL_BG='1E3A5F', TOTAL_FG='FFFFFF';
+
+  // Shared strings
+  var strings=[], strMap={};
+  function si(s){s=String(s);if(strMap[s]===undefined){strMap[s]=strings.length;strings.push(s);}return strMap[s];}
+
+  // Styles index
+  // 0=normal, 1=header, 2=group, 3=ok, 4=wn, 5=al, 6=cr, 7=zero, 8=total, 9=num, 10=pos, 11=neg, 12=title, 13=subtitle, 14=boldcenter
+  var styles_xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<fonts count="8">'
+    +'<font><sz val="11"/><name val="Calibri"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF'+HEADER_FG+'"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF'+GROUP_FG+'"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF065F46"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF92400E"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF9A3412"/></font>'
+    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF991B1B"/></font>'
+    +'<font><sz val="14"/><name val="Calibri"/><b/><color rgb="FF1E3A5F"/></font>'
+    +'</fonts>'
+    +'<fills count="14">'
+    +'<fill><patternFill patternType="none"/></fill>'
+    +'<fill><patternFill patternType="gray125"/></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+HEADER_BG+'"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+GROUP_BG+'"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFD1FAE5"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEF3C7"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFED7AA"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEE2E2"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+TOTAL_BG+'"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFD1FAE5"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFDCFCE7"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEF9C3"/></patternFill></fill>'
+    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEE2E2"/></patternFill></fill>'
+    +'</fills>'
+    +'<borders count="2">'
+    +'<border><left/><right/><top/><bottom/></border>'
+    +'<border><left style="thin"><color rgb="FFE2E8F0"/></left><right style="thin"><color rgb="FFE2E8F0"/></right><top style="thin"><color rgb="FFE2E8F0"/></top><bottom style="thin"><color rgb="FFE2E8F0"/></bottom></border>'
+    +'</borders>'
+    +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+    +'<cellXfs count="15">'
+    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="left" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="left" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="4" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="5" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="6" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="1" fillId="8" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="3" fillId="11" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="6" fillId="13" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyFont="1"><alignment horizontal="left" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="0" fillId="9" borderId="1" xfId="0" applyFill="1"><alignment horizontal="left" vertical="center"/></xf>'
+    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="center" vertical="center"/></xf>'
+    +'</cellXfs>'
+    +'</styleSheet>';
+
+  // S=1:header, 2:group, 3:ok/zero, 4:wn, 5:al, 6:cr, 7:zero, 8:total, 9:num center, 10:pos, 11:neg, 12:title, 13:alt, 14:center
+  function scStyle(sc){return sc===0?7:sc<=50?3:sc<=200?4:sc<=500?5:6;}
+
+  function cell(r,c,v,s){
+    var col=String.fromCharCode(65+c);
+    var ref=col+r;
+    if(typeof v==='number'){
+      return '<c r="'+ref+'" s="'+s+'"><v>'+v+'</v></c>';
+    }
+    var idx=si(String(v));
+    return '<c r="'+ref+'" t="s" s="'+s+'"><v>'+idx+'</v></c>';
+  }
+
+  // ---- FEUILLE BRADFORD ----
+  var rows1=[];
+  var r=1;
+  // Titre
+  rows1.push('<row r="'+r+'" ht="22" customHeight="1">'+cell(r,0,'Bradford Dashboard - AW3 Ploeg 5',12)+'</row>'); r++;
+  rows1.push('<row r="'+r+'">'+cell(r,0,'Rapport '+nomMois+' '+annee+' | Calcul 365 derniers jours | S2 x D',0)+'</row>'); r++;
+  rows1.push('<row r="'+r+'"></row>'); r++;
+  // Header
+  rows1.push('<row r="'+r+'" ht="18" customHeight="1">'
+    +cell(r,0,'Employe',1)+cell(r,1,'Groupe',1)+cell(r,2,'Role',1)
+    +cell(r,3,'Jours maladie',1)+cell(r,4,'Episodes',1)
+    +cell(r,5,'Score Bradford',1)+cell(r,6,'Statut',1)
+    +'</row>'); r++;
+
+  ['TL','INPAK','Prod','Unit'].forEach(function(g){
+    var em=BD.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});
+    if(!em.length) return;
+    rows1.push('<row r="'+r+'">'
+      +cell(r,0,g,2)+cell(r,1,'',2)+cell(r,2,'',2)
+      +cell(r,3,'',2)+cell(r,4,'',2)+cell(r,5,'',2)+cell(r,6,'',2)
+      +'</row>'); r++;
+    em.forEach(function(e,idx){
+      var emp=EMP.find(function(x){return x.n===e.n;});
+      var ss=scStyle(e.sc);
+      var rowStyle=idx%2===1?13:0;
+      rows1.push('<row r="'+r+'">'
+        +cell(r,0,e.n+(e.sc===0?' *':''),(idx%2===1?13:0))
+        +cell(r,1,g,9)
+        +cell(r,2,emp?emp.r:'',(idx%2===1?13:0))
+        +cell(r,3,e.D,9)+cell(r,4,e.S,9)
+        +cell(r,5,e.sc,ss)+cell(r,6,statutInfo(e.sc).label,ss)
+        +'</row>'); r++;
+    });
+  });
+
+  var sheet1='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<sheetFormatPr defaultRowHeight="15"/>'
+    +'<cols>'
+    +'<col min="1" max="1" width="28" customWidth="1"/>'
+    +'<col min="2" max="2" width="10" customWidth="1"/>'
+    +'<col min="3" max="3" width="18" customWidth="1"/>'
+    +'<col min="4" max="4" width="14" customWidth="1"/>'
+    +'<col min="5" max="5" width="10" customWidth="1"/>'
+    +'<col min="6" max="6" width="16" customWidth="1"/>'
+    +'<col min="7" max="7" width="16" customWidth="1"/>'
+    +'</cols>'
+    +'<sheetData>'+rows1.join('')+'</sheetData>'
+    +'<mergeCells count="2"><mergeCell ref="A1:G1"/><mergeCell ref="A2:G2"/></mergeCells>'
+    +'</worksheet>';
+
+  // ---- FEUILLE ABSENCES ----
+  var rows2=[];
+  var r2=1;
+  var absM=ABS.filter(function(a){
+    var deb=pFR(a.a);
+    return deb.getMonth()===mois&&deb.getFullYear()===annee&&a.t==='ziek';
+  });
+  absM.sort(function(a,b){return pFR(a.a)-pFR(b.a);});
+
+  rows2.push('<row r="'+r2+'" ht="22" customHeight="1">'+cell(r2,0,'Absences Maladie - '+nomMois+' '+annee,12)+'</row>'); r2++;
+  rows2.push('<row r="'+r2+'"></row>'); r2++;
+  rows2.push('<row r="'+r2+'" ht="18" customHeight="1">'
+    +cell(r2,0,'Employe',1)+cell(r2,1,'Date debut',1)+cell(r2,2,'Date fin',1)
+    +cell(r2,3,'Jours',1)+cell(r2,4,'Type',1)
+    +'</row>'); r2++;
+
+  if(absM.length){
+    var totalJ=0;
+    absM.forEach(function(a,idx){
+      totalJ+=a.d;
+      var rs=idx%2===1?13:0;
+      rows2.push('<row r="'+r2+'">'
+        +cell(r2,0,a.n,rs)+cell(r2,1,a.a,14)+cell(r2,2,a.b,14)
+        +cell(r2,3,a.d,6)+cell(r2,4,'Maladie',6)
+        +'</row>'); r2++;
+    });
+    rows2.push('<row r="'+r2+'" ht="18" customHeight="1">'
+      +cell(r2,0,'TOTAL',8)+cell(r2,1,'',8)+cell(r2,2,'',8)
+      +cell(r2,3,totalJ,8)+cell(r2,4,'',8)
+      +'</row>'); r2++;
+  } else {
+    rows2.push('<row r="'+r2+'">'+cell(r2,0,'Aucune absence maladie ce mois',3)+'</row>'); r2++;
+  }
+
+  var sheet2='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<sheetFormatPr defaultRowHeight="15"/>'
+    +'<cols>'
+    +'<col min="1" max="1" width="28" customWidth="1"/>'
+    +'<col min="2" max="2" width="14" customWidth="1"/>'
+    +'<col min="3" max="3" width="14" customWidth="1"/>'
+    +'<col min="4" max="4" width="10" customWidth="1"/>'
+    +'<col min="5" max="5" width="12" customWidth="1"/>'
+    +'</cols>'
+    +'<sheetData>'+rows2.join('')+'</sheetData>'
+    +'<mergeCells count="1"><mergeCell ref="A1:E1"/></mergeCells>'
+    +'</worksheet>';
+
+  // ---- FEUILLE STATISTIQUES ----
+  var res=calcStatsTrimestreNvsN1();
+  var stats=res.stats,yr=res.yr;
+  var rows3=[];
+  var r3=1;
+  rows3.push('<row r="'+r3+'" ht="22" customHeight="1">'+cell(r3,0,'Statistiques Absenteisme - '+yr+' vs '+(yr-1),12)+'</row>'); r3++;
+  rows3.push('<row r="'+r3+'"></row>'); r3++;
+  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
+    +cell(r3,0,'Trimestre',1)+cell(r3,1,'Jours '+yr,1)
+    +cell(r3,2,'Jours '+(yr-1),1)+cell(r3,3,'Evolution',1)
+    +'</row>'); r3++;
+
+  var totalN=0,totalN1=0;
+  var qLabels=['T1 Janvier-Mars','T2 Avril-Juin','T3 Juillet-Septembre','T4 Octobre-Decembre'];
+  ['Q1','Q2','Q3','Q4'].forEach(function(q,i){
+    var n=stats.N[q],n1=stats.N1[q];
+    totalN+=n; totalN1+=n1;
+    var pct=n1===0?'N/A':(n>n1?'+':'')+Math.round((n-n1)/(n1||1)*100)+'%';
+    var evoS=n>n1?11:n<n1?10:9;
+    rows3.push('<row r="'+r3+'">'
+      +cell(r3,0,qLabels[i],i%2===1?13:0)
+      +cell(r3,1,n,9)+cell(r3,2,n1,9)+cell(r3,3,pct,evoS)
+      +'</row>'); r3++;
+  });
+  var pctT=totalN1===0?'N/A':(totalN>totalN1?'+':'')+Math.round((totalN-totalN1)/(totalN1||1)*100)+'%';
+  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
+    +cell(r3,0,'TOTAL ANNEE',8)+cell(r3,1,totalN,8)+cell(r3,2,totalN1,8)
+    +cell(r3,3,pctT,totalN>totalN1?11:10)
+    +'</row>'); r3++;
+  rows3.push('<row r="'+r3+'"></row>'); r3++;
+  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
+    +cell(r3,0,'Employe',1)+cell(r3,1,'Jours '+yr,1)+cell(r3,2,'Episodes',1)+cell(r3,3,'Score',1)
+    +'</row>'); r3++;
+  BD.forEach(function(e,idx){
+    var ss=scStyle(e.sc);
+    rows3.push('<row r="'+r3+'">'
+      +cell(r3,0,e.n,idx%2===1?13:0)+cell(r3,1,e.D,9)+cell(r3,2,e.S,9)+cell(r3,3,e.sc,ss)
+      +'</row>'); r3++;
+  });
+
+  var sheet3='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<sheetFormatPr defaultRowHeight="15"/>'
+    +'<cols>'
+    +'<col min="1" max="1" width="30" customWidth="1"/>'
+    +'<col min="2" max="2" width="16" customWidth="1"/>'
+    +'<col min="3" max="3" width="16" customWidth="1"/>'
+    +'<col min="4" max="4" width="14" customWidth="1"/>'
+    +'</cols>'
+    +'<sheetData>'+rows3.join('')+'</sheetData>'
+    +'<mergeCells count="1"><mergeCell ref="A1:D1"/></mergeCells>'
+    +'</worksheet>';
+
+  // ---- Shared Strings ----
+  var sst='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strings.length+'" uniqueCount="'+strings.length+'">'
+    +strings.map(function(s){return '<si><t xml:space="preserve">'+s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'</t></si>';}).join('')
+    +'</sst>';
+
+  // ---- Workbook ----
+  var wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets>'
+    +'<sheet name="Bradford" sheetId="1" r:id="rId1"/>'
+    +'<sheet name="Absences '+nomMois+'" sheetId="2" r:id="rId2"/>'
+    +'<sheet name="Statistiques" sheetId="3" r:id="rId3"/>'
+    +'</sheets>'
+    +'</workbook>';
+
+  var wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>'
+    +'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>'
+    +'<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
+    +'<Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    +'</Relationships>';
+
+  var pkgRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    +'</Relationships>';
+
+  var contentTypes='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+    +'</Types>';
+
+  // Assembler le ZIP avec JSZip
+  if(typeof JSZip==='undefined'){toast('JSZip non charge, recharge la page','#ef4444');return;}
+  var zip=new JSZip();
+  zip.file('[Content_Types].xml', contentTypes);
+  zip.file('_rels/.rels', pkgRels);
+  zip.file('xl/workbook.xml', wb);
+  zip.file('xl/_rels/workbook.xml.rels', wbRels);
+  zip.file('xl/styles.xml', styles_xml);
+  zip.file('xl/sharedStrings.xml', sst);
+  zip.file('xl/worksheets/sheet1.xml', sheet1);
+  zip.file('xl/worksheets/sheet2.xml', sheet2);
+  zip.file('xl/worksheets/sheet3.xml', sheet3);
+
+  zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).then(function(blob){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='Bradford_AW3P5_'+nomMois+'_'+annee+'.xlsx';
+    a.click();
+    toast('Rapport Excel genere : '+nomMois+' '+annee,'#10b981');
+  });
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -431,481 +891,6 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 </div>
 <div class="popup" id="popup"></div>
 <script>
-function calcSaisons(name){
-  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-  var saisons={Hiver:0,Printemps:0,Ete:0,Automne:0};
-  ABS.filter(function(a){return a.n===name&&a.t==='ziek';}).forEach(function(a){
-    var m=pFR(a.a).getMonth();
-    if(m===11||m<=1) saisons.Hiver+=a.d;
-    else if(m<=4) saisons.Printemps+=a.d;
-    else if(m<=7) saisons.Ete+=a.d;
-    else saisons.Automne+=a.d;
-  });
-  return saisons;
-}
-
-function getCommentHistory(name){
-  var cm=BD_COMMENTS[name];
-  if(!cm||!cm.history||!cm.history.length) return '';
-  var html='<div style="margin-top:12px">';
-  html+='<div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>';
-  cm.history.slice(0,5).forEach(function(h){
-    html+='<div style="font-size:12px;padding:6px 8px;border-radius:6px;background:var(--bg3);margin-bottom:4px">';
-    html+='<div style="color:var(--tx2)">'+(h.text||'')+'</div>';
-    html+='<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(h.date||'')+(h.author?' · '+h.author:'')+'</div>';
-    html+='</div>';
-  });
-  html+='</div>';
-  return html;
-}
-
-function buildTodayAbs(){
-  var el=document.getElementById('today-abs');
-  var title=document.getElementById('today-abs-title');
-  if(!el) return;
-  var now=new Date();
-  var today=todayStr(); // DD/MM
-  var yr=String(now.getFullYear());
-  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-  // Chercher absences qui couvrent aujourd'hui
-  var absToday=[];
-  ABS.forEach(function(a){
-    var deb=pFR(a.a),fin=pFR(a.b);
-    var todayDate=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    if(deb<=todayDate&&fin>=todayDate){
-      absToday.push(a);
-    }
-  });
-  // Aussi chercher dans les SHIFTS (verlof/recup posés sur le planning)
-  var shifts=yr==='2027'?SHIFTS27:yr==='2026'?SHIFTS26:SHIFTS25;
-  var weeks=yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:WEEKS25;
-  var allDatesYr=weeks.reduce(function(a,w){return a.concat(w.d);},[]);
-  var todayIdx=allDatesYr.indexOf(today);
-  if(todayIdx!==-1){
-    shifts.forEach(function(emp){
-      var sv=emp.s[todayIdx]||'';
-      if(sv==='verlof'||sv==='recup'){
-        // Vérifier pas déjà dans absToday
-        if(!absToday.find(function(a){return a.n===emp.n;})){
-          absToday.push({n:emp.n,t:sv,a:today+'/'+yr,b:today+'/'+yr,d:1});
-        }
-      }
-    });
-  }
-  var dow=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][now.getDay()];
-  var MOIS=['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
-  if(title) title.textContent='Absents aujourd\'hui — '+dow+' '+now.getDate()+' '+MOIS[now.getMonth()];
-  if(!absToday.length){
-    el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">Tout le monde est present aujourd\'hui ✅</div>';
-    return;
-  }
-  el.innerHTML=absToday.map(function(a){
-    var tc=a.t==='ziek'?'#ef4444':a.t==='verlof'?'#3b82f6':'#10b981';
-    var tl=a.t==='ziek'?'Maladie':a.t==='verlof'?'Conge':'Recup';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2)">'\
-      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+a.n+'</div>'\
-      +'<span style="font-size:11px;padding:2px 9px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+tl+'</span>'\
-      +'</div>';
-  }).join('');
-}
-
-function calcStatsTrimestreNvsN1(){
-  var now=new Date();
-  var yr=now.getFullYear();
-  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-  var stats={N:{Q1:0,Q2:0,Q3:0,Q4:0},N1:{Q1:0,Q2:0,Q3:0,Q4:0}};
-  ABS.filter(function(a){return a.t==='ziek';}).forEach(function(a){
-    var deb=pFR(a.a);
-    var y=deb.getFullYear();
-    var m=deb.getMonth();
-    var q=m<3?'Q1':m<6?'Q2':m<9?'Q3':'Q4';
-    if(y===yr) stats.N[q]+=a.d;
-    else if(y===yr-1) stats.N1[q]+=a.d;
-  });
-  return {stats:stats,yr:yr};
-}
-
-function buildStatsChart(){
-  var res=calcStatsTrimestreNvsN1();
-  var stats=res.stats,yr=res.yr;
-  var el=document.getElementById('cTrim');
-  if(!el) return;
-  if(window.chTrim) window.chTrim.destroy();
-  window.chTrim=new Chart(el,{
-    type:'bar',
-    data:{
-      labels:['T1 (Jan-Mar)','T2 (Avr-Jun)','T3 (Jul-Sep)','T4 (Oct-Dec)'],
-      datasets:[
-        {label:String(yr),data:[stats.N.Q1,stats.N.Q2,stats.N.Q3,stats.N.Q4],backgroundColor:'rgba(59,130,246,.7)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4},
-        {label:String(yr-1),data:[stats.N1.Q1,stats.N1.Q2,stats.N1.Q3,stats.N1.Q4],backgroundColor:'rgba(148,163,184,.4)',borderColor:'#94a3b8',borderWidth:1,borderRadius:4}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'var(--tx2)',font:{size:11}}}},scales:{x:{ticks:{color:'var(--tx3)',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'var(--tx3)',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'},title:{display:true,text:'Jours maladie',color:'var(--tx3)',font:{size:10}}}}}
-  });
-}
-
-function marquerDiscute(name){
-  var now=new Date().toLocaleString('fr-BE');
-  var author=currentUser?currentUser.name||currentUser.email||'':'';
-  if(!BD_COMMENTS[name]) BD_COMMENTS[name]={text:'',date:'',author:'',history:[]};
-  if(!BD_COMMENTS[name].history) BD_COMMENTS[name].history=[];
-  var entry={text:'[Entretien effectue]',date:now,author:author};
-  BD_COMMENTS[name].history.unshift(entry);
-  if(!BD_COMMENTS[name].text){BD_COMMENTS[name].text='[Entretien effectue]';BD_COMMENTS[name].date=now;BD_COMMENTS[name].author=author;}
-  if(db) db.ref('bradford/comments/'+name.replace(/[.#$\/\[\]]/g,'_')).set(BD_COMMENTS[name]);
-  buildBT();
-  // Fermer le panneau et rouvrir pour refresh
-  var panel=document.getElementById('bradford-panel');
-  if(panel) panel.remove();
-  openBradfordPanel(name);
-  toast('Entretien marque pour '+name.split(' ')[0],'#10b981');
-}
-
-function genererRapportExcel(){
-  var mois=parseInt(document.getElementById('rapport-mois').value);
-  var annee=parseInt(document.getElementById('rapport-annee').value);
-  var MOIS_NOM=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
-  var nomMois=MOIS_NOM[mois];
-
-  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-  function statutInfo(sc){
-    if(sc===0) return {label:'Parfait',bg:'D1FAE5',fg:'065F46',bold:true};
-    if(sc<=50) return {label:'OK',bg:'D1FAE5',fg:'065F46',bold:false};
-    if(sc<=200) return {label:'A surveiller',bg:'FEF3C7',fg:'92400E',bold:false};
-    if(sc<=500) return {label:'Preoccupant',bg:'FED7AA',fg:'9A3412',bold:false};
-    return {label:'Critique',bg:'FEE2E2',fg:'991B1B',bold:true};
-  }
-
-  // Construire le XML XLSX manuellement (SpreadsheetML)
-  var HEADER_BG='1E3A5F', HEADER_FG='FFFFFF';
-  var GROUP_BG='1E40AF', GROUP_FG='FFFFFF';
-  var ALT_BG='F8FAFC';
-  var TOTAL_BG='1E3A5F', TOTAL_FG='FFFFFF';
-
-  // Shared strings
-  var strings=[], strMap={};
-  function si(s){s=String(s);if(strMap[s]===undefined){strMap[s]=strings.length;strings.push(s);}return strMap[s];}
-
-  // Styles index
-  // 0=normal, 1=header, 2=group, 3=ok, 4=wn, 5=al, 6=cr, 7=zero, 8=total, 9=num, 10=pos, 11=neg, 12=title, 13=subtitle, 14=boldcenter
-  var styles_xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<fonts count="8">'
-    +'<font><sz val="11"/><name val="Calibri"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF'+HEADER_FG+'"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF'+GROUP_FG+'"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF065F46"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF92400E"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><color rgb="FF9A3412"/></font>'
-    +'<font><sz val="11"/><name val="Calibri"/><b/><color rgb="FF991B1B"/></font>'
-    +'<font><sz val="14"/><name val="Calibri"/><b/><color rgb="FF1E3A5F"/></font>'
-    +'</fonts>'
-    +'<fills count="14">'
-    +'<fill><patternFill patternType="none"/></fill>'
-    +'<fill><patternFill patternType="gray125"/></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+HEADER_BG+'"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+GROUP_BG+'"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFD1FAE5"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEF3C7"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFED7AA"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEE2E2"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FF'+TOTAL_BG+'"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFD1FAE5"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFDCFCE7"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEF9C3"/></patternFill></fill>'
-    +'<fill><patternFill patternType="solid"><fgColor rgb="FFFEE2E2"/></patternFill></fill>'
-    +'</fills>'
-    +'<borders count="2">'
-    +'<border><left/><right/><top/><bottom/></border>'
-    +'<border><left style="thin"><color rgb="FFE2E8F0"/></left><right style="thin"><color rgb="FFE2E8F0"/></right><top style="thin"><color rgb="FFE2E8F0"/></top><bottom style="thin"><color rgb="FFE2E8F0"/></bottom></border>'
-    +'</borders>'
-    +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    +'<cellXfs count="15">'
-    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="left" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="left" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="4" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="5" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="6" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="1" fillId="8" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="3" fillId="11" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="6" fillId="13" borderId="1" xfId="0" applyFont="1" applyFill="1"><alignment horizontal="center" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyFont="1"><alignment horizontal="left" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="0" fillId="9" borderId="1" xfId="0" applyFill="1"><alignment horizontal="left" vertical="center"/></xf>'
-    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="center" vertical="center"/></xf>'
-    +'</cellXfs>'
-    +'</styleSheet>';
-
-  // S=1:header, 2:group, 3:ok/zero, 4:wn, 5:al, 6:cr, 7:zero, 8:total, 9:num center, 10:pos, 11:neg, 12:title, 13:alt, 14:center
-  function scStyle(sc){return sc===0?7:sc<=50?3:sc<=200?4:sc<=500?5:6;}
-
-  function cell(r,c,v,s){
-    var col=String.fromCharCode(65+c);
-    var ref=col+r;
-    if(typeof v==='number'){
-      return '<c r="'+ref+'" s="'+s+'"><v>'+v+'</v></c>';
-    }
-    var idx=si(String(v));
-    return '<c r="'+ref+'" t="s" s="'+s+'"><v>'+idx+'</v></c>';
-  }
-
-  // ---- FEUILLE BRADFORD ----
-  var rows1=[];
-  var r=1;
-  // Titre
-  rows1.push('<row r="'+r+'" ht="22" customHeight="1">'+cell(r,0,'Bradford Dashboard - AW3 Ploeg 5',12)+'</row>'); r++;
-  rows1.push('<row r="'+r+'">'+cell(r,0,'Rapport '+nomMois+' '+annee+' | Calcul 365 derniers jours | S2 x D',0)+'</row>'); r++;
-  rows1.push('<row r="'+r+'"></row>'); r++;
-  // Header
-  rows1.push('<row r="'+r+'" ht="18" customHeight="1">'
-    +cell(r,0,'Employe',1)+cell(r,1,'Groupe',1)+cell(r,2,'Role',1)
-    +cell(r,3,'Jours maladie',1)+cell(r,4,'Episodes',1)
-    +cell(r,5,'Score Bradford',1)+cell(r,6,'Statut',1)
-    +'</row>'); r++;
-
-  ['TL','INPAK','Prod','Unit'].forEach(function(g){
-    var em=BD.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});
-    if(!em.length) return;
-    rows1.push('<row r="'+r+'">'
-      +cell(r,0,g,2)+cell(r,1,'',2)+cell(r,2,'',2)
-      +cell(r,3,'',2)+cell(r,4,'',2)+cell(r,5,'',2)+cell(r,6,'',2)
-      +'</row>'); r++;
-    em.forEach(function(e,idx){
-      var emp=EMP.find(function(x){return x.n===e.n;});
-      var ss=scStyle(e.sc);
-      var rowStyle=idx%2===1?13:0;
-      rows1.push('<row r="'+r+'">'
-        +cell(r,0,e.n+(e.sc===0?' *':''),(idx%2===1?13:0))
-        +cell(r,1,g,9)
-        +cell(r,2,emp?emp.r:'',(idx%2===1?13:0))
-        +cell(r,3,e.D,9)+cell(r,4,e.S,9)
-        +cell(r,5,e.sc,ss)+cell(r,6,statutInfo(e.sc).label,ss)
-        +'</row>'); r++;
-    });
-  });
-
-  var sheet1='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<sheetFormatPr defaultRowHeight="15"/>'
-    +'<cols>'
-    +'<col min="1" max="1" width="28" customWidth="1"/>'
-    +'<col min="2" max="2" width="10" customWidth="1"/>'
-    +'<col min="3" max="3" width="18" customWidth="1"/>'
-    +'<col min="4" max="4" width="14" customWidth="1"/>'
-    +'<col min="5" max="5" width="10" customWidth="1"/>'
-    +'<col min="6" max="6" width="16" customWidth="1"/>'
-    +'<col min="7" max="7" width="16" customWidth="1"/>'
-    +'</cols>'
-    +'<sheetData>'+rows1.join('')+'</sheetData>'
-    +'<mergeCells count="2"><mergeCell ref="A1:G1"/><mergeCell ref="A2:G2"/></mergeCells>'
-    +'</worksheet>';
-
-  // ---- FEUILLE ABSENCES ----
-  var rows2=[];
-  var r2=1;
-  var absM=ABS.filter(function(a){
-    var deb=pFR(a.a);
-    return deb.getMonth()===mois&&deb.getFullYear()===annee&&a.t==='ziek';
-  });
-  absM.sort(function(a,b){return pFR(a.a)-pFR(b.a);});
-
-  rows2.push('<row r="'+r2+'" ht="22" customHeight="1">'+cell(r2,0,'Absences Maladie - '+nomMois+' '+annee,12)+'</row>'); r2++;
-  rows2.push('<row r="'+r2+'"></row>'); r2++;
-  rows2.push('<row r="'+r2+'" ht="18" customHeight="1">'
-    +cell(r2,0,'Employe',1)+cell(r2,1,'Date debut',1)+cell(r2,2,'Date fin',1)
-    +cell(r2,3,'Jours',1)+cell(r2,4,'Type',1)
-    +'</row>'); r2++;
-
-  if(absM.length){
-    var totalJ=0;
-    absM.forEach(function(a,idx){
-      totalJ+=a.d;
-      var rs=idx%2===1?13:0;
-      rows2.push('<row r="'+r2+'">'
-        +cell(r2,0,a.n,rs)+cell(r2,1,a.a,14)+cell(r2,2,a.b,14)
-        +cell(r2,3,a.d,6)+cell(r2,4,'Maladie',6)
-        +'</row>'); r2++;
-    });
-    rows2.push('<row r="'+r2+'" ht="18" customHeight="1">'
-      +cell(r2,0,'TOTAL',8)+cell(r2,1,'',8)+cell(r2,2,'',8)
-      +cell(r2,3,totalJ,8)+cell(r2,4,'',8)
-      +'</row>'); r2++;
-  } else {
-    rows2.push('<row r="'+r2+'">'+cell(r2,0,'Aucune absence maladie ce mois',3)+'</row>'); r2++;
-  }
-
-  var sheet2='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<sheetFormatPr defaultRowHeight="15"/>'
-    +'<cols>'
-    +'<col min="1" max="1" width="28" customWidth="1"/>'
-    +'<col min="2" max="2" width="14" customWidth="1"/>'
-    +'<col min="3" max="3" width="14" customWidth="1"/>'
-    +'<col min="4" max="4" width="10" customWidth="1"/>'
-    +'<col min="5" max="5" width="12" customWidth="1"/>'
-    +'</cols>'
-    +'<sheetData>'+rows2.join('')+'</sheetData>'
-    +'<mergeCells count="1"><mergeCell ref="A1:E1"/></mergeCells>'
-    +'</worksheet>';
-
-  // ---- FEUILLE STATISTIQUES ----
-  var res=calcStatsTrimestreNvsN1();
-  var stats=res.stats,yr=res.yr;
-  var rows3=[];
-  var r3=1;
-  rows3.push('<row r="'+r3+'" ht="22" customHeight="1">'+cell(r3,0,'Statistiques Absenteisme - '+yr+' vs '+(yr-1),12)+'</row>'); r3++;
-  rows3.push('<row r="'+r3+'"></row>'); r3++;
-  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
-    +cell(r3,0,'Trimestre',1)+cell(r3,1,'Jours '+yr,1)
-    +cell(r3,2,'Jours '+(yr-1),1)+cell(r3,3,'Evolution',1)
-    +'</row>'); r3++;
-
-  var totalN=0,totalN1=0;
-  var qLabels=['T1 Janvier-Mars','T2 Avril-Juin','T3 Juillet-Septembre','T4 Octobre-Decembre'];
-  ['Q1','Q2','Q3','Q4'].forEach(function(q,i){
-    var n=stats.N[q],n1=stats.N1[q];
-    totalN+=n; totalN1+=n1;
-    var pct=n1===0?'N/A':(n>n1?'+':'')+Math.round((n-n1)/(n1||1)*100)+'%';
-    var evoS=n>n1?11:n<n1?10:9;
-    rows3.push('<row r="'+r3+'">'
-      +cell(r3,0,qLabels[i],i%2===1?13:0)
-      +cell(r3,1,n,9)+cell(r3,2,n1,9)+cell(r3,3,pct,evoS)
-      +'</row>'); r3++;
-  });
-  var pctT=totalN1===0?'N/A':(totalN>totalN1?'+':'')+Math.round((totalN-totalN1)/(totalN1||1)*100)+'%';
-  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
-    +cell(r3,0,'TOTAL ANNEE',8)+cell(r3,1,totalN,8)+cell(r3,2,totalN1,8)
-    +cell(r3,3,pctT,totalN>totalN1?11:10)
-    +'</row>'); r3++;
-  rows3.push('<row r="'+r3+'"></row>'); r3++;
-  rows3.push('<row r="'+r3+'" ht="18" customHeight="1">'
-    +cell(r3,0,'Employe',1)+cell(r3,1,'Jours '+yr,1)+cell(r3,2,'Episodes',1)+cell(r3,3,'Score',1)
-    +'</row>'); r3++;
-  BD.forEach(function(e,idx){
-    var ss=scStyle(e.sc);
-    rows3.push('<row r="'+r3+'">'
-      +cell(r3,0,e.n,idx%2===1?13:0)+cell(r3,1,e.D,9)+cell(r3,2,e.S,9)+cell(r3,3,e.sc,ss)
-      +'</row>'); r3++;
-  });
-
-  var sheet3='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<sheetFormatPr defaultRowHeight="15"/>'
-    +'<cols>'
-    +'<col min="1" max="1" width="30" customWidth="1"/>'
-    +'<col min="2" max="2" width="16" customWidth="1"/>'
-    +'<col min="3" max="3" width="16" customWidth="1"/>'
-    +'<col min="4" max="4" width="14" customWidth="1"/>'
-    +'</cols>'
-    +'<sheetData>'+rows3.join('')+'</sheetData>'
-    +'<mergeCells count="1"><mergeCell ref="A1:D1"/></mergeCells>'
-    +'</worksheet>';
-
-  // ---- Shared Strings ----
-  var sst='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strings.length+'" uniqueCount="'+strings.length+'">'
-    +strings.map(function(s){return '<si><t xml:space="preserve">'+s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'</t></si>';}).join('')
-    +'</sst>';
-
-  // ---- Workbook ----
-  var wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-    +'<sheets>'
-    +'<sheet name="Bradford" sheetId="1" r:id="rId1"/>'
-    +'<sheet name="Absences '+nomMois+'" sheetId="2" r:id="rId2"/>'
-    +'<sheet name="Statistiques" sheetId="3" r:id="rId3"/>'
-    +'</sheets>'
-    +'</workbook>';
-
-  var wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>'
-    +'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>'
-    +'<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
-    +'<Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
-    +'</Relationships>';
-
-  var pkgRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
-    +'</Relationships>';
-
-  var contentTypes='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-    +'<Default Extension="xml" ContentType="application/xml"/>'
-    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-    +'<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-    +'<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
-    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
-    +'</Types>';
-
-  // Assembler le ZIP avec JSZip
-  if(typeof JSZip==='undefined'){toast('JSZip non charge, recharge la page','#ef4444');return;}
-  var zip=new JSZip();
-  zip.file('[Content_Types].xml', contentTypes);
-  zip.file('_rels/.rels', pkgRels);
-  zip.file('xl/workbook.xml', wb);
-  zip.file('xl/_rels/workbook.xml.rels', wbRels);
-  zip.file('xl/styles.xml', styles_xml);
-  zip.file('xl/sharedStrings.xml', sst);
-  zip.file('xl/worksheets/sheet1.xml', sheet1);
-  zip.file('xl/worksheets/sheet2.xml', sheet2);
-  zip.file('xl/worksheets/sheet3.xml', sheet3);
-
-  zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).then(function(blob){
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='Bradford_AW3P5_'+nomMois+'_'+annee+'.xlsx';
-    a.click();
-    toast('Rapport Excel genere : '+nomMois+' '+annee,'#10b981');
-  });
-}
-
-
-// ============================================================
-// Vue "Absents aujourd'hui"
-// ============================================================
-
-
-// ============================================================
-// Filtre tableau Bradford
-// ============================================================
-// (intégré dans buildBT via le select #bd-filter)
-
-// ============================================================
-// Statistiques absentéisme N vs N-1
-// ============================================================
-
-
-
-
-// ============================================================
-// Bouton "Marquer comme discuté"
-// ============================================================
-
-
-// ============================================================
-// Compteur épisodes par saison
-// ============================================================
-
-
-// ============================================================
-// Historique commentaires propre
-// ============================================================
-
-
-// ============================================================
-// Rapport Excel mensuel professionnel
-// ============================================================
-
 var WEEKS26 = [
   {d:["01/01", "02/01", "03/01", "04/01"]},
   {d:["10/01", "11/01"]},
@@ -1242,10 +1227,7 @@ function updKPI(){
 }
 var chB,chT,chJ;
 function initCharts(){var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB=new Chart(document.getElementById('cBrad'),{type:'bar',data:{labels:s.map(function(e){return e.n.split(' ')[0];}),datasets:[{data:s.map(function(e){return e.sc;}),backgroundColor:s.map(function(e){return scColor(e.sc)+'bb';}),borderColor:s.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var tr={'Q1 2025':0,'Q2 2025':0,'Q3 2025':0,'Q4 2025':0,'Q1 2026':0,'Q2 2026':0};ABS.forEach(function(a){var p=a.a.split('/');var k='Q'+Math.ceil(Number(p[1])/3)+' '+p[2];if(tr[k]!==undefined)tr[k]+=a.d;});chT=new Chart(document.getElementById('cTrim'),{type:'line',data:{labels:Object.keys(tr),datasets:[{data:Object.values(tr),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',borderWidth:2,pointBackgroundColor:'#3b82f6',pointRadius:5,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ=new Chart(document.getElementById('cJour'),{type:'bar',data:{labels:jj.map(function(e){return e.n.split(' ').pop();}),datasets:[{data:jj.map(function(e){return e.D;}),backgroundColor:jj.map(function(e){return scColor(e.sc)+'99';}),borderColor:jj.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});}
-function refreshCharts(){
-  if(chB&&chB.destroy) chB.destroy();
-  if(chJ&&chJ.destroy) chJ.destroy();
-  if(window.chTrim&&window.chTrim.destroy) window.chTrim.destroy();var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB.data.labels=s.map(function(e){return e.n.split(' ')[0];});chB.data.datasets[0].data=s.map(function(e){return e.sc;});chB.data.datasets[0].backgroundColor=s.map(function(e){return scColor(e.sc)+'bb';});chB.data.datasets[0].borderColor=s.map(function(e){return scColor(e.sc);});chB.update();var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ.data.labels=jj.map(function(e){return e.n.split(' ').pop();});chJ.data.datasets[0].data=jj.map(function(e){return e.D;});chJ.data.datasets[0].backgroundColor=jj.map(function(e){return scColor(e.sc)+'99';});chJ.data.datasets[0].borderColor=jj.map(function(e){return scColor(e.sc);});chJ.update();}
+function refreshCharts(){var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB.data.labels=s.map(function(e){return e.n.split(' ')[0];});chB.data.datasets[0].data=s.map(function(e){return e.sc;});chB.data.datasets[0].backgroundColor=s.map(function(e){return scColor(e.sc)+'bb';});chB.data.datasets[0].borderColor=s.map(function(e){return scColor(e.sc);});chB.update();var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ.data.labels=jj.map(function(e){return e.n.split(' ').pop();});chJ.data.datasets[0].data=jj.map(function(e){return e.D;});chJ.data.datasets[0].backgroundColor=jj.map(function(e){return scColor(e.sc)+'99';});chJ.data.datasets[0].borderColor=jj.map(function(e){return scColor(e.sc);});chJ.update();}
 
 function calcTrend(name){
   // Comparer score sur les 90 derniers jours vs les 90 précédents
@@ -1309,7 +1291,7 @@ function buildBT(){
       var cm=BD_COMMENTS[e.n];
       var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+cm.text.replace(/"/g,"&quot;")+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
       h+='<tr id="bdrow-'+e.n.replace(/\s+/g,'-')+'">';
-      h+='<td><span style="font-size:10px;color:var(--tx3);margin-right:4px">&#9656;</span><b style="font-size:13px;cursor:pointer" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="Voir historique">'+e.n+'</b></td>';
+      h+='<td><b style="font-size:13px;cursor:pointer" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="Voir historique">'+e.n+'</b></td>';
       h+='<td style="color:var(--tx3);font-size:12px">'+(emp?emp.r:'')+'</td>';
       h+='<td><span style="font-family:var(--mo)">'+e.D+'</span></td>';
       h+='<td><span style="font-family:var(--mo)">'+e.S+'</span></td>';
@@ -1365,8 +1347,6 @@ function saveComment(name){
 }
 
 function openBradfordPanel(name){
-  var existing=document.getElementById('bradford-panel');
-  if(existing) existing.remove();
   var e=BD.find(function(x){return x.n===name;});
   if(!e) return;
   var col=scColor(e.sc);
@@ -1380,17 +1360,6 @@ function openBradfordPanel(name){
   var cm=BD_COMMENTS[name];
   var d=document.createElement('div');
   d.style.cssText='position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:var(--bg2);border-left:1px solid var(--bd2);z-index:9998;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.4)';
-  // Saisons
-  var saisons=calcSaisons(name);
-  var saisonsHtml='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px">'
-    +[['❄️','Hiver',saisons.Hiver],['🌸','Printemps',saisons.Printemps],['☀️','Ete',saisons.Ete],['🍂','Automne',saisons.Automne]].map(function(s){
-      return '<div style="text-align:center;flex:1;min-width:60px;padding:8px 4px;border-radius:8px;background:var(--bg3)">'
-        +'<div style="font-size:18px">'+s[0]+'</div>'
-        +'<div style="font-size:11px;color:var(--tx3);margin:2px 0">'+s[1]+'</div>'
-        +'<div style="font-size:14px;font-weight:700;color:'+(s[2]>0?'#ef4444':'#10b981')+'">'+s[2]+'j</div>'
-        +'</div>';
-    }).join('')+'</div>';
-
   var epsHtml=eps.length?eps.map(function(a){
     var same=a.a===a.b;
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd2)">'
@@ -1427,7 +1396,7 @@ function openBradfordPanel(name){
   d.id='bradford-panel';
   d.innerHTML='<div style="padding:20px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center">'
     +'<div><div style="font-weight:700;font-size:16px">'+name+'</div><span class="pill '+st.c+'" style="margin-top:4px;display:inline-block">'+st.l+'</span>&nbsp;'+trendHtml(trend)+'</div>'
-    +'<button onclick="var p=document.getElementById(\'bradford-panel\');if(p)p.remove()" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
+    +'<button onclick="document.getElementById(\'bradford-panel\').remove()" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
     +'</div>'
     +celebHtml
     +'<div style="padding:16px 20px;display:flex;gap:16px;border-bottom:1px solid var(--bd2);flex-wrap:wrap">'
@@ -2080,23 +2049,7 @@ function deactivateEmp(idx){
   }).catch(function(err){ toast('Erreur: '+err.message,'#ef4444'); });
 }
 
-function doLogin(){
-  var email=document.getElementById('li-email').value.trim();
-  var pass=document.getElementById('li-pass').value;
-  var btn=document.getElementById('li-btn');
-  var err=document.getElementById('li-err');
-  if(!email||!pass){err.textContent='Remplis tous les champs.';return;}
-  btn.textContent='Connexion...';btn.disabled=true;err.textContent='';
-  // S'assurer que Firebase est initialise
-  try{
-    var cfg={apiKey:"AIzaSyAexVCEfVxmShZ-m7xFAVfk9AzReBi2WTQ",authDomain:"aw3-p5-hub.firebaseapp.com",databaseURL:"https://aw3-p5-hub-default-rtdb.europe-west1.firebasedatabase.app",projectId:"aw3-p5-hub",storageBucket:"aw3-p5-hub.firebasestorage.app",messagingSenderId:"685884843934",appId:"1:685884843934:web:ab8f7b8e362959f1ab988f"};
-    if(!firebase.apps.length) firebase.initializeApp(cfg);
-  }catch(e){}
-  firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){
-    err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;
-    btn.textContent='Se connecter';btn.disabled=false;
-  });
-}
+function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent='Connexion...';btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent='Se connecter';btn.disabled=false;});}
 function doLogout(){firebase.auth().signOut();}
 window.addEventListener('load',function(){
   document.getElementById('dchip').textContent=new Date().toLocaleDateString('fr-BE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
@@ -2534,7 +2487,7 @@ function startApp(){
     recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();
   }
 }
-</script>
 
+</script>
 </body>
 </html>
