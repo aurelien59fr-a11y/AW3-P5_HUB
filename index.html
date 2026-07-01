@@ -2079,7 +2079,23 @@ function deactivateEmp(idx){
   }).catch(function(err){ toast('Erreur: '+err.message,'#ef4444'); });
 }
 
-function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent='Connexion...';btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent='Se connecter';btn.disabled=false;});}
+function doLogin(){
+  var email=document.getElementById('li-email').value.trim();
+  var pass=document.getElementById('li-pass').value;
+  var btn=document.getElementById('li-btn');
+  var err=document.getElementById('li-err');
+  if(!email||!pass){err.textContent='Remplis tous les champs.';return;}
+  btn.textContent='Connexion...';btn.disabled=true;err.textContent='';
+  // S'assurer que Firebase est initialise
+  try{
+    var cfg={apiKey:"AIzaSyAexVCEfVxmShZ-m7xFAVfk9AzReBi2WTQ",authDomain:"aw3-p5-hub.firebaseapp.com",databaseURL:"https://aw3-p5-hub-default-rtdb.europe-west1.firebasedatabase.app",projectId:"aw3-p5-hub",storageBucket:"aw3-p5-hub.firebasestorage.app",messagingSenderId:"685884843934",appId:"1:685884843934:web:ab8f7b8e362959f1ab988f"};
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+  }catch(e){}
+  firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){
+    err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;
+    btn.textContent='Se connecter';btn.disabled=false;
+  });
+}
 function doLogout(){firebase.auth().signOut();}
 window.addEventListener('load',function(){
   document.getElementById('dchip').textContent=new Date().toLocaleDateString('fr-BE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
