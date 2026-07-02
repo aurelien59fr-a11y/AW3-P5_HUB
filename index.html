@@ -11,6 +11,13 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FFC20F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AW3 · P5">
+  <link rel="apple-touch-icon" href="/icon-180.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
 </head>
 <body>
 <div class="login-screen" id="login-screen">
@@ -41,6 +48,7 @@
     <button class="tab" data-tab="br">&#9673; Bradford</button>
     <button class="tab" data-tab="pl">&#9638; Planning</button>
     <button class="tab" data-tab="ab">&#9675; Absences</button>
+    <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; Pointages</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; Admin</button>
   </nav>
   <main class="content">
@@ -290,6 +298,53 @@
       </div>
     </div>
 
+
+    <div class="pane" id="pane-pt">
+      <div class="sh">
+        <div class="st">Pointages</div>
+        <div class="ss">Retards &amp; anomalies tourniquet/pointeuse</div>
+        <div style="display:flex;gap:8px;margin-left:auto;align-items:center">
+          <select id="pt-filter-person" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all">Tous</option>
+          </select>
+          <select id="pt-filter-type" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all">Tous types</option>
+            <option value="retard">Retards</option>
+            <option value="pointage">Anomalies tourniquet</option>
+          </select>
+          <select id="pt-filter-status" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all">Tous statuts</option>
+            <option value="open">Non traités</option>
+            <option value="done">Traités</option>
+          </select>
+          <button onclick="openImportPointages()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer</button>
+        </div>
+      </div>
+
+      <!-- Bandeau alertes non traitées -->
+      <div id="pt-alerts-banner" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ef4444;display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">&#9888;</span>
+        <span id="pt-alerts-text"></span>
+      </div>
+
+      <!-- Tableau -->
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--bd)">
+        <table class="bt" id="pt-table">
+          <thead>
+            <tr>
+              <th>Personne</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Détail</th>
+              <th>Statut</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="pt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 </div>
@@ -297,5 +352,29 @@
 
 
   <script src="js/app.js"></script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(reg){ console.log('[PWA] SW enregistré:', reg.scope); })
+          .catch(function(err){ console.warn('[PWA] SW erreur:', err); });
+      });
+    }
+  </script>
+
+<!-- Modal import pointages -->
+<div id="pt-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:500px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; Importer pointages Protime</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON généré par le script <b>exportEnrichi()</b> dans la console Protime</div>
+    <textarea id="pt-import-txt" style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:12px;padding:10px;resize:vertical"></textarea>
+    <div id="pt-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
+      <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
