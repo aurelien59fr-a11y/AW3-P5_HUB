@@ -922,6 +922,8 @@ function applyRole(role){
   // Onglet Admin — admin seulement
   var adminTab = document.getElementById('tab-admin-btn');
   if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
+  var ptTab = document.getElementById('tab-pt-btn');
+  if(ptTab) ptTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -1449,7 +1451,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
         buildEmpTable();
       }
     }
@@ -1530,7 +1532,7 @@ function startApp(){
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
   }
 }
 
@@ -1865,5 +1867,232 @@ function loadBirthdaysFromFirebase(){
     buildBirthdayCal();
     buildPT(); // refresh planning avec étoiles
   });
+}
+
+// ============================================================
+// POINTAGES — Données, import, affichage, commentaires
+// ============================================================
+
+var PT_DATA = {}; // {clé: {nom, date, type, detail, statut, commentaire, ts}}
+
+// Charger depuis Firebase au démarrage
+function loadPointages(){
+  if(!db) return;
+  db.ref('pointages').on('value', function(snap){
+    var data = snap.val();
+    PT_DATA = data || {};
+    buildPT2();
+    updPointagesBanner();
+  });
+}
+
+// Générer une clé unique pour une anomalie
+function ptKey(nom, date, type, heure){
+  return (nom + '_' + date + '_' + type + '_' + heure)
+    .replace(/[.#$\/\[\]\s]/g, '-');
+}
+
+// Ouvrir le modal d'import
+function openImportPointages(){
+  document.getElementById('pt-import-txt').value = '';
+  document.getElementById('pt-import-err').textContent = '';
+  document.getElementById('pt-import-modal').style.display = 'flex';
+}
+
+// Importer les données depuis le JSON Protime
+function importerPointages(){
+  var raw = document.getElementById('pt-import-txt').value.trim();
+  var err = document.getElementById('pt-import-err');
+  if(!raw){ err.textContent = 'Colle le JSON ici.'; return; }
+
+  var data;
+  try { data = JSON.parse(raw); }
+  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+
+  if(!data || (!data.retards && !data.pointages && !data.anomaliesPointage)){
+    err.textContent = 'Format non reconnu. Utilise exportEnrichiJSON() dans la console Protime.'; return;
+  }
+
+  var ajoutes = 0, doublons = 0;
+  var updates = {};
+
+  // Traiter retards
+  var retards = data.retards || [];
+  retards.forEach(function(a){
+    var k = ptKey(a.nom, a.date, 'retard', a.heure);
+    if(PT_DATA[k]){ doublons++; return; }
+    updates[k] = {
+      nom: a.nom, date: a.date, type: 'retard',
+      detail: 'Arrivée ' + a.heure + ' (prévu ' + a.heureDebut + ') → ' + a.retardMin + ' min',
+      retardMin: a.retardMin, heureDebut: a.heureDebut, heure: a.heure,
+      statut: 'open', commentaire: '', ts: Date.now()
+    };
+    ajoutes++;
+  });
+
+  // Traiter anomalies pointage
+  var anomalies = data.pointages || data.anomaliesPointage || [];
+  anomalies.forEach(function(a){
+    var k = ptKey(a.nom, a.date, a.type || 'pointage', a.pointeuse || a.heure);
+    if(PT_DATA[k]){ doublons++; return; }
+    updates[k] = {
+      nom: a.nom, date: a.date, type: 'pointage',
+      sousType: a.type || '',
+      detail: (a.type || '') + ' : pointeuse ' + (a.pointeuse||'') + ' / tourniquet ' + (a.tourniquet||'') + ' = ' + a.ecart + ' min',
+      ecart: a.ecart, heure: a.pointeuse || a.heure,
+      statut: 'open', commentaire: '', ts: Date.now()
+    };
+    ajoutes++;
+  });
+
+  if(!ajoutes && !doublons){
+    err.textContent = 'Aucune anomalie trouvée dans ce JSON.'; return;
+  }
+
+  // Sauvegarder dans Firebase
+  if(db && Object.keys(updates).length){
+    db.ref('pointages').update(updates).then(function(){
+      document.getElementById('pt-import-modal').style.display = 'none';
+      toast(ajoutes + ' anomalie(s) importée(s)' + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : ''), '#10b981');
+    }).catch(function(e){
+      err.textContent = 'Erreur Firebase : ' + e.message;
+    });
+  } else {
+    document.getElementById('pt-import-modal').style.display = 'none';
+    toast('Tout déjà importé — ' + doublons + ' doublon(s) ignoré(s)', '#f59e0b');
+  }
+}
+
+// Construire le tableau pointages
+function buildPT2(){
+  var tbody = document.getElementById('pt-tbody');
+  if(!tbody) return;
+
+  var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
+  var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
+  var filterStatus = document.getElementById('pt-filter-status') ? document.getElementById('pt-filter-status').value : 'all';
+
+  // Remplir le filtre personnes
+  var selPerson = document.getElementById('pt-filter-person');
+  if(selPerson && selPerson.options.length <= 1){
+    var noms = [...new Set(Object.values(PT_DATA).map(function(a){return a.nom;}))].sort();
+    noms.forEach(function(n){
+      var opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      selPerson.appendChild(opt);
+    });
+  }
+
+  // Filtrer et trier
+  var rows = Object.entries(PT_DATA).filter(function(entry){
+    var a = entry[1];
+    if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
+    if(filterType !== 'all' && a.type !== filterType) return false;
+    if(filterStatus !== 'all' && a.statut !== filterStatus) return false;
+    return true;
+  }).sort(function(a, b){
+    // Trier : non traités d'abord, puis par date décroissante
+    if(a[1].statut !== b[1].statut) return a[1].statut === 'open' ? -1 : 1;
+    return b[1].date.localeCompare(a[1].date);
+  });
+
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">Aucune anomalie</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(function(entry){
+    var k = entry[0], a = entry[1];
+    var isOpen = a.statut === 'open';
+    var typeCol = a.type === 'retard' ? '#f59e0b' : '#ef4444';
+    var typeLabel = a.type === 'retard' ? '⏰ Retard' : '⚠ Tourniquet';
+    var statutBadge = isOpen
+      ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">Non traité</span>'
+      : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">Traité</span>';
+    var cmIcon = a.commentaire
+      ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
+      : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
+    return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
+      + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
+      + '<td style="font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+      + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
+      + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + '</td>'
+      + '<td>' + statutBadge + '</td>'
+      + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + k + '\')">' + cmIcon + '</span></td>'
+      + '</tr>';
+  }).join('');
+
+  updPointagesBanner();
+}
+
+// Bannière alertes non traitées
+function updPointagesBanner(){
+  var banner = document.getElementById('pt-alerts-banner');
+  var text = document.getElementById('pt-alerts-text');
+  if(!banner || !text) return;
+  var open = Object.values(PT_DATA).filter(function(a){return a.statut === 'open';});
+  var retards = open.filter(function(a){return a.type === 'retard';}).length;
+  var ptgs = open.filter(function(a){return a.type === 'pointage';}).length;
+  if(!open.length){ banner.style.display = 'none'; return; }
+  banner.style.display = 'flex';
+  var msg = open.length + ' anomalie(s) non traitée(s)';
+  if(retards) msg += ' · ' + retards + ' retard(s)';
+  if(ptgs) msg += ' · ' + ptgs + ' anomalie(s) tourniquet';
+  text.textContent = msg;
+}
+
+// Ouvrir popup commentaire pointage
+function openPtComment(key){
+  var a = PT_DATA[key];
+  if(!a) return;
+  var d = document.createElement('div');
+  d.id = 'pt-comment-popup';
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  d.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:440px;max-width:95vw">'
+    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + a.nom + '</div>'
+    + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + a.date + ' — ' + a.detail + '</div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:14px">'
+    + '<button onclick="setPtStatut(\'' + key + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
+    + '<button onclick="setPtStatut(\'' + key + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
+    + '</div>'
+    + '<textarea id="pt-cm-txt" style="width:100%;height:100px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">' + (a.commentaire||'') + '</textarea>'
+    + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
+    + '<button onclick="document.getElementById(\'pt-comment-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>'
+    + '<button onclick="savePtComment(\'' + key + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
+    + '</div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click', function(e){ if(e.target===d) d.remove(); });
+  document.getElementById('pt-cm-txt').focus();
+}
+
+function setPtStatut(key, statut){
+  if(PT_DATA[key]) PT_DATA[key].statut = statut;
+  // Mettre à jour les boutons visuellement
+  var btnOpen = document.getElementById('btn-open');
+  var btnDone = document.getElementById('btn-done');
+  if(btnOpen){
+    btnOpen.style.background = statut==='open'?'#ef4444':'none';
+    btnOpen.style.color = statut==='open'?'#fff':'#ef4444';
+  }
+  if(btnDone){
+    btnDone.style.background = statut==='done'?'#10b981':'none';
+    btnDone.style.color = statut==='done'?'#fff':'#10b981';
+  }
+}
+
+function savePtComment(key){
+  var txt = document.getElementById('pt-cm-txt').value.trim();
+  var statut = PT_DATA[key] ? PT_DATA[key].statut : 'open';
+  var updates = {};
+  updates['pointages/' + key + '/commentaire'] = txt;
+  updates['pointages/' + key + '/statut'] = statut;
+  updates['pointages/' + key + '/commentaireDate'] = new Date().toLocaleString('fr-BE');
+  updates['pointages/' + key + '/commentaireAuteur'] = currentUser ? currentUser.email : '';
+  if(db){
+    db.ref().update(updates).then(function(){
+      document.getElementById('pt-comment-popup').remove();
+      toast('Commentaire enregistré', '#10b981');
+    });
+  }
 }
 
