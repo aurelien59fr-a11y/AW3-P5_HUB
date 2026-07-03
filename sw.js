@@ -6,15 +6,15 @@
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v1';
+const CACHE_VERSION = 'bradford-v3';
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/js/app.js',
-  '/manifest.json',
-  '/icon-180.png',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './js/app.js',
+  './manifest.json',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // Domaines à ne JAMAIS mettre en cache (données live)
@@ -28,7 +28,15 @@ const NEVER_CACHE = [
 self.addEventListener('install', function(event){
   event.waitUntil(
     caches.open(CACHE_VERSION).then(function(cache){
-      return cache.addAll(APP_SHELL);
+      // addAll échoue en bloc si UNE seule ressource 404 → on ajoute une par une
+      // pour ne jamais bloquer l'installation du service worker
+      return Promise.all(
+        APP_SHELL.map(function(url){
+          return cache.add(url).catch(function(e){
+            console.warn('[SW] Impossible de mettre en cache : ' + url, e);
+          });
+        })
+      );
     }).then(function(){
       return self.skipWaiting();
     })
