@@ -1883,6 +1883,9 @@ function loadPointages(){
     PT_DATA = data || {};
     buildPT2();
     updPointagesBanner();
+  }, function(error){
+    console.error('[Pointages] Erreur de lecture Firebase :', error);
+    toast('Pointages : accès Firebase refusé (' + error.message + ')', '#ef4444');
   });
 }
 
@@ -1950,11 +1953,16 @@ function importerPointages(){
   }
 
   // Sauvegarder dans Firebase
-  if(db && Object.keys(updates).length){
+  if(!db){
+    err.textContent = 'Connexion Firebase non disponible. Recharge la page et réessaie.';
+    return;
+  }
+  if(Object.keys(updates).length){
     db.ref('pointages').update(updates).then(function(){
       document.getElementById('pt-import-modal').style.display = 'none';
       toast(ajoutes + ' anomalie(s) importée(s)' + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : ''), '#10b981');
     }).catch(function(e){
+      console.error('[Pointages] Erreur import Firebase :', e);
       err.textContent = 'Erreur Firebase : ' + e.message;
     });
   } else {
@@ -1968,61 +1976,67 @@ function buildPT2(){
   var tbody = document.getElementById('pt-tbody');
   if(!tbody) return;
 
-  var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
-  var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
-  var filterStatus = document.getElementById('pt-filter-status') ? document.getElementById('pt-filter-status').value : 'all';
+  try{
+    var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
+    var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
+    var filterStatus = document.getElementById('pt-filter-status') ? document.getElementById('pt-filter-status').value : 'all';
 
-  // Remplir le filtre personnes
-  var selPerson = document.getElementById('pt-filter-person');
-  if(selPerson && selPerson.options.length <= 1){
-    var noms = [...new Set(Object.values(PT_DATA).map(function(a){return a.nom;}))].sort();
-    noms.forEach(function(n){
-      var opt = document.createElement('option');
-      opt.value = n; opt.textContent = n;
-      selPerson.appendChild(opt);
+    // Remplir le filtre personnes
+    var selPerson = document.getElementById('pt-filter-person');
+    if(selPerson && selPerson.options.length <= 1){
+      var noms = [...new Set(Object.values(PT_DATA).map(function(a){return a.nom;}))].sort();
+      noms.forEach(function(n){
+        var opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        selPerson.appendChild(opt);
+      });
+    }
+
+    // Filtrer et trier
+    var rows = Object.entries(PT_DATA).filter(function(entry){
+      var a = entry[1];
+      if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
+      if(filterType !== 'all' && a.type !== filterType) return false;
+      if(filterStatus !== 'all' && a.statut !== filterStatus) return false;
+      return true;
+    }).sort(function(a, b){
+      // Trier : non traités d'abord, puis par date décroissante
+      if(a[1].statut !== b[1].statut) return a[1].statut === 'open' ? -1 : 1;
+      return (b[1].date||'').localeCompare(a[1].date||'');
     });
+
+    if(!rows.length){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">Aucune anomalie</td></tr>';
+      updPointagesBanner();
+      return;
+    }
+
+    tbody.innerHTML = rows.map(function(entry){
+      var k = entry[0], a = entry[1];
+      var isOpen = a.statut === 'open';
+      var typeCol = a.type === 'retard' ? '#f59e0b' : '#ef4444';
+      var typeLabel = a.type === 'retard' ? '⏰ Retard' : '⚠ Tourniquet';
+      var statutBadge = isOpen
+        ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">Non traité</span>'
+        : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">Traité</span>';
+      var cmIcon = a.commentaire
+        ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
+        : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
+      return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
+        + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
+        + '<td style="font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+        + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
+        + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + '</td>'
+        + '<td>' + statutBadge + '</td>'
+        + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + k + '\')">' + cmIcon + '</span></td>'
+        + '</tr>';
+    }).join('');
+
+    updPointagesBanner();
+  } catch(e){
+    console.error('[Pointages] Erreur de rendu buildPT2 :', e);
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px">Erreur d\'affichage : ' + e.message + '</td></tr>';
   }
-
-  // Filtrer et trier
-  var rows = Object.entries(PT_DATA).filter(function(entry){
-    var a = entry[1];
-    if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
-    if(filterType !== 'all' && a.type !== filterType) return false;
-    if(filterStatus !== 'all' && a.statut !== filterStatus) return false;
-    return true;
-  }).sort(function(a, b){
-    // Trier : non traités d'abord, puis par date décroissante
-    if(a[1].statut !== b[1].statut) return a[1].statut === 'open' ? -1 : 1;
-    return b[1].date.localeCompare(a[1].date);
-  });
-
-  if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">Aucune anomalie</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = rows.map(function(entry){
-    var k = entry[0], a = entry[1];
-    var isOpen = a.statut === 'open';
-    var typeCol = a.type === 'retard' ? '#f59e0b' : '#ef4444';
-    var typeLabel = a.type === 'retard' ? '⏰ Retard' : '⚠ Tourniquet';
-    var statutBadge = isOpen
-      ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">Non traité</span>'
-      : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">Traité</span>';
-    var cmIcon = a.commentaire
-      ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
-      : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
-    return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
-      + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
-      + '<td style="font-family:var(--mo);font-size:12px">' + a.date + '</td>'
-      + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
-      + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + '</td>'
-      + '<td>' + statutBadge + '</td>'
-      + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + k + '\')">' + cmIcon + '</span></td>'
-      + '</tr>';
-  }).join('');
-
-  updPointagesBanner();
 }
 
 // Bannière alertes non traitées
@@ -2039,6 +2053,52 @@ function updPointagesBanner(){
   if(retards) msg += ' · ' + retards + ' retard(s)';
   if(ptgs) msg += ' · ' + ptgs + ' anomalie(s) tourniquet';
   text.textContent = msg;
+}
+
+// Marquer en masse comme traité (respecte les filtres actifs : personne / type)
+function markAllPtDone(){
+  var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
+  var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
+
+  var toMark = Object.entries(PT_DATA).filter(function(entry){
+    var a = entry[1];
+    if(a.statut !== 'open') return false;
+    if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
+    if(filterType !== 'all' && a.type !== filterType) return false;
+    return true;
+  });
+
+  if(!toMark.length){
+    toast('Aucune anomalie non traitée avec ces filtres', '#f59e0b');
+    return;
+  }
+
+  var label = (filterPerson !== 'all' ? filterPerson : 'tout le monde')
+    + (filterType !== 'all' ? ' · ' + (filterType === 'retard' ? 'retards' : 'tourniquet') : '');
+  if(!confirm('Marquer ' + toMark.length + ' anomalie(s) comme traitée(s) (' + label + ') ?\nCette action est faite en masse et peut être annulée ligne par ligne ensuite.')){
+    return;
+  }
+
+  var updates = {};
+  var now = new Date().toLocaleString('fr-BE');
+  var auteur = currentUser ? currentUser.email : '';
+  toMark.forEach(function(entry){
+    var k = entry[0];
+    updates['pointages/' + k + '/statut'] = 'done';
+    updates['pointages/' + k + '/commentaireDate'] = now;
+    updates['pointages/' + k + '/commentaireAuteur'] = auteur;
+    if(!entry[1].commentaire){
+      updates['pointages/' + k + '/commentaire'] = 'Traité en masse';
+    }
+  });
+
+  if(db){
+    db.ref().update(updates).then(function(){
+      toast(toMark.length + ' anomalie(s) marquée(s) comme traitée(s)', '#10b981');
+    }).catch(function(e){
+      toast('Erreur Firebase : ' + e.message, '#ef4444');
+    });
+  }
 }
 
 // Ouvrir popup commentaire pointage
