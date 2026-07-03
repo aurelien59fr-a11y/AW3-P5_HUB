@@ -16,15 +16,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="AW3 · P5">
-  <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=2">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=2">
 </head>
 <body>
 <div class="login-screen" id="login-screen">
   <div class="login-box">
-    <div class="login-logo"><div class="dot">B</div><div><div class="login-title">Bradford Dashboard</div><div class="login-sub">AW3 &middot; Ploeg 5</div></div></div>
+    <div class="login-logo"><img class="dot" src="icons/icon-192.png" alt="Logo AW3 Ploeg 5"><div><div class="login-title">Bradford Dashboard</div><div class="login-sub">AW3 &middot; Ploeg 5</div></div></div>
     <div class="li-field"><label class="li-label">Email</label><input class="li-input" type="email" id="li-email" placeholder="votre@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('li-pass').focus()"></div>
     <div class="li-field"><label class="li-label">Mot de passe</label><input class="li-input" type="password" id="li-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="li-err" id="li-err"></div>
@@ -35,7 +35,7 @@
 <div id="app-screen" style="display:none">
 <div style="display:flex;flex-direction:column;min-height:100vh">
   <header class="topbar">
-    <div class="logo"><div class="logo-dot">B</div><div>Bradford Dashboard<div class="logo-sub">AW3 &middot; Ploeg 5</div></div></div>
+    <div class="logo"><img class="logo-dot" src="icons/icon-192.png" alt="Logo AW3 Ploeg 5"><div>Bradford Dashboard<div class="logo-sub">AW3 &middot; Ploeg 5</div></div></div>
     <div class="topbar-r">
       <span id="conn-status" style="font-size:11px;color:var(--amber);font-family:var(--mo)">Connexion...</span>
       <span id="role-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid;font-weight:500"></span>
