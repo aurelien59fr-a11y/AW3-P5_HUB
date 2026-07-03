@@ -85,25 +85,6 @@
     </div>
     <div class="pane" id="pane-pl">
       <div class="sh"><div class="st" id="plan-title">Planning 2026</div><div class="ss">Cliquez sur un poste pour modifier</div></div>
-      <div class="lgbar">
-        <div class="lch"><span class="sp s-tl">TL</span> Team Leader</div>
-        <div class="lch"><span class="sp s-coord">COORD</span> Coordinateur</div>
-        <div class="lch"><span class="sp s-31">31/32</span></div>
-        <div class="lch"><span class="sp s-33">33/34</span></div>
-        <div class="lch"><span class="sp s-35">35/36</span></div>
-        <div class="lch"><span class="sp s-ex">extra</span></div>
-        <div class="lch"><span class="sp s-pr">Prod</span></div>
-        <div class="lch"><span class="sp s-lb">Labo</span></div>
-        <div class="lch"><span class="sp s-bt">Batter</span></div>
-        <div class="lch"><span class="sp s-cl">Cleaning</span></div>
-        <div class="lch"><span class="sp s-ip">Inpak</span></div>
-        <div class="lch"><span class="sp s-bk">Bulk</span></div>
-        <div class="lch"><span class="sp s-aw1">AW1</span> Equipe AW1</div>
-        <div class="lch"><span class="sp s-aw2">AW2</span> Equipe AW2</div>
-        <div class="lch"><span class="sp s-zk">ziek</span> Maladie</div>
-        <div class="lch"><span class="sp s-vl">verlof</span> Conge</div>
-        <div class="lch"><span class="sp s-rc">recup</span> Recup</div>
-      </div>
       <div class="ptb">
         <div class="ytabs"><button class="ytab" data-yr="2025">2025</button><button class="ytab on" data-yr="2026">2026</button><button class="ytab" data-yr="2027">2027</button></div>
         <div style="display:flex;align-items:center;gap:6px">
@@ -123,6 +104,25 @@
       </div>
       <div class="pscroll"><table class="ptable" id="ptable"></table></div>
       <div id="no-today">Aujourd'hui n'est pas un jour planifie.</div>
+      <div class="lgbar">
+        <div class="lch"><span class="sp s-tl">TL</span> Team Leader</div>
+        <div class="lch"><span class="sp s-coord">COORD</span> Coordinateur</div>
+        <div class="lch"><span class="sp s-31">31/32</span></div>
+        <div class="lch"><span class="sp s-33">33/34</span></div>
+        <div class="lch"><span class="sp s-35">35/36</span></div>
+        <div class="lch"><span class="sp s-ex">extra</span></div>
+        <div class="lch"><span class="sp s-pr">Prod</span></div>
+        <div class="lch"><span class="sp s-lb">Labo</span></div>
+        <div class="lch"><span class="sp s-bt">Batter</span></div>
+        <div class="lch"><span class="sp s-cl">Cleaning</span></div>
+        <div class="lch"><span class="sp s-ip">Inpak</span></div>
+        <div class="lch"><span class="sp s-bk">Bulk</span></div>
+        <div class="lch"><span class="sp s-aw1">AW1</span> Equipe AW1</div>
+        <div class="lch"><span class="sp s-aw2">AW2</span> Equipe AW2</div>
+        <div class="lch"><span class="sp s-zk">ziek</span> Maladie</div>
+        <div class="lch"><span class="sp s-vl">verlof</span> Conge</div>
+        <div class="lch"><span class="sp s-rc">recup</span> Recup</div>
+      </div>
     </div>
     <div class="pane" id="pane-ab">
       <div class="sh"><div class="st">Absences</div><div class="ss" id="abs-lbl">-</div></div>
@@ -365,7 +365,7 @@
           .catch(function(err){ console.warn('[PWA] SW erreur:', err); });
       });
     }
-  </script>a
+  </script>
 
 <!-- Modal import pointages -->
 <div id="pt-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
