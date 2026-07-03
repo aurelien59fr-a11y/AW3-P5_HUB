@@ -12,7 +12,7 @@
 body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh;line-height:1.5;font-size:14px}
 .topbar{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;letter-spacing:-.02em}
-.logo-dot{width:28px;height:28px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.logo-dot{width:28px;height:28px;border-radius:8px;object-fit:cover;display:block}
 .logo-sub{font-size:12px;color:var(--tx3);font-weight:400}
 .topbar-r{margin-left:auto;display:flex;align-items:center;gap:10px}
 .badge{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.25);font-weight:500}
@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
 .login-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;padding:40px 36px;width:360px;display:flex;flex-direction:column;gap:20px}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:4px}
-.login-logo .dot{width:36px;height:36px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.login-logo .dot{width:36px;height:36px;border-radius:10px;object-fit:cover;display:block}
 .login-title{font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--tx)}
 .login-sub{font-size:12px;color:var(--tx3)}
 .li-field{display:flex;flex-direction:column;gap:6px}
@@ -2057,47 +2057,61 @@ function updPointagesBanner(){
 
 // Marquer en masse comme traité (respecte les filtres actifs : personne / type)
 function markAllPtDone(){
-  var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
-  var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
+  try{
+    console.log('[markAllPtDone] Déclenché. PT_DATA contient', Object.keys(PT_DATA).length, 'entrée(s).');
 
-  var toMark = Object.entries(PT_DATA).filter(function(entry){
-    var a = entry[1];
-    if(a.statut !== 'open') return false;
-    if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
-    if(filterType !== 'all' && a.type !== filterType) return false;
-    return true;
-  });
+    var filterPerson = document.getElementById('pt-filter-person') ? document.getElementById('pt-filter-person').value : 'all';
+    var filterType   = document.getElementById('pt-filter-type')   ? document.getElementById('pt-filter-type').value   : 'all';
 
-  if(!toMark.length){
-    toast('Aucune anomalie non traitée avec ces filtres', '#f59e0b');
-    return;
-  }
+    var toMark = Object.entries(PT_DATA).filter(function(entry){
+      var a = entry[1];
+      if(a.statut !== 'open') return false;
+      if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
+      if(filterType !== 'all' && a.type !== filterType) return false;
+      return true;
+    });
 
-  var label = (filterPerson !== 'all' ? filterPerson : 'tout le monde')
-    + (filterType !== 'all' ? ' · ' + (filterType === 'retard' ? 'retards' : 'tourniquet') : '');
-  if(!confirm('Marquer ' + toMark.length + ' anomalie(s) comme traitée(s) (' + label + ') ?\nCette action est faite en masse et peut être annulée ligne par ligne ensuite.')){
-    return;
-  }
+    console.log('[markAllPtDone]', toMark.length, 'anomalie(s) à marquer.');
 
-  var updates = {};
-  var now = new Date().toLocaleString('fr-BE');
-  var auteur = currentUser ? currentUser.email : '';
-  toMark.forEach(function(entry){
-    var k = entry[0];
-    updates['pointages/' + k + '/statut'] = 'done';
-    updates['pointages/' + k + '/commentaireDate'] = now;
-    updates['pointages/' + k + '/commentaireAuteur'] = auteur;
-    if(!entry[1].commentaire){
-      updates['pointages/' + k + '/commentaire'] = 'Traité en masse';
+    if(!toMark.length){
+      toast('Aucune anomalie non traitée avec ces filtres', '#f59e0b');
+      return;
     }
-  });
 
-  if(db){
+    var label = (filterPerson !== 'all' ? filterPerson : 'tout le monde')
+      + (filterType !== 'all' ? ' · ' + (filterType === 'retard' ? 'retards' : 'tourniquet') : '');
+    var ok = window.confirm('Marquer ' + toMark.length + ' anomalie(s) comme traitée(s) (' + label + ') ?\nCette action est faite en masse et peut être annulée ligne par ligne ensuite.');
+    console.log('[markAllPtDone] confirm() a renvoyé :', ok);
+    if(!ok) return;
+
+    var updates = {};
+    var now = new Date().toLocaleString('fr-BE');
+    var auteur = currentUser ? currentUser.email : '';
+    toMark.forEach(function(entry){
+      var k = entry[0];
+      updates['pointages/' + k + '/statut'] = 'done';
+      updates['pointages/' + k + '/commentaireDate'] = now;
+      updates['pointages/' + k + '/commentaireAuteur'] = auteur;
+      if(!entry[1].commentaire){
+        updates['pointages/' + k + '/commentaire'] = 'Traité en masse';
+      }
+    });
+
+    if(!db){
+      toast('Connexion Firebase non disponible', '#ef4444');
+      return;
+    }
+
     db.ref().update(updates).then(function(){
+      console.log('[markAllPtDone] Mise à jour Firebase réussie.');
       toast(toMark.length + ' anomalie(s) marquée(s) comme traitée(s)', '#10b981');
     }).catch(function(e){
+      console.error('[markAllPtDone] Erreur Firebase :', e);
       toast('Erreur Firebase : ' + e.message, '#ef4444');
     });
+  } catch(e){
+    console.error('[markAllPtDone] Erreur inattendue :', e);
+    toast('Erreur : ' + e.message, '#ef4444');
   }
 }
 
