@@ -11,13 +11,15 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FFC20F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="AW3 · P5">
-  <link rel="apple-touch-icon" href="/icon-180.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
 </head>
 <body>
 <div class="login-screen" id="login-screen">
@@ -322,9 +324,10 @@
       </div>
 
       <!-- Bandeau alertes non traitées -->
-      <div id="pt-alerts-banner" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ef4444;display:flex;align-items:center;gap:10px">
+      <div id="pt-alerts-banner" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ef4444;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:18px">&#9888;</span>
-        <span id="pt-alerts-text"></span>
+        <span id="pt-alerts-text" style="flex:1"></span>
+        <button onclick="markAllPtDone()" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">&#10003; Tout marquer comme traité</button>
       </div>
 
       <!-- Tableau -->
@@ -355,7 +358,7 @@
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
           .then(function(reg){ console.log('[PWA] SW enregistré:', reg.scope); })
           .catch(function(err){ console.warn('[PWA] SW erreur:', err); });
       });
