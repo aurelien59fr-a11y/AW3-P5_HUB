@@ -1957,6 +1957,70 @@ function loadBirthdaysFromFirebase(){
 }
 
 // ============================================================
+// Test de fiabilite Firebase (Admin)
+// ============================================================
+function testFirebaseConnection(){
+  var el = document.getElementById('fb-test-results');
+  if(!el) return;
+  if(!db){
+    el.innerHTML = '<div style="color:#ef4444">✗ Aucune connexion Firebase (db non initialise)</div>';
+    return;
+  }
+  el.innerHTML = '<div style="color:var(--tx3)">Test en cours…</div>';
+
+  var paths = [
+    {label: 'Lecture users', ref: 'users', mode: 'read'},
+    {label: 'Lecture employees', ref: 'employees', mode: 'read'},
+    {label: 'Lecture planning/shifts2026', ref: 'planning/shifts2026', mode: 'read'},
+    {label: 'Lecture planning/absences', ref: 'planning/absences', mode: 'read'},
+    {label: 'Lecture pointages', ref: 'pointages', mode: 'read'},
+    {label: 'Ecriture pointages (test)', ref: 'pointages/_test_connexion', mode: 'write'},
+    {label: 'Connexion temps reel (.info/connected)', ref: '.info/connected', mode: 'realtime'}
+  ];
+
+  var results = paths.map(function(p){ return {label: p.label, status: 'pending'}; });
+
+  function render(){
+    el.innerHTML = results.map(function(r){
+      var icon = r.status === 'pending' ? '<span style="color:var(--tx3)">…</span>'
+        : r.status === 'ok' ? '<span style="color:#10b981">✓</span>'
+        : '<span style="color:#ef4444">✗</span>';
+      var extra = r.error ? ' <span style="color:#ef4444;font-size:11px">(' + r.error + ')</span>' : '';
+      return '<div>' + icon + ' ' + r.label + extra + '</div>';
+    }).join('');
+  }
+  render();
+
+  paths.forEach(function(p, idx){
+    if(p.mode === 'read'){
+      db.ref(p.ref).once('value').then(function(){
+        results[idx].status = 'ok'; render();
+      }).catch(function(e){
+        results[idx].status = 'error'; results[idx].error = e.message; render();
+      });
+    } else if(p.mode === 'write'){
+      db.ref(p.ref).set({ts: Date.now(), by: currentUser?currentUser.email:'test'}).then(function(){
+        return db.ref(p.ref).remove();
+      }).then(function(){
+        results[idx].status = 'ok'; render();
+      }).catch(function(e){
+        results[idx].status = 'error'; results[idx].error = e.message; render();
+      });
+    } else if(p.mode === 'realtime'){
+      db.ref(p.ref).once('value').then(function(snap){
+        results[idx].status = snap.val() ? 'ok' : 'error';
+        if(!snap.val()) results[idx].error = 'hors ligne';
+        render();
+      }).catch(function(e){
+        results[idx].status = 'error'; results[idx].error = e.message; render();
+      });
+    }
+  });
+}
+
+
+
+// ============================================================
 // POINTAGES — Données, import, affichage, commentaires
 // ============================================================
 
@@ -2192,13 +2256,17 @@ function markAllPtDone(){
     var updates = {};
     var now = new Date().toLocaleString('fr-BE');
     var auteur = currentUser ? currentUser.email : '';
+    var pushPromises = [];
     toMark.forEach(function(entry){
       var k = entry[0];
       updates['pointages/' + k + '/statut'] = 'done';
-      updates['pointages/' + k + '/commentaireDate'] = now;
-      updates['pointages/' + k + '/commentaireAuteur'] = auteur;
       if(!entry[1].commentaire){
         updates['pointages/' + k + '/commentaire'] = 'Traité en masse';
+        if(db){
+          pushPromises.push(db.ref('pointages/' + k + '/historique').push({
+            texte: 'Traité en masse', date: now, auteur: auteur
+          }));
+        }
       }
     });
 
@@ -2207,7 +2275,7 @@ function markAllPtDone(){
       return;
     }
 
-    db.ref().update(updates).then(function(){
+    Promise.all([db.ref().update(updates)].concat(pushPromises)).then(function(){
       console.log('[markAllPtDone] Mise à jour Firebase réussie.');
       toast(toMark.length + ' anomalie(s) marquée(s) comme traitée(s)', '#10b981');
     }).catch(function(e){
@@ -2224,19 +2292,31 @@ function markAllPtDone(){
 function openPtComment(key){
   var a = PT_DATA[key];
   if(!a) return;
+  var hist = a.historique ? Object.keys(a.historique).sort().map(function(k){ return a.historique[k]; }) : [];
+  var histHtml = hist.length
+    ? hist.slice().reverse().map(function(h){
+        return '<div style="padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:6px">'
+          + '<div style="font-size:11px;color:var(--tx3);margin-bottom:3px">' + (h.date||'') + (h.auteur?' · '+h.auteur:'') + '</div>'
+          + '<div style="font-size:13px;color:var(--tx1);white-space:pre-wrap">' + (h.texte||'').replace(/</g,'&lt;') + '</div>'
+          + '</div>';
+      }).join('')
+    : '<div style="font-size:12px;color:var(--tx3);font-style:italic">Aucun commentaire pour le moment</div>';
   var d = document.createElement('div');
   d.id = 'pt-comment-popup';
   d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
-  d.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:440px;max-width:95vw">'
+  d.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:440px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column">'
     + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + a.nom + '</div>'
     + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + a.date + ' — ' + a.detail + '</div>'
     + '<div style="display:flex;gap:8px;margin-bottom:14px">'
     + '<button onclick="setPtStatut(\'' + key + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
     + '<button onclick="setPtStatut(\'' + key + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
     + '</div>'
-    + '<textarea id="pt-cm-txt" style="width:100%;height:100px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">' + (a.commentaire||'') + '</textarea>'
+    + '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>'
+    + '<div style="overflow-y:auto;max-height:200px;margin-bottom:14px">' + histHtml + '</div>'
+    + '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Ajouter un commentaire</div>'
+    + '<textarea id="pt-cm-txt" placeholder="Ecrire un nouveau commentaire..." style="width:100%;height:70px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical"></textarea>'
     + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
-    + '<button onclick="document.getElementById(\'pt-comment-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>'
+    + '<button onclick="document.getElementById(\'pt-comment-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Fermer</button>'
     + '<button onclick="savePtComment(\'' + key + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
     + '</div></div>';
   document.body.appendChild(d);
@@ -2263,15 +2343,27 @@ function savePtComment(key){
   var txt = document.getElementById('pt-cm-txt').value.trim();
   var statut = PT_DATA[key] ? PT_DATA[key].statut : 'open';
   var updates = {};
-  updates['pointages/' + key + '/commentaire'] = txt;
   updates['pointages/' + key + '/statut'] = statut;
-  updates['pointages/' + key + '/commentaireDate'] = new Date().toLocaleString('fr-BE');
-  updates['pointages/' + key + '/commentaireAuteur'] = currentUser ? currentUser.email : '';
-  if(db){
-    db.ref().update(updates).then(function(){
-      document.getElementById('pt-comment-popup').remove();
-      toast('Commentaire enregistré', '#10b981');
+  if(!db) return;
+  var chain = db.ref().update(updates);
+  if(txt){
+    var entry = {
+      texte: txt,
+      date: new Date().toLocaleString('fr-BE'),
+      auteur: currentUser ? currentUser.email : ''
+    };
+    chain = chain.then(function(){
+      return db.ref('pointages/' + key + '/historique').push(entry);
+    }).then(function(){
+      // Garder 'commentaire' à jour avec le dernier texte pour l'aperçu rapide dans le tableau
+      return db.ref('pointages/' + key + '/commentaire').set(txt);
     });
   }
+  chain.then(function(){
+    document.getElementById('pt-comment-popup').remove();
+    toast(txt ? 'Commentaire ajouté' : 'Statut mis à jour', '#10b981');
+  }).catch(function(e){
+    toast('Erreur : ' + e.message, '#ef4444');
+  });
 }
 
