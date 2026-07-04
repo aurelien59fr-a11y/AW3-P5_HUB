@@ -51,6 +51,7 @@
     <button class="tab" data-tab="pl">&#9638; Planning</button>
     <button class="tab" data-tab="ab">&#9675; Absences</button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; Pointages</button>
+    <button class="tab" id="tab-prod-btn" data-tab="prod" style="display:none">&#127981; Production</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; Admin</button>
   </nav>
   <main class="content">
@@ -357,6 +358,71 @@
       </div>
     </div>
 
+    <!-- PRODUCTION -->
+    <div class="pane" id="pane-prod">
+      <div class="sh">
+        <div class="st">Production</div>
+        <div class="ss">Suivi manuel des chiffres cles AW3 (issus de Grafana)</div>
+        <button onclick="openImportProdModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
+      </div>
+
+      <!-- Formulaire d'ajout -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Ajouter un releve</div></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:12px">
+          <div class="li-field">
+            <label class="li-label">Date</label>
+            <input type="date" id="prod-date" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Heure</label>
+            <input type="time" id="prod-heure" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Output net (kg ou unites)</label>
+            <input type="number" id="prod-output" class="li-input" placeholder="ex: 4200">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Capacite theorique (%)</label>
+            <input type="number" id="prod-capacite" class="li-input" placeholder="ex: 87">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Statut ligne</label>
+            <select id="prod-statut" class="li-input">
+              <option value="production">Production</option>
+              <option value="ralenti">Ralenti</option>
+              <option value="arret">Arret</option>
+            </select>
+          </div>
+        </div>
+        <div class="li-field" style="margin-bottom:12px">
+          <label class="li-label">Commentaire (optionnel)</label>
+          <input type="text" id="prod-commentaire" class="li-input" placeholder="ex: panne convoyeur ligne 2">
+        </div>
+        <button onclick="addProdEntry()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">+ Ajouter le releve</button>
+      </div>
+
+      <!-- Historique -->
+      <div class="cc">
+        <div class="cch"><div class="cct">Historique</div></div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
+              <th style="padding:8px">Date</th>
+              <th style="padding:8px">Heure</th>
+              <th style="padding:8px">Métrique</th>
+              <th style="padding:8px">Output net</th>
+              <th style="padding:8px">Capacite</th>
+              <th style="padding:8px">Statut</th>
+              <th style="padding:8px">Commentaire</th>
+              <th style="padding:8px"></th>
+            </tr>
+          </thead>
+          <tbody id="prod-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 </div>
@@ -384,6 +450,27 @@
     <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
       <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
       <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal import CSV/JSON Production -->
+<div id="prod-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; Importer des données Grafana</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">
+      <b>CSV simple</b> (un panneau) : survole le titre du panneau &rarr; menu &rarr; <b>Inspect</b> &rarr; <b>Data</b> &rarr; <b>Download CSV</b>.<br>
+      <b>JSON multi-métriques</b> : colle le résultat de <code>exportAW3JSON()</code> depuis le script <code>grafana_enrichi.js</code> (console Grafana).
+    </div>
+    <div class="li-field" style="margin-bottom:10px">
+      <label class="li-label">Nom de la métrique (uniquement pour un CSV simple — ignoré si tu colles du JSON)</label>
+      <input type="text" id="prod-import-metrique" class="li-input" placeholder="Nom du panneau ou de la mesure">
+    </div>
+    <textarea id="prod-import-txt" placeholder="Colle ici un CSV Grafana OU le JSON de exportAW3JSON()" style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
+    <div id="prod-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('prod-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
+      <button onclick="importerProdData()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
     </div>
   </div>
 </div>
