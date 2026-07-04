@@ -142,6 +142,13 @@
     <div class="pane" id="pane-admin">
       <div class="sh"><div class="st">Administration</div><div class="ss">Outils reserves a l'admin</div></div>
 
+      <!-- TEST FIREBASE -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Fiabilite Firebase</div><button onclick="testFirebaseConnection()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Tester la connexion</button></div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">Verifie que le dashboard peut bien lire/ecrire sur chaque section de Firebase (utile pour diagnostiquer un probleme de regles).</div>
+        <div id="fb-test-results" style="font-family:var(--mo);font-size:12px;line-height:1.9"></div>
+      </div>
+
       <!-- REGLES FIREBASE -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch"><div class="cct">Roles utilisateurs Firebase</div></div>
