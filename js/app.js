@@ -1011,6 +1011,8 @@ function applyRole(role){
   if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
   var ptTab = document.getElementById('tab-pt-btn');
   if(ptTab) ptTab.style.display = isAdmin ? 'flex' : 'none';
+  var prodTab = document.getElementById('tab-prod-btn');
+  if(prodTab) prodTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -1538,7 +1540,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadProduction();
         buildEmpTable();
       }
     }
@@ -1619,7 +1621,7 @@ function startApp(){
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadProduction();
   }
 }
 
@@ -2366,4 +2368,270 @@ function savePtComment(key){
     toast('Erreur : ' + e.message, '#ef4444');
   });
 }
+
+// ============================================================
+// PRODUCTION — Suivi manuel des chiffres AW3 (issus de Grafana)
+// Conçu pour être compatible avec un futur relais automatique :
+// même structure de données ('production/<pushKey>'), que l'entrée
+// vienne d'une saisie manuelle ou d'un script poussant depuis le
+// réseau de l'entreprise.
+// ============================================================
+
+var PROD_DATA = {};
+
+function loadProduction(){
+  if(!db) return;
+  db.ref('production').on('value', function(snap){
+    PROD_DATA = snap.val() || {};
+    buildProdTable();
+  }, function(error){
+    console.error('[Production] Erreur de lecture Firebase :', error);
+  });
+  // Pré-remplir date/heure du jour par défaut
+  var now = new Date();
+  var dEl = document.getElementById('prod-date');
+  var hEl = document.getElementById('prod-heure');
+  if(dEl && !dEl.value) dEl.value = now.toISOString().slice(0,10);
+  if(hEl && !hEl.value) hEl.value = now.toTimeString().slice(0,5);
+}
+
+function addProdEntry(){
+  if(!canEdit()) return;
+  var date = document.getElementById('prod-date').value;
+  var heure = document.getElementById('prod-heure').value;
+  var output = document.getElementById('prod-output').value;
+  var capacite = document.getElementById('prod-capacite').value;
+  var statut = document.getElementById('prod-statut').value;
+  var commentaire = document.getElementById('prod-commentaire').value.trim();
+
+  if(!date || !heure){
+    toast('Date et heure sont obligatoires', '#f59e0b');
+    return;
+  }
+
+  var entry = {
+    date: date,
+    heure: heure,
+    output: output ? Number(output) : null,
+    capacite: capacite ? Number(capacite) : null,
+    statut: statut,
+    commentaire: commentaire,
+    source: 'manuel',
+    auteur: currentUser ? currentUser.email : '',
+    ts: Date.now()
+  };
+
+  if(!db){
+    toast('Connexion Firebase non disponible', '#ef4444');
+    return;
+  }
+
+  db.ref('production').push(entry).then(function(){
+    toast('Relevé ajouté', '#10b981');
+    document.getElementById('prod-output').value = '';
+    document.getElementById('prod-capacite').value = '';
+    document.getElementById('prod-commentaire').value = '';
+  }).catch(function(e){
+    toast('Erreur Firebase : ' + e.message, '#ef4444');
+  });
+}
+
+function deleteProdEntry(key){
+  if(!canEdit()) return;
+  if(!confirm('Supprimer ce relevé ?')) return;
+  if(!db) return;
+  db.ref('production/' + key).remove().then(function(){
+    toast('Relevé supprimé', '#10b981');
+  }).catch(function(e){
+    toast('Erreur : ' + e.message, '#ef4444');
+  });
+}
+
+function buildProdTable(){
+  var tbody = document.getElementById('prod-tbody');
+  if(!tbody) return;
+
+  var rows = Object.entries(PROD_DATA).sort(function(a, b){
+    var da = a[1].date + ' ' + a[1].heure;
+    var db_ = b[1].date + ' ' + b[1].heure;
+    return db_.localeCompare(da); // plus récent en premier
+  });
+
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:20px">Aucun relevé pour le moment</td></tr>';
+    return;
+  }
+
+  var statutColors = {
+    production: {bg:'#10b98122', fg:'#10b981', label:'Production'},
+    ralenti: {bg:'#f59e0b22', fg:'#f59e0b', label:'Ralenti'},
+    arret: {bg:'#ef444422', fg:'#ef4444', label:'Arrêt'}
+  };
+
+  tbody.innerHTML = rows.map(function(entry){
+    var k = entry[0], a = entry[1];
+    var sc = a.statut ? (statutColors[a.statut] || statutColors.production) : null;
+    var sourceIcon = a.source === 'import_csv'
+      ? '<span title="Importé depuis un CSV Grafana" style="font-size:11px;color:var(--tx3)">&#128190;</span>'
+      : a.source === 'auto'
+      ? '<span title="Ajouté automatiquement" style="font-size:11px;color:var(--tx3)">&#9881;</span>'
+      : '<span title="Saisie manuelle" style="font-size:11px;color:var(--tx3)">&#9997;</span>';
+    return '<tr>'
+      + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+      + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
+      + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + (a.metrique || '-') + '</td>'
+      + '<td style="padding:8px;font-size:13px">' + (a.output != null ? a.output : '-') + '</td>'
+      + '<td style="padding:8px;font-size:13px">' + (a.capacite != null ? a.capacite + '%' : '-') + '</td>'
+      + '<td style="padding:8px">' + (sc ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:' + sc.bg + ';color:' + sc.fg + '">' + sc.label + '</span>' : '-') + '</td>'
+      + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + (a.commentaire || '') + ' ' + sourceIcon + '</td>'
+      + '<td style="padding:8px;text-align:center"><span style="cursor:pointer;color:var(--tx3)" onclick="deleteProdEntry(\'' + k + '\')" title="Supprimer">&#10005;</span></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// Ouvrir le modal d'import
+function openImportProdModal(){
+  document.getElementById('prod-import-modal').style.display = 'flex';
+  document.getElementById('prod-import-err').textContent = '';
+}
+
+// Importe soit un CSV simple (un panneau), soit le JSON multi-métriques
+// généré par exportAW3JSON() dans grafana_enrichi.js — détection automatique.
+function importerProdData(){
+  var err = document.getElementById('prod-import-err');
+  err.textContent = '';
+  var raw = document.getElementById('prod-import-txt').value.trim();
+
+  if(!raw){
+    err.textContent = 'Colle le contenu du CSV ou du JSON.';
+    return;
+  }
+
+  if(raw.startsWith('{')){
+    importerProdJSON(raw, err);
+  } else {
+    importerProdCSV(raw, err);
+  }
+}
+
+function importerProdJSON(raw, err){
+  var parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch(e){
+    err.textContent = 'JSON invalide : ' + e.message;
+    return;
+  }
+  if(!parsed.metriques || !Array.isArray(parsed.metriques)){
+    err.textContent = 'Format JSON inattendu (clé "metriques" manquante).';
+    return;
+  }
+
+  var updates = {};
+  var ajoutes = 0;
+  var now = new Date().toLocaleString('fr-BE');
+  var auteur = currentUser ? currentUser.email : '';
+
+  parsed.metriques.forEach(function(m){
+    if(!m.nom || !Array.isArray(m.data)) return;
+    m.data.forEach(function(pt){
+      if(!pt.date || !pt.heure || pt.valeur == null) return;
+      var key = ptKey(m.nom, pt.date, 'prod', pt.heure);
+      updates['production/' + key] = {
+        date: pt.date, heure: pt.heure, metrique: m.nom,
+        output: pt.valeur, capacite: null, statut: null, commentaire: '',
+        source: 'import_csv', auteur: auteur, ts: Date.now(), importeLe: now
+      };
+      ajoutes++;
+    });
+  });
+
+  if(!ajoutes){
+    err.textContent = 'Aucun point de donnée valide trouvé dans le JSON.';
+    return;
+  }
+
+  if(!db){
+    err.textContent = 'Connexion Firebase non disponible.';
+    return;
+  }
+
+  db.ref().update(updates).then(function(){
+    document.getElementById('prod-import-modal').style.display = 'none';
+    document.getElementById('prod-import-txt').value = '';
+    toast(ajoutes + ' relevé(s) importé(s) (' + parsed.metriques.length + ' métrique(s))', '#10b981');
+  }).catch(function(e){
+    err.textContent = 'Erreur Firebase : ' + e.message;
+  });
+}
+
+// Parser un CSV Grafana (colonnes: time, <valeur>) et importer en masse
+function importerProdCSV(raw, err){
+  var metrique = document.getElementById('prod-import-metrique').value.trim();
+
+  if(!metrique){
+    err.textContent = 'Indique un nom de métrique (ex: nom du panneau Grafana).';
+    return;
+  }
+
+  var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l; });
+  if(lines.length < 2){
+    err.textContent = 'CSV vide ou incomplet.';
+    return;
+  }
+
+  // Détecter et ignorer l'en-tête (ex: "time","Standaard")
+  var startIdx = /^"?time"?/i.test(lines[0]) ? 1 : 0;
+
+  var updates = {};
+  var ajoutes = 0, erreurs = 0;
+  var now = new Date().toLocaleString('fr-BE');
+  var auteur = currentUser ? currentUser.email : '';
+
+  for(var i = startIdx; i < lines.length; i++){
+    var line = lines[i];
+    // Gère les valeurs éventuellement entre guillemets
+    var parts = line.split(',');
+    if(parts.length < 2){ erreurs++; continue; }
+
+    var timeStr = parts[0].replace(/"/g, '').trim();
+    var valStr = parts.slice(1).join(',').replace(/"/g, '').trim();
+
+    var m = timeStr.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+    if(!m){ erreurs++; continue; }
+    var date = m[1], heure = m[2];
+
+    // Format belge/néerlandais : le point est un séparateur de milliers, pas une décimale
+    var valeurNum = Number(valStr.replace(/\./g, '').replace(',', '.'));
+    if(isNaN(valeurNum)){ erreurs++; continue; }
+
+    var key = ptKey(metrique, date, 'prod', heure);
+    updates['production/' + key] = {
+      date: date, heure: heure, metrique: metrique,
+      output: valeurNum, capacite: null, statut: null, commentaire: '',
+      source: 'import_csv', auteur: auteur, ts: Date.now(), importeLe: now
+    };
+    ajoutes++;
+  }
+
+  if(!ajoutes){
+    err.textContent = 'Aucune ligne valide trouvée (' + erreurs + ' ligne(s) ignorée(s)).';
+    return;
+  }
+
+  if(!db){
+    err.textContent = 'Connexion Firebase non disponible.';
+    return;
+  }
+
+  db.ref().update(updates).then(function(){
+    document.getElementById('prod-import-modal').style.display = 'none';
+    document.getElementById('prod-import-txt').value = '';
+    document.getElementById('prod-import-metrique').value = '';
+    toast(ajoutes + ' relevé(s) importé(s)' + (erreurs ? ' · ' + erreurs + ' ligne(s) ignorée(s)' : ''), '#10b981');
+  }).catch(function(e){
+    err.textContent = 'Erreur Firebase : ' + e.message;
+  });
+}
+
 
