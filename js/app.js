@@ -150,6 +150,11 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .sp-extra{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:3px 8px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:11px;cursor:pointer;white-space:nowrap}
 .sp-extra:hover{border-color:var(--blue);color:var(--tx)}
 .sp-extra.empty{color:var(--tx3)}
+.sp-nett{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.sp-nett-empty{border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx3)}
+.sp-nett-empty:hover{border-color:var(--blue);color:var(--tx)}
+.sp-nett-oui{background:rgba(16,185,129,.18);color:#10b981;border:1px solid rgba(16,185,129,.4)}
+.sp-nett-non{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
 
 /* ===== Responsive mobile ===== */
 @media (max-width: 768px){
@@ -768,21 +773,46 @@ function buildPT(){
       return parseInt(parts2[0],10)===bday&&parseInt(parts2[1],10)===bm;
     })();
     if(isExtra){
+      var isNett=emp.n==='Nettoyeur externe';
+      if(isNett){
+        var nCls=sv==='Oui'?'sp-nett-oui':sv==='Non'?'sp-nett-non':'sp-nett-empty';
+        var nLbl=sv==='Oui'?'Oui':sv==='Non'?'Non':'+';
+        h+='<td class="'+(col===ti?'td-td':'')+'">'
+          +'<span class="sp-nett '+nCls+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+nLbl+'</span>'
+          +'</td>';
+      } else {
       var esc=(sv||'').replace(/"/g,'&quot;');
       var short=sv?(sv.length>9?sv.slice(0,9)+'…':sv):'+';
       h+='<td class="'+(col===ti?'td-td':'')+'">'
         +'<span class="sp-extra'+(sv?'':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+esc+'" title="'+esc+'">'+short+'</span>'
         +'</td>';
+      }
     } else {
     h+='<td class="'+(col===ti?'td-td':'')+'">'
       +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span>'
       +(isBdToday?'<span style="font-size:10px;margin-left:2px" title="Anniversaire de '+emp.n.split(' ')[0]+'">⭐</span>':'')
       +'</td>';
-    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+function toggleNettoyeur(span){
+  if(!canEdit())return;
+  var nm=span.dataset.n,i=parseInt(span.dataset.i),cur=span.dataset.s||'';
+  var next=cur===''?'Oui':cur==='Oui'?'Non':'';
+  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var row=shifts.find(function(e){return e.n===nm;});
+  if(!row)return;
+  while(row.s.length<=i)row.s.push('');
+  row.s[i]=next;
+  document.querySelectorAll('.sp-nett[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
+    p.dataset.s=next;
+    p.textContent=next==='Oui'?'Oui':next==='Non'?'Non':'+';
+    p.className='sp-nett '+(next==='Oui'?'sp-nett-oui':next==='Non'?'sp-nett-non':'sp-nett-empty');
+  });
+  save();
+}
 function openExtraEdit(span){
   if(!canEdit())return;
   var nm=span.dataset.n,i=parseInt(span.dataset.i),cur=span.dataset.s||'';
-  var val=prompt((nm==='Nettoyeur externe'?'Nettoyeur externe':'Commentaire')+' — '+ (allDates()[i]||'') +' :',cur);
+  var val=prompt('Commentaire — '+ (allDates()[i]||'') +' :',cur);
   if(val===null)return;
   var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
   var row=shifts.find(function(e){return e.n===nm;});
@@ -2078,11 +2108,23 @@ function buildPT2(){
       var cmIcon = a.commentaire
         ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
         : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
+      // Garde-fou : anomalie pointage matinale (00h-05h59) SANS mention (J+1)
+      // = pattern du bug de comparaison avec le tourniquet de la veille sur shift de nuit
+      var isSuspect = false;
+      if(a.type === 'pointage' && a.heure){
+        var hh = parseInt((a.heure+'').split(':')[0], 10);
+        if(!isNaN(hh) && hh >= 0 && hh < 6 && a.detail && a.detail.indexOf('(J+1)') === -1){
+          isSuspect = true;
+        }
+      }
+      var suspectIcon = isSuspect
+        ? '<span style="color:#f59e0b;font-size:13px;margin-left:6px;cursor:help" title="Suspect : heure matinale sans (J+1) — possible confusion avec le tourniquet de la veille (bug shift de nuit)">&#9888;</span>'
+        : '';
       return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
         + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
         + '<td style="font-family:var(--mo);font-size:12px">' + a.date + '</td>'
         + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
-        + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + '</td>'
+        + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + suspectIcon + '</td>'
         + '<td>' + statutBadge + '</td>'
         + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + k + '\')">' + cmIcon + '</span></td>'
         + '</tr>';
@@ -2103,12 +2145,18 @@ function updPointagesBanner(){
   var open = Object.values(PT_DATA).filter(function(a){return a.statut === 'open';});
   var retards = open.filter(function(a){return a.type === 'retard';}).length;
   var ptgs = open.filter(function(a){return a.type === 'pointage';}).length;
+  var suspects = open.filter(function(a){
+    if(a.type !== 'pointage' || !a.heure) return false;
+    var hh = parseInt((a.heure+'').split(':')[0], 10);
+    return !isNaN(hh) && hh >= 0 && hh < 6 && a.detail && a.detail.indexOf('(J+1)') === -1;
+  }).length;
   if(!open.length){ banner.style.display = 'none'; return; }
   banner.style.display = 'flex';
   var msg = open.length + ' anomalie(s) non traitée(s)';
   if(retards) msg += ' · ' + retards + ' retard(s)';
   if(ptgs) msg += ' · ' + ptgs + ' anomalie(s) tourniquet';
-  text.textContent = msg;
+  if(suspects) msg += ' · <span style="color:#f59e0b">⚠ ' + suspects + ' suspecte(s) (bug nuit)</span>';
+  text.innerHTML = msg;
 }
 
 // Marquer en masse comme traité (respecte les filtres actifs : personne / type)
