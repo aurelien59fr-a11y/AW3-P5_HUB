@@ -150,6 +150,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .sp-extra{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:3px 8px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:11px;cursor:pointer;white-space:nowrap}
 .sp-extra:hover{border-color:var(--blue);color:var(--tx)}
 .sp-extra.empty{color:var(--tx3)}
+.sp-extra.filled{border:1px solid rgba(59,130,246,.5);background:rgba(59,130,246,.16);color:#7eb3ff;font-weight:600}
 .sp-nett{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
 .sp-nett-empty{border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx3)}
 .sp-nett-empty:hover{border-color:var(--blue);color:var(--tx)}
@@ -784,7 +785,7 @@ function buildPT(){
       var esc=(sv||'').replace(/"/g,'&quot;');
       var short=sv?(sv.length>9?sv.slice(0,9)+'…':sv):'+';
       h+='<td class="'+(col===ti?'td-td':'')+'">'
-        +'<span class="sp-extra'+(sv?'':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+esc+'" title="'+esc+'">'+short+'</span>'
+        +'<span class="sp-extra'+(sv?' filled':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+esc+'" title="'+esc+'">'+short+'</span>'
         +'</td>';
       }
     } else {
@@ -823,7 +824,7 @@ function openExtraEdit(span){
     var esc=val.replace(/"/g,'&quot;');
     p.dataset.s=esc;p.title=esc;
     p.textContent=val?(val.length>9?val.slice(0,9)+'…':val):'+';
-    p.className='sp-extra'+(val?'':' empty');
+    p.className='sp-extra'+(val?' filled':' empty');
   });
   save();
   toast(nm+' mis à jour','#10b981');
