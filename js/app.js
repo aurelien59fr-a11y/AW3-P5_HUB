@@ -2536,7 +2536,60 @@ var NS_STATE = {
   prod:  { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null },
   inpak: { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null }
 };
-var _prodUptimeChartInstance = null;
+var _prodChangeoverShiftChartInstance = null;
+
+function buildProdChangeoverShiftChart(ns, dateMin, dateMax){
+  var ctx = document.getElementById(ns + 'ChangeoverShiftChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+  var equipes = NS_STATE[ns].equipes;
+  var data = aggregerChangementsParShift(dateMin, dateMax).filter(function(d){
+    var equipe = extraireEquipe(d.label);
+    return equipe && equipes[equipe];
+  });
+
+  var couleurPour = function(label){
+    if(label.indexOf('P1') !== -1) return '#8b5cf6';
+    if(label.indexOf('P2') !== -1) return '#06b6d4';
+    if(label.indexOf('P3') !== -1) return '#3b82f6';
+    if(label.indexOf('P4') !== -1) return '#f59e0b';
+    if(label.indexOf('P5') !== -1) return '#10b981';
+    return '#8b90a4';
+  };
+  var labelCourt = function(label){
+    var m = label.match(/^(Semaine|Weekend) (\S+)/);
+    return m ? m[2] : label;
+  };
+
+  if(_prodChangeoverShiftChartInstance){ _prodChangeoverShiftChartInstance.destroy(); }
+  if(!data.length) return;
+
+  _prodChangeoverShiftChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(function(d){ return labelCourt(d.label); }),
+      datasets: [{
+        label: 'Moyenne de changements par shift',
+        data: data.map(function(d){ return Math.round(d.moyenne * 100) / 100; }),
+        backgroundColor: data.map(function(d){ return couleurPour(d.label); })
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: function(items){ return data[items[0].dataIndex].label; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+      }
+    }
+  });
+}
 var _prodChangeoverChartInstance = null;
 var LABEL_MANUEL = 'Saisie manuelle (output net)';
 
@@ -2743,6 +2796,60 @@ function labelShiftWeekend(dateStr, bloc){
 }
 
 // Moyenne par occurrence de shift, pour une métrique et une fenêtre de dates
+// Compte le nombre RÉEL de fois où chaque type de shift a eu lieu sur la
+// période (jour par jour), y compris les shifts sans aucun événement —
+// indispensable pour calculer une vraie moyenne "par shift" (ex: nombre
+// de changements de série), et pas juste une moyenne sur les shifts qui
+// ont eu au moins un événement.
+function compterOccurrencesShifts(dateMin, dateMax){
+  var compte = {};
+  TOUS_SHIFTS.forEach(function(l){ compte[l] = 0; });
+  if(!dateMin || !dateMax) return compte;
+
+  var cur = new Date(dateMin + 'T00:00:00');
+  var fin = new Date(dateMax + 'T00:00:00');
+  while(cur <= fin){
+    var dateStr = cur.toISOString().slice(0,10);
+    var dow = cur.getDay();
+    var estWeekend = (dow === 0 || dow === 6);
+    if(estWeekend){
+      compte[labelShiftWeekend(dateStr, '05h-17h')]++;
+      compte[labelShiftWeekend(dateStr, '17h-05h')]++;
+    } else {
+      compte[labelShiftSemaine(dateStr, '05h-13h')]++;
+      compte[labelShiftSemaine(dateStr, '13h-21h')]++;
+      compte[labelShiftSemaine(dateStr, '21h-05h')]++;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return compte;
+}
+
+// Moyenne réelle du nombre de changements de série par shift (toutes
+// lignes confondues), en tenant compte des shifts sans aucun changement.
+function aggregerChangementsParShift(dateMin, dateMax){
+  var comptesEvenements = {};
+  TOUS_SHIFTS.forEach(function(l){ comptesEvenements[l] = 0; });
+
+  Object.values(PROD_DATA).forEach(function(a){
+    var nom = a.metrique || '';
+    if(!/^Changement de série - Line \d+ \(min\)$/.test(nom)) return;
+    if(dateMin && a.date < dateMin) return;
+    if(dateMax && a.date > dateMax) return;
+    var info = getShiftInfo(a.date, a.heure);
+    if(comptesEvenements[info.label] === undefined) comptesEvenements[info.label] = 0;
+    comptesEvenements[info.label]++;
+  });
+
+  var occurrences = compterOccurrencesShifts(dateMin, dateMax);
+
+  return TOUS_SHIFTS.map(function(label){
+    var n = occurrences[label] || 0;
+    var total = comptesEvenements[label] || 0;
+    return { label: label, moyenne: n ? total / n : 0, occurrences: n, total: total };
+  });
+}
+
 function aggregerParShift(metrique, dateMin, dateMax){
   var parInstance = {}; // shiftDate|label -> total
   Object.values(PROD_DATA).forEach(function(a){
@@ -2831,8 +2938,7 @@ function buildProdShiftChart(ns, metrique, dateMin, dateMax){
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: function(items){ return data[items[0].dataIndex].label; },
-            afterLabel: function(ctx){ return data[ctx.dataIndex].occurrences + ' occurrence(s) sur la periode'; }
+            title: function(items){ return data[items[0].dataIndex].label; }
           }
         }
       },
@@ -3167,6 +3273,7 @@ function buildProdChart(ns){
   if(ns === 'inpak'){
     buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
     buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
+    buildProdChangeoverShiftChart(ns, dateMinPeriode, dateMaxPeriode);
     buildProdSnapshotTable();
   }
 }
