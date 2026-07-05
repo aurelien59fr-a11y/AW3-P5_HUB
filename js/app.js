@@ -2609,9 +2609,33 @@ function labelTranche(ms, graniteH){
 // Un point entre 00h et 05h appartient au shift de nuit qui a
 // DÉMARRÉ LA VEILLE (le shift "appartient" à son jour de début).
 // ============================================================
+// Numéro de semaine ISO 8601 (utilisé pour la parité impaire/paire de la rotation P4/P5)
+function getISOWeek(date){
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+// Rotation weekend AW3 :
+//   Semaines impaires : P5 = 05h-17h, P4 = 17h-05h
+//   Semaines paires   : P5 = 17h-05h, P4 = 05h-17h
+function equipeWeekend(dateStr, bloc){
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  if(bloc === '05h-17h') return semaineImpaire ? 'P5' : 'P4';
+  return semaineImpaire ? 'P4' : 'P5'; // bloc 17h-05h
+}
+
 var SHIFTS_SEMAINE = ['Semaine 05h-13h', 'Semaine 13h-21h', 'Semaine 21h-05h'];
-var SHIFTS_WEEKEND = ['Weekend 05h-17h', 'Weekend 17h-05h'];
-var TOUS_SHIFTS = SHIFTS_SEMAINE.concat(SHIFTS_WEEKEND);
+var SHIFTS_WEEKEND = ['Weekend 05h-17h (P4/P5)', 'Weekend 17h-05h (P4/P5)'];
+// Catégories affichées dans le graphique : les 2 blocs weekend sont éclatés
+// par équipe réelle (P4 ou P5 selon la parité de semaine de la date).
+var TOUS_SHIFTS = SHIFTS_SEMAINE.concat([
+  'Weekend 05h-17h (P5, sem. impaire)',
+  'Weekend 05h-17h (P4, sem. paire)',
+  'Weekend 17h-05h (P4, sem. impaire)',
+  'Weekend 17h-05h (P5, sem. paire)'
+]);
 
 function getShiftInfo(dateStr, heureStr){
   var d = new Date(dateStr + 'T00:00:00');
@@ -2621,7 +2645,8 @@ function getShiftInfo(dateStr, heureStr){
 
   if(hh >= 5){
     if(estWeekend){
-      return { shiftDate: dateStr, label: hh < 17 ? SHIFTS_WEEKEND[0] : SHIFTS_WEEKEND[1] };
+      var bloc = hh < 17 ? '05h-17h' : '17h-05h';
+      return { shiftDate: dateStr, label: labelShiftWeekend(dateStr, bloc) };
     }
     if(hh < 13) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[0] };
     if(hh < 21) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[1] };
@@ -2633,7 +2658,15 @@ function getShiftInfo(dateStr, heureStr){
   var veilleDow = veille.getDay();
   var veilleStr = veille.toISOString().slice(0,10);
   var veilleEstWeekend = (veilleDow === 0 || veilleDow === 6);
-  return { shiftDate: veilleStr, label: veilleEstWeekend ? SHIFTS_WEEKEND[1] : SHIFTS_SEMAINE[2] };
+  if(veilleEstWeekend) return { shiftDate: veilleStr, label: labelShiftWeekend(veilleStr, '17h-05h') };
+  return { shiftDate: veilleStr, label: SHIFTS_SEMAINE[2] };
+}
+
+function labelShiftWeekend(dateStr, bloc){
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  var equipe = equipeWeekend(dateStr, bloc);
+  var parite = semaineImpaire ? 'sem. impaire' : 'sem. paire';
+  return 'Weekend ' + bloc + ' (' + equipe + ', ' + parite + ')';
 }
 
 // Moyenne par occurrence de shift, pour une métrique et une fenêtre de dates
@@ -2668,6 +2701,12 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
   if(!ctx || typeof Chart === 'undefined') return;
   var data = aggregerParShift(metrique, dateMin, dateMax);
 
+  var couleurPour = function(label){
+    if(label.indexOf('P5') !== -1) return '#10b981'; // vert = ton équipe
+    if(label.indexOf('P4') !== -1) return '#f59e0b'; // orange = P4
+    return '#3b82f6'; // bleu = semaine (P1/P2/P3)
+  };
+
   if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); }
   _prodShiftChartInstance = new Chart(ctx, {
     type: 'bar',
@@ -2676,7 +2715,7 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
       datasets: [{
         label: 'Moyenne par shift',
         data: data.map(function(d){ return Math.round(d.moyenne * 10) / 10; }),
-        backgroundColor: ['#3b82f6','#3b82f6','#3b82f6','#f59e0b','#f59e0b']
+        backgroundColor: data.map(function(d){ return couleurPour(d.label); })
       }]
     },
     options: {
@@ -2690,7 +2729,7 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+        x: { grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 40, minRotation: 40, font: { size: 10 } } },
         y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
       }
     }
@@ -2743,7 +2782,7 @@ function buildProdChart(){
   var meilleur = serieAffichee.reduce(function(m, p){ return p.valeur > (m ? m.valeur : -Infinity) ? p : m; }, null);
   var totalPrec = seriePrecedente.reduce(function(s, p){ return s + p.valeur; }, 0);
 
-  var fmtNum = function(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'k' : Math.round(n * 10) / 10; };
+  var fmtNum = function(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'T' : Math.round(n * 10) / 10; };
 
   var elTotal = document.getElementById('prod-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
   var elMoy = document.getElementById('prod-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
@@ -2760,6 +2799,51 @@ function buildProdChart(){
       elTrend.style.color = variation >= 0 ? '#10b981' : '#ef4444';
     }
   }
+
+  // Repères de changement de shift (05h/13h/21h semaine, 05h/17h weekend),
+  // affichés uniquement en vue horaire (granularité <= 12h, sinon peu utile).
+  var reperesShift = [];
+  if(PROD_GRANULARITE_H <= 12){
+    serieAffichee.forEach(function(p, idx){
+      var d = new Date(p.ms);
+      var dow = d.getDay();
+      var estWeekend = (dow === 0 || dow === 6);
+      var bornes = estWeekend ? [5, 17] : [5, 13, 21];
+      var hDebut = d.getHours();
+      var hFin = hDebut + PROD_GRANULARITE_H;
+      var borneTouchee = bornes.find(function(b){ return b >= hDebut && b < hFin; });
+      if(borneTouchee !== undefined){
+        reperesShift.push({ index: idx, label: String(borneTouchee).padStart(2,'0') + 'h' });
+      }
+    });
+  }
+
+  var shiftMarkersPlugin = {
+    id: 'shiftMarkers',
+    afterDraw: function(chart){
+      if(!reperesShift.length) return;
+      var ctx = chart.ctx;
+      var xScale = chart.scales.x;
+      var yScale = chart.scales.y;
+      ctx.save();
+      reperesShift.forEach(function(r){
+        var x = xScale.getPixelForValue(r.index);
+        ctx.strokeStyle = 'rgba(245,158,11,.5)';
+        ctx.setLineDash([4,3]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(r.label, x, yScale.bottom + 16);
+      });
+      ctx.restore();
+    }
+  };
 
   // Graphique principal
   var ctx = document.getElementById('prodChart');
@@ -2781,12 +2865,14 @@ function buildProdChart(){
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { bottom: reperesShift.length ? 18 : 0 } },
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: 14 } },
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: PROD_GRANULARITE_H <= 4 ? 24 : 14 } },
           y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
         }
-      }
+      },
+      plugins: [shiftMarkersPlugin]
     });
   }
 
