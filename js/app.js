@@ -2395,6 +2395,8 @@ function loadProduction(){
   if(hEl && !hEl.value) hEl.value = now.toTimeString().slice(0,5);
   var btn30 = document.querySelector('.prod-periode-btn[data-j="30"]');
   if(btn30){ btn30.style.background = 'var(--blue)'; btn30.style.color = '#fff'; btn30.style.borderColor = 'var(--blue)'; }
+  var btn24h = document.querySelector('.prod-granularite-btn[data-h="24"]');
+  if(btn24h){ btn24h.style.background = 'var(--blue)'; btn24h.style.color = '#fff'; btn24h.style.borderColor = 'var(--blue)'; }
 }
 
 function addProdEntry(){
@@ -2523,7 +2525,9 @@ function buildProdTableThrottled(){
 // ============================================================
 
 var PROD_PERIODE_JOURS = 30; // 0 = tout
+var PROD_GRANULARITE_H = 24; // taille de tranche en heures : 1,2,4,12,24,48
 var _prodChartInstance = null;
+var _prodShiftChartInstance = null;
 var LABEL_MANUEL = 'Saisie manuelle (output net)';
 
 function toggleProdHistorique(){
@@ -2546,6 +2550,17 @@ function setProdPeriode(j){
   buildProdChart();
 }
 
+function setProdGranularite(h){
+  PROD_GRANULARITE_H = h;
+  document.querySelectorAll('.prod-granularite-btn').forEach(function(b){
+    var actif = Number(b.dataset.h) === h;
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildProdChart();
+}
+
 function populateProdMetriqueSelect(){
   var sel = document.getElementById('prod-metrique-select');
   if(!sel) return;
@@ -2559,16 +2574,127 @@ function populateProdMetriqueSelect(){
   if(liste.indexOf(precedent) !== -1) sel.value = precedent;
 }
 
-// Agrège les entrées d'une métrique par jour (somme de 'output')
-function aggregerParJour(metrique){
-  var parJour = {};
+// Agrège les entrées d'une métrique par tranche horaire configurable
+// (1h, 2h, 4h, 12h, 24h, 48h), alignée sur des blocs de temps absolus.
+function aggregerParTranche(metrique, graniteH){
+  var parBucket = {};
   Object.values(PROD_DATA).forEach(function(a){
     var nom = a.metrique || LABEL_MANUEL;
     if(nom !== metrique) return;
     if(a.output == null) return;
-    parJour[a.date] = (parJour[a.date] || 0) + Number(a.output);
+    var ts = new Date(a.date + 'T' + a.heure + ':00').getTime();
+    if(isNaN(ts)) return;
+    var heuresDepuisEpoch = Math.floor(ts / 3600000);
+    var bucketIdx = Math.floor(heuresDepuisEpoch / graniteH);
+    var bucketMs = bucketIdx * graniteH * 3600000;
+    parBucket[bucketMs] = (parBucket[bucketMs] || 0) + Number(a.output);
   });
-  return Object.keys(parJour).sort().map(function(d){ return { date: d, valeur: parJour[d] }; });
+  return Object.keys(parBucket).map(Number).sort(function(a,b){ return a-b; }).map(function(ms){
+    return { ms: ms, date: new Date(ms).toISOString().slice(0,10), valeur: parBucket[ms] };
+  });
+}
+
+function labelTranche(ms, graniteH){
+  var d = new Date(ms);
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var jourMois = pad(d.getDate()) + '/' + pad(d.getMonth()+1);
+  if(graniteH >= 24) return jourMois + (graniteH === 48 ? '+' : '');
+  return jourMois + ' ' + pad(d.getHours()) + 'h';
+}
+
+// ============================================================
+// Classification par shift AW3 :
+//   Lun-Ven : 05h-13h / 13h-21h / 21h-05h(+1)
+//   Sam-Dim : 05h-17h / 17h-05h(+1)
+// Un point entre 00h et 05h appartient au shift de nuit qui a
+// DÉMARRÉ LA VEILLE (le shift "appartient" à son jour de début).
+// ============================================================
+var SHIFTS_SEMAINE = ['Semaine 05h-13h', 'Semaine 13h-21h', 'Semaine 21h-05h'];
+var SHIFTS_WEEKEND = ['Weekend 05h-17h', 'Weekend 17h-05h'];
+var TOUS_SHIFTS = SHIFTS_SEMAINE.concat(SHIFTS_WEEKEND);
+
+function getShiftInfo(dateStr, heureStr){
+  var d = new Date(dateStr + 'T00:00:00');
+  var dow = d.getDay(); // 0=dim,6=sam
+  var estWeekend = (dow === 0 || dow === 6);
+  var hh = parseInt(heureStr.split(':')[0], 10);
+
+  if(hh >= 5){
+    if(estWeekend){
+      return { shiftDate: dateStr, label: hh < 17 ? SHIFTS_WEEKEND[0] : SHIFTS_WEEKEND[1] };
+    }
+    if(hh < 13) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[0] };
+    if(hh < 21) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[1] };
+    return { shiftDate: dateStr, label: SHIFTS_SEMAINE[2] };
+  }
+
+  // hh < 5 : appartient à la nuit démarrée la veille
+  var veille = new Date(d); veille.setDate(veille.getDate() - 1);
+  var veilleDow = veille.getDay();
+  var veilleStr = veille.toISOString().slice(0,10);
+  var veilleEstWeekend = (veilleDow === 0 || veilleDow === 6);
+  return { shiftDate: veilleStr, label: veilleEstWeekend ? SHIFTS_WEEKEND[1] : SHIFTS_SEMAINE[2] };
+}
+
+// Moyenne par occurrence de shift, pour une métrique et une fenêtre de dates
+function aggregerParShift(metrique, dateMin, dateMax){
+  var parInstance = {}; // shiftDate|label -> total
+  Object.values(PROD_DATA).forEach(function(a){
+    var nom = a.metrique || LABEL_MANUEL;
+    if(nom !== metrique) return;
+    if(a.output == null) return;
+    if(dateMin && a.date < dateMin) return;
+    if(dateMax && a.date > dateMax) return;
+    var info = getShiftInfo(a.date, a.heure);
+    var k = info.shiftDate + '|' + info.label;
+    parInstance[k] = (parInstance[k] || 0) + Number(a.output);
+  });
+
+  var sommeParLabel = {}, compteParLabel = {};
+  Object.keys(parInstance).forEach(function(k){
+    var label = k.split('|')[1];
+    sommeParLabel[label] = (sommeParLabel[label] || 0) + parInstance[k];
+    compteParLabel[label] = (compteParLabel[label] || 0) + 1;
+  });
+
+  return TOUS_SHIFTS.map(function(label){
+    var n = compteParLabel[label] || 0;
+    return { label: label, moyenne: n ? sommeParLabel[label] / n : 0, occurrences: n };
+  });
+}
+
+function buildProdShiftChart(metrique, dateMin, dateMax){
+  var ctx = document.getElementById('prodShiftChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+  var data = aggregerParShift(metrique, dateMin, dateMax);
+
+  if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); }
+  _prodShiftChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(function(d){ return d.label; }),
+      datasets: [{
+        label: 'Moyenne par shift',
+        data: data.map(function(d){ return Math.round(d.moyenne * 10) / 10; }),
+        backgroundColor: ['#3b82f6','#3b82f6','#3b82f6','#f59e0b','#f59e0b']
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            afterLabel: function(ctx){ return data[ctx.dataIndex].occurrences + ' occurrence(s) sur la periode'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+      }
+    }
+  });
 }
 
 function buildProdChart(){
@@ -2580,21 +2706,23 @@ function buildProdChart(){
     return;
   }
   var metrique = sel.value;
-  var serie = aggregerParJour(metrique);
+  var serie = aggregerParTranche(metrique, PROD_GRANULARITE_H);
 
   if(!serie.length){
     ['prod-kpi-total','prod-kpi-moyenne','prod-kpi-max','prod-kpi-trend'].forEach(function(id){
       var el = document.getElementById(id); if(el) el.textContent = '-';
     });
     if(_prodChartInstance){ _prodChartInstance.destroy(); _prodChartInstance = null; }
+    if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); _prodShiftChartInstance = null; }
     return;
   }
 
-  // Fenêtre de la période sélectionnée
+  // Fenêtre de la période sélectionnée (en jours calendaires, indépendant de la granularité)
   var toutesLesDates = serie.map(function(p){ return p.date; });
   var derniereDate = toutesLesDates[toutesLesDates.length - 1];
   var serieAffichee = serie;
   var seriePrecedente = [];
+  var dateMinPeriode = null, dateMaxPeriode = derniereDate;
 
   if(PROD_PERIODE_JOURS > 0){
     var finPeriode = new Date(derniereDate);
@@ -2603,7 +2731,9 @@ function buildProdChart(){
     var finPeriodePrec = new Date(debutPeriode); finPeriodePrec.setDate(finPeriodePrec.getDate() - 1);
 
     var fmt = function(d){ return d.toISOString().slice(0,10); };
-    serieAffichee = serie.filter(function(p){ return p.date >= fmt(debutPeriode) && p.date <= fmt(finPeriode); });
+    dateMinPeriode = fmt(debutPeriode);
+    dateMaxPeriode = fmt(finPeriode);
+    serieAffichee = serie.filter(function(p){ return p.date >= dateMinPeriode && p.date <= dateMaxPeriode; });
     seriePrecedente = serie.filter(function(p){ return p.date >= fmt(debutPeriodePrec) && p.date <= fmt(finPeriodePrec); });
   }
 
@@ -2617,7 +2747,7 @@ function buildProdChart(){
 
   var elTotal = document.getElementById('prod-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
   var elMoy = document.getElementById('prod-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
-  var elMax = document.getElementById('prod-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + meilleur.date.slice(5) + ')') : '-';
+  var elMax = document.getElementById('prod-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + labelTranche(meilleur.ms, PROD_GRANULARITE_H) + ')') : '-';
 
   var elTrend = document.getElementById('prod-kpi-trend');
   if(elTrend){
@@ -2631,33 +2761,37 @@ function buildProdChart(){
     }
   }
 
-  // Graphique
+  // Graphique principal
   var ctx = document.getElementById('prodChart');
-  if(!ctx || typeof Chart === 'undefined') return;
-  if(_prodChartInstance){ _prodChartInstance.destroy(); }
-  _prodChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: serieAffichee.map(function(p){ return p.date.slice(5); }),
-      datasets: [{
-        label: metrique,
-        data: serieAffichee.map(function(p){ return p.valeur; }),
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59,130,246,.12)',
-        fill: true,
-        tension: 0.25,
-        pointRadius: serieAffichee.length > 60 ? 0 : 2
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: 12 } },
-        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+  if(ctx && typeof Chart !== 'undefined'){
+    if(_prodChartInstance){ _prodChartInstance.destroy(); }
+    _prodChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: serieAffichee.map(function(p){ return labelTranche(p.ms, PROD_GRANULARITE_H); }),
+        datasets: [{
+          label: metrique,
+          data: serieAffichee.map(function(p){ return p.valeur; }),
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,.12)',
+          fill: true,
+          tension: 0.25,
+          pointRadius: serieAffichee.length > 60 ? 0 : 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: 14 } },
+          y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+        }
       }
-    }
-  });
+    });
+  }
+
+  // Graphique de répartition par shift, sur la même fenêtre de période
+  buildProdShiftChart(metrique, dateMinPeriode, dateMaxPeriode);
 }
 
 // Ouvrir le modal d'import
