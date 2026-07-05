@@ -2497,7 +2497,7 @@ function buildProdTable(){
       + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
       + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
       + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + (a.metrique || '-') + '</td>'
-      + '<td style="padding:8px;font-size:13px">' + (a.output != null ? a.output : '-') + '</td>'
+      + '<td style="padding:8px;font-size:13px">' + (a.output != null ? a.output + (extraireUnite(a.metrique) ? ' <span style="font-weight:400;color:var(--tx3);font-size:11px">' + extraireUnite(a.metrique) + '</span>' : '') : '-') + '</td>'
       + '<td style="padding:8px;font-size:13px">' + (a.capacite != null ? a.capacite + '%' : '-') + '</td>'
       + '<td style="padding:8px">' + (sc ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:' + sc.bg + ';color:' + sc.fg + '">' + sc.label + '</span>' : '-') + '</td>'
       + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + (a.commentaire || '') + ' ' + sourceIcon + '</td>'
@@ -2593,11 +2593,52 @@ function buildProdChangeoverShiftChart(ns, dateMin, dateMax){
 var _prodChangeoverChartInstance = null;
 var LABEL_MANUEL = 'Saisie manuelle (output net)';
 
+// Déduit l'unité d'une métrique à partir de son nom, pour que ce soit
+// toujours clair de quoi on parle (kg/h, min, sachets/h, etc.), sans
+// avoir à se souvenir du contexte de chaque courbe.
+function extraireUnite(metrique){
+  if(!metrique) return '';
+  if(/\(kg\/heure\)/i.test(metrique) || /kg\/derni[eè]re heure/i.test(metrique)) return 'kg/h';
+  if(/\(sachets\/h\)/i.test(metrique)) return 'sachets/h';
+  if(/^Arr[êe]t en cours/i.test(metrique)) return 'min (en cours)';
+  if(/\(min\)/i.test(metrique)) return 'min';
+  if(/heures actives/i.test(metrique)) return 'h actives';
+  if(/^Heures restantes/i.test(metrique)) return 'h restantes';
+  if(/^Avancement doses|^Target/i.test(metrique)) return 'doses';
+  if(/^Avancement palettes/i.test(metrique)) return 'palettes';
+  if(/^Etat Inpak|^Verloop/i.test(metrique)) return '1=marche, 0=arret';
+  if(/standaard\/heure$|noodafvoer\/heure$/i.test(metrique)) return 'bulks/h';
+  if(metrique === LABEL_MANUEL) return 'kg';
+  return '';
+}
+
+// Formatte une valeur + son unité pour affichage (ex: "12.4 kg/h")
+function fmtAvecUnite(valeur, metrique, fmtFn){
+  var unite = extraireUnite(metrique);
+  var v = fmtFn ? fmtFn(valeur) : valeur;
+  return unite ? (v + ' ' + unite) : String(v);
+}
+
 // Catégorisation des métriques par onglet : la grosse ligne de
 // production (Production) vs les 6 petites lignes d'inpak 31-36 (Inpak).
 function filtreProduction(n){ return /^Netto output|^Stoomschiller|^Vriestunnel|^Balance bulk/.test(n) || n === LABEL_MANUEL; }
 function filtreInpak(n){ return /^Bulkopvang|^Bijlijn|^Vitesse |^Avancement |^Target |^Capacité théorique|^Heures restantes|^Arrêt en cours|^Changement de série|^Etat Inpak|^Verloop/.test(n); }
 var NS_FILTRES = { prod: filtreProduction, inpak: filtreInpak };
+
+function setInpakSousOnglet(sub){
+  ['apercu','lignes'].forEach(function(s){
+    var el = document.getElementById('inpak-sub-' + s);
+    if(el) el.style.display = (s === sub) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.inpak-sub-btn').forEach(function(b){
+    var actif = b.dataset.sub === sub;
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  // Chart.js a besoin d'un re-render quand un canvas redevient visible
+  if(sub === 'lignes') buildProdChart('inpak');
+}
 
 function toggleProdHistorique(){
   var wrap = document.getElementById('prod-hist-wrap');
@@ -2680,12 +2721,13 @@ function populateProdMetriqueSelect(ns){
 
 // Agrège les entrées d'une métrique par tranche horaire configurable
 // (1h, 2h, 4h, 12h, 24h, 48h), alignée sur des blocs de temps absolus.
-function aggregerParTranche(metrique, graniteH){
+function aggregerParTranche(metrique, graniteH, equipes){
   var parBucket = {};
   Object.values(PROD_DATA).forEach(function(a){
     var nom = a.metrique || LABEL_MANUEL;
     if(nom !== metrique) return;
     if(a.output == null) return;
+    if(equipes && !estDansEquipesActives(a.date, a.heure, equipes)) return;
     var ts = new Date(a.date + 'T' + a.heure + ':00').getTime();
     if(isNaN(ts)) return;
     var heuresDepuisEpoch = Math.floor(ts / 3600000);
@@ -2895,6 +2937,14 @@ function extraireEquipe(label){
   return m ? m[1] : null;
 }
 
+// Filtre partagé : est-ce que ce point (date/heure) appartient à une
+// équipe actuellement active dans le filtre P1-P5 de cet onglet ?
+function estDansEquipesActives(date, heure, equipes){
+  var info = getShiftInfo(date, heure);
+  var eq = extraireEquipe(info.label);
+  return !eq || equipes[eq];
+}
+
 function buildProdShiftChart(ns, metrique, dateMin, dateMax){
   var ctx = document.getElementById(ns + 'ShiftChart');
   if(!ctx || typeof Chart === 'undefined') return;
@@ -2938,13 +2988,14 @@ function buildProdShiftChart(ns, metrique, dateMin, dateMax){
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: function(items){ return data[items[0].dataIndex].label; }
+            title: function(items){ return data[items[0].dataIndex].label; },
+            label: function(ctx){ return ctx.parsed.y + ' — ' + metrique; }
           }
         }
       },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: extraireUnite(metrique) || metrique, color: '#8b90a4', font: { size: 11 } } }
       }
     }
   });
@@ -2956,7 +3007,7 @@ function buildProdShiftChart(ns, metrique, dateMin, dateMax){
 // Uniquement sur l'onglet Inpak.
 // ============================================================
 
-function buildProdUptimeChart(dateMin, dateMax){
+function buildProdUptimeChart(dateMin, dateMax, equipes){
   var ctx = document.getElementById('prodUptimeChart');
   if(!ctx || typeof Chart === 'undefined') return;
 
@@ -2977,6 +3028,7 @@ function buildProdUptimeChart(dateMin, dateMax){
       if(a.metrique !== nom) return;
       if(dateMin && a.date < dateMin) return;
       if(dateMax && a.date > dateMax) return;
+      if(equipes && !estDansEquipesActives(a.date, a.heure, equipes)) return;
       if(a.output != null) vals.push(a.output);
     });
     var taux = vals.length ? (vals.reduce(function(s,v){ return s+v; },0) / vals.length) * 100 : null;
@@ -3023,7 +3075,7 @@ function buildProdUptimeChart(dateMin, dateMax){
 // "Changement de série - Line XX (min)"
 // ============================================================
 
-function buildProdChangeoverChart(dateMin, dateMax){
+function buildProdChangeoverChart(dateMin, dateMax, equipes){
   var ctx = document.getElementById('prodChangeoverChart');
   if(!ctx || typeof Chart === 'undefined') return;
 
@@ -3042,6 +3094,7 @@ function buildProdChangeoverChart(dateMin, dateMax){
       if(a.metrique !== nom) return;
       if(dateMin && a.date < dateMin) return;
       if(dateMax && a.date > dateMax) return;
+      if(equipes && !estDansEquipesActives(a.date, a.heure, equipes)) return;
       if(a.output != null) vals.push(a.output);
     });
     var moyenne = vals.length ? vals.reduce(function(s,v){ return s+v; },0) / vals.length : 0;
@@ -3114,9 +3167,10 @@ function buildProdSnapshotTable(){
 
   tbody.innerHTML = lignes.map(function(nom){
     var d = dernier[nom];
+    var unite = extraireUnite(nom);
     return '<tr>'
       + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + nom + '</td>'
-      + '<td style="padding:8px;font-size:13px;font-weight:600">' + d.valeur + '</td>'
+      + '<td style="padding:8px;font-size:13px;font-weight:600">' + d.valeur + (unite ? ' <span style="font-weight:400;color:var(--tx3);font-size:11px">' + unite + '</span>' : '') + '</td>'
       + '<td style="padding:8px;font-family:var(--mo);font-size:11px;color:var(--tx3)">' + d.date + ' ' + d.heure + '</td>'
       + '</tr>';
   }).join('');
@@ -3130,11 +3184,13 @@ function buildProdChart(ns){
   if(!sel || !sel.value){
     var kt = document.getElementById(ns + '-kpi-total');
     if(kt) kt.textContent = '-';
+    var eEvo = document.getElementById(ns + '-evo-titre'); if(eEvo) eEvo.textContent = '';
+    var eCmp = document.getElementById(ns + '-cmp-titre'); if(eCmp) eCmp.textContent = '';
     if(ns === 'inpak') buildProdSnapshotTable();
     return;
   }
   var metrique = sel.value;
-  var serie = aggregerParTranche(metrique, st.granularite);
+  var serie = aggregerParTranche(metrique, st.granularite, st.equipes);
 
   if(!serie.length){
     [ns+'-kpi-total', ns+'-kpi-moyenne', ns+'-kpi-max', ns+'-kpi-trend'].forEach(function(id){
@@ -3172,11 +3228,20 @@ function buildProdChart(ns){
   var meilleur = serieAffichee.reduce(function(m, p){ return p.valeur > (m ? m.valeur : -Infinity) ? p : m; }, null);
   var totalPrec = seriePrecedente.reduce(function(s, p){ return s + p.valeur; }, 0);
 
-  var fmtNum = function(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'T' : Math.round(n * 10) / 10; };
+  var unite = extraireUnite(metrique);
+  var estKg = unite === 'kg/h' || unite === 'kg';
+  var fmtNum = function(n){
+    if(estKg && n >= 1000) return (n/1000).toFixed(1) + ' T' + (unite === 'kg/h' ? '/h' : '');
+    var base = Math.round(n * 10) / 10;
+    return unite ? (base + ' ' + unite) : String(base);
+  };
 
   var elTotal = document.getElementById(ns + '-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
   var elMoy = document.getElementById(ns + '-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
   var elMax = document.getElementById(ns + '-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + labelTranche(meilleur.ms, st.granularite) + ')') : '-';
+
+  var elEvoTitre = document.getElementById(ns + '-evo-titre'); if(elEvoTitre) elEvoTitre.textContent = '— ' + metrique;
+  var elCmpTitre = document.getElementById(ns + '-cmp-titre'); if(elCmpTitre) elCmpTitre.textContent = '— ' + metrique;
 
   var elTrend = document.getElementById(ns + '-kpi-trend');
   if(elTrend){
@@ -3259,7 +3324,7 @@ function buildProdChart(ns){
         plugins: { legend: { display: false } },
         scales: {
           x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: st.granularite <= 4 ? 24 : 14 } },
-          y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+          y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: extraireUnite(metrique) || metrique, color: '#8b90a4', font: { size: 11 } } }
         }
       },
       plugins: [shiftMarkersPlugin]
@@ -3271,8 +3336,8 @@ function buildProdChart(ns){
 
   // Vues spécifiques aux petites lignes d'inpak uniquement
   if(ns === 'inpak'){
-    buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
-    buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
+    buildProdUptimeChart(dateMinPeriode, dateMaxPeriode, st.equipes);
+    buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode, st.equipes);
     buildProdChangeoverShiftChart(ns, dateMinPeriode, dateMaxPeriode);
     buildProdSnapshotTable();
   }
@@ -3447,3 +3512,5 @@ function importerProdCSV(raw, err){
     err.textContent = 'Erreur Firebase : ' + e.message;
   });
 }
+
+
