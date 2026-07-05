@@ -429,7 +429,10 @@ function sLbl(v){var m={'coordinateur':'COORD','TL':'TL'};return m[v]||v||'-';}
 function todayStr(){var n=new Date();return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0');}
 function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEEKS25).reduce(function(a,w){return a.concat(w.d);},[]);}
 function toast(msg,col){var t=document.createElement('div');t.className='toast';t.innerHTML='<div class="tdot" style="background:'+col+'"></div>'+msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2500);}
-document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');});});
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
+  if(b.dataset.tab === 'prod' && typeof buildProdChart === 'function') buildProdChart('prod');
+  if(b.dataset.tab === 'inpak' && typeof buildProdChart === 'function') buildProdChart('inpak');
+});});
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
   db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&currentUser.role==='admin'){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
   db.ref('bradford/comments').on('value',function(snap){var data=snap.val();if(!data)return;BD_COMMENTS={};Object.keys(data).forEach(function(k){BD_COMMENTS[k]=data[k];});buildBT();});
@@ -1013,6 +1016,8 @@ function applyRole(role){
   if(ptTab) ptTab.style.display = isAdmin ? 'flex' : 'none';
   var prodTab = document.getElementById('tab-prod-btn');
   if(prodTab) prodTab.style.display = isAdmin ? 'flex' : 'none';
+  var inpakTab = document.getElementById('tab-inpak-btn');
+  if(inpakTab) inpakTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -2393,10 +2398,12 @@ function loadProduction(){
   var hEl = document.getElementById('prod-heure');
   if(dEl && !dEl.value) dEl.value = now.toISOString().slice(0,10);
   if(hEl && !hEl.value) hEl.value = now.toTimeString().slice(0,5);
-  var btn30 = document.querySelector('.prod-periode-btn[data-j="30"]');
-  if(btn30){ btn30.style.background = 'var(--blue)'; btn30.style.color = '#fff'; btn30.style.borderColor = 'var(--blue)'; }
-  var btn24h = document.querySelector('.prod-granularite-btn[data-h="24"]');
-  if(btn24h){ btn24h.style.background = 'var(--blue)'; btn24h.style.color = '#fff'; btn24h.style.borderColor = 'var(--blue)'; }
+  ['prod','inpak'].forEach(function(ns){
+    var btn30 = document.querySelector('.' + ns + '-periode-btn[data-j="30"]');
+    if(btn30){ btn30.style.background = 'var(--blue)'; btn30.style.color = '#fff'; btn30.style.borderColor = 'var(--blue)'; }
+    var btn24h = document.querySelector('.' + ns + '-granularite-btn[data-h="24"]');
+    if(btn24h){ btn24h.style.background = 'var(--blue)'; btn24h.style.color = '#fff'; btn24h.style.borderColor = 'var(--blue)'; }
+  });
 }
 
 function addProdEntry(){
@@ -2515,7 +2522,8 @@ function buildProdTableThrottled(){
   clearTimeout(_buildProdTableTimer);
   _buildProdTableTimer = setTimeout(function(){
     buildProdTable();
-    buildProdChart();
+    buildProdChart('prod');
+    buildProdChart('inpak');
   }, 400);
 }
 
@@ -2524,11 +2532,19 @@ function buildProdTableThrottled(){
 // plutôt que le tableau brut ligne par ligne)
 // ============================================================
 
-var PROD_PERIODE_JOURS = 30; // 0 = tout
-var PROD_GRANULARITE_H = 24; // taille de tranche en heures : 1,2,4,12,24,48
-var _prodChartInstance = null;
-var _prodShiftChartInstance = null;
+var NS_STATE = {
+  prod:  { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null },
+  inpak: { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null }
+};
+var _prodUptimeChartInstance = null;
+var _prodChangeoverChartInstance = null;
 var LABEL_MANUEL = 'Saisie manuelle (output net)';
+
+// Catégorisation des métriques par onglet : la grosse ligne de
+// production (Production) vs les 6 petites lignes d'inpak 31-36 (Inpak).
+function filtreProduction(n){ return /^Netto output|^Stoomschiller|^Vriestunnel|^Balance bulk/.test(n) || n === LABEL_MANUEL; }
+function filtreInpak(n){ return /^Bulkopvang|^Bijlijn|^Vitesse |^Avancement |^Target |^Capacité théorique|^Heures restantes|^Arrêt en cours|^Changement de série|^Etat Inpak|^Verloop/.test(n); }
+var NS_FILTRES = { prod: filtreProduction, inpak: filtreInpak };
 
 function toggleProdHistorique(){
   var wrap = document.getElementById('prod-hist-wrap');
@@ -2539,48 +2555,52 @@ function toggleProdHistorique(){
   if(toggle) toggle.innerHTML = visible ? '&#9660; afficher' : '&#9650; masquer';
 }
 
-function setProdPeriode(j){
-  PROD_PERIODE_JOURS = j;
-  document.querySelectorAll('.prod-periode-btn').forEach(function(b){
+function setProdPeriode(ns, j){
+  NS_STATE[ns].periode = j;
+  document.querySelectorAll('.' + ns + '-periode-btn').forEach(function(b){
     var actif = Number(b.dataset.j) === j;
     b.style.background = actif ? 'var(--blue)' : 'none';
     b.style.color = actif ? '#fff' : 'var(--tx2)';
     b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
   });
-  buildProdChart();
+  buildProdChart(ns);
 }
 
-function setProdGranularite(h){
-  PROD_GRANULARITE_H = h;
-  document.querySelectorAll('.prod-granularite-btn').forEach(function(b){
+function setProdGranularite(ns, h){
+  NS_STATE[ns].granularite = h;
+  document.querySelectorAll('.' + ns + '-granularite-btn').forEach(function(b){
     var actif = Number(b.dataset.h) === h;
     b.style.background = actif ? 'var(--blue)' : 'none';
     b.style.color = actif ? '#fff' : 'var(--tx2)';
     b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
   });
-  buildProdChart();
+  buildProdChart(ns);
 }
 
-function populateProdMetriqueSelect(){
-  var sel = document.getElementById('prod-metrique-select');
+function populateProdMetriqueSelect(ns){
+  var sel = document.getElementById(ns + '-metrique-select');
   if(!sel) return;
+  var filtre = NS_FILTRES[ns];
   var noms = {};
   Object.values(PROD_DATA).forEach(function(a){
-    noms[a.metrique || LABEL_MANUEL] = true;
+    var nom = a.metrique || LABEL_MANUEL;
+    if(filtre(nom)) noms[nom] = true;
   });
   var liste = Object.keys(noms).sort();
 
   // Regroupement par catégorie pour éviter un menu illisible avec
   // des dizaines d'entrées dynamiques (une par ligne/raison d'arrêt...)
-  var categories = [
-    { titre: 'Volumes & output', test: function(n){ return /Bulkopvang|Netto output|Bijlijn|Balance bulk/.test(n); } },
+  var categories = ns === 'prod' ? [
+    { titre: 'Volumes & output', test: function(n){ return /Netto output|Balance bulk/.test(n); } },
     { titre: 'Consommation pommes de terre', test: function(n){ return /Stoomschiller|Vriestunnel/.test(n); } },
+    { titre: 'Saisie manuelle', test: function(n){ return n === LABEL_MANUEL; } }
+  ] : [
+    { titre: 'Volumes bulk', test: function(n){ return /^Bulkopvang|^Bijlijn/.test(n); } },
     { titre: 'Vitesse & avancement par ligne', test: function(n){ return /^Vitesse |^Avancement |^Target |^Heures restantes/.test(n); } },
     { titre: 'Capacité théorique', test: function(n){ return /^Capacité théorique/.test(n); } },
     { titre: 'Arrêts en cours', test: function(n){ return /^Arrêt en cours/.test(n); } },
     { titre: 'Changements de série', test: function(n){ return /^Changement de série/.test(n); } },
-    { titre: 'États lignes (brut)', test: function(n){ return /^Etat Inpak|^Verloop/.test(n); } },
-    { titre: 'Saisie manuelle', test: function(n){ return n === LABEL_MANUEL; } }
+    { titre: 'États lignes (brut)', test: function(n){ return /^Etat Inpak|^Verloop/.test(n); } }
   ];
 
   var precedent = sel.value;
@@ -2594,7 +2614,6 @@ function populateProdMetriqueSelect(){
       return '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>';
     }).join('') + '</optgroup>';
   });
-  // Filet de sécurité : tout ce qui n'a matché aucune catégorie
   var reste = liste.filter(function(n){ return !casesDeja[n]; });
   if(reste.length){
     html += '<optgroup label="Autres">' + reste.map(function(n){
@@ -2750,10 +2769,33 @@ function aggregerParShift(metrique, dateMin, dateMax){
   });
 }
 
-function buildProdShiftChart(metrique, dateMin, dateMax){
-  var ctx = document.getElementById('prodShiftChart');
+function toggleProdEquipe(ns, equipe){
+  var equipes = NS_STATE[ns].equipes;
+  if(equipe === 'all'){
+    Object.keys(equipes).forEach(function(e){ equipes[e] = true; });
+  } else {
+    equipes[equipe] = !equipes[equipe];
+  }
+  document.querySelectorAll('.' + ns + '-equipe-btn').forEach(function(b){
+    var actif = equipes[b.dataset.equipe];
+    b.style.opacity = actif ? '1' : '.35';
+  });
+  buildProdChart(ns);
+}
+
+function extraireEquipe(label){
+  var m = label.match(/\(([^,)]+)/);
+  return m ? m[1] : null;
+}
+
+function buildProdShiftChart(ns, metrique, dateMin, dateMax){
+  var ctx = document.getElementById(ns + 'ShiftChart');
   if(!ctx || typeof Chart === 'undefined') return;
-  var data = aggregerParShift(metrique, dateMin, dateMax);
+  var equipes = NS_STATE[ns].equipes;
+  var data = aggregerParShift(metrique, dateMin, dateMax).filter(function(d){
+    var equipe = extraireEquipe(d.label);
+    return equipe && equipes[equipe];
+  });
 
   var couleurPour = function(label){
     if(label.indexOf('P1') !== -1) return '#8b5cf6'; // violet
@@ -2764,11 +2806,19 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
     return '#8b90a4';
   };
 
-  if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); }
-  _prodShiftChartInstance = new Chart(ctx, {
+  // Libellé court sur l'axe (l'équipe est déjà indiquée par la couleur
+  // et les boutons) ; le détail complet reste dans l'infobulle.
+  var labelCourt = function(label){
+    var m = label.match(/^(Semaine|Weekend) (\S+)/);
+    return m ? m[2] : label;
+  };
+
+  if(NS_STATE[ns].shiftChart){ NS_STATE[ns].shiftChart.destroy(); }
+  if(!data.length) return;
+  NS_STATE[ns].shiftChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: data.map(function(d){ return d.label; }),
+      labels: data.map(function(d){ return labelCourt(d.label); }),
       datasets: [{
         label: 'Moyenne par shift',
         data: data.map(function(d){ return Math.round(d.moyenne * 10) / 10; }),
@@ -2781,12 +2831,13 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
         legend: { display: false },
         tooltip: {
           callbacks: {
+            title: function(items){ return data[items[0].dataIndex].label; },
             afterLabel: function(ctx){ return data[ctx.dataIndex].occurrences + ' occurrence(s) sur la periode'; }
           }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 40, minRotation: 40, font: { size: 10 } } },
+        x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 11 } } },
         y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
       }
     }
@@ -2796,8 +2847,8 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
 // ============================================================
 // Taux de marche par ligne — basé sur les métriques
 // "Etat Inpak/Stilstand - Line XX" (valeur 1 = en marche, 0 = arrêt)
+// Uniquement sur l'onglet Inpak.
 // ============================================================
-var _prodUptimeChartInstance = null;
 
 function buildProdUptimeChart(dateMin, dateMax){
   var ctx = document.getElementById('prodUptimeChart');
@@ -2865,7 +2916,6 @@ function buildProdUptimeChart(dateMin, dateMax){
 // Changements de série par ligne — basé sur les métriques
 // "Changement de série - Line XX (min)"
 // ============================================================
-var _prodChangeoverChartInstance = null;
 
 function buildProdChangeoverChart(dateMin, dateMax){
   var ctx = document.getElementById('prodChangeoverChart');
@@ -2966,25 +3016,27 @@ function buildProdSnapshotTable(){
   }).join('');
 }
 
-function buildProdChart(){
-  populateProdMetriqueSelect();
-  var sel = document.getElementById('prod-metrique-select');
+function buildProdChart(ns){
+  ns = ns || 'prod';
+  var st = NS_STATE[ns];
+  populateProdMetriqueSelect(ns);
+  var sel = document.getElementById(ns + '-metrique-select');
   if(!sel || !sel.value){
-    var kt = document.getElementById('prod-kpi-total');
+    var kt = document.getElementById(ns + '-kpi-total');
     if(kt) kt.textContent = '-';
-    buildProdSnapshotTable();
+    if(ns === 'inpak') buildProdSnapshotTable();
     return;
   }
   var metrique = sel.value;
-  var serie = aggregerParTranche(metrique, PROD_GRANULARITE_H);
+  var serie = aggregerParTranche(metrique, st.granularite);
 
   if(!serie.length){
-    ['prod-kpi-total','prod-kpi-moyenne','prod-kpi-max','prod-kpi-trend'].forEach(function(id){
+    [ns+'-kpi-total', ns+'-kpi-moyenne', ns+'-kpi-max', ns+'-kpi-trend'].forEach(function(id){
       var el = document.getElementById(id); if(el) el.textContent = '-';
     });
-    if(_prodChartInstance){ _prodChartInstance.destroy(); _prodChartInstance = null; }
-    if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); _prodShiftChartInstance = null; }
-    buildProdSnapshotTable();
+    if(st.chart){ st.chart.destroy(); st.chart = null; }
+    if(st.shiftChart){ st.shiftChart.destroy(); st.shiftChart = null; }
+    if(ns === 'inpak') buildProdSnapshotTable();
     return;
   }
 
@@ -2995,10 +3047,10 @@ function buildProdChart(){
   var seriePrecedente = [];
   var dateMinPeriode = null, dateMaxPeriode = derniereDate;
 
-  if(PROD_PERIODE_JOURS > 0){
+  if(st.periode > 0){
     var finPeriode = new Date(derniereDate);
-    var debutPeriode = new Date(finPeriode); debutPeriode.setDate(debutPeriode.getDate() - PROD_PERIODE_JOURS + 1);
-    var debutPeriodePrec = new Date(debutPeriode); debutPeriodePrec.setDate(debutPeriodePrec.getDate() - PROD_PERIODE_JOURS);
+    var debutPeriode = new Date(finPeriode); debutPeriode.setDate(debutPeriode.getDate() - st.periode + 1);
+    var debutPeriodePrec = new Date(debutPeriode); debutPeriodePrec.setDate(debutPeriodePrec.getDate() - st.periode);
     var finPeriodePrec = new Date(debutPeriode); finPeriodePrec.setDate(finPeriodePrec.getDate() - 1);
 
     var fmt = function(d){ return d.toISOString().slice(0,10); };
@@ -3016,11 +3068,11 @@ function buildProdChart(){
 
   var fmtNum = function(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'T' : Math.round(n * 10) / 10; };
 
-  var elTotal = document.getElementById('prod-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
-  var elMoy = document.getElementById('prod-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
-  var elMax = document.getElementById('prod-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + labelTranche(meilleur.ms, PROD_GRANULARITE_H) + ')') : '-';
+  var elTotal = document.getElementById(ns + '-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
+  var elMoy = document.getElementById(ns + '-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
+  var elMax = document.getElementById(ns + '-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + labelTranche(meilleur.ms, st.granularite) + ')') : '-';
 
-  var elTrend = document.getElementById('prod-kpi-trend');
+  var elTrend = document.getElementById(ns + '-kpi-trend');
   if(elTrend){
     if(!seriePrecedente.length || totalPrec === 0){
       elTrend.textContent = 'N/A';
@@ -3035,14 +3087,14 @@ function buildProdChart(){
   // Repères de changement de shift (05h/13h/21h semaine, 05h/17h weekend),
   // affichés uniquement en vue horaire (granularité <= 12h, sinon peu utile).
   var reperesShift = [];
-  if(PROD_GRANULARITE_H <= 12){
+  if(st.granularite <= 12){
     serieAffichee.forEach(function(p, idx){
       var d = new Date(p.ms);
       var dow = d.getDay();
       var estWeekend = (dow === 0 || dow === 6);
       var bornes = estWeekend ? [5, 17] : [5, 13, 21];
       var hDebut = d.getHours();
-      var hFin = hDebut + PROD_GRANULARITE_H;
+      var hFin = hDebut + st.granularite;
       var borneTouchee = bornes.find(function(b){ return b >= hDebut && b < hFin; });
       if(borneTouchee !== undefined){
         reperesShift.push({ index: idx, label: String(borneTouchee).padStart(2,'0') + 'h' });
@@ -3078,13 +3130,13 @@ function buildProdChart(){
   };
 
   // Graphique principal
-  var ctx = document.getElementById('prodChart');
+  var ctx = document.getElementById(ns + 'Chart');
   if(ctx && typeof Chart !== 'undefined'){
-    if(_prodChartInstance){ _prodChartInstance.destroy(); }
-    _prodChartInstance = new Chart(ctx, {
+    if(st.chart){ st.chart.destroy(); }
+    st.chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: serieAffichee.map(function(p){ return labelTranche(p.ms, PROD_GRANULARITE_H); }),
+        labels: serieAffichee.map(function(p){ return labelTranche(p.ms, st.granularite); }),
         datasets: [{
           label: metrique,
           data: serieAffichee.map(function(p){ return p.valeur; }),
@@ -3100,7 +3152,7 @@ function buildProdChart(){
         layout: { padding: { bottom: reperesShift.length ? 18 : 0 } },
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: PROD_GRANULARITE_H <= 4 ? 24 : 14 } },
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: st.granularite <= 4 ? 24 : 14 } },
           y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
         }
       },
@@ -3109,15 +3161,14 @@ function buildProdChart(){
   }
 
   // Graphique de répartition par shift, sur la même fenêtre de période
-  buildProdShiftChart(metrique, dateMinPeriode, dateMaxPeriode);
-  buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
-  buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
-  buildProdSnapshotTable();
+  buildProdShiftChart(ns, metrique, dateMinPeriode, dateMaxPeriode);
 
-  // Nouvelles vues : uptime par ligne, changements de série, derniers relevés
-  buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
-  buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
-  buildProdSnapshotTable();
+  // Vues spécifiques aux petites lignes d'inpak uniquement
+  if(ns === 'inpak'){
+    buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
+    buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
+    buildProdSnapshotTable();
+  }
 }
 
 // Ouvrir le modal d'import
