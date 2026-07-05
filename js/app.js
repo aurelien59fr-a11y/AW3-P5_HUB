@@ -2569,8 +2569,40 @@ function populateProdMetriqueSelect(){
     noms[a.metrique || LABEL_MANUEL] = true;
   });
   var liste = Object.keys(noms).sort();
+
+  // Regroupement par catégorie pour éviter un menu illisible avec
+  // des dizaines d'entrées dynamiques (une par ligne/raison d'arrêt...)
+  var categories = [
+    { titre: 'Volumes & output', test: function(n){ return /Bulkopvang|Netto output|Bijlijn|Balance bulk/.test(n); } },
+    { titre: 'Consommation pommes de terre', test: function(n){ return /Stoomschiller|Vriestunnel/.test(n); } },
+    { titre: 'Vitesse & avancement par ligne', test: function(n){ return /^Vitesse |^Avancement |^Target |^Heures restantes/.test(n); } },
+    { titre: 'Capacité théorique', test: function(n){ return /^Capacité théorique/.test(n); } },
+    { titre: 'Arrêts en cours', test: function(n){ return /^Arrêt en cours/.test(n); } },
+    { titre: 'Changements de série', test: function(n){ return /^Changement de série/.test(n); } },
+    { titre: 'États lignes (brut)', test: function(n){ return /^Etat Inpak|^Verloop/.test(n); } },
+    { titre: 'Saisie manuelle', test: function(n){ return n === LABEL_MANUEL; } }
+  ];
+
   var precedent = sel.value;
-  sel.innerHTML = liste.map(function(n){ return '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>'; }).join('');
+  var html = '';
+  var casesDeja = {};
+  categories.forEach(function(cat){
+    var items = liste.filter(function(n){ return cat.test(n) && !casesDeja[n]; });
+    if(!items.length) return;
+    items.forEach(function(n){ casesDeja[n] = true; });
+    html += '<optgroup label="' + cat.titre + '">' + items.map(function(n){
+      return '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>';
+    }).join('') + '</optgroup>';
+  });
+  // Filet de sécurité : tout ce qui n'a matché aucune catégorie
+  var reste = liste.filter(function(n){ return !casesDeja[n]; });
+  if(reste.length){
+    html += '<optgroup label="Autres">' + reste.map(function(n){
+      return '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>';
+    }).join('') + '</optgroup>';
+  }
+
+  sel.innerHTML = html;
   if(liste.indexOf(precedent) !== -1) sel.value = precedent;
 }
 
@@ -2761,12 +2793,186 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
   });
 }
 
+// ============================================================
+// Taux de marche par ligne — basé sur les métriques
+// "Etat Inpak/Stilstand - Line XX" (valeur 1 = en marche, 0 = arrêt)
+// ============================================================
+var _prodUptimeChartInstance = null;
+
+function buildProdUptimeChart(dateMin, dateMax){
+  var ctx = document.getElementById('prodUptimeChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+
+  var lignes = [];
+  Object.keys(PROD_DATA).length; // noop pour lisibilité
+  var noms = {};
+  Object.values(PROD_DATA).forEach(function(a){
+    if(a.metrique && a.metrique.indexOf('Etat Inpak/Stilstand - Line ') === 0){
+      noms[a.metrique] = true;
+    }
+  });
+  var listeMetriques = Object.keys(noms).sort();
+
+  var data = listeMetriques.map(function(nom){
+    var ligne = nom.replace('Etat Inpak/Stilstand - Line ', '');
+    var vals = [];
+    Object.values(PROD_DATA).forEach(function(a){
+      if(a.metrique !== nom) return;
+      if(dateMin && a.date < dateMin) return;
+      if(dateMax && a.date > dateMax) return;
+      if(a.output != null) vals.push(a.output);
+    });
+    var taux = vals.length ? (vals.reduce(function(s,v){ return s+v; },0) / vals.length) * 100 : null;
+    return { ligne: 'Line ' + ligne, taux: taux, n: vals.length };
+  });
+
+  if(_prodUptimeChartInstance){ _prodUptimeChartInstance.destroy(); }
+  if(!data.length) return;
+
+  _prodUptimeChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(function(d){ return d.ligne; }),
+      datasets: [{
+        label: '% du temps en marche',
+        data: data.map(function(d){ return d.taux != null ? Math.round(d.taux * 10) / 10 : 0; }),
+        backgroundColor: data.map(function(d){
+          if(d.taux == null) return '#374151';
+          return d.taux >= 80 ? '#10b981' : d.taux >= 50 ? '#f59e0b' : '#ef4444';
+        })
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx){ return ctx.parsed.y + '% en marche'; },
+            afterLabel: function(ctx){ return data[ctx.dataIndex].n + ' releve(s) sur la periode'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', callback: function(v){ return v + '%'; } } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// Changements de série par ligne — basé sur les métriques
+// "Changement de série - Line XX (min)"
+// ============================================================
+var _prodChangeoverChartInstance = null;
+
+function buildProdChangeoverChart(dateMin, dateMax){
+  var ctx = document.getElementById('prodChangeoverChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+
+  var noms = {};
+  Object.values(PROD_DATA).forEach(function(a){
+    if(a.metrique && a.metrique.indexOf('Changement de série - Line ') === 0){
+      noms[a.metrique] = true;
+    }
+  });
+  var listeMetriques = Object.keys(noms).sort();
+
+  var data = listeMetriques.map(function(nom){
+    var ligne = nom.replace('Changement de série - Line ', '').replace(' (min)', '');
+    var vals = [];
+    Object.values(PROD_DATA).forEach(function(a){
+      if(a.metrique !== nom) return;
+      if(dateMin && a.date < dateMin) return;
+      if(dateMax && a.date > dateMax) return;
+      if(a.output != null) vals.push(a.output);
+    });
+    var moyenne = vals.length ? vals.reduce(function(s,v){ return s+v; },0) / vals.length : 0;
+    return { ligne: 'Line ' + ligne, nombre: vals.length, moyenne: Math.round(moyenne) };
+  });
+
+  if(_prodChangeoverChartInstance){ _prodChangeoverChartInstance.destroy(); }
+  if(!data.length) return;
+
+  _prodChangeoverChartInstance = new Chart(ctx, {
+    data: {
+      labels: data.map(function(d){ return d.ligne; }),
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Nombre de changements',
+          data: data.map(function(d){ return d.nombre; }),
+          backgroundColor: '#3b82f6',
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: 'Duree moyenne (min)',
+          data: data.map(function(d){ return d.moyenne; }),
+          borderColor: '#f59e0b',
+          backgroundColor: '#f59e0b',
+          yAxisID: 'y1',
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b90a4' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+        y: { position: 'left', grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'Nombre', color: '#8b90a4' } },
+        y1: { position: 'right', grid: { display: false }, ticks: { color: '#f59e0b' }, title: { display: true, text: 'Minutes', color: '#f59e0b' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// Derniers relevés capturés — dernière valeur connue de chaque
+// métrique "instantanée" (capacité, vitesse, arrêts en cours...)
+// ============================================================
+function buildProdSnapshotTable(){
+  var tbody = document.getElementById('prod-snapshot-tbody');
+  if(!tbody) return;
+
+  var prefixes = ['Capacité théorique', 'Vitesse ', 'Avancement', 'Target', 'Heures restantes', 'Arrêt en cours'];
+  var dernier = {}; // nom métrique -> {date, heure, valeur}
+
+  Object.values(PROD_DATA).forEach(function(a){
+    if(!a.metrique) return;
+    var estSnapshot = prefixes.some(function(p){ return a.metrique.indexOf(p) === 0; });
+    if(!estSnapshot) return;
+    var dh = a.date + ' ' + a.heure;
+    if(!dernier[a.metrique] || dh > dernier[a.metrique].dh){
+      dernier[a.metrique] = { dh: dh, date: a.date, heure: a.heure, valeur: a.output };
+    }
+  });
+
+  var lignes = Object.keys(dernier).sort();
+  if(!lignes.length){
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--tx3);padding:16px">Aucun releve instantane pour le moment</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = lignes.map(function(nom){
+    var d = dernier[nom];
+    return '<tr>'
+      + '<td style="padding:8px;font-size:12px;color:var(--tx2)">' + nom + '</td>'
+      + '<td style="padding:8px;font-size:13px;font-weight:600">' + d.valeur + '</td>'
+      + '<td style="padding:8px;font-family:var(--mo);font-size:11px;color:var(--tx3)">' + d.date + ' ' + d.heure + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
 function buildProdChart(){
   populateProdMetriqueSelect();
   var sel = document.getElementById('prod-metrique-select');
   if(!sel || !sel.value){
     var kt = document.getElementById('prod-kpi-total');
     if(kt) kt.textContent = '-';
+    buildProdSnapshotTable();
     return;
   }
   var metrique = sel.value;
@@ -2778,6 +2984,7 @@ function buildProdChart(){
     });
     if(_prodChartInstance){ _prodChartInstance.destroy(); _prodChartInstance = null; }
     if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); _prodShiftChartInstance = null; }
+    buildProdSnapshotTable();
     return;
   }
 
@@ -2903,6 +3110,14 @@ function buildProdChart(){
 
   // Graphique de répartition par shift, sur la même fenêtre de période
   buildProdShiftChart(metrique, dateMinPeriode, dateMaxPeriode);
+  buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
+  buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
+  buildProdSnapshotTable();
+
+  // Nouvelles vues : uptime par ligne, changements de série, derniers relevés
+  buildProdUptimeChart(dateMinPeriode, dateMaxPeriode);
+  buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode);
+  buildProdSnapshotTable();
 }
 
 // Ouvrir le modal d'import
