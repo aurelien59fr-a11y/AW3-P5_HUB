@@ -2527,26 +2527,24 @@ function importerProdJSON(raw, err){
     return;
   }
 
-  var updates = {};
-  var ajoutes = 0;
   var now = new Date().toLocaleString('fr-BE');
   var auteur = currentUser ? currentUser.email : '';
+  var entries = [];
 
   parsed.metriques.forEach(function(m){
     if(!m.nom || !Array.isArray(m.data)) return;
     m.data.forEach(function(pt){
       if(!pt.date || !pt.heure || pt.valeur == null) return;
       var key = ptKey(m.nom, pt.date, 'prod', pt.heure);
-      updates['production/' + key] = {
+      entries.push([key, {
         date: pt.date, heure: pt.heure, metrique: m.nom,
         output: pt.valeur, capacite: null, statut: null, commentaire: '',
         source: 'import_csv', auteur: auteur, ts: Date.now(), importeLe: now
-      };
-      ajoutes++;
+      }]);
     });
   });
 
-  if(!ajoutes){
+  if(!entries.length){
     err.textContent = 'Aucun point de donnée valide trouvé dans le JSON.';
     return;
   }
@@ -2556,13 +2554,40 @@ function importerProdJSON(raw, err){
     return;
   }
 
-  db.ref().update(updates).then(function(){
-    document.getElementById('prod-import-modal').style.display = 'none';
-    document.getElementById('prod-import-txt').value = '';
-    toast(ajoutes + ' relevé(s) importé(s) (' + parsed.metriques.length + ' métrique(s))', '#10b981');
-  }).catch(function(e){
-    err.textContent = 'Erreur Firebase : ' + e.message;
-  });
+  // Découpage en lots pour éviter un seul très gros envoi (peut bloquer
+  // le navigateur ou échouer silencieusement au-delà d'une certaine taille).
+  var TAILLE_LOT = 400;
+  var lots = [];
+  for(var i = 0; i < entries.length; i += TAILLE_LOT){
+    lots.push(entries.slice(i, i + TAILLE_LOT));
+  }
+
+  err.style.color = '#3b82f6';
+  err.textContent = 'Import en cours… 0 / ' + entries.length;
+
+  var fait = 0;
+  function envoyerLot(idx){
+    if(idx >= lots.length){
+      document.getElementById('prod-import-modal').style.display = 'none';
+      document.getElementById('prod-import-txt').value = '';
+      err.style.color = '#ef4444';
+      err.textContent = '';
+      toast(entries.length + ' relevé(s) importé(s) (' + parsed.metriques.length + ' métrique(s))', '#10b981');
+      return;
+    }
+    var updates = {};
+    lots[idx].forEach(function(e){ updates['production/' + e[0]] = e[1]; });
+    db.ref().update(updates).then(function(){
+      fait += lots[idx].length;
+      err.textContent = 'Import en cours… ' + fait + ' / ' + entries.length;
+      envoyerLot(idx + 1);
+    }).catch(function(e){
+      console.error('[Production] Erreur import lot ' + idx + ' :', e);
+      err.style.color = '#ef4444';
+      err.textContent = 'Erreur Firebase (lot ' + (idx+1) + '/' + lots.length + ') : ' + e.message;
+    });
+  }
+  envoyerLot(0);
 }
 
 // Parser un CSV Grafana (colonnes: time, <valeur>) et importer en masse
@@ -2633,5 +2658,3 @@ function importerProdCSV(raw, err){
     err.textContent = 'Erreur Firebase : ' + e.message;
   });
 }
-
-
