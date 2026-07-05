@@ -2626,16 +2626,30 @@ function equipeWeekend(dateStr, bloc){
   return semaineImpaire ? 'P4' : 'P5'; // bloc 17h-05h
 }
 
-var SHIFTS_SEMAINE = ['Semaine 05h-13h', 'Semaine 13h-21h', 'Semaine 21h-05h'];
-var SHIFTS_WEEKEND = ['Weekend 05h-17h (P4/P5)', 'Weekend 17h-05h (P4/P5)'];
-// Catégories affichées dans le graphique : les 2 blocs weekend sont éclatés
-// par équipe réelle (P4 ou P5 selon la parité de semaine de la date).
-var TOUS_SHIFTS = SHIFTS_SEMAINE.concat([
+// Rotation semaine AW3 (lun-ven) :
+//   Semaines impaires : P1 = 05h-13h, P2 = 13h-21h
+//   Semaines paires   : P1 = 13h-21h, P2 = 05h-13h
+//   P3 = 21h-05h tous les jours, pas de parité
+function equipeSemaine(dateStr, bloc){
+  if(bloc === '21h-05h') return 'P3';
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  if(bloc === '05h-13h') return semaineImpaire ? 'P1' : 'P2';
+  return semaineImpaire ? 'P2' : 'P1'; // bloc 13h-21h
+}
+
+// Catégories affichées dans le graphique : chaque bloc horaire est éclaté
+// par équipe réelle (selon la parité de semaine de la date concernée).
+var TOUS_SHIFTS = [
+  'Semaine 05h-13h (P1, sem. impaire)',
+  'Semaine 05h-13h (P2, sem. paire)',
+  'Semaine 13h-21h (P2, sem. impaire)',
+  'Semaine 13h-21h (P1, sem. paire)',
+  'Semaine 21h-05h (P3)',
   'Weekend 05h-17h (P5, sem. impaire)',
   'Weekend 05h-17h (P4, sem. paire)',
   'Weekend 17h-05h (P4, sem. impaire)',
   'Weekend 17h-05h (P5, sem. paire)'
-]);
+];
 
 function getShiftInfo(dateStr, heureStr){
   var d = new Date(dateStr + 'T00:00:00');
@@ -2648,9 +2662,9 @@ function getShiftInfo(dateStr, heureStr){
       var bloc = hh < 17 ? '05h-17h' : '17h-05h';
       return { shiftDate: dateStr, label: labelShiftWeekend(dateStr, bloc) };
     }
-    if(hh < 13) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[0] };
-    if(hh < 21) return { shiftDate: dateStr, label: SHIFTS_SEMAINE[1] };
-    return { shiftDate: dateStr, label: SHIFTS_SEMAINE[2] };
+    if(hh < 13) return { shiftDate: dateStr, label: labelShiftSemaine(dateStr, '05h-13h') };
+    if(hh < 21) return { shiftDate: dateStr, label: labelShiftSemaine(dateStr, '13h-21h') };
+    return { shiftDate: dateStr, label: labelShiftSemaine(dateStr, '21h-05h') };
   }
 
   // hh < 5 : appartient à la nuit démarrée la veille
@@ -2659,7 +2673,15 @@ function getShiftInfo(dateStr, heureStr){
   var veilleStr = veille.toISOString().slice(0,10);
   var veilleEstWeekend = (veilleDow === 0 || veilleDow === 6);
   if(veilleEstWeekend) return { shiftDate: veilleStr, label: labelShiftWeekend(veilleStr, '17h-05h') };
-  return { shiftDate: veilleStr, label: SHIFTS_SEMAINE[2] };
+  return { shiftDate: veilleStr, label: labelShiftSemaine(veilleStr, '21h-05h') };
+}
+
+function labelShiftSemaine(dateStr, bloc){
+  if(bloc === '21h-05h') return 'Semaine 21h-05h (P3)';
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  var equipe = equipeSemaine(dateStr, bloc);
+  var parite = semaineImpaire ? 'sem. impaire' : 'sem. paire';
+  return 'Semaine ' + bloc + ' (' + equipe + ', ' + parite + ')';
 }
 
 function labelShiftWeekend(dateStr, bloc){
@@ -2702,9 +2724,12 @@ function buildProdShiftChart(metrique, dateMin, dateMax){
   var data = aggregerParShift(metrique, dateMin, dateMax);
 
   var couleurPour = function(label){
+    if(label.indexOf('P1') !== -1) return '#8b5cf6'; // violet
+    if(label.indexOf('P2') !== -1) return '#06b6d4'; // cyan
+    if(label.indexOf('P3') !== -1) return '#3b82f6'; // bleu
+    if(label.indexOf('P4') !== -1) return '#f59e0b'; // orange
     if(label.indexOf('P5') !== -1) return '#10b981'; // vert = ton équipe
-    if(label.indexOf('P4') !== -1) return '#f59e0b'; // orange = P4
-    return '#3b82f6'; // bleu = semaine (P1/P2/P3)
+    return '#8b90a4';
   };
 
   if(_prodShiftChartInstance){ _prodShiftChartInstance.destroy(); }
