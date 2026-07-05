@@ -362,13 +362,39 @@
     <div class="pane" id="pane-prod">
       <div class="sh">
         <div class="st">Production</div>
-        <div class="ss">Suivi manuel des chiffres cles AW3 (issus de Grafana)</div>
+        <div class="ss">Suivi des chiffres cles AW3 (issus de Grafana)</div>
         <button onclick="openImportProdModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
+      </div>
+
+      <!-- Controles graphique -->
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+        <select id="prod-metrique-select" onchange="buildProdChart()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:220px">
+        </select>
+        <div style="display:flex;gap:6px">
+          <button class="prod-periode-btn" data-j="7" onclick="setProdPeriode(7)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">7j</button>
+          <button class="prod-periode-btn" data-j="30" onclick="setProdPeriode(30)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">30j</button>
+          <button class="prod-periode-btn" data-j="90" onclick="setProdPeriode(90)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">90j</button>
+          <button class="prod-periode-btn" data-j="0" onclick="setProdPeriode(0)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Tout</button>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kgrid" style="margin-bottom:16px">
+        <div class="cc"><div class="cch"><div class="cct">Total periode</div></div><div id="prod-kpi-total" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Moyenne / jour</div></div><div id="prod-kpi-moyenne" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Meilleur jour</div></div><div id="prod-kpi-max" style="font-size:20px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Vs periode precedente</div></div><div id="prod-kpi-trend" style="font-size:28px;font-weight:700">-</div></div>
+      </div>
+
+      <!-- Graphique -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Evolution (agregation journaliere)</div></div>
+        <div class="cw" style="height:300px"><canvas id="prodChart"></canvas></div>
       </div>
 
       <!-- Formulaire d'ajout -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Ajouter un releve</div></div>
+        <div class="cch"><div class="cct">Ajouter un releve manuel</div></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:12px">
           <div class="li-field">
             <label class="li-label">Date</label>
@@ -402,24 +428,28 @@
         <button onclick="addProdEntry()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">+ Ajouter le releve</button>
       </div>
 
-      <!-- Historique -->
+      <!-- Historique brut (repliable, pour verification ponctuelle uniquement) -->
       <div class="cc">
-        <div class="cch"><div class="cct">Historique</div></div>
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
-              <th style="padding:8px">Date</th>
-              <th style="padding:8px">Heure</th>
-              <th style="padding:8px">Métrique</th>
-              <th style="padding:8px">Output net</th>
-              <th style="padding:8px">Capacite</th>
-              <th style="padding:8px">Statut</th>
-              <th style="padding:8px">Commentaire</th>
-              <th style="padding:8px"></th>
-            </tr>
-          </thead>
-          <tbody id="prod-tbody"></tbody>
-        </table>
+        <div class="cch" style="cursor:pointer" onclick="toggleProdHistorique()">
+          <div class="cct">Historique brut (verification) <span id="prod-hist-toggle" style="font-size:11px;color:var(--tx3)">&#9660; afficher</span></div>
+        </div>
+        <div id="prod-hist-wrap" style="display:none">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
+                <th style="padding:8px">Date</th>
+                <th style="padding:8px">Heure</th>
+                <th style="padding:8px">Métrique</th>
+                <th style="padding:8px">Output net</th>
+                <th style="padding:8px">Capacite</th>
+                <th style="padding:8px">Statut</th>
+                <th style="padding:8px">Commentaire</th>
+                <th style="padding:8px"></th>
+              </tr>
+            </thead>
+            <tbody id="prod-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
