@@ -52,6 +52,7 @@
     <button class="tab" data-tab="ab">&#9675; Absences</button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; Pointages</button>
     <button class="tab" id="tab-prod-btn" data-tab="prod" style="display:none">&#127981; Production</button>
+    <button class="tab" id="tab-inpak-btn" data-tab="inpak" style="display:none">&#128230; Inpak</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; Admin</button>
   </nav>
   <main class="content">
@@ -368,22 +369,22 @@
 
       <!-- Controles graphique -->
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-        <select id="prod-metrique-select" onchange="buildProdChart()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:220px">
+        <select id="prod-metrique-select" onchange="buildProdChart('prod')" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:220px">
         </select>
         <div style="display:flex;gap:6px">
-          <button class="prod-periode-btn" data-j="7" onclick="setProdPeriode(7)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">7j</button>
-          <button class="prod-periode-btn" data-j="30" onclick="setProdPeriode(30)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">30j</button>
-          <button class="prod-periode-btn" data-j="90" onclick="setProdPeriode(90)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">90j</button>
-          <button class="prod-periode-btn" data-j="0" onclick="setProdPeriode(0)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Tout</button>
+          <button class="prod-periode-btn" data-j="7" onclick="setProdPeriode('prod',7)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">7j</button>
+          <button class="prod-periode-btn" data-j="30" onclick="setProdPeriode('prod',30)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">30j</button>
+          <button class="prod-periode-btn" data-j="90" onclick="setProdPeriode('prod',90)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">90j</button>
+          <button class="prod-periode-btn" data-j="0" onclick="setProdPeriode('prod',0)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Tout</button>
         </div>
         <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
           <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">Tranche</span>
-          <button class="prod-granularite-btn" data-h="1" onclick="setProdGranularite(1)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">1h</button>
-          <button class="prod-granularite-btn" data-h="2" onclick="setProdGranularite(2)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">2h</button>
-          <button class="prod-granularite-btn" data-h="4" onclick="setProdGranularite(4)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">4h</button>
-          <button class="prod-granularite-btn" data-h="12" onclick="setProdGranularite(12)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">12h</button>
-          <button class="prod-granularite-btn" data-h="24" onclick="setProdGranularite(24)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">24h</button>
-          <button class="prod-granularite-btn" data-h="48" onclick="setProdGranularite(48)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">48h</button>
+          <button class="prod-granularite-btn" data-h="1" onclick="setProdGranularite('prod',1)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">1h</button>
+          <button class="prod-granularite-btn" data-h="2" onclick="setProdGranularite('prod',2)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">2h</button>
+          <button class="prod-granularite-btn" data-h="4" onclick="setProdGranularite('prod',4)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">4h</button>
+          <button class="prod-granularite-btn" data-h="12" onclick="setProdGranularite('prod',12)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">12h</button>
+          <button class="prod-granularite-btn" data-h="24" onclick="setProdGranularite('prod',24)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">24h</button>
+          <button class="prod-granularite-btn" data-h="48" onclick="setProdGranularite('prod',48)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">48h</button>
         </div>
       </div>
 
@@ -403,35 +404,17 @@
 
       <!-- Repartition par shift -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Repartition par shift (moyenne par occurrence, periode selectionnee)</div></div>
+        <div class="cch"><div class="cct">Comparaison par equipe</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Moyenne de production par shift travaille, periode selectionnee. Clique une equipe pour l'isoler ou la masquer.</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="prod-equipe-btn" data-equipe="P1" onclick="toggleProdEquipe('prod','P1')" style="padding:6px 16px;border-radius:99px;border:2px solid #8b5cf6;background:#8b5cf6;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+          <button class="prod-equipe-btn" data-equipe="P2" onclick="toggleProdEquipe('prod','P2')" style="padding:6px 16px;border-radius:99px;border:2px solid #06b6d4;background:#06b6d4;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+          <button class="prod-equipe-btn" data-equipe="P3" onclick="toggleProdEquipe('prod','P3')" style="padding:6px 16px;border-radius:99px;border:2px solid #3b82f6;background:#3b82f6;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+          <button class="prod-equipe-btn" data-equipe="P4" onclick="toggleProdEquipe('prod','P4')" style="padding:6px 16px;border-radius:99px;border:2px solid #f59e0b;background:#f59e0b;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+          <button class="prod-equipe-btn" data-equipe="P5" onclick="toggleProdEquipe('prod','P5')" style="padding:6px 16px;border-radius:99px;border:2px solid #10b981;background:#10b981;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+          <button onclick="toggleProdEquipe('prod','all')" style="padding:6px 16px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer">Tout afficher</button>
+        </div>
         <div class="cw" style="height:280px"><canvas id="prodShiftChart"></canvas></div>
-      </div>
-
-      <!-- Uptime par ligne -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Taux de marche par ligne (Inpak), periode selectionnee</div></div>
-        <div class="cw" style="height:260px"><canvas id="prodUptimeChart"></canvas></div>
-      </div>
-
-      <!-- Changements de serie -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Changements de serie par ligne (nombre et duree moyenne)</div></div>
-        <div class="cw" style="height:260px"><canvas id="prodChangeoverChart"></canvas></div>
-      </div>
-
-      <!-- Derniers releves (snapshots) -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Derniers releves capturees (etat actuel des lignes)</div></div>
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
-              <th style="padding:8px">Mesure</th>
-              <th style="padding:8px">Valeur</th>
-              <th style="padding:8px">Capture le</th>
-            </tr>
-          </thead>
-          <tbody id="prod-snapshot-tbody"></tbody>
-        </table>
       </div>
 
       <!-- Formulaire d'ajout -->
@@ -492,6 +475,92 @@
             <tbody id="prod-tbody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- INPAK -->
+    <div class="pane" id="pane-inpak">
+      <div class="sh">
+        <div class="st">Inpak</div>
+        <div class="ss">Lignes de conditionnement (31 a 36) et bulk associe</div>
+        <button onclick="openImportProdModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
+      </div>
+
+      <!-- Controles graphique -->
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+        <select id="inpak-metrique-select" onchange="buildProdChart('inpak')" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:220px">
+        </select>
+        <div style="display:flex;gap:6px">
+          <button class="inpak-periode-btn" data-j="7" onclick="setProdPeriode('inpak',7)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">7j</button>
+          <button class="inpak-periode-btn" data-j="30" onclick="setProdPeriode('inpak',30)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">30j</button>
+          <button class="inpak-periode-btn" data-j="90" onclick="setProdPeriode('inpak',90)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">90j</button>
+          <button class="inpak-periode-btn" data-j="0" onclick="setProdPeriode('inpak',0)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Tout</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
+          <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">Tranche</span>
+          <button class="inpak-granularite-btn" data-h="1" onclick="setProdGranularite('inpak',1)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">1h</button>
+          <button class="inpak-granularite-btn" data-h="2" onclick="setProdGranularite('inpak',2)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">2h</button>
+          <button class="inpak-granularite-btn" data-h="4" onclick="setProdGranularite('inpak',4)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">4h</button>
+          <button class="inpak-granularite-btn" data-h="12" onclick="setProdGranularite('inpak',12)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">12h</button>
+          <button class="inpak-granularite-btn" data-h="24" onclick="setProdGranularite('inpak',24)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">24h</button>
+          <button class="inpak-granularite-btn" data-h="48" onclick="setProdGranularite('inpak',48)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">48h</button>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kgrid" style="margin-bottom:16px">
+        <div class="cc"><div class="cch"><div class="cct">Total periode</div></div><div id="inpak-kpi-total" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Moyenne / tranche</div></div><div id="inpak-kpi-moyenne" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Meilleure tranche</div></div><div id="inpak-kpi-max" style="font-size:20px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Vs periode precedente</div></div><div id="inpak-kpi-trend" style="font-size:28px;font-weight:700">-</div></div>
+      </div>
+
+      <!-- Graphique -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Evolution</div></div>
+        <div class="cw" style="height:300px"><canvas id="inpakChart"></canvas></div>
+      </div>
+
+      <!-- Repartition par shift -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Comparaison par equipe</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Moyenne par shift travaille, periode selectionnee. Clique une equipe pour l'isoler ou la masquer.</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="inpak-equipe-btn" data-equipe="P1" onclick="toggleProdEquipe('inpak','P1')" style="padding:6px 16px;border-radius:99px;border:2px solid #8b5cf6;background:#8b5cf6;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+          <button class="inpak-equipe-btn" data-equipe="P2" onclick="toggleProdEquipe('inpak','P2')" style="padding:6px 16px;border-radius:99px;border:2px solid #06b6d4;background:#06b6d4;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+          <button class="inpak-equipe-btn" data-equipe="P3" onclick="toggleProdEquipe('inpak','P3')" style="padding:6px 16px;border-radius:99px;border:2px solid #3b82f6;background:#3b82f6;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+          <button class="inpak-equipe-btn" data-equipe="P4" onclick="toggleProdEquipe('inpak','P4')" style="padding:6px 16px;border-radius:99px;border:2px solid #f59e0b;background:#f59e0b;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+          <button class="inpak-equipe-btn" data-equipe="P5" onclick="toggleProdEquipe('inpak','P5')" style="padding:6px 16px;border-radius:99px;border:2px solid #10b981;background:#10b981;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+          <button onclick="toggleProdEquipe('inpak','all')" style="padding:6px 16px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer">Tout afficher</button>
+        </div>
+        <div class="cw" style="height:280px"><canvas id="inpakShiftChart"></canvas></div>
+      </div>
+
+      <!-- Uptime par ligne -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Taux de marche par ligne, periode selectionnee</div></div>
+        <div class="cw" style="height:260px"><canvas id="prodUptimeChart"></canvas></div>
+      </div>
+
+      <!-- Changements de serie -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Changements de serie par ligne (nombre et duree moyenne)</div></div>
+        <div class="cw" style="height:260px"><canvas id="prodChangeoverChart"></canvas></div>
+      </div>
+
+      <!-- Derniers releves (snapshots) -->
+      <div class="cc">
+        <div class="cch"><div class="cct">Derniers releves capturees (etat actuel des lignes)</div></div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
+              <th style="padding:8px">Mesure</th>
+              <th style="padding:8px">Valeur</th>
+              <th style="padding:8px">Capture le</th>
+            </tr>
+          </thead>
+          <tbody id="prod-snapshot-tbody"></tbody>
+        </table>
       </div>
     </div>
 
