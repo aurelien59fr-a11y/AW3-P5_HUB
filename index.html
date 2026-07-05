@@ -407,6 +407,33 @@
         <div class="cw" style="height:280px"><canvas id="prodShiftChart"></canvas></div>
       </div>
 
+      <!-- Uptime par ligne -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Taux de marche par ligne (Inpak), periode selectionnee</div></div>
+        <div class="cw" style="height:260px"><canvas id="prodUptimeChart"></canvas></div>
+      </div>
+
+      <!-- Changements de serie -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Changements de serie par ligne (nombre et duree moyenne)</div></div>
+        <div class="cw" style="height:260px"><canvas id="prodChangeoverChart"></canvas></div>
+      </div>
+
+      <!-- Derniers releves (snapshots) -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Derniers releves capturees (etat actuel des lignes)</div></div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">
+              <th style="padding:8px">Mesure</th>
+              <th style="padding:8px">Valeur</th>
+              <th style="padding:8px">Capture le</th>
+            </tr>
+          </thead>
+          <tbody id="prod-snapshot-tbody"></tbody>
+        </table>
+      </div>
+
       <!-- Formulaire d'ajout -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch"><div class="cct">Ajouter un releve manuel</div></div>
