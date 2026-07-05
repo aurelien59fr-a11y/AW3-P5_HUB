@@ -2383,7 +2383,7 @@ function loadProduction(){
   if(!db) return;
   db.ref('production').on('value', function(snap){
     PROD_DATA = snap.val() || {};
-    buildProdTable();
+    buildProdTableThrottled();
   }, function(error){
     console.error('[Production] Erreur de lecture Firebase :', error);
   });
@@ -2393,6 +2393,8 @@ function loadProduction(){
   var hEl = document.getElementById('prod-heure');
   if(dEl && !dEl.value) dEl.value = now.toISOString().slice(0,10);
   if(hEl && !hEl.value) hEl.value = now.toTimeString().slice(0,5);
+  var btn30 = document.querySelector('.prod-periode-btn[data-j="30"]');
+  if(btn30){ btn30.style.background = 'var(--blue)'; btn30.style.color = '#fff'; btn30.style.borderColor = 'var(--blue)'; }
 }
 
 function addProdEntry(){
@@ -2451,13 +2453,19 @@ function buildProdTable(){
   var tbody = document.getElementById('prod-tbody');
   if(!tbody) return;
 
+  var LIMITE_AFFICHAGE = 200;
+
   var rows = Object.entries(PROD_DATA).sort(function(a, b){
     var da = a[1].date + ' ' + a[1].heure;
     var db_ = b[1].date + ' ' + b[1].heure;
     return db_.localeCompare(da); // plus récent en premier
   });
 
-  if(!rows.length){
+  var total = rows.length;
+  var tronque = total > LIMITE_AFFICHAGE;
+  if(tronque) rows = rows.slice(0, LIMITE_AFFICHAGE);
+
+  if(!total){
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:20px">Aucun relevé pour le moment</td></tr>';
     return;
   }
@@ -2468,7 +2476,7 @@ function buildProdTable(){
     arret: {bg:'#ef444422', fg:'#ef4444', label:'Arrêt'}
   };
 
-  tbody.innerHTML = rows.map(function(entry){
+  var html = rows.map(function(entry){
     var k = entry[0], a = entry[1];
     var sc = a.statut ? (statutColors[a.statut] || statutColors.production) : null;
     var sourceIcon = a.source === 'import_csv'
@@ -2487,6 +2495,169 @@ function buildProdTable(){
       + '<td style="padding:8px;text-align:center"><span style="cursor:pointer;color:var(--tx3)" onclick="deleteProdEntry(\'' + k + '\')" title="Supprimer">&#10005;</span></td>'
       + '</tr>';
   }).join('');
+
+  if(tronque){
+    html += '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:12px;font-size:12px">'
+      + 'Affichage limité aux ' + LIMITE_AFFICHAGE + ' relevés les plus récents (' + total + ' au total)</td></tr>';
+  }
+
+  tbody.innerHTML = html;
+}
+
+// Anti-rafale : pendant un import en masse, Firebase déclenche le listener
+// à chaque petit lot écrit. On évite de redessiner le tableau à chaque fois
+// (coûteux avec beaucoup de données) en ne redessinant qu'une fois les
+// écritures calmées.
+var _buildProdTableTimer = null;
+function buildProdTableThrottled(){
+  clearTimeout(_buildProdTableTimer);
+  _buildProdTableTimer = setTimeout(function(){
+    buildProdTable();
+    buildProdChart();
+  }, 400);
+}
+
+// ============================================================
+// Production — graphique agrégé + KPI (la vraie vue utile,
+// plutôt que le tableau brut ligne par ligne)
+// ============================================================
+
+var PROD_PERIODE_JOURS = 30; // 0 = tout
+var _prodChartInstance = null;
+var LABEL_MANUEL = 'Saisie manuelle (output net)';
+
+function toggleProdHistorique(){
+  var wrap = document.getElementById('prod-hist-wrap');
+  var toggle = document.getElementById('prod-hist-toggle');
+  if(!wrap) return;
+  var visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  if(toggle) toggle.innerHTML = visible ? '&#9660; afficher' : '&#9650; masquer';
+}
+
+function setProdPeriode(j){
+  PROD_PERIODE_JOURS = j;
+  document.querySelectorAll('.prod-periode-btn').forEach(function(b){
+    var actif = Number(b.dataset.j) === j;
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildProdChart();
+}
+
+function populateProdMetriqueSelect(){
+  var sel = document.getElementById('prod-metrique-select');
+  if(!sel) return;
+  var noms = {};
+  Object.values(PROD_DATA).forEach(function(a){
+    noms[a.metrique || LABEL_MANUEL] = true;
+  });
+  var liste = Object.keys(noms).sort();
+  var precedent = sel.value;
+  sel.innerHTML = liste.map(function(n){ return '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>'; }).join('');
+  if(liste.indexOf(precedent) !== -1) sel.value = precedent;
+}
+
+// Agrège les entrées d'une métrique par jour (somme de 'output')
+function aggregerParJour(metrique){
+  var parJour = {};
+  Object.values(PROD_DATA).forEach(function(a){
+    var nom = a.metrique || LABEL_MANUEL;
+    if(nom !== metrique) return;
+    if(a.output == null) return;
+    parJour[a.date] = (parJour[a.date] || 0) + Number(a.output);
+  });
+  return Object.keys(parJour).sort().map(function(d){ return { date: d, valeur: parJour[d] }; });
+}
+
+function buildProdChart(){
+  populateProdMetriqueSelect();
+  var sel = document.getElementById('prod-metrique-select');
+  if(!sel || !sel.value){
+    var kt = document.getElementById('prod-kpi-total');
+    if(kt) kt.textContent = '-';
+    return;
+  }
+  var metrique = sel.value;
+  var serie = aggregerParJour(metrique);
+
+  if(!serie.length){
+    ['prod-kpi-total','prod-kpi-moyenne','prod-kpi-max','prod-kpi-trend'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.textContent = '-';
+    });
+    if(_prodChartInstance){ _prodChartInstance.destroy(); _prodChartInstance = null; }
+    return;
+  }
+
+  // Fenêtre de la période sélectionnée
+  var toutesLesDates = serie.map(function(p){ return p.date; });
+  var derniereDate = toutesLesDates[toutesLesDates.length - 1];
+  var serieAffichee = serie;
+  var seriePrecedente = [];
+
+  if(PROD_PERIODE_JOURS > 0){
+    var finPeriode = new Date(derniereDate);
+    var debutPeriode = new Date(finPeriode); debutPeriode.setDate(debutPeriode.getDate() - PROD_PERIODE_JOURS + 1);
+    var debutPeriodePrec = new Date(debutPeriode); debutPeriodePrec.setDate(debutPeriodePrec.getDate() - PROD_PERIODE_JOURS);
+    var finPeriodePrec = new Date(debutPeriode); finPeriodePrec.setDate(finPeriodePrec.getDate() - 1);
+
+    var fmt = function(d){ return d.toISOString().slice(0,10); };
+    serieAffichee = serie.filter(function(p){ return p.date >= fmt(debutPeriode) && p.date <= fmt(finPeriode); });
+    seriePrecedente = serie.filter(function(p){ return p.date >= fmt(debutPeriodePrec) && p.date <= fmt(finPeriodePrec); });
+  }
+
+  // KPI
+  var total = serieAffichee.reduce(function(s, p){ return s + p.valeur; }, 0);
+  var moyenne = serieAffichee.length ? total / serieAffichee.length : 0;
+  var meilleur = serieAffichee.reduce(function(m, p){ return p.valeur > (m ? m.valeur : -Infinity) ? p : m; }, null);
+  var totalPrec = seriePrecedente.reduce(function(s, p){ return s + p.valeur; }, 0);
+
+  var fmtNum = function(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'k' : Math.round(n * 10) / 10; };
+
+  var elTotal = document.getElementById('prod-kpi-total'); if(elTotal) elTotal.textContent = fmtNum(total);
+  var elMoy = document.getElementById('prod-kpi-moyenne'); if(elMoy) elMoy.textContent = fmtNum(moyenne);
+  var elMax = document.getElementById('prod-kpi-max'); if(elMax) elMax.textContent = meilleur ? (fmtNum(meilleur.valeur) + ' (' + meilleur.date.slice(5) + ')') : '-';
+
+  var elTrend = document.getElementById('prod-kpi-trend');
+  if(elTrend){
+    if(!seriePrecedente.length || totalPrec === 0){
+      elTrend.textContent = 'N/A';
+      elTrend.style.color = 'var(--tx3)';
+    } else {
+      var variation = ((total - totalPrec) / totalPrec) * 100;
+      elTrend.textContent = (variation >= 0 ? '+' : '') + variation.toFixed(1) + '%';
+      elTrend.style.color = variation >= 0 ? '#10b981' : '#ef4444';
+    }
+  }
+
+  // Graphique
+  var ctx = document.getElementById('prodChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+  if(_prodChartInstance){ _prodChartInstance.destroy(); }
+  _prodChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: serieAffichee.map(function(p){ return p.date.slice(5); }),
+      datasets: [{
+        label: metrique,
+        data: serieAffichee.map(function(p){ return p.valeur; }),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,.12)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: serieAffichee.length > 60 ? 0 : 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', maxTicksLimit: 12 } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }
+      }
+    }
+  });
 }
 
 // Ouvrir le modal d'import
