@@ -376,20 +376,35 @@
           <button class="prod-periode-btn" data-j="90" onclick="setProdPeriode(90)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">90j</button>
           <button class="prod-periode-btn" data-j="0" onclick="setProdPeriode(0)" style="padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Tout</button>
         </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
+          <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">Tranche</span>
+          <button class="prod-granularite-btn" data-h="1" onclick="setProdGranularite(1)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">1h</button>
+          <button class="prod-granularite-btn" data-h="2" onclick="setProdGranularite(2)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">2h</button>
+          <button class="prod-granularite-btn" data-h="4" onclick="setProdGranularite(4)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">4h</button>
+          <button class="prod-granularite-btn" data-h="12" onclick="setProdGranularite(12)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">12h</button>
+          <button class="prod-granularite-btn" data-h="24" onclick="setProdGranularite(24)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">24h</button>
+          <button class="prod-granularite-btn" data-h="48" onclick="setProdGranularite(48)" style="padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">48h</button>
+        </div>
       </div>
 
       <!-- KPI -->
       <div class="kgrid" style="margin-bottom:16px">
         <div class="cc"><div class="cch"><div class="cct">Total periode</div></div><div id="prod-kpi-total" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
-        <div class="cc"><div class="cch"><div class="cct">Moyenne / jour</div></div><div id="prod-kpi-moyenne" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
-        <div class="cc"><div class="cch"><div class="cct">Meilleur jour</div></div><div id="prod-kpi-max" style="font-size:20px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Moyenne / tranche</div></div><div id="prod-kpi-moyenne" style="font-size:28px;font-weight:700;color:var(--tx1)">-</div></div>
+        <div class="cc"><div class="cch"><div class="cct">Meilleure tranche</div></div><div id="prod-kpi-max" style="font-size:20px;font-weight:700;color:var(--tx1)">-</div></div>
         <div class="cc"><div class="cch"><div class="cct">Vs periode precedente</div></div><div id="prod-kpi-trend" style="font-size:28px;font-weight:700">-</div></div>
       </div>
 
       <!-- Graphique -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Evolution (agregation journaliere)</div></div>
+        <div class="cch"><div class="cct">Evolution</div></div>
         <div class="cw" style="height:300px"><canvas id="prodChart"></canvas></div>
+      </div>
+
+      <!-- Repartition par shift -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Repartition par shift (moyenne par occurrence, periode selectionnee)</div></div>
+        <div class="cw" style="height:280px"><canvas id="prodShiftChart"></canvas></div>
       </div>
 
       <!-- Formulaire d'ajout -->
