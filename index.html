@@ -51,6 +51,7 @@
     <button class="tab" data-tab="pl">&#9638; Planning</button>
     <button class="tab" data-tab="ab">&#9675; Absences</button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; Pointages</button>
+    <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; Arrets Inpak</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; Admin</button>
   </nav>
   <main class="content">
@@ -357,6 +358,46 @@
       </div>
     </div>
 
+    <!-- ARRETS INPAK -->
+    <div class="pane" id="pane-arrets">
+      <div class="sh">
+        <div class="st">Arrets Inpak</div>
+        <div class="ss">Lignes 31 a 36 — arrets avec raison et micro-arrets</div>
+        <button onclick="openImportArretsModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
+      </div>
+
+      <!-- Filtre ligne -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="arrets-filtre-ligne">
+        <button class="arrets-ligne-btn on" data-ligne="all" onclick="filtrerArretsLigne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes</button>
+        <button class="arrets-ligne-btn" data-ligne="31" onclick="filtrerArretsLigne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
+        <button class="arrets-ligne-btn" data-ligne="32" onclick="filtrerArretsLigne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
+        <button class="arrets-ligne-btn" data-ligne="33" onclick="filtrerArretsLigne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
+        <button class="arrets-ligne-btn" data-ligne="34" onclick="filtrerArretsLigne('34')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 34</button>
+        <button class="arrets-ligne-btn" data-ligne="35" onclick="filtrerArretsLigne('35')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 35</button>
+        <button class="arrets-ligne-btn" data-ligne="36" onclick="filtrerArretsLigne('36')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 36</button>
+      </div>
+
+      <!-- Resume frequence -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Frequence par ligne</div></div>
+        <div id="arrets-resume-wrap"></div>
+      </div>
+
+      <!-- Arrets avec raison -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Arrets avec raison <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        <div id="arrets-raison-wrap"></div>
+      </div>
+
+      <!-- Microstops -->
+      <div class="cc">
+        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
+          <div class="cct">Micro-arrets <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; afficher le detail</span></div>
+        </div>
+        <div id="arrets-micro-wrap" style="display:none"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 </div>
@@ -384,6 +425,20 @@
     <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
       <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
       <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal import arrets Inpak -->
+<div id="arrets-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; Importer les arrets Inpak</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON genere par <code>analyserArretsInpak()</code> / <code>exporterArretsInpak()</code> depuis le script <code>grafana_arrets_inpak.js</code> (console Grafana)</div>
+    <textarea id="arrets-import-txt" placeholder="Colle ici le JSON..." style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
+    <div id="arrets-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('arrets-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
+      <button onclick="importerArretsInpak()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
     </div>
   </div>
 </div>
