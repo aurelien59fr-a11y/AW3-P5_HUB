@@ -1012,6 +1012,8 @@ function applyRole(role){
   if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
   var ptTab = document.getElementById('tab-pt-btn');
   if(ptTab) ptTab.style.display = isAdmin ? 'flex' : 'none';
+  var arretsTab = document.getElementById('tab-arrets-btn');
+  if(arretsTab) arretsTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -1539,7 +1541,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();
         buildEmpTable();
       }
     }
@@ -1620,7 +1622,7 @@ function startApp(){
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();
   }
 }
 
@@ -2368,3 +2370,202 @@ function savePtComment(key){
   });
 }
 
+// ============================================================
+// ARRETS INPAK — donnees simples : arrets avec raison + micro-arrets
+// venant du script grafana_arrets_inpak.js
+// ============================================================
+
+var ARRETS_DATA = {};
+var ARRETS_LIGNE_FILTRE = 'all';
+
+function loadArretsInpak(){
+  if(!db) return;
+  db.ref('arrets_inpak').on('value', function(snap){
+    ARRETS_DATA = snap.val() || {};
+    buildArretsInpak();
+  }, function(error){
+    console.error('[Arrets Inpak] Erreur de lecture Firebase :', error);
+  });
+}
+
+function openImportArretsModal(){
+  document.getElementById('arrets-import-modal').style.display = 'flex';
+  document.getElementById('arrets-import-err').textContent = '';
+}
+
+function importerArretsInpak(){
+  var err = document.getElementById('arrets-import-err');
+  err.textContent = '';
+  var raw = document.getElementById('arrets-import-txt').value.trim();
+  if(!raw){ err.textContent = 'Colle le JSON genere par le script.'; return; }
+
+  var parsed;
+  try { parsed = JSON.parse(raw); }
+  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+
+  if(!parsed.avecRaison && !parsed.microstops){
+    err.textContent = 'Format inattendu (cles "avecRaison"/"microstops" manquantes).';
+    return;
+  }
+
+  var now = new Date().toLocaleString('fr-BE');
+  var auteur = currentUser ? currentUser.email : '';
+  var entries = [];
+
+  (parsed.avecRaison || []).forEach(function(a){
+    if(!a.ligne || !a.date || !a.heure) return;
+    var key = ptKey('arret-' + a.ligne, a.date, 'raison', a.heure) + '-' + Math.random().toString(36).slice(2,7);
+    entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: a.raison || '', type: 'avec_raison', auteur: auteur, ts: Date.now(), importeLe: now }]);
+  });
+  (parsed.microstops || []).forEach(function(a){
+    if(!a.ligne || !a.date || !a.heure) return;
+    var key = ptKey('arret-' + a.ligne, a.date, 'micro', a.heure) + '-' + Math.random().toString(36).slice(2,7);
+    entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: '', type: 'microstop', auteur: auteur, ts: Date.now(), importeLe: now }]);
+  });
+
+  if(!entries.length){ err.textContent = 'Aucune ligne valide trouvee dans le JSON.'; return; }
+  if(!db){ err.textContent = 'Connexion Firebase non disponible.'; return; }
+
+  var TAILLE_LOT = 400;
+  var lots = [];
+  for(var i = 0; i < entries.length; i += TAILLE_LOT) lots.push(entries.slice(i, i + TAILLE_LOT));
+
+  err.style.color = '#3b82f6';
+  err.textContent = 'Import en cours… 0 / ' + entries.length;
+  var fait = 0;
+
+  function envoyerLot(idx){
+    if(idx >= lots.length){
+      document.getElementById('arrets-import-modal').style.display = 'none';
+      document.getElementById('arrets-import-txt').value = '';
+      err.style.color = '#ef4444';
+      err.textContent = '';
+      toast(entries.length + ' arret(s) importe(s)', '#10b981');
+      return;
+    }
+    var updates = {};
+    lots[idx].forEach(function(e){ updates['arrets_inpak/' + e[0]] = e[1]; });
+    db.ref().update(updates).then(function(){
+      fait += lots[idx].length;
+      err.textContent = 'Import en cours… ' + fait + ' / ' + entries.length;
+      envoyerLot(idx + 1);
+    }).catch(function(e){
+      console.error('[Arrets Inpak] Erreur import lot ' + idx + ' :', e);
+      err.style.color = '#ef4444';
+      err.textContent = 'Erreur Firebase (lot ' + (idx+1) + '/' + lots.length + ') : ' + e.message;
+    });
+  }
+  envoyerLot(0);
+}
+
+function filtrerArretsLigne(ligne){
+  ARRETS_LIGNE_FILTRE = ligne;
+  document.querySelectorAll('.arrets-ligne-btn').forEach(function(b){
+    var actif = b.dataset.ligne === ligne;
+    b.classList.toggle('on', actif);
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildArretsInpak();
+}
+
+function toggleMicrostopsDetail(){
+  var wrap = document.getElementById('arrets-micro-wrap');
+  var toggle = document.getElementById('arrets-micro-toggle');
+  if(!wrap) return;
+  var visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  if(toggle) toggle.innerHTML = visible ? '&#9660; afficher le detail' : '&#9650; masquer le detail';
+}
+
+function buildArretsInpak(){
+  var tousLesArrets = Object.values(ARRETS_DATA);
+  var filtre = ARRETS_LIGNE_FILTRE;
+  var arrets = tousLesArrets.filter(function(a){ return filtre === 'all' || a.ligne === filtre; });
+
+  var avecRaison = arrets.filter(function(a){ return a.type === 'avec_raison'; });
+  var microstops = arrets.filter(function(a){ return a.type === 'microstop'; });
+
+  // --- Resume frequence par ligne ---
+  var wrapResume = document.getElementById('arrets-resume-wrap');
+  if(wrapResume){
+    var parLigne = {};
+    tousLesArrets.forEach(function(a){
+      if(!parLigne[a.ligne]) parLigne[a.ligne] = { raison: 0, micro: 0 };
+      if(a.type === 'avec_raison') parLigne[a.ligne].raison++;
+      else parLigne[a.ligne].micro++;
+    });
+    var lignes = Object.keys(parLigne).sort();
+    if(!lignes.length){
+      wrapResume.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucune donnee importee — utilise le bouton "Importer Grafana".</div>';
+    } else {
+      wrapResume.innerHTML = '<table style="width:100%;border-collapse:collapse">'
+        + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
+        + '<th style="padding:8px">Ligne</th><th style="padding:8px">Avec raison</th><th style="padding:8px">Micro-arrets</th></tr></thead><tbody>'
+        + lignes.map(function(l){
+            return '<tr><td style="padding:8px;font-weight:600">Line ' + l + '</td>'
+              + '<td style="padding:8px;color:#ef4444">' + parLigne[l].raison + '</td>'
+              + '<td style="padding:8px;color:#f59e0b">' + parLigne[l].micro + '</td></tr>';
+          }).join('')
+        + '</tbody></table>';
+    }
+  }
+
+  // --- Arrets avec raison ---
+  var wrapRaison = document.getElementById('arrets-raison-wrap');
+  var countRaison = document.getElementById('arrets-raison-count');
+  if(countRaison) countRaison.textContent = '(' + avecRaison.length + ')';
+  if(wrapRaison){
+    avecRaison.sort(function(x, y){ return (y.date + y.heure).localeCompare(x.date + x.heure); });
+    if(!avecRaison.length){
+      wrapRaison.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun arret avec raison sur ce filtre.</div>';
+    } else {
+      var LIMITE = 200;
+      var tronque = avecRaison.length > LIMITE;
+      var affiches = avecRaison.slice(0, LIMITE);
+      var html = '<table style="width:100%;border-collapse:collapse">'
+        + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+      html += affiches.map(function(a){
+        return '<tr>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
+          + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
+          + '<td style="padding:8px;font-size:13px;color:#ef4444">' + a.raison + '</td>'
+          + '</tr>';
+      }).join('');
+      html += '</tbody></table>';
+      if(tronque) html += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE + ' plus recents (' + avecRaison.length + ' au total)</div>';
+      wrapRaison.innerHTML = html;
+    }
+  }
+
+  // --- Micro-arrets ---
+  var wrapMicro = document.getElementById('arrets-micro-wrap');
+  var countMicro = document.getElementById('arrets-micro-count');
+  if(countMicro) countMicro.textContent = '(' + microstops.length + ')';
+  if(wrapMicro){
+    microstops.sort(function(x, y){ return (y.date + y.heure).localeCompare(x.date + x.heure); });
+    if(!microstops.length){
+      wrapMicro.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun micro-arret sur ce filtre.</div>';
+    } else {
+      var LIMITE2 = 200;
+      var tronque2 = microstops.length > LIMITE2;
+      var affiches2 = microstops.slice(0, LIMITE2);
+      var html2 = '<table style="width:100%;border-collapse:collapse">'
+        + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th></tr></thead><tbody>';
+      html2 += affiches2.map(function(a){
+        return '<tr>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
+          + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
+          + '</tr>';
+      }).join('');
+      html2 += '</tbody></table>';
+      if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE2 + ' plus recents (' + microstops.length + ' au total)</div>';
+      wrapMicro.innerHTML = html2;
+    }
+  }
+}
