@@ -3169,6 +3169,7 @@ function buildInpakProblemes(){
   var fenetre = calculerFenetrePeriode(st.periode, dateRef);
 
   buildInpakArretsActuels();
+  buildInpakHistoriqueArrets(fenetre.min, fenetre.max);
   buildProdUptimeChart(fenetre.min, fenetre.max, st.equipes);
   buildProdChangeoverChart(fenetre.min, fenetre.max, st.equipes);
   buildProdChangeoverShiftChart('inpak', fenetre.min, fenetre.max);
@@ -3177,6 +3178,129 @@ function buildInpakProblemes(){
 
 // Liste bien visible des derniers arrêts capturés par ligne (le vrai
 // sujet "problèmes" que tu veux voir en premier sur cet onglet).
+// Historique chronologique des arrêts (raison incluse), à partir des
+// données "Etat Inpak/Stilstand" — c'est le vrai "pourquoi" que tu
+// cherches, pas juste un instantané.
+// Extrait le code + intitule de raison d'un libelle "Stilstand - (02.01) xxx - ..."
+// Renvoie null pour les microstops bruts (pas de raison exploitable, juste un code produit).
+function extraireRaisonCategorisee(raw){
+  var m = String(raw || '').match(/^Stilstand - (\(\d+\.\d+\)[^-]+)/);
+  return m ? m[1].trim() : null;
+}
+
+function buildInpakHistoriqueArrets(dateMin, dateMax){
+  var wrap = document.getElementById('inpak-histo-arrets-wrap');
+  var wrapTop = document.getElementById('inpak-top-raisons-wrap');
+  if(!wrap && !wrapTop) return;
+
+  var evenements = [];
+  var compteMicrostopParLigne = {};
+  var compteRaisons = {}; // raison -> {total, parLigne:{31:n,...}}
+
+  Object.values(PROD_DATA).forEach(function(a){
+    var m = a.metrique || '';
+    var match = m.match(/^Etat Inpak\/Stilstand - Line (\d+)$/);
+    if(!match) return;
+    if(a.output !== 0) return; // on ne garde que les arrêts (0 = arrêt)
+    if(dateMin && a.date < dateMin) return;
+    if(dateMax && a.date > dateMax) return;
+    var ligne = match[1];
+    var raw = a.commentaire || '';
+
+    if(/^Microstop/i.test(raw)){
+      compteMicrostopParLigne[ligne] = (compteMicrostopParLigne[ligne] || 0) + 1;
+      return; // pas de raison exploitable, exclu de la liste et du classement
+    }
+
+    var raison = extraireRaisonCategorisee(raw);
+    if(!raison) return; // "Stilstand" sans code de raison precis : trop vague, on l'ignore aussi
+
+    if(!compteRaisons[raison]) compteRaisons[raison] = { total: 0, parLigne: {} };
+    compteRaisons[raison].total++;
+    compteRaisons[raison].parLigne[ligne] = (compteRaisons[raison].parLigne[ligne] || 0) + 1;
+
+    evenements.push({ ligne: ligne, date: a.date, heure: a.heure, raison: raison });
+  });
+
+  // --- Historique chronologique (raisons categorisees uniquement) ---
+  if(wrap){
+    evenements.sort(function(x, y){ return (y.date + y.heure).localeCompare(x.date + x.heure); });
+
+    if(!evenements.length){
+      wrap.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun arret avec raison categorisee sur cette periode.</div>';
+    } else {
+      var LIMITE = 150;
+      var tronque = evenements.length > LIMITE;
+      var affiches = evenements.slice(0, LIMITE);
+
+      var html = '<table style="width:100%;border-collapse:collapse">'
+        + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+      html += affiches.map(function(e){
+        return '<tr>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + e.date + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + e.heure + '</td>'
+          + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + e.ligne + '</td>'
+          + '<td style="padding:8px;font-size:13px;color:#ef4444">' + e.raison + '</td>'
+          + '</tr>';
+      }).join('');
+      html += '</tbody></table>';
+      if(tronque) html += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Affichage limite aux ' + LIMITE + ' plus recents (' + evenements.length + ' au total)</div>';
+      wrap.innerHTML = html;
+    }
+  }
+
+  // --- Classement des raisons les plus frequentes (le vrai "pourquoi") ---
+  if(wrapTop){
+    var classement = Object.keys(compteRaisons).map(function(r){
+      return { raison: r, total: compteRaisons[r].total, parLigne: compteRaisons[r].parLigne };
+    }).sort(function(a, b){ return b.total - a.total; }).slice(0, 12);
+
+    if(!classement.length){
+      wrapTop.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucune donnee sur cette periode.</div>';
+    } else {
+      var maxTotal = classement[0].total;
+      wrapTop.innerHTML = classement.map(function(c){
+        var pct = Math.round((c.total / maxTotal) * 100);
+        var lignesDetail = Object.keys(c.parLigne).sort().map(function(l){ return 'L' + l + ':' + c.parLigne[l]; }).join('  ');
+        return '<div style="margin-bottom:10px">'
+          + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">'
+          + '<span style="color:var(--tx1)">' + c.raison + '</span>'
+          + '<b style="color:var(--tx1)">' + c.total + '</b>'
+          + '</div>'
+          + '<div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">'
+          + '<div style="height:100%;width:' + pct + '%;background:#ef4444"></div>'
+          + '</div>'
+          + '<div style="font-size:11px;color:var(--tx3);margin-top:2px">' + lignesDetail + '</div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  // --- Frequence des microstops par ligne (probleme chronique potentiel) ---
+  var wrapMicro = document.getElementById('inpak-microstops-wrap');
+  if(wrapMicro){
+    var lignesMicro = Object.keys(compteMicrostopParLigne).sort();
+    if(!lignesMicro.length){
+      wrapMicro.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucune donnee sur cette periode.</div>';
+    } else {
+      var maxMicro = Math.max.apply(null, lignesMicro.map(function(l){ return compteMicrostopParLigne[l]; }));
+      wrapMicro.innerHTML = '<div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Micro-arrets tres courts, sans raison precise — une frequence elevee et persistante peut signaler un probleme chronique sur une ligne.</div>'
+        + lignesMicro.map(function(l){
+          var n = compteMicrostopParLigne[l];
+          var pct = Math.round((n / maxMicro) * 100);
+          return '<div style="margin-bottom:8px">'
+            + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">'
+            + '<span>Line ' + l + '</span><b>' + n + '</b>'
+            + '</div>'
+            + '<div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">'
+            + '<div style="height:100%;width:' + pct + '%;background:#f59e0b"></div>'
+            + '</div></div>';
+        }).join('');
+    }
+  }
+}
+
 function buildInpakArretsActuels(){
   var wrap = document.getElementById('inpak-arrets-wrap');
   if(!wrap) return;
@@ -3460,7 +3584,7 @@ function importerProdJSON(raw, err){
       var key = ptKey(m.nom, pt.date, 'prod', pt.heure);
       entries.push([key, {
         date: pt.date, heure: pt.heure, metrique: m.nom,
-        output: pt.valeur, capacite: null, statut: null, commentaire: '',
+        output: pt.valeur, capacite: null, statut: null, commentaire: pt.commentaire || '',
         source: 'import_csv', auteur: auteur, ts: Date.now(), importeLe: now
       }]);
     });
