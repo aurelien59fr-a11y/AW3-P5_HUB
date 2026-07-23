@@ -431,7 +431,8 @@ function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEE
 function toast(msg,col){var t=document.createElement('div');t.className='toast';t.innerHTML='<div class="tdot" style="background:'+col+'"></div>'+msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2500);}
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
   if(b.dataset.tab === 'prod' && typeof buildProdChart === 'function') buildProdChart('prod');
-  if(b.dataset.tab === 'inpak' && typeof buildProdChart === 'function') buildProdChart('inpak');
+  if(b.dataset.tab === 'inpak' && typeof buildInpakProblemes === 'function') buildInpakProblemes();
+  if(b.dataset.tab === 'cmp' && typeof buildProdChart === 'function') buildProdChart('cmp');
 });});
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
   db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&currentUser.role==='admin'){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
@@ -1018,6 +1019,8 @@ function applyRole(role){
   if(prodTab) prodTab.style.display = isAdmin ? 'flex' : 'none';
   var inpakTab = document.getElementById('tab-inpak-btn');
   if(inpakTab) inpakTab.style.display = isAdmin ? 'flex' : 'none';
+  var cmpTab = document.getElementById('tab-cmp-btn');
+  if(cmpTab) cmpTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -2398,7 +2401,7 @@ function loadProduction(){
   var hEl = document.getElementById('prod-heure');
   if(dEl && !dEl.value) dEl.value = now.toISOString().slice(0,10);
   if(hEl && !hEl.value) hEl.value = now.toTimeString().slice(0,5);
-  ['prod','inpak'].forEach(function(ns){
+  ['prod','inpak','cmp'].forEach(function(ns){
     var btn30 = document.querySelector('.' + ns + '-periode-btn[data-j="30"]');
     if(btn30){ btn30.style.background = 'var(--blue)'; btn30.style.color = '#fff'; btn30.style.borderColor = 'var(--blue)'; }
     var btn24h = document.querySelector('.' + ns + '-granularite-btn[data-h="24"]');
@@ -2523,7 +2526,8 @@ function buildProdTableThrottled(){
   _buildProdTableTimer = setTimeout(function(){
     buildProdTable();
     buildProdChart('prod');
-    buildProdChart('inpak');
+    buildInpakProblemes();
+    buildProdChart('cmp');
   }, 400);
 }
 
@@ -2534,7 +2538,8 @@ function buildProdTableThrottled(){
 
 var NS_STATE = {
   prod:  { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null },
-  inpak: { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null }
+  inpak: { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null },
+  cmp:   { periode: 30, granularite: 24, equipes: { P1:true,P2:true,P3:true,P4:true,P5:true }, chart:null, shiftChart:null }
 };
 var _prodChangeoverShiftChartInstance = null;
 
@@ -2623,22 +2628,8 @@ function fmtAvecUnite(valeur, metrique, fmtFn){
 // production (Production) vs les 6 petites lignes d'inpak 31-36 (Inpak).
 function filtreProduction(n){ return /^Netto output|^Stoomschiller|^Vriestunnel|^Balance bulk/.test(n) || n === LABEL_MANUEL; }
 function filtreInpak(n){ return /^Bulkopvang|^Bijlijn|^Vitesse |^Avancement |^Target |^Capacité théorique|^Heures restantes|^Arrêt en cours|^Changement de série|^Etat Inpak|^Verloop/.test(n); }
-var NS_FILTRES = { prod: filtreProduction, inpak: filtreInpak };
-
-function setInpakSousOnglet(sub){
-  ['apercu','lignes'].forEach(function(s){
-    var el = document.getElementById('inpak-sub-' + s);
-    if(el) el.style.display = (s === sub) ? 'block' : 'none';
-  });
-  document.querySelectorAll('.inpak-sub-btn').forEach(function(b){
-    var actif = b.dataset.sub === sub;
-    b.style.background = actif ? 'var(--blue)' : 'none';
-    b.style.color = actif ? '#fff' : 'var(--tx2)';
-    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
-  });
-  // Chart.js a besoin d'un re-render quand un canvas redevient visible
-  if(sub === 'lignes') buildProdChart('inpak');
-}
+function filtreComparaison(n){ return filtreProduction(n) || filtreInpak(n); }
+var NS_FILTRES = { prod: filtreProduction, inpak: filtreInpak, cmp: filtreComparaison };
 
 function toggleProdHistorique(){
   var wrap = document.getElementById('prod-hist-wrap');
@@ -3142,6 +3133,86 @@ function buildProdChangeoverChart(dateMin, dateMax, equipes){
 // Derniers relevés capturés — dernière valeur connue de chaque
 // métrique "instantanée" (capacité, vitesse, arrêts en cours...)
 // ============================================================
+// Calcule une fenêtre de dates [min, max] à partir d'une période en jours
+// et d'une date de référence (par défaut : la date la plus récente
+// trouvée dans les données concernées, ou aujourd'hui si aucune donnée).
+function calculerFenetrePeriode(periodeJours, dateReference){
+  var ref = dateReference || new Date().toISOString().slice(0,10);
+  if(!periodeJours || periodeJours <= 0) return { min: null, max: ref };
+  var fin = new Date(ref + 'T00:00:00');
+  var debut = new Date(fin); debut.setDate(debut.getDate() - periodeJours + 1);
+  var fmt = function(d){ return d.toISOString().slice(0,10); };
+  return { min: fmt(debut), max: fmt(fin) };
+}
+
+function setInpakPeriode(j){
+  NS_STATE.inpak.periode = j;
+  document.querySelectorAll('.inpak-periode-btn').forEach(function(b){
+    var actif = Number(b.dataset.j) === j;
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildInpakProblemes();
+}
+
+// Vue Inpak : centrée sur les problèmes (arrêts, taux de marche,
+// changements de série), pas sur les volumes.
+function buildInpakProblemes(){
+  var st = NS_STATE.inpak;
+  var toutesDates = [];
+  Object.values(PROD_DATA).forEach(function(a){
+    if(a.metrique && filtreInpak(a.metrique)) toutesDates.push(a.date);
+  });
+  toutesDates.sort();
+  var dateRef = toutesDates.length ? toutesDates[toutesDates.length - 1] : new Date().toISOString().slice(0,10);
+  var fenetre = calculerFenetrePeriode(st.periode, dateRef);
+
+  buildInpakArretsActuels();
+  buildProdUptimeChart(fenetre.min, fenetre.max, st.equipes);
+  buildProdChangeoverChart(fenetre.min, fenetre.max, st.equipes);
+  buildProdChangeoverShiftChart('inpak', fenetre.min, fenetre.max);
+  buildProdSnapshotTable();
+}
+
+// Liste bien visible des derniers arrêts capturés par ligne (le vrai
+// sujet "problèmes" que tu veux voir en premier sur cet onglet).
+function buildInpakArretsActuels(){
+  var wrap = document.getElementById('inpak-arrets-wrap');
+  if(!wrap) return;
+
+  var dernierParLigne = {}; // WorkCenterName -> {raison, duree, date, heure}
+  Object.values(PROD_DATA).forEach(function(a){
+    if(!a.metrique || a.metrique.indexOf('Arrêt en cours - ') !== 0) return;
+    var reste = a.metrique.replace('Arrêt en cours - ', '');
+    var idx = reste.lastIndexOf(' - ');
+    var ligne = idx !== -1 ? reste.slice(0, idx) : reste;
+    var raison = idx !== -1 ? reste.slice(idx + 3) : '';
+    var dh = a.date + ' ' + a.heure;
+    if(!dernierParLigne[ligne] || dh > dernierParLigne[ligne].dh){
+      dernierParLigne[ligne] = { dh: dh, date: a.date, heure: a.heure, raison: raison, duree: a.output };
+    }
+  });
+
+  var lignes = Object.keys(dernierParLigne).sort();
+  if(!lignes.length){
+    wrap.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun arrêt capturé pour le moment — importe les snapshots Grafana (analyserAW3Snapshots()).</div>';
+    return;
+  }
+
+  wrap.innerHTML = lignes.map(function(ligne){
+    var d = dernierParLigne[ligne];
+    return '<div style="background:#ef444414;border:1px solid #ef444440;border-radius:10px;padding:12px 14px;margin-bottom:8px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'
+      + '<b style="font-size:13px;color:var(--tx1)">' + ligne + '</b>'
+      + '<span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">releve le ' + d.date + ' ' + d.heure + '</span>'
+      + '</div>'
+      + '<div style="font-size:13px;color:#ef4444;margin-top:4px">' + (d.raison || 'Raison non precisee') + '</div>'
+      + '<div style="font-size:12px;color:var(--tx3);margin-top:2px">' + d.duree + ' min (en cours au moment du releve)</div>'
+      + '</div>';
+  }).join('');
+}
+
 function buildProdSnapshotTable(){
   var tbody = document.getElementById('prod-snapshot-tbody');
   if(!tbody) return;
@@ -3186,7 +3257,6 @@ function buildProdChart(ns){
     if(kt) kt.textContent = '-';
     var eEvo = document.getElementById(ns + '-evo-titre'); if(eEvo) eEvo.textContent = '';
     var eCmp = document.getElementById(ns + '-cmp-titre'); if(eCmp) eCmp.textContent = '';
-    if(ns === 'inpak') buildProdSnapshotTable();
     return;
   }
   var metrique = sel.value;
@@ -3198,7 +3268,6 @@ function buildProdChart(ns){
     });
     if(st.chart){ st.chart.destroy(); st.chart = null; }
     if(st.shiftChart){ st.shiftChart.destroy(); st.shiftChart = null; }
-    if(ns === 'inpak') buildProdSnapshotTable();
     return;
   }
 
@@ -3334,12 +3403,11 @@ function buildProdChart(ns){
   // Graphique de répartition par shift, sur la même fenêtre de période
   buildProdShiftChart(ns, metrique, dateMinPeriode, dateMaxPeriode);
 
-  // Vues spécifiques aux petites lignes d'inpak uniquement
-  if(ns === 'inpak'){
-    buildProdUptimeChart(dateMinPeriode, dateMaxPeriode, st.equipes);
-    buildProdChangeoverChart(dateMinPeriode, dateMaxPeriode, st.equipes);
+  // Sur l'onglet Comparaison, on montre aussi la fréquence des
+  // changements de série par shift (utile pour comparer les équipes,
+  // indépendant de la métrique choisie).
+  if(ns === 'cmp'){
     buildProdChangeoverShiftChart(ns, dateMinPeriode, dateMaxPeriode);
-    buildProdSnapshotTable();
   }
 }
 
