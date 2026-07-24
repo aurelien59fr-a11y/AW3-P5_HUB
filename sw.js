@@ -85,4 +85,4 @@ self.addEventListener('fetch', function(event){
       return cached || fetchPromise;
     })
   );
-});
+}); 
