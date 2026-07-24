@@ -2375,8 +2375,57 @@ function savePtComment(key){
 // venant du script grafana_arrets_inpak.js
 // ============================================================
 
+// --- Rotation des equipes AW3 ---
+// Semaine (lun-ven) : P1/P2 alternent 05h-13h / 13h-21h selon la parite
+// de semaine, P3 fixe la nuit 21h-05h.
+// Weekend (sam-dim) : P4/P5 alternent 05h-17h / 17h-05h selon la parite.
+function getISOWeek(date){
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function equipeSemaine(dateStr, bloc){
+  if(bloc === '21h-05h') return 'P3';
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  if(bloc === '05h-13h') return semaineImpaire ? 'P1' : 'P2';
+  return semaineImpaire ? 'P2' : 'P1'; // bloc 13h-21h
+}
+
+function equipeWeekend(dateStr, bloc){
+  var semaineImpaire = getISOWeek(new Date(dateStr + 'T00:00:00')) % 2 === 1;
+  if(bloc === '05h-17h') return semaineImpaire ? 'P5' : 'P4';
+  return semaineImpaire ? 'P4' : 'P5'; // bloc 17h-05h
+}
+
+// Renvoie l'equipe (P1 a P5) qui travaillait a une date/heure donnee.
+function getEquipe(dateStr, heureStr){
+  var d = new Date(dateStr + 'T00:00:00');
+  var dow = d.getDay(); // 0=dim,6=sam
+  var estWeekend = (dow === 0 || dow === 6);
+  var hh = parseInt(heureStr.split(':')[0], 10);
+
+  if(hh >= 5){
+    if(estWeekend) return equipeWeekend(dateStr, hh < 17 ? '05h-17h' : '17h-05h');
+    if(hh < 13) return equipeSemaine(dateStr, '05h-13h');
+    if(hh < 21) return equipeSemaine(dateStr, '13h-21h');
+    return equipeSemaine(dateStr, '21h-05h');
+  }
+  // hh < 5 : appartient a la nuit demarree la veille
+  var veille = new Date(d); veille.setDate(veille.getDate() - 1);
+  var veilleDow = veille.getDay();
+  var veilleStr = veille.toISOString().slice(0,10);
+  var veilleEstWeekend = (veilleDow === 0 || veilleDow === 6);
+  if(veilleEstWeekend) return equipeWeekend(veilleStr, '17h-05h');
+  return equipeSemaine(veilleStr, '21h-05h');
+}
+
 var ARRETS_DATA = {};
 var ARRETS_LIGNE_FILTRE = 'all';
+var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
+var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
+var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
 
 function loadArretsInpak(){
   if(!db) return;
@@ -2418,9 +2467,9 @@ function importerArretsInpak(){
     entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: a.raison || '', type: 'avec_raison', auteur: auteur, ts: Date.now(), importeLe: now }]);
   });
   (parsed.microstops || []).forEach(function(a){
-    if(!a.ligne || !a.date || !a.heure) return;
-    var key = ptKey('arret-' + a.ligne, a.date, 'micro', a.heure) + '-' + Math.random().toString(36).slice(2,7);
-    entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: '', type: 'microstop', auteur: auteur, ts: Date.now(), importeLe: now }]);
+    if(!a.ligne || !a.date || a.nombre == null) return;
+    var key = ptKey('arret-' + a.ligne, a.date, 'micro', '00-00');
+    entries.push([key, { ligne: a.ligne, date: a.date, nombre: a.nombre, type: 'microstop', auteur: auteur, ts: Date.now(), importeLe: now }]);
   });
 
   if(!entries.length){ err.textContent = 'Aucune ligne valide trouvee dans le JSON.'; return; }
@@ -2470,6 +2519,42 @@ function filtrerArretsLigne(ligne){
   buildArretsInpak();
 }
 
+var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', P5:'#10b981' };
+
+function filtrerArretsEquipe(equipe){
+  ARRETS_EQUIPE_FILTRE = equipe;
+  document.querySelectorAll('.arrets-equipe-btn').forEach(function(b){
+    var actif = b.dataset.equipe === equipe;
+    var coul = COULEURS_EQUIPE[b.dataset.equipe] || 'var(--blue)';
+    b.classList.toggle('on', actif);
+    b.style.background = actif ? coul : 'none';
+    b.style.color = actif ? '#fff' : coul;
+    b.style.borderColor = coul;
+  });
+  buildArretsInpak();
+}
+
+function rechercherArrets(){
+  ARRETS_DATE_FILTRE = document.getElementById('arrets-recherche-date').value || '';
+  ARRETS_HEURE_FILTRE = document.getElementById('arrets-recherche-heure').value || '';
+  buildArretsInpak();
+}
+
+function reinitialiserRechercheArrets(){
+  document.getElementById('arrets-recherche-date').value = '';
+  document.getElementById('arrets-recherche-heure').value = '';
+  ARRETS_DATE_FILTRE = '';
+  ARRETS_HEURE_FILTRE = '';
+  buildArretsInpak();
+}
+
+// Renvoie vrai si l'heure (HH:MM) est dans les +/- 30 min de la reference
+function dansFenetreHeure(heure, reference){
+  var toMin = function(h){ var p = h.split(':'); return parseInt(p[0],10)*60 + parseInt(p[1],10); };
+  var diff = Math.abs(toMin(heure) - toMin(reference));
+  return diff <= 30;
+}
+
 function toggleMicrostopsDetail(){
   var wrap = document.getElementById('arrets-micro-wrap');
   var toggle = document.getElementById('arrets-micro-toggle');
@@ -2487,6 +2572,21 @@ function buildArretsInpak(){
   var avecRaison = arrets.filter(function(a){ return a.type === 'avec_raison'; });
   var microstops = arrets.filter(function(a){ return a.type === 'microstop'; });
 
+  // Filtre equipe — uniquement sur "avec raison" (les microstops sont
+  // agreges par jour et n'ont pas d'heure precise, donc pas d'equipe possible)
+  if(ARRETS_EQUIPE_FILTRE !== 'all'){
+    avecRaison = avecRaison.filter(function(a){ return getEquipe(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
+  }
+
+  // Recherche precise date/heure
+  if(ARRETS_DATE_FILTRE){
+    avecRaison = avecRaison.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
+    microstops = microstops.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
+    if(ARRETS_HEURE_FILTRE){
+      avecRaison = avecRaison.filter(function(a){ return dansFenetreHeure(a.heure, ARRETS_HEURE_FILTRE); });
+    }
+  }
+
   // --- Resume frequence par ligne ---
   var wrapResume = document.getElementById('arrets-resume-wrap');
   if(wrapResume){
@@ -2494,7 +2594,7 @@ function buildArretsInpak(){
     tousLesArrets.forEach(function(a){
       if(!parLigne[a.ligne]) parLigne[a.ligne] = { raison: 0, micro: 0 };
       if(a.type === 'avec_raison') parLigne[a.ligne].raison++;
-      else parLigne[a.ligne].micro++;
+      else parLigne[a.ligne].micro += (a.nombre || 0);
     });
     var lignes = Object.keys(parLigne).sort();
     if(!lignes.length){
@@ -2526,12 +2626,15 @@ function buildArretsInpak(){
       var affiches = avecRaison.slice(0, LIMITE);
       var html = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
       html += affiches.map(function(a){
+        var eq = getEquipe(a.date, a.heure);
+        var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
+          + '<td style="padding:8px;font-size:12px;font-weight:600;color:' + coul + '">' + eq + '</td>'
           + '<td style="padding:8px;font-size:13px;color:#ef4444">' + a.raison + '</td>'
           + '</tr>';
       }).join('');
@@ -2544,9 +2647,10 @@ function buildArretsInpak(){
   // --- Micro-arrets ---
   var wrapMicro = document.getElementById('arrets-micro-wrap');
   var countMicro = document.getElementById('arrets-micro-count');
-  if(countMicro) countMicro.textContent = '(' + microstops.length + ')';
+  var totalMicro = microstops.reduce(function(s, a){ return s + (a.nombre || 0); }, 0);
+  if(countMicro) countMicro.textContent = '(' + totalMicro + ' sur ' + microstops.length + ' jour(s))';
   if(wrapMicro){
-    microstops.sort(function(x, y){ return (y.date + y.heure).localeCompare(x.date + x.heure); });
+    microstops.sort(function(x, y){ return y.date.localeCompare(x.date) || (y.nombre - x.nombre); });
     if(!microstops.length){
       wrapMicro.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun micro-arret sur ce filtre.</div>';
     } else {
@@ -2555,16 +2659,16 @@ function buildArretsInpak(){
       var affiches2 = microstops.slice(0, LIMITE2);
       var html2 = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th></tr></thead><tbody>';
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Ligne</th><th style="padding:8px">Nombre ce jour-la</th></tr></thead><tbody>';
       html2 += affiches2.map(function(a){
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
-          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
+          + '<td style="padding:8px;font-size:13px;color:#f59e0b">' + a.nombre + '</td>'
           + '</tr>';
       }).join('');
       html2 += '</tbody></table>';
-      if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE2 + ' plus recents (' + microstops.length + ' au total)</div>';
+      if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE2 + ' plus recents jours (' + microstops.length + ' jours au total)</div>';
       wrapMicro.innerHTML = html2;
     }
   }
