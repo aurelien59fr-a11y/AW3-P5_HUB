@@ -393,17 +393,21 @@
         <div class="cch"><div class="cct">Recherche precise</div></div>
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
           <div class="li-field">
-            <label class="li-label">Date</label>
+            <label class="li-label">Du</label>
             <input type="date" id="arrets-recherche-date" class="li-input">
           </div>
           <div class="li-field">
-            <label class="li-label">Heure (optionnel)</label>
+            <label class="li-label">Au (optionnel — laisse vide pour un seul jour)</label>
+            <input type="date" id="arrets-recherche-date-fin" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Heure (optionnel, seulement si "Au" est vide)</label>
             <input type="time" id="arrets-recherche-heure" class="li-input">
           </div>
           <button onclick="rechercherArrets()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Rechercher</button>
           <button onclick="reinitialiserRechercheArrets()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Reinitialiser</button>
         </div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:8px">Sans heure precise : montre tous les evenements de la date choisie. Avec heure : montre les evenements dans les 30 minutes autour.</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px">Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".</div>
       </div>
 
       <!-- Resume frequence -->
