@@ -432,7 +432,7 @@ function toast(msg,col){var t=document.createElement('div');t.className='toast';
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
 });});
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
-  db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&currentUser.role==='admin'){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
+  db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&(currentUser.role==='admin'||currentUser.role==='visiteur')){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
   db.ref('bradford/comments').on('value',function(snap){var data=snap.val();if(!data)return;BD_COMMENTS={};Object.keys(data).forEach(function(k){BD_COMMENTS[k]=data[k];});buildBT();});
   db.ref('bradford/import_ts').on('value',function(snap){var v=snap.val();var el=document.getElementById('protime-last-import');if(el&&v)el.textContent='Dernier import : '+new Date(v).toLocaleString('fr-BE');});}
 function save(){if(!db)return;isSyncing=true;var d26={};SHIFTS26.forEach(function(e){d26[e.n]=e.s;});var d25={};SHIFTS25.forEach(function(e){d25[e.n]=e.s;});var upd={};upd['planning/shifts2026']=d26;upd['planning/shifts2025']=d25;upd['planning/absences']=ABS;upd['planning/lastUpdate']={at:new Date().toISOString(),by:currentUser?currentUser.email:'anonyme'};db.ref().update(upd).then(function(){isSyncing=false;updSlbl(new Date().toISOString());}).catch(function(err){isSyncing=false;toast('Erreur: '+err.message,'#ef4444');});}
@@ -990,6 +990,7 @@ function doPrint(fromIdx,toIdx){var all=allDates();if(fromIdx===undefined)fromId
 function applyRole(role){
   var isAdmin = role === 'admin';
   var isSubchef = role === 'subchef';
+  var isVisiteur = role === 'visiteur';
 
   // Badge role
   var badge = document.getElementById('role-badge');
@@ -999,6 +1000,11 @@ function applyRole(role){
       badge.style.background='rgba(16,185,129,.15)';
       badge.style.color='var(--green)';
       badge.style.borderColor='rgba(16,185,129,.3)';
+    } else if(isVisiteur){
+      badge.textContent='Visiteur (lecture seule)';
+      badge.style.background='rgba(139,146,164,.15)';
+      badge.style.color='var(--tx2)';
+      badge.style.borderColor='rgba(139,146,164,.3)';
     } else {
       badge.textContent='Sous-chef';
       badge.style.background='rgba(59,130,246,.15)';
@@ -1007,17 +1013,41 @@ function applyRole(role){
     }
   }
 
-  // Onglet Admin — admin seulement
+  // Onglet Admin — admin seulement (jamais visiteur ni sous-chef)
   var adminTab = document.getElementById('tab-admin-btn');
   if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
+  // Pointages et Arrets Inpak — admin ET visiteur (lecture), pas sous-chef
   var ptTab = document.getElementById('tab-pt-btn');
-  if(ptTab) ptTab.style.display = isAdmin ? 'flex' : 'none';
+  if(ptTab) ptTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var arretsTab = document.getElementById('tab-arrets-btn');
-  if(arretsTab) arretsTab.style.display = isAdmin ? 'flex' : 'none';
+  if(arretsTab) arretsTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
   if(ae && currentUser) ae.textContent = currentUser.email;
+
+  // Visiteur : acces en lecture a tout (sauf Admin), aucune ecriture possible
+  // (bloque aussi cote regles Firebase, donc double securite — meme si un
+  // bouton d'ecriture restait visible quelque part, Firebase refuserait).
+  if(isVisiteur){
+    document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
+
+    // Masquer les boutons d'action principaux, pour une experience propre
+    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"]').forEach(function(el){
+      el.style.display = 'none';
+    });
+
+    document.addEventListener('click', function(e){
+      var tab = e.target.closest('.tab');
+      if(tab && tab.dataset.tab === 'admin'){
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        toast('Acces non autorise (compte visiteur)', '#ef4444');
+      }
+    }, true);
+
+    return;
+  }
 
   // Sous-chef : accès Planning uniquement
   if(!isAdmin){
@@ -1607,7 +1637,7 @@ function startApp(){
       loaded.s27=true;tryBuild();
     }).catch(function(){loaded.s27=true;tryBuild();});
     // Charger absences — admin seulement
-    if(currentUser && currentUser.role === 'admin'){
+    if(currentUser && (currentUser.role === 'admin' || currentUser.role === 'visiteur')){
       db.ref('planning/absences').once('value').then(function(snap){
         var data=snap.val();
         if(data){
