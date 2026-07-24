@@ -995,7 +995,7 @@ function applyRole(role){
   // Toujours repartir d'un etat "tout visible" avant d'appliquer les
   // restrictions du role courant — indispensable si on change de compte
   // (ex: visiteur -> admin) sans recharger completement la page.
-  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"]').forEach(function(el){
+  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"]').forEach(function(el){
     el.style.display = '';
   });
   ['ov','br','ab'].forEach(function(tab){
@@ -1044,7 +1044,7 @@ function applyRole(role){
     document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
 
     // Masquer les boutons d'action principaux, pour une experience propre
-    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"]').forEach(function(el){
+    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"]').forEach(function(el){
       el.style.display = 'none';
     });
 
@@ -2505,7 +2505,7 @@ function importerArretsInpak(){
 
   (parsed.avecRaison || []).forEach(function(a){
     if(!a.ligne || !a.date || !a.heure) return;
-    var key = ptKey('arret-' + a.ligne, a.date, 'raison', a.heure) + '-' + Math.random().toString(36).slice(2,7);
+    var key = ptKey('arret-' + a.ligne, a.date, 'raison', a.heure);
     entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: a.raison || '', duree: (a.duree != null ? a.duree : null), type: 'avec_raison', auteur: auteur, ts: Date.now(), importeLe: now }]);
   });
   (parsed.microstops || []).forEach(function(a){
@@ -2607,6 +2607,42 @@ function toggleMicrostopsDetail(){
   var visible = wrap.style.display !== 'none';
   wrap.style.display = visible ? 'none' : 'block';
   if(toggle) toggle.innerHTML = visible ? '&#9660; afficher le detail' : '&#9650; masquer le detail';
+}
+
+// Retire les doublons deja presents dans Firebase (crees par l'ancienne
+// cle aleatoire). Regroupe par ligne+date+heure(+type), ne garde que la
+// version la plus recente (ts le plus grand), supprime le reste.
+function nettoyerDoublonsArrets(){
+  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
+  if(!confirm('Nettoyer les doublons dans les arrets Inpak ? Cette action est irreversible.')) return;
+
+  var groupes = {};
+  Object.keys(ARRETS_DATA).forEach(function(key){
+    var a = ARRETS_DATA[key];
+    var k = a.type + '|' + a.ligne + '|' + a.date + '|' + (a.heure || '');
+    if(!groupes[k]) groupes[k] = [];
+    groupes[k].push({ key: key, ts: a.ts || 0 });
+  });
+
+  var aSupprimer = [];
+  Object.keys(groupes).forEach(function(k){
+    var entries = groupes[k];
+    if(entries.length <= 1) return;
+    entries.sort(function(a, b){ return b.ts - a.ts; }); // le plus recent en premier
+    for(var i = 1; i < entries.length; i++) aSupprimer.push(entries[i].key);
+  });
+
+  if(!aSupprimer.length){ toast('Aucun doublon trouve', '#10b981'); return; }
+
+  var updates = {};
+  aSupprimer.forEach(function(key){ updates['arrets_inpak/' + key] = null; });
+
+  toast('Suppression de ' + aSupprimer.length + ' doublon(s)…', '#3b82f6');
+  db.ref().update(updates).then(function(){
+    toast(aSupprimer.length + ' doublon(s) supprime(s)', '#10b981');
+  }).catch(function(e){
+    toast('Erreur : ' + e.message, '#ef4444');
+  });
 }
 
 function buildArretsInpak(){
