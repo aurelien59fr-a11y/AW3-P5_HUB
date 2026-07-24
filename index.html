@@ -377,6 +377,35 @@
         <button class="arrets-ligne-btn" data-ligne="36" onclick="filtrerArretsLigne('36')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 36</button>
       </div>
 
+      <!-- Filtre equipe -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="arrets-filtre-equipe">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Equipe</span>
+        <button class="arrets-equipe-btn on" data-equipe="all" onclick="filtrerArretsEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes</button>
+        <button class="arrets-equipe-btn" data-equipe="P1" onclick="filtrerArretsEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+        <button class="arrets-equipe-btn" data-equipe="P2" onclick="filtrerArretsEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+        <button class="arrets-equipe-btn" data-equipe="P3" onclick="filtrerArretsEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+        <button class="arrets-equipe-btn" data-equipe="P4" onclick="filtrerArretsEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+        <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+      </div>
+
+      <!-- Recherche date/heure precise -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Recherche precise</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="li-field">
+            <label class="li-label">Date</label>
+            <input type="date" id="arrets-recherche-date" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label">Heure (optionnel)</label>
+            <input type="time" id="arrets-recherche-heure" class="li-input">
+          </div>
+          <button onclick="rechercherArrets()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Rechercher</button>
+          <button onclick="reinitialiserRechercheArrets()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Reinitialiser</button>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px">Sans heure precise : montre tous les evenements de la date choisie. Avec heure : montre les evenements dans les 30 minutes autour.</div>
+      </div>
+
       <!-- Resume frequence -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch"><div class="cct">Frequence par ligne</div></div>
