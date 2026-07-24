@@ -2624,15 +2624,29 @@ function toggleMicrostopsDetail(){
 function nettoyerDoublonsArrets(){
   if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
 
+  var aSupprimer = [];
+
+  // 1. Micro-arrets au format obsolete (avant l'agregation par jour) :
+  // ils ont un champ "heure" mais pas de champ "nombre" — reliquats des
+  // tout premiers tests, remplaces depuis par le format agrege.
+  Object.keys(ARRETS_DATA).forEach(function(key){
+    var a = ARRETS_DATA[key];
+    if(a.type === 'microstop' && a.nombre == null){
+      aSupprimer.push(key);
+    }
+  });
+
+  // 2. Doublons classiques (meme ligne+date+heure+type, cree par l'ancienne
+  // cle aleatoire) — on ignore les entrees deja marquees ci-dessus.
   var groupes = {};
   Object.keys(ARRETS_DATA).forEach(function(key){
+    if(aSupprimer.indexOf(key) !== -1) return;
     var a = ARRETS_DATA[key];
     var k = a.type + '|' + a.ligne + '|' + a.date + '|' + (a.heure || '');
     if(!groupes[k]) groupes[k] = [];
     groupes[k].push({ key: key, ts: a.ts || 0 });
   });
 
-  var aSupprimer = [];
   Object.keys(groupes).forEach(function(k){
     var entries = groupes[k];
     if(entries.length <= 1) return;
@@ -2641,7 +2655,7 @@ function nettoyerDoublonsArrets(){
   });
 
   if(!aSupprimer.length){ toast('Aucun doublon trouve', '#10b981'); return; }
-  if(!confirm(aSupprimer.length + ' doublon(s) trouve(s). Les supprimer ? Cette action est irreversible.')) return;
+  if(!confirm(aSupprimer.length + ' entree(s) a supprimer (doublons + anciens micro-arrets non agreges). Continuer ? Cette action est irreversible.')) return;
 
   var TAILLE_LOT = 100;
   var lots = [];
