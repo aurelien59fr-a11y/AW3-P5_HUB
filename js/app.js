@@ -2425,6 +2425,7 @@ var ARRETS_DATA = {};
 var ARRETS_LIGNE_FILTRE = 'all';
 var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
 var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
+var ARRETS_DATE_FIN_FILTRE = '';  // '' ou 'YYYY-MM-DD' (fourchette)
 var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
 
 function loadArretsInpak(){
@@ -2464,7 +2465,7 @@ function importerArretsInpak(){
   (parsed.avecRaison || []).forEach(function(a){
     if(!a.ligne || !a.date || !a.heure) return;
     var key = ptKey('arret-' + a.ligne, a.date, 'raison', a.heure) + '-' + Math.random().toString(36).slice(2,7);
-    entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: a.raison || '', type: 'avec_raison', auteur: auteur, ts: Date.now(), importeLe: now }]);
+    entries.push([key, { ligne: a.ligne, date: a.date, heure: a.heure, raison: a.raison || '', duree: (a.duree != null ? a.duree : null), type: 'avec_raison', auteur: auteur, ts: Date.now(), importeLe: now }]);
   });
   (parsed.microstops || []).forEach(function(a){
     if(!a.ligne || !a.date || a.nombre == null) return;
@@ -2536,14 +2537,17 @@ function filtrerArretsEquipe(equipe){
 
 function rechercherArrets(){
   ARRETS_DATE_FILTRE = document.getElementById('arrets-recherche-date').value || '';
-  ARRETS_HEURE_FILTRE = document.getElementById('arrets-recherche-heure').value || '';
+  ARRETS_DATE_FIN_FILTRE = document.getElementById('arrets-recherche-date-fin').value || '';
+  ARRETS_HEURE_FILTRE = ARRETS_DATE_FIN_FILTRE ? '' : (document.getElementById('arrets-recherche-heure').value || '');
   buildArretsInpak();
 }
 
 function reinitialiserRechercheArrets(){
   document.getElementById('arrets-recherche-date').value = '';
+  document.getElementById('arrets-recherche-date-fin').value = '';
   document.getElementById('arrets-recherche-heure').value = '';
   ARRETS_DATE_FILTRE = '';
+  ARRETS_DATE_FIN_FILTRE = '';
   ARRETS_HEURE_FILTRE = '';
   buildArretsInpak();
 }
@@ -2578,12 +2582,17 @@ function buildArretsInpak(){
     avecRaison = avecRaison.filter(function(a){ return getEquipe(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
   }
 
-  // Recherche precise date/heure
+  // Recherche precise date/heure, ou fourchette de dates
   if(ARRETS_DATE_FILTRE){
-    avecRaison = avecRaison.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
-    microstops = microstops.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
-    if(ARRETS_HEURE_FILTRE){
-      avecRaison = avecRaison.filter(function(a){ return dansFenetreHeure(a.heure, ARRETS_HEURE_FILTRE); });
+    if(ARRETS_DATE_FIN_FILTRE){
+      avecRaison = avecRaison.filter(function(a){ return a.date >= ARRETS_DATE_FILTRE && a.date <= ARRETS_DATE_FIN_FILTRE; });
+      microstops = microstops.filter(function(a){ return a.date >= ARRETS_DATE_FILTRE && a.date <= ARRETS_DATE_FIN_FILTRE; });
+    } else {
+      avecRaison = avecRaison.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
+      microstops = microstops.filter(function(a){ return a.date === ARRETS_DATE_FILTRE; });
+      if(ARRETS_HEURE_FILTRE){
+        avecRaison = avecRaison.filter(function(a){ return dansFenetreHeure(a.heure, ARRETS_HEURE_FILTRE); });
+      }
     }
   }
 
@@ -2626,13 +2635,15 @@ function buildArretsInpak(){
       var affiches = avecRaison.slice(0, LIMITE);
       var html = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Duree</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
       html += affiches.map(function(a){
         var eq = getEquipe(a.date, a.heure);
         var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
+        var dureeTxt = (a.duree != null) ? a.duree + ' min' : '-';
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px;color:var(--tx1)">' + dureeTxt + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600;color:' + coul + '">' + eq + '</td>'
           + '<td style="padding:8px;font-size:13px;color:#ef4444">' + a.raison + '</td>'
