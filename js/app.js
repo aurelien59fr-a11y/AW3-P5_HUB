@@ -992,6 +992,17 @@ function applyRole(role){
   var isSubchef = role === 'subchef';
   var isVisiteur = role === 'visiteur';
 
+  // Toujours repartir d'un etat "tout visible" avant d'appliquer les
+  // restrictions du role courant — indispensable si on change de compte
+  // (ex: visiteur -> admin) sans recharger completement la page.
+  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"]').forEach(function(el){
+    el.style.display = '';
+  });
+  ['ov','br','ab'].forEach(function(tab){
+    var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+    if(btn) btn.style.display = 'flex';
+  });
+
   // Badge role
   var badge = document.getElementById('role-badge');
   if(badge){
