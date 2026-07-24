@@ -2614,7 +2614,6 @@ function toggleMicrostopsDetail(){
 // version la plus recente (ts le plus grand), supprime le reste.
 function nettoyerDoublonsArrets(){
   if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  if(!confirm('Nettoyer les doublons dans les arrets Inpak ? Cette action est irreversible.')) return;
 
   var groupes = {};
   Object.keys(ARRETS_DATA).forEach(function(key){
@@ -2633,16 +2632,34 @@ function nettoyerDoublonsArrets(){
   });
 
   if(!aSupprimer.length){ toast('Aucun doublon trouve', '#10b981'); return; }
+  if(!confirm(aSupprimer.length + ' doublon(s) trouve(s). Les supprimer ? Cette action est irreversible.')) return;
 
-  var updates = {};
-  aSupprimer.forEach(function(key){ updates['arrets_inpak/' + key] = null; });
+  var TAILLE_LOT = 400;
+  var lots = [];
+  for(var i = 0; i < aSupprimer.length; i += TAILLE_LOT) lots.push(aSupprimer.slice(i, i + TAILLE_LOT));
 
-  toast('Suppression de ' + aSupprimer.length + ' doublon(s)…', '#3b82f6');
-  db.ref().update(updates).then(function(){
-    toast(aSupprimer.length + ' doublon(s) supprime(s)', '#10b981');
-  }).catch(function(e){
-    toast('Erreur : ' + e.message, '#ef4444');
-  });
+  var fait = 0;
+  toast('Suppression de ' + aSupprimer.length + ' doublon(s) en cours…', '#3b82f6');
+  console.log('[Nettoyage doublons] ' + lots.length + ' lot(s) a traiter');
+
+  function envoyerLot(idx){
+    if(idx >= lots.length){
+      toast(aSupprimer.length + ' doublon(s) supprime(s)', '#10b981');
+      console.log('[Nettoyage doublons] Termine :', aSupprimer.length, 'doublon(s) supprime(s)');
+      return;
+    }
+    var updates = {};
+    lots[idx].forEach(function(key){ updates['arrets_inpak/' + key] = null; });
+    db.ref().update(updates).then(function(){
+      fait += lots[idx].length;
+      console.log('[Nettoyage doublons] ' + fait + ' / ' + aSupprimer.length);
+      envoyerLot(idx + 1);
+    }).catch(function(e){
+      toast('Erreur au lot ' + (idx+1) + '/' + lots.length + ' : ' + e.message, '#ef4444');
+      console.error('[Nettoyage doublons] Erreur lot ' + idx, e);
+    });
+  }
+  envoyerLot(0);
 }
 
 function buildArretsInpak(){
