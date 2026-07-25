@@ -29,7 +29,8 @@
     <div class="li-field"><label class="li-label">Mot de passe</label><input class="li-input" type="password" id="li-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="li-err" id="li-err"></div>
     <button class="li-btn" id="li-btn" onclick="doLogin()">Se connecter</button>
-    <div style="text-align:center;font-size:11px;color:var(--tx3)">Tu resteras connecte automatiquement</div>
+    <div style="text-align:center;margin-top:10px"><a href="#" onclick="doForgotPassword();return false;" style="font-size:12px;color:var(--blue);text-decoration:none">Mot de passe oublie ?</a></div>
+    <div style="text-align:center;font-size:11px;color:var(--tx3);margin-top:8px">Tu resteras connecte automatiquement</div>
   </div>
 </div>
 <div id="app-screen" style="display:none">
