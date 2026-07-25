@@ -1229,6 +1229,19 @@ function deactivateEmp(idx){
 }
 
 function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent='Connexion...';btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent='Se connecter';btn.disabled=false;});}
+function doForgotPassword(){
+  var email=document.getElementById('li-email').value.trim();
+  var err=document.getElementById('li-err');
+  if(!email){ err.style.color='#ef4444'; err.textContent='Renseigne ton email dans le champ ci-dessus, puis clique a nouveau sur "Mot de passe oublie ?".'; return; }
+  err.style.color='var(--tx3)'; err.textContent='Envoi en cours...';
+  firebase.auth().sendPasswordResetEmail(email).then(function(){
+    err.style.color='#10b981';
+    err.textContent='Email envoye a '+email+' (verifie aussi tes spams).';
+  }).catch(function(e){
+    err.style.color='#ef4444';
+    err.textContent = e.code==='auth/user-not-found' ? 'Aucun compte avec cet email.' : 'Erreur: '+e.message;
+  });
+}
 function doLogout(){firebase.auth().signOut();}
 window.addEventListener('load',function(){
   document.getElementById('dchip').textContent=new Date().toLocaleDateString('fr-BE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
