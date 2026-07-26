@@ -2613,6 +2613,37 @@ function filtrerArretsRaison(){
   buildArretsInpak();
 }
 
+var ARRETS_OPERATEURS_FILTRE = {}; // {} = tous, sinon {nom: true, ...} = seulement ceux-la
+
+function toggleArretsOperateur(nom){
+  if(nom === 'all'){
+    ARRETS_OPERATEURS_FILTRE = {};
+  } else {
+    if(ARRETS_OPERATEURS_FILTRE[nom]) delete ARRETS_OPERATEURS_FILTRE[nom];
+    else ARRETS_OPERATEURS_FILTRE[nom] = true;
+  }
+  document.querySelectorAll('.arrets-operateur-btn').forEach(function(b){
+    var nomBtn = b.dataset.operateur;
+    var actif = nomBtn === 'all' ? (Object.keys(ARRETS_OPERATEURS_FILTRE).length === 0) : !!ARRETS_OPERATEURS_FILTRE[nomBtn];
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildArretsInpak();
+}
+
+function peuplerOperateursFiltre(){
+  var wrap = document.getElementById('arrets-filtre-operateur');
+  if(!wrap || wrap.dataset.rempli === '1') return; // ne construire qu'une fois (liste statique)
+  var operateurs = EMP.filter(function(e){ return e.g === 'INPAK'; }).map(function(e){ return e.n; });
+  var html = '<button class="arrets-operateur-btn" data-operateur="all" onclick="toggleArretsOperateur(\'all\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Tous</button>';
+  html += operateurs.map(function(nom){
+    return '<button class="arrets-operateur-btn" data-operateur="' + nom.replace(/"/g,'&quot;') + '" onclick="toggleArretsOperateur(\'' + nom.replace(/'/g,"\\'") + '\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">' + nom + '</button>';
+  }).join('');
+  wrap.innerHTML = html;
+  wrap.dataset.rempli = '1';
+}
+
 function peuplerRaisonsSelect(){
   var sel = document.getElementById('arrets-raison-select');
   if(!sel) return;
@@ -2857,6 +2888,18 @@ function buildArretsInpak(){
   }
 
   peuplerRaisonsSelect();
+  peuplerOperateursFiltre();
+
+  // Filtre par operateur(s) selectionne(s) — croise avec le planning
+  if(Object.keys(ARRETS_OPERATEURS_FILTRE).length){
+    var matchOp = function(a){
+      var op = getOperateur(a.date, a.ligne);
+      if(!op) return false;
+      return op.split(', ').some(function(n){ return ARRETS_OPERATEURS_FILTRE[n]; });
+    };
+    avecRaison = avecRaison.filter(matchOp);
+    microstops = microstops.filter(matchOp);
+  }
 
   // Filtre par raison precise (ex: "combien de temps a pris le grand
   // nettoyage sur toute l'annee ?")
