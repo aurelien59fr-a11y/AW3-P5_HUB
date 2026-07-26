@@ -2477,9 +2477,22 @@ function getGroupePourLigne(ligne){
   return null;
 }
 
-function getOperateur(dateISO, ligne){
+function getOperateur(dateISO, heureISO, ligne){
   var groupe = getGroupePourLigne(ligne);
   if(!groupe) return null;
+
+  // Le weekend, deux equipes (P4/P5) se partagent la meme journee sur
+  // 2 blocs (05h-17h / 17h-05h). Cette dashboard ne suit que P5 — si
+  // l'heure de l'arret tombe dans le bloc couvert par P4 cette
+  // semaine-la, on ne connait pas l'operateur (personne d'autre suivi ici).
+  var d = new Date(dateISO + 'T00:00:00');
+  var dow = d.getDay();
+  var estWeekend = (dow === 0 || dow === 6);
+  if(estWeekend && heureISO){
+    var equipeArret = getEquipe(dateISO, heureISO);
+    if(equipeArret !== 'P5') return null;
+  }
+
   var parts = dateISO.split('-'); // YYYY-MM-DD
   var year = parts[0], mm = parts[1], dd = parts[2];
   var ddmm = dd + '/' + mm;
@@ -2972,7 +2985,7 @@ function buildComparaisonTab(){
     }
     var parOp2 = {};
     arretsOp.forEach(function(a){
-      var op = getOperateur(a.date, a.ligne);
+      var op = getOperateur(a.date, a.heure, a.ligne);
       if(!op) return;
       op.split(', ').forEach(function(n){
         if(!parOp2[n]) parOp2[n] = { total: 0, n: 0 };
@@ -3062,7 +3075,7 @@ function buildArretsInpak(){
     } else {
       var parOp = {};
       avecRaison.forEach(function(a){
-        var op = getOperateur(a.date, a.ligne) || 'Inconnu';
+        var op = getOperateur(a.date, a.heure, a.ligne) || 'Inconnu';
         op.split(', ').forEach(function(n){
           if(!parOp[n]) parOp[n] = { total: 0, n: 0 };
           parOp[n].total += (a.duree || 0);
@@ -3101,7 +3114,7 @@ function buildArretsInpak(){
   // applique APRES le calcul de comparaison ci-dessus.
   if(Object.keys(ARRETS_OPERATEURS_FILTRE).length){
     var matchOp = function(a){
-      var op = getOperateur(a.date, a.ligne);
+      var op = getOperateur(a.date, a.heure, a.ligne);
       if(!op) return false;
       return op.split(', ').some(function(n){ return ARRETS_OPERATEURS_FILTRE[n]; });
     };
@@ -3153,7 +3166,7 @@ function buildArretsInpak(){
         var eq = getEquipe(a.date, a.heure);
         var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
         var dureeTxt = (a.duree != null) ? a.duree + ' min' : '-';
-        var operateur = getOperateur(a.date, a.ligne) || '-';
+        var operateur = getOperateur(a.date, a.heure, a.ligne) || '-';
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
@@ -3199,4 +3212,3 @@ function buildArretsInpak(){
     }
   }
 }
- 
