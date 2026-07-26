@@ -430,6 +430,7 @@ function todayStr(){var n=new Date();return String(n.getDate()).padStart(2,'0')+
 function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEEKS25).reduce(function(a,w){return a.concat(w.d);},[]);}
 function toast(msg,col){var t=document.createElement('div');t.className='toast';t.innerHTML='<div class="tdot" style="background:'+col+'"></div>'+msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2500);}
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
+  if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
 });});
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
   db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&(currentUser.role==='admin'||currentUser.role==='visiteur')){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
@@ -1041,6 +1042,8 @@ function applyRole(role){
   if(ptTab) ptTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var arretsTab = document.getElementById('tab-arrets-btn');
   if(arretsTab) arretsTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
+  var cmp2Tab = document.getElementById('tab-cmp2-btn');
+  if(cmp2Tab) cmp2Tab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -2512,6 +2515,7 @@ function getEquipe(dateStr, heureStr){
 }
 
 var ARRETS_DATA = {};
+var _arretsComparOpChart = null;
 var ARRETS_LIGNE_FILTRE = 'all';
 var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
 var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
@@ -2524,6 +2528,7 @@ function loadArretsInpak(){
   db.ref('arrets_inpak').on('value', function(snap){
     ARRETS_DATA = snap.val() || {};
     buildArretsInpak();
+    if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
   }, function(error){
     console.error('[Arrets Inpak] Erreur de lecture Firebase :', error);
   });
@@ -2859,6 +2864,143 @@ function nettoyerDoublonsArrets(){
   envoyerLot(0);
 }
 
+// ============================================================
+// ONGLET COMPARAISON — equipes (P1-P5) et operateurs, pour une raison
+// et une ligne donnees. Etat independant de l'onglet Arrets Inpak.
+// ============================================================
+var CMP2_LIGNE_FILTRE = 'all';
+var CMP2_EQUIPE_OP_FILTRE = 'all';
+var _cmp2EquipeChart = null;
+var _cmp2OperateurChart = null;
+
+function filtrerCmp2Ligne(ligne){
+  CMP2_LIGNE_FILTRE = ligne;
+  document.querySelectorAll('.cmp2-ligne-btn').forEach(function(b){
+    var actif = b.dataset.ligne === ligne;
+    b.classList.toggle('on', actif);
+    b.style.background = actif ? 'var(--blue)' : 'none';
+    b.style.color = actif ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildComparaisonTab();
+}
+
+function filtrerCmp2EquipeOp(equipe){
+  CMP2_EQUIPE_OP_FILTRE = equipe;
+  document.querySelectorAll('.cmp2-equipe-op-btn').forEach(function(b){
+    var nomBtn = b.dataset.equipe;
+    var coul = nomBtn === 'all' ? 'var(--blue)' : (COULEURS_EQUIPE[nomBtn] || 'var(--blue)');
+    var actif = nomBtn === equipe;
+    b.classList.toggle('on', actif);
+    b.style.background = actif ? coul : 'none';
+    b.style.color = actif ? '#fff' : coul;
+  });
+  buildComparaisonTab();
+}
+
+function peuplerCmp2RaisonsSelect(){
+  var sel = document.getElementById('cmp2-raison-select');
+  if(!sel) return;
+  var raisons = {};
+  Object.values(ARRETS_DATA).forEach(function(a){
+    if(a.type === 'avec_raison' && a.raison) raisons[a.raison] = true;
+  });
+  var liste = Object.keys(raisons).sort();
+  var precedent = sel.value;
+  sel.innerHTML = '<option value="all">Toutes les raisons</option>' + liste.map(function(r){
+    return '<option value="' + r.replace(/"/g,'&quot;') + '">' + r + '</option>';
+  }).join('');
+  if(liste.indexOf(precedent) !== -1) sel.value = precedent;
+}
+
+function buildComparaisonTab(){
+  peuplerCmp2RaisonsSelect();
+  var raison = document.getElementById('cmp2-raison-select') ? document.getElementById('cmp2-raison-select').value : 'all';
+
+  var arrets = Object.values(ARRETS_DATA).filter(function(a){ return a.type === 'avec_raison'; });
+  if(CMP2_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === CMP2_LIGNE_FILTRE; });
+  if(raison !== 'all') arrets = arrets.filter(function(a){ return a.raison === raison; });
+
+  var wrapResume = document.getElementById('cmp2-resume-wrap');
+  if(wrapResume){
+    if(!arrets.length){
+      wrapResume.style.display = 'none';
+    } else {
+      var totalMin = arrets.reduce(function(s, a){ return s + (a.duree || 0); }, 0);
+      var h = Math.floor(totalMin / 60), m = totalMin % 60;
+      wrapResume.style.display = 'block';
+      wrapResume.innerHTML = '<b>' + arrets.length + '</b> occurrence(s)' + (raison !== 'all' ? ' de "' + raison + '"' : '') + ' — temps total : <b>' + h + 'h' + String(m).padStart(2,'0') + '</b>';
+    }
+  }
+
+  // --- Comparaison par equipe ---
+  var ctxEq = document.getElementById('cmp2EquipeChart');
+  if(ctxEq && typeof Chart !== 'undefined'){
+    var parEquipe = { P1: {total:0,n:0}, P2: {total:0,n:0}, P3: {total:0,n:0}, P4: {total:0,n:0}, P5: {total:0,n:0} };
+    arrets.forEach(function(a){
+      var eq = getEquipe(a.date, a.heure);
+      if(!parEquipe[eq]) return;
+      parEquipe[eq].total += (a.duree || 0);
+      parEquipe[eq].n++;
+    });
+    var equipes = ['P1','P2','P3','P4','P5'].filter(function(e){ return parEquipe[e].n > 0; });
+    if(_cmp2EquipeChart){ _cmp2EquipeChart.destroy(); _cmp2EquipeChart = null; }
+    if(equipes.length){
+      var moyEq = equipes.map(function(e){ return Math.round(parEquipe[e].total / parEquipe[e].n); });
+      var nEq = equipes.map(function(e){ return parEquipe[e].n; });
+      _cmp2EquipeChart = new Chart(ctxEq, {
+        type: 'bar',
+        data: { labels: equipes.map(function(e){ return e === 'P5' ? 'P5 (moi)' : e; }), datasets: [{ data: moyEq, backgroundColor: equipes.map(function(e){ return COULEURS_EQUIPE[e]; }) }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nEq[c.dataIndex] + ' occurrence(s)'; } } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+            y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
+          }
+        }
+      });
+    }
+  }
+
+  // --- Comparaison par operateur, filtree par equipe si choisie ---
+  var ctxOp = document.getElementById('cmp2OperateurChart');
+  if(ctxOp && typeof Chart !== 'undefined'){
+    var arretsOp = arrets;
+    if(CMP2_EQUIPE_OP_FILTRE !== 'all'){
+      arretsOp = arretsOp.filter(function(a){ return getEquipe(a.date, a.heure) === CMP2_EQUIPE_OP_FILTRE; });
+    }
+    var parOp2 = {};
+    arretsOp.forEach(function(a){
+      var op = getOperateur(a.date, a.ligne);
+      if(!op) return;
+      op.split(', ').forEach(function(n){
+        if(!parOp2[n]) parOp2[n] = { total: 0, n: 0 };
+        parOp2[n].total += (a.duree || 0);
+        parOp2[n].n++;
+      });
+    });
+    var noms2 = Object.keys(parOp2).sort(function(x, y){ return (parOp2[y].total/parOp2[y].n) - (parOp2[x].total/parOp2[x].n); });
+    if(_cmp2OperateurChart){ _cmp2OperateurChart.destroy(); _cmp2OperateurChart = null; }
+    if(noms2.length){
+      var moyOp = noms2.map(function(n){ return Math.round(parOp2[n].total / parOp2[n].n); });
+      var nOp = noms2.map(function(n){ return parOp2[n].n; });
+      _cmp2OperateurChart = new Chart(ctxOp, {
+        type: 'bar',
+        data: { labels: noms2, datasets: [{ data: moyOp, backgroundColor: '#3b82f6' }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nOp[c.dataIndex] + ' occurrence(s)'; } } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+            y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
+          }
+        }
+      });
+    }
+  }
+}
+
 function buildArretsInpak(){
   var tousLesArrets = Object.values(ARRETS_DATA);
   var filtre = ARRETS_LIGNE_FILTRE;
@@ -2890,19 +3032,9 @@ function buildArretsInpak(){
   peuplerRaisonsSelect();
   peuplerOperateursFiltre();
 
-  // Filtre par operateur(s) selectionne(s) — croise avec le planning
-  if(Object.keys(ARRETS_OPERATEURS_FILTRE).length){
-    var matchOp = function(a){
-      var op = getOperateur(a.date, a.ligne);
-      if(!op) return false;
-      return op.split(', ').some(function(n){ return ARRETS_OPERATEURS_FILTRE[n]; });
-    };
-    avecRaison = avecRaison.filter(matchOp);
-    microstops = microstops.filter(matchOp);
-  }
-
   // Filtre par raison precise (ex: "combien de temps a pris le grand
-  // nettoyage sur toute l'annee ?")
+  // nettoyage sur toute l'annee ?") — applique AVANT le filtre operateur,
+  // pour que la comparaison par operateur montre toujours tout le monde.
   if(ARRETS_RAISON_FILTRE !== 'all'){
     avecRaison = avecRaison.filter(function(a){ return a.raison === ARRETS_RAISON_FILTRE; });
   }
@@ -2917,6 +3049,64 @@ function buildArretsInpak(){
       wrapRaisonResume.style.display = 'block';
       wrapRaisonResume.innerHTML = '<b>' + avecRaison.length + '</b> occurrence(s) de "' + ARRETS_RAISON_FILTRE + '" — temps total : <b>' + h + 'h' + String(m).padStart(2,'0') + '</b> (' + totalMin + ' min)';
     }
+  }
+
+  // --- Comparaison par operateur (moyenne de duree), pour la raison
+  // selectionnee — calculee AVANT le filtre operateur, pour comparer tout
+  // le monde meme si un ou plusieurs operateurs sont selectionnes ailleurs.
+  var wrapComparOp = document.getElementById('arrets-compar-op-wrap');
+  if(wrapComparOp){
+    if(ARRETS_RAISON_FILTRE === 'all'){
+      wrapComparOp.style.display = 'none';
+      if(_arretsComparOpChart){ _arretsComparOpChart.destroy(); _arretsComparOpChart = null; }
+    } else {
+      var parOp = {};
+      avecRaison.forEach(function(a){
+        var op = getOperateur(a.date, a.ligne) || 'Inconnu';
+        op.split(', ').forEach(function(n){
+          if(!parOp[n]) parOp[n] = { total: 0, n: 0 };
+          parOp[n].total += (a.duree || 0);
+          parOp[n].n++;
+        });
+      });
+      var noms = Object.keys(parOp).sort(function(x, y){ return (parOp[y].total/parOp[y].n) - (parOp[x].total/parOp[x].n); });
+      if(noms.length && typeof Chart !== 'undefined'){
+        wrapComparOp.style.display = 'block';
+        var moyennes = noms.map(function(n){ return Math.round(parOp[n].total / parOp[n].n); });
+        var occurrences = noms.map(function(n){ return parOp[n].n; });
+        var ctx = document.getElementById('arretsComparOpChart');
+        if(_arretsComparOpChart) _arretsComparOpChart.destroy();
+        _arretsComparOpChart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: noms, datasets: [{ label: 'Duree moyenne (min)', data: moyennes, backgroundColor: '#3b82f6' }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { afterLabel: function(c){ return occurrences[c.dataIndex] + ' occurrence(s)'; } } }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
+              y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
+            }
+          }
+        });
+      } else {
+        wrapComparOp.style.display = 'none';
+      }
+    }
+  }
+
+  // Filtre par operateur(s) selectionne(s) — croise avec le planning,
+  // applique APRES le calcul de comparaison ci-dessus.
+  if(Object.keys(ARRETS_OPERATEURS_FILTRE).length){
+    var matchOp = function(a){
+      var op = getOperateur(a.date, a.ligne);
+      if(!op) return false;
+      return op.split(', ').some(function(n){ return ARRETS_OPERATEURS_FILTRE[n]; });
+    };
+    avecRaison = avecRaison.filter(matchOp);
+    microstops = microstops.filter(matchOp);
   }
 
   // --- Resume frequence par ligne ---
