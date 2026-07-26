@@ -2659,12 +2659,17 @@ function nettoyerDoublonsArrets(){
   });
 
   // 2. Doublons classiques (meme ligne+date+heure+type, cree par l'ancienne
-  // cle aleatoire) — on ignore les entrees deja marquees ci-dessus.
+  // cle aleatoire, ou par de petites variations d'espace/type entre deux
+  // imports) — on ignore les entrees deja marquees ci-dessus. Normalisation
+  // stricte (trim + casse) pour ne rater aucune variante.
   var groupes = {};
   Object.keys(ARRETS_DATA).forEach(function(key){
     if(aSupprimer.indexOf(key) !== -1) return;
     var a = ARRETS_DATA[key];
-    var k = a.type + '|' + a.ligne + '|' + a.date + '|' + (a.heure || '');
+    var ligneNorm = String(a.ligne || '').trim();
+    var dateNorm = String(a.date || '').trim();
+    var heureNorm = String(a.heure || '').trim();
+    var k = a.type + '|' + ligneNorm + '|' + dateNorm + '|' + heureNorm;
     if(!groupes[k]) groupes[k] = [];
     groupes[k].push({ key: key, ts: a.ts || 0 });
   });
