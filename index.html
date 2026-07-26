@@ -53,6 +53,7 @@
     <button class="tab" data-tab="ab">&#9675; Absences</button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; Pointages</button>
     <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; Arrets Inpak</button>
+    <button class="tab" id="tab-cmp2-btn" data-tab="cmp2" style="display:none">&#128101; Comparaison</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; Admin</button>
   </nav>
   <main class="content">
@@ -437,6 +438,10 @@
           </select>
         </div>
         <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
+        <div id="arrets-compar-op-wrap" style="display:none;margin-bottom:16px">
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:8px">Duree moyenne par operateur pour cette raison — te permet de comparer</div>
+          <div style="height:240px"><canvas id="arretsComparOpChart"></canvas></div>
+        </div>
         <div id="arrets-raison-wrap"></div>
       </div>
 
@@ -446,6 +451,56 @@
           <div class="cct">Micro-arrets <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; afficher le detail</span></div>
         </div>
         <div id="arrets-micro-wrap" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- COMPARAISON -->
+    <div class="pane" id="pane-cmp2">
+      <div class="sh">
+        <div class="st">Comparaison</div>
+        <div class="ss">Compare les equipes (P1 a P5) et les operateurs entre eux</div>
+      </div>
+
+      <!-- Raison -->
+      <div style="margin-bottom:16px">
+        <select id="cmp2-raison-select" onchange="buildComparaisonTab()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+          <option value="all">Toutes les raisons</option>
+        </select>
+      </div>
+
+      <!-- Filtre ligne -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="cmp2-filtre-ligne">
+        <button class="cmp2-ligne-btn on" data-ligne="all" onclick="filtrerCmp2Ligne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes les lignes</button>
+        <button class="cmp2-ligne-btn" data-ligne="31" onclick="filtrerCmp2Ligne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
+        <button class="cmp2-ligne-btn" data-ligne="32" onclick="filtrerCmp2Ligne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
+        <button class="cmp2-ligne-btn" data-ligne="33" onclick="filtrerCmp2Ligne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
+        <button class="cmp2-ligne-btn" data-ligne="34" onclick="filtrerCmp2Ligne('34')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 34</button>
+        <button class="cmp2-ligne-btn" data-ligne="35" onclick="filtrerCmp2Ligne('35')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 35</button>
+        <button class="cmp2-ligne-btn" data-ligne="36" onclick="filtrerCmp2Ligne('36')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 36</button>
+      </div>
+
+      <div id="cmp2-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx1)"></div>
+
+      <!-- Comparaison par equipe -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Comparaison par equipe (P1 a P5)</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Duree moyenne d'arret par equipe, pour la raison et la ligne selectionnees.</div>
+        <div style="height:260px"><canvas id="cmp2EquipeChart"></canvas></div>
+      </div>
+
+      <!-- Comparaison par operateur, avec filtre equipe -->
+      <div class="cc">
+        <div class="cch"><div class="cct">Comparaison par operateur</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap" id="cmp2-filtre-equipe-op">
+          <button class="cmp2-equipe-op-btn on" data-equipe="all" onclick="filtrerCmp2EquipeOp('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes equipes</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P1" onclick="filtrerCmp2EquipeOp('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P2" onclick="filtrerCmp2EquipeOp('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P3" onclick="filtrerCmp2EquipeOp('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P4" onclick="filtrerCmp2EquipeOp('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P5" onclick="filtrerCmp2EquipeOp('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+        </div>
+        <div style="height:260px"><canvas id="cmp2OperateurChart"></canvas></div>
       </div>
     </div>
 
