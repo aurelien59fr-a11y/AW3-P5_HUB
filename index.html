@@ -425,6 +425,12 @@
       <!-- Arrets avec raison -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch"><div class="cct">Arrets avec raison <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        <div style="margin-bottom:12px">
+          <select id="arrets-raison-select" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+            <option value="all">Toutes les raisons</option>
+          </select>
+        </div>
+        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
         <div id="arrets-raison-wrap"></div>
       </div>
 
