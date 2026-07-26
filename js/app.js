@@ -2643,6 +2643,65 @@ function toggleMicrostopsDetail(){
 // Retire les doublons deja presents dans Firebase (crees par l'ancienne
 // cle aleatoire). Regroupe par ligne+date+heure(+type), ne garde que la
 // version la plus recente (ts le plus grand), supprime le reste.
+// Montre les doublons detectes SANS rien supprimer — pour verifier avant
+// d'agir, et pour pouvoir envoyer un exemple concret si besoin.
+function diagnostiquerDoublonsArrets(){
+  var legacy = [];
+  Object.keys(ARRETS_DATA).forEach(function(key){
+    var a = ARRETS_DATA[key];
+    if(a.type === 'microstop' && a.nombre == null) legacy.push({ key: key, a: a });
+  });
+
+  var groupes = {};
+  Object.keys(ARRETS_DATA).forEach(function(key){
+    if(legacy.some(function(l){ return l.key === key; })) return;
+    var a = ARRETS_DATA[key];
+    var ligneNorm = String(a.ligne || '').trim();
+    var dateNorm = String(a.date || '').trim();
+    var heureNorm = String(a.heure || '').trim();
+    var k = a.type + '|' + ligneNorm + '|' + dateNorm + '|' + heureNorm;
+    if(!groupes[k]) groupes[k] = [];
+    groupes[k].push({ key: key, a: a });
+  });
+
+  var doublons = Object.keys(groupes).filter(function(k){ return groupes[k].length > 1; });
+
+  var wrap = document.getElementById('arrets-diag-wrap');
+  if(!wrap) return;
+
+  if(!legacy.length && !doublons.length){
+    wrap.innerHTML = '<div style="color:#10b981;font-size:13px;padding:12px">✓ Aucun doublon ni entree obsolete detectee.</div>';
+    wrap.style.display = 'block';
+    return;
+  }
+
+  var html = '<div style="font-size:13px;color:var(--tx2);margin-bottom:10px">'
+    + legacy.length + ' entree(s) au format obsolete, ' + doublons.length + ' groupe(s) en double (aperçu des 10 premiers de chaque) :</div>';
+
+  if(legacy.length){
+    html += '<div style="font-weight:600;font-size:12px;color:var(--tx1);margin:10px 0 6px">Micro-arrets format obsolete :</div>';
+    html += legacy.slice(0, 10).map(function(l){
+      return '<div style="font-family:var(--mo);font-size:11px;color:var(--tx3);padding:4px 0;border-bottom:1px solid var(--bd2)">' + JSON.stringify(l.a) + '</div>';
+    }).join('');
+  }
+
+  if(doublons.length){
+    html += '<div style="font-weight:600;font-size:12px;color:var(--tx1);margin:10px 0 6px">Groupes en double :</div>';
+    html += doublons.slice(0, 10).map(function(k){
+      var entries = groupes[k];
+      return '<div style="margin-bottom:8px;padding:8px;background:var(--bg3);border-radius:6px">'
+        + '<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">' + entries.length + ' exemplaires — cle: ' + k + '</div>'
+        + entries.map(function(e){ return '<div style="font-family:var(--mo);font-size:11px;color:var(--tx2)">' + JSON.stringify(e.a) + '</div>'; }).join('')
+        + '</div>';
+    }).join('');
+  }
+
+  wrap.innerHTML = html;
+  wrap.style.display = 'block';
+  console.log('[Diagnostic doublons] Format obsolete:', legacy);
+  console.log('[Diagnostic doublons] Groupes en double:', doublons.map(function(k){ return { cle: k, entrees: groupes[k] }; }));
+}
+
 function nettoyerDoublonsArrets(){
   if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
 
