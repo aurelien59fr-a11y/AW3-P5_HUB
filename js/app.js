@@ -2463,6 +2463,33 @@ function equipeWeekend(dateStr, bloc){
 }
 
 // Renvoie l'equipe (P1 a P5) qui travaillait a une date/heure donnee.
+// Lie une ligne d'arret a son groupe de planning (31/32, 33/34, 35/36),
+// puis retrouve qui etait affecte a ce groupe ce jour-la — pour repondre
+// a "c'est l'arret de qui ?"
+function getGroupePourLigne(ligne){
+  var l = String(ligne);
+  if(l === '31' || l === '32') return '31/32';
+  if(l === '33' || l === '34') return '33/34';
+  if(l === '35' || l === '36') return '35/36';
+  return null;
+}
+
+function getOperateur(dateISO, ligne){
+  var groupe = getGroupePourLigne(ligne);
+  if(!groupe) return null;
+  var parts = dateISO.split('-'); // YYYY-MM-DD
+  var year = parts[0], mm = parts[1], dd = parts[2];
+  var ddmm = dd + '/' + mm;
+  var weeks = year==='2027'?WEEKS27:year==='2026'?WEEKS26:WEEKS25;
+  var shifts = year==='2027'?SHIFTS27:year==='2026'?SHIFTS26:SHIFTS25;
+  if(!weeks || !shifts) return null;
+  var allD = weeks.reduce(function(a,w){ return a.concat(w.d); }, []);
+  var idx = allD.indexOf(ddmm);
+  if(idx === -1) return null;
+  var noms = shifts.filter(function(e){ return e.s[idx] === groupe; }).map(function(e){ return e.n; });
+  return noms.length ? noms.join(', ') : null;
+}
+
 function getEquipe(dateStr, heureStr){
   var d = new Date(dateStr + 'T00:00:00');
   var dow = d.getDay(); // 0=dim,6=sam
@@ -2490,6 +2517,7 @@ var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
 var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
 var ARRETS_DATE_FIN_FILTRE = '';  // '' ou 'YYYY-MM-DD' (fourchette)
 var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
+var ARRETS_RAISON_FILTRE = 'all'; // 'all' ou une raison precise
 
 function loadArretsInpak(){
   if(!db) return;
@@ -2578,6 +2606,26 @@ function importerArretsInpak(){
     });
   }
   envoyerLot(0);
+}
+
+function filtrerArretsRaison(){
+  ARRETS_RAISON_FILTRE = document.getElementById('arrets-raison-select').value || 'all';
+  buildArretsInpak();
+}
+
+function peuplerRaisonsSelect(){
+  var sel = document.getElementById('arrets-raison-select');
+  if(!sel) return;
+  var raisons = {};
+  Object.values(ARRETS_DATA).forEach(function(a){
+    if(a.type === 'avec_raison' && a.raison) raisons[a.raison] = true;
+  });
+  var liste = Object.keys(raisons).sort();
+  var precedent = sel.value;
+  sel.innerHTML = '<option value="all">Toutes les raisons</option>' + liste.map(function(r){
+    return '<option value="' + r.replace(/"/g,'&quot;') + '">' + r + '</option>';
+  }).join('');
+  if(liste.indexOf(precedent) !== -1) sel.value = precedent;
 }
 
 function filtrerArretsLigne(ligne){
@@ -2808,6 +2856,26 @@ function buildArretsInpak(){
     }
   }
 
+  peuplerRaisonsSelect();
+
+  // Filtre par raison precise (ex: "combien de temps a pris le grand
+  // nettoyage sur toute l'annee ?")
+  if(ARRETS_RAISON_FILTRE !== 'all'){
+    avecRaison = avecRaison.filter(function(a){ return a.raison === ARRETS_RAISON_FILTRE; });
+  }
+
+  var wrapRaisonResume = document.getElementById('arrets-raison-resume-wrap');
+  if(wrapRaisonResume){
+    if(ARRETS_RAISON_FILTRE === 'all'){
+      wrapRaisonResume.style.display = 'none';
+    } else {
+      var totalMin = avecRaison.reduce(function(s, a){ return s + (a.duree || 0); }, 0);
+      var h = Math.floor(totalMin / 60), m = totalMin % 60;
+      wrapRaisonResume.style.display = 'block';
+      wrapRaisonResume.innerHTML = '<b>' + avecRaison.length + '</b> occurrence(s) de "' + ARRETS_RAISON_FILTRE + '" — temps total : <b>' + h + 'h' + String(m).padStart(2,'0') + '</b> (' + totalMin + ' min)';
+    }
+  }
+
   // --- Resume frequence par ligne ---
   var wrapResume = document.getElementById('arrets-resume-wrap');
   if(wrapResume){
@@ -2847,17 +2915,19 @@ function buildArretsInpak(){
       var affiches = avecRaison.slice(0, LIMITE);
       var html = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Duree</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Duree</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Operateur</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
       html += affiches.map(function(a){
         var eq = getEquipe(a.date, a.heure);
         var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
         var dureeTxt = (a.duree != null) ? a.duree + ' min' : '-';
+        var operateur = getOperateur(a.date, a.ligne) || '-';
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px;color:var(--tx1)">' + dureeTxt + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600;color:' + coul + '">' + eq + '</td>'
+          + '<td style="padding:8px;font-size:12px;color:var(--tx1)">' + operateur + '</td>'
           + '<td style="padding:8px;font-size:13px;color:#ef4444">' + a.raison + '</td>'
           + '</tr>';
       }).join('');
