@@ -394,6 +394,12 @@
         <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
       </div>
 
+      <!-- Filtre operateur (multi-selection, rempli par JS) -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Operateur</span>
+        <div id="arrets-filtre-operateur" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
       <!-- Recherche date/heure precise -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch"><div class="cct">Recherche precise</div></div>
