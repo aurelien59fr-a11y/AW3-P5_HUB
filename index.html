@@ -364,9 +364,13 @@
       <div class="sh">
         <div class="st">Arrets Inpak</div>
         <div class="ss">Lignes 31 a 36 — arrets avec raison et micro-arrets</div>
-        <button onclick="nettoyerDoublonsArrets()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128465; Nettoyer les doublons</button>
+        <button onclick="diagnostiquerDoublonsArrets()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128269; Diagnostiquer les doublons</button>
+        <button onclick="nettoyerDoublonsArrets()" style="padding:6px 14px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128465; Nettoyer les doublons</button>
         <button onclick="openImportArretsModal()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
       </div>
+
+      <!-- Zone de diagnostic (masquee par defaut) -->
+      <div class="cc" id="arrets-diag-wrap" style="display:none;margin-bottom:16px;max-height:400px;overflow-y:auto"></div>
 
       <!-- Filtre ligne -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="arrets-filtre-ligne">
