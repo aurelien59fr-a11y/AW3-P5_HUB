@@ -461,6 +461,19 @@
         <div class="ss">Compare les equipes (P1 a P5) et les operateurs entre eux</div>
       </div>
 
+      <!-- Periode -->
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+        <div class="li-field">
+          <label class="li-label">Du</label>
+          <input type="date" id="cmp2-date-debut" class="li-input" onchange="buildComparaisonTab()">
+        </div>
+        <div class="li-field">
+          <label class="li-label">Au</label>
+          <input type="date" id="cmp2-date-fin" class="li-input" onchange="buildComparaisonTab()">
+        </div>
+        <button onclick="document.getElementById('cmp2-date-debut').value='';document.getElementById('cmp2-date-fin').value='';buildComparaisonTab()" style="padding:9px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Reinitialiser</button>
+      </div>
+
       <!-- Raison -->
       <div style="margin-bottom:16px">
         <select id="cmp2-raison-select" onchange="buildComparaisonTab()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
@@ -480,6 +493,13 @@
       </div>
 
       <div id="cmp2-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx1)"></div>
+
+      <!-- Evolution dans le temps (mois par mois) -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Evolution mois par mois</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Duree moyenne par mois, pour voir si ca s'ameliore ou pas dans le temps.</div>
+        <div style="height:260px"><canvas id="cmp2EvolutionChart"></canvas></div>
+      </div>
 
       <!-- Comparaison par equipe -->
       <div class="cc" style="margin-bottom:16px">
@@ -551,4 +571,3 @@
 
 </body>
 </html>
- 
