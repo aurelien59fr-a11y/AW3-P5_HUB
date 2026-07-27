@@ -2884,6 +2884,7 @@ function nettoyerDoublonsArrets(){
 var CMP2_LIGNE_FILTRE = 'all';
 var CMP2_EQUIPE_OP_FILTRE = 'all';
 var _cmp2EquipeChart = null;
+var _cmp2EvolutionChart = null;
 var _cmp2OperateurChart = null;
 
 function filtrerCmp2Ligne(ligne){
@@ -2929,10 +2930,14 @@ function peuplerCmp2RaisonsSelect(){
 function buildComparaisonTab(){
   peuplerCmp2RaisonsSelect();
   var raison = document.getElementById('cmp2-raison-select') ? document.getElementById('cmp2-raison-select').value : 'all';
+  var dateDebut = document.getElementById('cmp2-date-debut') ? document.getElementById('cmp2-date-debut').value : '';
+  var dateFin = document.getElementById('cmp2-date-fin') ? document.getElementById('cmp2-date-fin').value : '';
 
   var arrets = Object.values(ARRETS_DATA).filter(function(a){ return a.type === 'avec_raison'; });
   if(CMP2_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === CMP2_LIGNE_FILTRE; });
   if(raison !== 'all') arrets = arrets.filter(function(a){ return a.raison === raison; });
+  if(dateDebut) arrets = arrets.filter(function(a){ return a.date >= dateDebut; });
+  if(dateFin) arrets = arrets.filter(function(a){ return a.date <= dateFin; });
 
   var wrapResume = document.getElementById('cmp2-resume-wrap');
   if(wrapResume){
@@ -2943,6 +2948,55 @@ function buildComparaisonTab(){
       var h = Math.floor(totalMin / 60), m = totalMin % 60;
       wrapResume.style.display = 'block';
       wrapResume.innerHTML = '<b>' + arrets.length + '</b> occurrence(s)' + (raison !== 'all' ? ' de "' + raison + '"' : '') + ' — temps total : <b>' + h + 'h' + String(m).padStart(2,'0') + '</b>';
+    }
+  }
+
+  // --- Evolution mois par mois ---
+  var ctxEvo = document.getElementById('cmp2EvolutionChart');
+  if(ctxEvo && typeof Chart !== 'undefined'){
+    var parMois = {};
+    arrets.forEach(function(a){
+      var mois = a.date.slice(0, 7); // YYYY-MM
+      if(!parMois[mois]) parMois[mois] = { total: 0, n: 0 };
+      parMois[mois].total += (a.duree || 0);
+      parMois[mois].n++;
+    });
+    var moisTries = Object.keys(parMois).sort();
+    if(_cmp2EvolutionChart){ _cmp2EvolutionChart.destroy(); _cmp2EvolutionChart = null; }
+    if(moisTries.length){
+      var moyMois = moisTries.map(function(m){ return Math.round(parMois[m].total / parMois[m].n); });
+      var nMois = moisTries.map(function(m){ return parMois[m].n; });
+      var labelsMois = moisTries.map(function(m){
+        var p = m.split('-');
+        var noms = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
+        return noms[parseInt(p[1],10) - 1] + ' ' + p[0].slice(2);
+      });
+      _cmp2EvolutionChart = new Chart(ctxEvo, {
+        type: 'line',
+        data: {
+          labels: labelsMois,
+          datasets: [{
+            label: 'Duree moyenne (min)',
+            data: moyMois,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,.12)',
+            fill: true,
+            tension: 0.25,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { afterLabel: function(c){ return nMois[c.dataIndex] + ' occurrence(s) ce mois-la'; } } }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } },
+            y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
+          }
+        }
+      });
     }
   }
 
