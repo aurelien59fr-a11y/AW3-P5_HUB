@@ -2951,45 +2951,65 @@ function buildComparaisonTab(){
     }
   }
 
-  // --- Evolution mois par mois ---
+  // --- Evolution mois par mois, une courbe par equipe (P1 a P5) ---
   var ctxEvo = document.getElementById('cmp2EvolutionChart');
   if(ctxEvo && typeof Chart !== 'undefined'){
-    var parMois = {};
+    // parMoisEquipe[mois][equipe] = {total, n}
+    var parMoisEquipe = {};
+    var tousLesMois = {};
     arrets.forEach(function(a){
       var mois = a.date.slice(0, 7); // YYYY-MM
-      if(!parMois[mois]) parMois[mois] = { total: 0, n: 0 };
-      parMois[mois].total += (a.duree || 0);
-      parMois[mois].n++;
+      tousLesMois[mois] = true;
+      var eq = getEquipe(a.date, a.heure);
+      if(!parMoisEquipe[mois]) parMoisEquipe[mois] = {};
+      if(!parMoisEquipe[mois][eq]) parMoisEquipe[mois][eq] = { total: 0, n: 0 };
+      parMoisEquipe[mois][eq].total += (a.duree || 0);
+      parMoisEquipe[mois][eq].n++;
     });
-    var moisTries = Object.keys(parMois).sort();
+    var moisTries = Object.keys(tousLesMois).sort();
     if(_cmp2EvolutionChart){ _cmp2EvolutionChart.destroy(); _cmp2EvolutionChart = null; }
     if(moisTries.length){
-      var moyMois = moisTries.map(function(m){ return Math.round(parMois[m].total / parMois[m].n); });
-      var nMois = moisTries.map(function(m){ return parMois[m].n; });
       var labelsMois = moisTries.map(function(m){
         var p = m.split('-');
         var noms = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
         return noms[parseInt(p[1],10) - 1] + ' ' + p[0].slice(2);
       });
+      var datasets = ['P1','P2','P3','P4','P5'].map(function(eq){
+        var data = moisTries.map(function(m){
+          var c = parMoisEquipe[m] && parMoisEquipe[m][eq];
+          return c ? Math.round(c.total / c.n) : null;
+        });
+        var occ = moisTries.map(function(m){
+          var c = parMoisEquipe[m] && parMoisEquipe[m][eq];
+          return c ? c.n : 0;
+        });
+        return {
+          label: eq === 'P5' ? 'P5 (moi)' : eq,
+          data: data,
+          borderColor: COULEURS_EQUIPE[eq],
+          backgroundColor: COULEURS_EQUIPE[eq],
+          fill: false,
+          tension: 0.25,
+          pointRadius: 4,
+          spanGaps: true,
+          _occurrences: occ
+        };
+      });
       _cmp2EvolutionChart = new Chart(ctxEvo, {
         type: 'line',
-        data: {
-          labels: labelsMois,
-          datasets: [{
-            label: 'Duree moyenne (min)',
-            data: moyMois,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59,130,246,.12)',
-            fill: true,
-            tension: 0.25,
-            pointRadius: 4
-          }]
-        },
+        data: { labels: labelsMois, datasets: datasets },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { afterLabel: function(c){ return nMois[c.dataIndex] + ' occurrence(s) ce mois-la'; } } }
+            legend: { display: true, labels: { color: '#8b90a4' } },
+            tooltip: {
+              callbacks: {
+                afterLabel: function(c){
+                  var occ = c.dataset._occurrences[c.dataIndex];
+                  return occ + ' occurrence(s) ce mois-la';
+                }
+              }
+            }
           },
           scales: {
             x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } },
