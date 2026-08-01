@@ -2110,6 +2110,105 @@ function loadPointages(){
 }
 
 // Générer une clé unique pour une anomalie
+// Rapproche un nom Protime ("Abdulhassan Ramazani") avec un nom du
+// dashboard ("Ramazani Abdulhassan") — l'ordre prenom/nom differe entre
+// les deux systemes, donc on compare les mots un par un, peu importe l'ordre.
+function matchNomProtime(nomProtime){
+  var motsProtime = nomProtime.toLowerCase().split(/\s+/).sort().join(' ');
+  var trouve = EMP.find(function(e){
+    var motsEmp = e.n.toLowerCase().split(/\s+/).sort().join(' ');
+    return motsEmp === motsProtime;
+  });
+  return trouve ? trouve.n : null;
+}
+
+// Classe une absence Protime en ziek/verlof/recup a partir du titre/detail/groupe
+function classifierTypeAbsence(titre, detail, groupe){
+  var texte = ((titre||'') + ' ' + (detail||'') + ' ' + (groupe||'')).toLowerCase();
+  if(/ziek|maladie|sick/.test(texte)) return 'ziek';
+  if(/recup|compensation/.test(texte)) return 'recup';
+  if(/verlof|cong|vacation|vakantie/.test(texte)) return 'verlof';
+  return null; // type inconnu : on ignore plutot que de deviner
+}
+
+function dateISOtoFR(iso){
+  var p = iso.split('-'); // YYYY-MM-DD
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+// Trouve l'index (dans WEEKS/SHIFTS de l'annee correspondante) d'une date ISO
+function indexPourDate(dateISO){
+  var parts = dateISO.split('-');
+  var year = parts[0], ddmm = parts[2] + '/' + parts[1];
+  var weeks = year==='2027'?WEEKS27:year==='2026'?WEEKS26:WEEKS25;
+  if(!weeks) return { idx: -1, year: year };
+  var allD = weeks.reduce(function(a,w){ return a.concat(w.d); }, []);
+  return { idx: allD.indexOf(ddmm), year: year };
+}
+
+// Importe les absences Protime : remplit directement les cases du planning
+// (ziek/verlof/recup) et regroupe en periodes pour le tableau ABS (Bradford)
+function importerAbsencesProtime(absences){
+  var parPersonneType = {}; // "nom|type" -> [dateISO, ...]
+  var casesRemplies = 0, nomsNonTrouves = {}, typesInconnus = 0;
+
+  absences.forEach(function(a){
+    var nomDashboard = matchNomProtime(a.nom);
+    if(!nomDashboard){ nomsNonTrouves[a.nom] = true; return; }
+    var type = classifierTypeAbsence(a.titre, a.detail, a.groupe);
+    if(!type){ typesInconnus++; return; }
+
+    // Remplir directement la case du planning ce jour-la
+    var pos = indexPourDate(a.date);
+    if(pos.idx !== -1){
+      var shiftsAnnee = pos.year==='2027'?SHIFTS27:pos.year==='2026'?SHIFTS26:SHIFTS25;
+      var empShift = shiftsAnnee.find(function(e){ return e.n === nomDashboard; });
+      if(empShift){ empShift.s[pos.idx] = type; casesRemplies++; }
+    }
+
+    var cle = nomDashboard + '|' + type;
+    if(!parPersonneType[cle]) parPersonneType[cle] = [];
+    parPersonneType[cle].push(a.date);
+  });
+
+  // Regrouper les dates consecutives en periodes pour le tableau ABS
+  var nouvellesAbs = [];
+  Object.keys(parPersonneType).forEach(function(cle){
+    var parts = cle.split('|');
+    var nom = parts[0], type = parts[1];
+    var dates = parPersonneType[cle].slice().sort();
+    var i = 0;
+    while(i < dates.length){
+      var debut = dates[i];
+      var fin = debut;
+      while(i + 1 < dates.length){
+        var d1 = new Date(fin + 'T00:00:00');
+        var d2 = new Date(dates[i+1] + 'T00:00:00');
+        if((d2 - d1) / 86400000 <= 3){ fin = dates[i+1]; i++; } // tolere les jours non-travailles entre 2 jours de planning
+        else break;
+      }
+      var nbJours = Math.round((new Date(fin+'T00:00:00') - new Date(debut+'T00:00:00')) / 86400000) + 1;
+      nouvellesAbs.push({ n: nom, a: dateISOtoFR(debut), b: dateISOtoFR(fin), d: nbJours, y: debut.slice(0,4), t: type });
+      i++;
+    }
+  });
+
+  // Fusionner avec l'existant : on remplace les periodes qui se recoupent
+  // exactement (meme personne+type+debut), on ajoute le reste.
+  nouvellesAbs.forEach(function(nouvelle){
+    var idxExistant = ABS.findIndex(function(old){ return old.n === nouvelle.n && old.t === nouvelle.t && old.a === nouvelle.a; });
+    if(idxExistant !== -1) ABS[idxExistant] = nouvelle;
+    else ABS.push(nouvelle);
+  });
+
+  return {
+    casesRemplies: casesRemplies,
+    periodesCreees: nouvellesAbs.length,
+    nomsNonTrouves: Object.keys(nomsNonTrouves),
+    typesInconnus: typesInconnus
+  };
+}
+
 function ptKey(nom, date, type, heure){
   return (nom + '_' + date + '_' + type + '_' + heure)
     .replace(/[.#$\/\[\]\s]/g, '-');
@@ -2132,7 +2231,7 @@ function importerPointages(){
   try { data = JSON.parse(raw); }
   catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
 
-  if(!data || (!data.retards && !data.pointages && !data.anomaliesPointage)){
+  if(!data || (!data.retards && !data.pointages && !data.anomaliesPointage && !data.absences)){
     err.textContent = 'Format non reconnu. Utilise exportEnrichiJSON() dans la console Protime.'; return;
   }
 
@@ -2168,8 +2267,14 @@ function importerPointages(){
     ajoutes++;
   });
 
-  if(!ajoutes && !doublons){
-    err.textContent = 'Aucune anomalie trouvée dans ce JSON.'; return;
+  // Traiter absences (ziek/verlof/recup) : remplit le planning directement
+  var resultatAbsences = null;
+  if(data.absences && data.absences.length){
+    resultatAbsences = importerAbsencesProtime(data.absences);
+  }
+
+  if(!ajoutes && !doublons && !resultatAbsences){
+    err.textContent = 'Aucune anomalie ni absence trouvée dans ce JSON.'; return;
   }
 
   // Sauvegarder dans Firebase
@@ -2177,18 +2282,41 @@ function importerPointages(){
     err.textContent = 'Connexion Firebase non disponible. Recharge la page et réessaie.';
     return;
   }
+
+  var toutesLesEcritures = Promise.resolve();
   if(Object.keys(updates).length){
-    db.ref('pointages').update(updates).then(function(){
-      document.getElementById('pt-import-modal').style.display = 'none';
-      toast(ajoutes + ' anomalie(s) importée(s)' + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : ''), '#10b981');
-    }).catch(function(e){
-      console.error('[Pointages] Erreur import Firebase :', e);
-      err.textContent = 'Erreur Firebase : ' + e.message;
-    });
-  } else {
-    document.getElementById('pt-import-modal').style.display = 'none';
-    toast('Tout déjà importé — ' + doublons + ' doublon(s) ignoré(s)', '#f59e0b');
+    toutesLesEcritures = toutesLesEcritures.then(function(){ return db.ref('pointages').update(updates); });
   }
+  if(resultatAbsences){
+    var updPlanning = {};
+    var d26 = {}; SHIFTS26.forEach(function(e){ d26[e.n] = e.s; });
+    var d25 = {}; SHIFTS25.forEach(function(e){ d25[e.n] = e.s; });
+    var d27 = {}; SHIFTS27.forEach(function(e){ d27[e.n] = e.s; });
+    updPlanning['planning/shifts2026'] = d26;
+    updPlanning['planning/shifts2025'] = d25;
+    updPlanning['planning/shifts2027'] = d27;
+    updPlanning['planning/absences'] = ABS;
+    toutesLesEcritures = toutesLesEcritures.then(function(){ return db.ref().update(updPlanning); });
+  }
+
+  toutesLesEcritures.then(function(){
+    document.getElementById('pt-import-modal').style.display = 'none';
+    var msg = ajoutes + ' anomalie(s) importée(s)' + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : '');
+    if(resultatAbsences){
+      msg += ' · ' + resultatAbsences.casesRemplies + ' jour(s) d\'absence rempli(s) (' + resultatAbsences.periodesCreees + ' periode(s))';
+      if(resultatAbsences.nomsNonTrouves.length){
+        console.warn('[Absences Protime] Noms non reconnus (verifie l\'orthographe) :', resultatAbsences.nomsNonTrouves);
+        msg += ' · ' + resultatAbsences.nomsNonTrouves.length + ' nom(s) non reconnu(s), voir console';
+      }
+      if(resultatAbsences.typesInconnus){
+        msg += ' · ' + resultatAbsences.typesInconnus + ' type(s) d\'absence non reconnu(s)';
+      }
+    }
+    toast(msg, '#10b981');
+  }).catch(function(e){
+    console.error('[Pointages] Erreur import Firebase :', e);
+    err.textContent = 'Erreur Firebase : ' + e.message;
+  });
 }
 
 // Construire le tableau pointages
