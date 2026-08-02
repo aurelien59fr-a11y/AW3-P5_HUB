@@ -147,10 +147,11 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .li-btn:disabled{background:#374151;cursor:not-allowed}
 .li-err{font-size:12px;color:var(--red);min-height:16px;text-align:center}
 #app-screen{flex-direction:column;min-height:100vh}
-.sp-extra{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:3px 8px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:11px;cursor:pointer;white-space:nowrap}
+.sp-extra{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:24px;min-height:22px;padding:3px 6px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:10px;line-height:1.3;cursor:pointer}
 .sp-extra:hover{border-color:var(--blue);color:var(--tx)}
 .sp-extra.empty{color:var(--tx3)}
 .sp-extra.filled{border:1px solid rgba(59,130,246,.5);background:rgba(59,130,246,.16);color:#7eb3ff;font-weight:600}
+.sp-extra span.exn{display:block;white-space:nowrap}
 .sp-nett{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
 .sp-nett-empty{border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx3)}
 .sp-nett-empty:hover{border-color:var(--blue);color:var(--tx)}
@@ -827,8 +828,13 @@ function parseExtraList(sv){
 function stringifyExtraList(list){return list.length?JSON.stringify(list):'';}
 function extraBadgeLabel(list){
   if(!list.length)return '+';
-  var first=list[0].n.split(' ')[0];
-  return list.length===1?first:(first+' +'+(list.length-1));
+  var MAX=3;
+  var noms=list.map(function(w){return w.n.split(' ')[0];});
+  var shown=noms.slice(0,MAX);
+  var rest=noms.length-shown.length;
+  var h=shown.map(function(n){return '<span class="exn">'+n+'</span>';}).join('');
+  if(rest>0)h+='<span class="exn">+'+rest+'</span>';
+  return h;
 }
 function extraSaveHist(nom){
   if(!nom)return;
@@ -921,7 +927,7 @@ function updateExtraBadge(nm,i){
   var ttl=list.length?list.map(function(w){return w.n+(w.p?' ('+w.p+')':'');}).join(', ').replace(/"/g,'&quot;'):'';
   document.querySelectorAll('.sp-extra[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
     p.dataset.s=esc;p.title=ttl;
-    p.textContent=lbl;
+    p.innerHTML=lbl;
     p.className='sp-extra'+(list.length?' filled':' empty');
   });
 }
