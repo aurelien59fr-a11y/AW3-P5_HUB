@@ -59,23 +59,23 @@
   </nav>
   <main class="content">
     <div class="pane on" id="pane-ov">
-      <div class="sh"><div class="st">Tableau de bord</div><div class="ss">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
+      <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" data-i18n="ov_subtitle">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
       <div id="birthday-notif" style="display:none;align-items:center;gap:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
       <div class="kgrid">
-        <div class="kcard bl"><div class="klbl">Equipe</div><div class="kval">15</div><div class="kmeta">TL + INPAK + Prod + Unit</div></div>
+        <div class="kcard bl"><div class="klbl" data-i18n="ov_kcard_team">Equipe</div><div class="kval">15</div><div class="kmeta">TL + INPAK + Prod + Unit</div></div>
         <div class="kcard gn"><div class="klbl">Score &le; 50</div><div class="kval" id="k-ok">-</div><div class="kmeta" id="k-okp">-</div></div>
-        <div class="kcard am"><div class="klbl">A surveiller</div><div class="kval" id="k-wn">-</div><div class="kmeta">Score 51-500</div><div id="k-wn-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
-        <div class="kcard rd"><div class="klbl">Critique</div><div class="kval" id="k-cr">-</div><div class="kmeta" id="k-crm">Score &gt; 500</div><div id="k-cr-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
+        <div class="kcard am"><div class="klbl" data-i18n="status_wn">A surveiller</div><div class="kval" id="k-wn">-</div><div class="kmeta">Score 51-500</div><div id="k-wn-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
+        <div class="kcard rd"><div class="klbl" data-i18n="status_cr">Critique</div><div class="kval" id="k-cr">-</div><div class="kmeta" id="k-crm">Score &gt; 500</div><div id="k-cr-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
       </div>
       <div id="k-alerts"></div>
       <div class="two">
-        <div class="cc"><div class="cch"><div class="cct">Scores Bradford</div><div class="lgd"><div class="li"><div class="ld" style="background:#10b981"></div>OK</div><div class="li"><div class="ld" style="background:#f59e0b"></div>Surveiller</div><div class="li"><div class="ld" style="background:#ef4444"></div>Critique</div></div></div><div class="cw" style="height:260px"><canvas id="cBrad"></canvas></div></div>
-        <div class="cc"><div class="cch"><div class="cct">Absences par trimestre</div></div><div class="cw" style="height:260px"><canvas id="cTrim"></canvas></div></div>
+        <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_bradford">Scores Bradford</div><div class="lgd"><div class="li"><div class="ld" style="background:#10b981"></div><span data-i18n="status_ok">OK</span></div><div class="li"><div class="ld" style="background:#f59e0b"></div><span data-i18n="legend_watch_short">Surveiller</span></div><div class="li"><div class="ld" style="background:#ef4444"></div><span data-i18n="status_cr">Critique</span></div></div></div><div class="cw" style="height:260px"><canvas id="cBrad"></canvas></div></div>
+        <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_absences_trim">Absences par trimestre</div></div><div class="cw" style="height:260px"><canvas id="cTrim"></canvas></div></div>
       </div>
-      <div class="cc"><div class="cch"><div class="cct">Jours d&rsquo;absence par employ&eacute;</div></div><div class="cw" style="height:220px"><canvas id="cJour"></canvas></div></div>
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">Absences &mdash; 30 prochains jours</div></div><div id="mini-cal" style="padding:0 4px"></div></div>
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="today-abs-title">Absents aujourd'hui</div></div><div id="today-abs" style="padding:4px"></div></div>
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127874; Anniversaires à venir</div></div><div id="birthday-cal" style="padding:4px"></div></div>
+      <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_days_per_emp">Jours d&rsquo;absence par employ&eacute;</div></div><div class="cw" style="height:220px"><canvas id="cJour"></canvas></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" data-i18n="ov_next30_title">Absences &mdash; 30 prochains jours</div></div><div id="mini-cal" style="padding:0 4px"></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="today-abs-title" data-i18n="ov_today_prefix">Absents aujourd'hui</div></div><div id="today-abs" style="padding:4px"></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127874; <span data-i18n="ov_birthdays_title">Anniversaires à venir</span></div></div><div id="birthday-cal" style="padding:4px"></div></div>
     </div>
     <div class="pane" id="pane-br">
       <div class="sh"><div class="st">Score Bradford</div><div class="ss">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all">Tous</option><option value="ok">OK</option><option value="wn">A surveiller</option><option value="al">Preoccupant</option><option value="cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
