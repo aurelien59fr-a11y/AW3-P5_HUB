@@ -338,6 +338,57 @@ var SHIFTS25 = [
 var currentUser=null,db=null,isSyncing=false,curYear='2026',curMonth=null,activePill=null,popup=null;
 var BD_COMMENTS={};
 var EXTRA_HIST=[]; // historique des noms deja utilises pour le personnel extra (autocompletion)
+
+// ===== i18n =====
+// Etape 1 : squelette + chrome partage (login/topbar/nav) + onglet Planning.
+// Les autres onglets restent a traduire au fur et a mesure (cle absente = repli automatique sur le francais).
+var I18N={
+  fr:{
+    login_email:'Email', login_password:'Mot de passe', login_btn:'Se connecter',
+    login_forgot:'Mot de passe oublié ?', login_autoconnect:'Tu resteras connecté automatiquement',
+    topbar_connecting:'Connexion...', topbar_logout:'Déconnexion',
+    tab_ov:'Vue d\u2019ensemble', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
+    tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin',
+    plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
+    plan_today:'Aujourd\u2019hui', plan_print:'Imprimer', plan_no_today:'Aujourd\u2019hui n\u2019est pas un jour planifié.',
+    legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
+    legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup'
+  },
+  nl:{
+    login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
+    login_forgot:'Wachtwoord vergeten?', login_autoconnect:'Je blijft automatisch aangemeld',
+    topbar_connecting:'Verbinden...', topbar_logout:'Afmelden',
+    tab_ov:'Overzicht', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Afwezigheden',
+    tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin',
+    plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
+    plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
+    legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
+    legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie'
+  }
+};
+var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
+var MOIS_I18N={
+  fr:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+  nl:['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December']
+};
+function t(key){var d=I18N[LANG]||I18N.fr;return d[key]!==undefined?d[key]:(I18N.fr[key]!==undefined?I18N.fr[key]:key);}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n');el.textContent=t(k);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+    var k=el.getAttribute('data-i18n-ph');el.placeholder=t(k);
+  });
+  var lb=document.getElementById('lang-toggle');
+  if(lb)lb.textContent=LANG==='fr'?'NL':'FR';
+}
+function setLang(l){
+  LANG=l;
+  try{localStorage.setItem('lang',l);}catch(e){}
+  applyI18n();
+  if(typeof buildPT==='function'&&document.getElementById('ptable'))buildPT();
+}
+function toggleLang(){setLang(LANG==='fr'?'nl':'fr');}
 var BD_PREV_STATUS={};
 var EMP=[{n:'Aurelien Turchi',g:'TL',r:'Team Leader'},{n:'Nicolas Fettu',g:'INPAK',r:'Coordinateur'},{n:'Julien Demuyter',g:'INPAK',r:'Coordinateur'},{n:'Mohamed Lalaoui',g:'INPAK',r:'Operateur'},{n:'Ramazani Abdulhassan',g:'INPAK',r:'Operateur'},{n:'Halima Laadi',g:'INPAK',r:'Operateur'},{n:'Hakkim Akkouh',g:'INPAK',r:'Operateur'},{n:'Balan Marius',g:'INPAK',r:'Operateur'},{n:'Lyse Musik',g:'INPAK',r:'Labo'},{n:'Max Secember',g:'Prod',r:'Production'},{n:'Larissa Fratutescu',g:'Prod',r:'Production'},{n:'Monir Salmi',g:'Unit',r:'Batter/Cleaning'},{n:'Anthony Raimondi',g:'Unit',r:'Inpak'},{n:'Brahim Akdim',g:'Unit',r:'Batter/Cleaning'},{n:'Lachen Baraik',g:'Unit',r:'Bulk'}];
 
@@ -742,9 +793,9 @@ function goToBradford(name){
 }
 function buildPT(){
   // Navigation mois
-  var MOIS=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+  var MOIS=MOIS_I18N[LANG]||MOIS_I18N.fr;
   var mlbl=document.getElementById('month-label');
-  if(mlbl) mlbl.textContent=curMonth!==null?MOIS[curMonth]:'Tous';
+  if(mlbl) mlbl.textContent=curMonth!==null?MOIS[curMonth]:t('plan_all');
   document.getElementById('plan-title').textContent='Planning '+curYear+(curMonth!==null?' — '+MOIS[curMonth]:'');
   var tbl=document.getElementById('ptable');var td=todayStr();var allFull=allDates();
   // Les indices dans emp.s[] sont toujours relatifs a allFull (toute l'annee).
@@ -1335,7 +1386,7 @@ function deactivateEmp(idx){
   }).catch(function(err){ toast('Erreur: '+err.message,'#ef4444'); });
 }
 
-function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent='Connexion...';btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent='Se connecter';btn.disabled=false;});}
+function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent=t('topbar_connecting');btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent=t('login_btn');btn.disabled=false;});}
 function doForgotPassword(){
   var email=document.getElementById('li-email').value.trim();
   var err=document.getElementById('li-err');
@@ -1351,6 +1402,7 @@ function doForgotPassword(){
 }
 function doLogout(){firebase.auth().signOut();}
 window.addEventListener('load',function(){
+  applyI18n();
   document.getElementById('dchip').textContent=new Date().toLocaleDateString('fr-BE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   var cfg={apiKey:"AIzaSyAexVCEfVxmShZ-m7xFAVfk9AzReBi2WTQ",authDomain:"aw3-p5-hub.firebaseapp.com",databaseURL:"https://aw3-p5-hub-default-rtdb.europe-west1.firebasedatabase.app",projectId:"aw3-p5-hub",storageBucket:"aw3-p5-hub.firebasestorage.app",messagingSenderId:"685884843934",appId:"1:685884843934:web:ab8f7b8e362959f1ab988f"};
   var app;try{app=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(cfg);}catch(e){app=firebase.app();}
