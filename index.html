@@ -129,16 +129,16 @@
       </div>
     </div>
     <div class="pane" id="pane-ab">
-      <div class="sh"><div class="st">Absences</div><div class="ss" id="abs-lbl">-</div></div>
+      <div class="sh"><div class="st" data-i18n="ab_title">Absences</div><div class="ss" id="abs-lbl">-</div></div>
       <div class="aflt">
-        <button class="fb on" data-f="all">Tous</button>
+        <button class="fb on" data-f="all" data-i18n="plan_all">Tous</button>
         <button class="fb" data-f="2025">2025</button>
         <button class="fb" data-f="2026">2026</button>
         <button class="fb" data-f="Anthony Raimondi">A. Raimondi</button>
         <button class="fb" data-f="Mohamed Lalaoui">M. Lalaoui</button>
       </div>
       <div class="ascroll">
-        <div class="ahdr"><span>Employe</span><span>Debut</span><span>Fin</span><span>Jours</span><span>Intensite</span><span style="text-align:right">Annee</span></div>
+        <div class="ahdr"><span data-i18n="ab_col_emp">Employe</span><span data-i18n="ab_col_start">Debut</span><span data-i18n="ab_col_end">Fin</span><span data-i18n="ab_col_days">Jours</span><span data-i18n="ab_col_intensity">Intensite</span><span style="text-align:right" data-i18n="ab_col_year">Annee</span></div>
         <div class="agrid" id="agrid"></div>
       </div>
     </div>
@@ -316,23 +316,23 @@
 
     <div class="pane" id="pane-pt">
       <div class="sh">
-        <div class="st">Pointages</div>
-        <div class="ss">Retards &amp; anomalies tourniquet/pointeuse</div>
+        <div class="st" data-i18n="tab_pt">Pointages</div>
+        <div class="ss" data-i18n="pt_subtitle">Retards &amp; anomalies tourniquet/pointeuse</div>
         <div style="display:flex;gap:8px;margin-left:auto;align-items:center">
           <select id="pt-filter-person" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
-            <option value="all">Tous</option>
+            <option value="all" data-i18n="plan_all">Tous</option>
           </select>
           <select id="pt-filter-type" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
-            <option value="all">Tous types</option>
-            <option value="retard">Retards</option>
-            <option value="pointage">Anomalies tourniquet</option>
+            <option value="all" data-i18n="pt_opt_all_types">Tous types</option>
+            <option value="retard" data-i18n="pt_opt_retards">Retards</option>
+            <option value="pointage" data-i18n="pt_opt_anomalies_tourniquet">Anomalies tourniquet</option>
           </select>
           <select id="pt-filter-status" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
-            <option value="all">Tous statuts</option>
-            <option value="open">Non traités</option>
-            <option value="done">Traités</option>
+            <option value="all" data-i18n="pt_opt_all_status">Tous statuts</option>
+            <option value="open" data-i18n="pt_opt_open">Non traités</option>
+            <option value="done" data-i18n="pt_opt_done">Traités</option>
           </select>
-          <button onclick="openImportPointages()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer</button>
+          <button onclick="openImportPointages()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; <span data-i18n="modal_import">Importer</span></button>
         </div>
       </div>
 
@@ -340,7 +340,7 @@
       <div id="pt-alerts-banner" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ef4444;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:18px">&#9888;</span>
         <span id="pt-alerts-text" style="flex:1"></span>
-        <button onclick="markAllPtDone()" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">&#10003; Tout marquer comme traité</button>
+        <button onclick="markAllPtDone()" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">&#10003; <span data-i18n="pt_mark_all_done">Tout marquer comme traité</span></button>
       </div>
 
       <!-- Tableau -->
@@ -348,11 +348,11 @@
         <table class="bt" id="pt-table">
           <thead>
             <tr>
-              <th>Personne</th>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Détail</th>
-              <th>Statut</th>
+              <th data-i18n="pt_col_person">Personne</th>
+              <th data-i18n="pt_col_date">Date</th>
+              <th data-i18n="pt_col_type">Type</th>
+              <th data-i18n="pt_col_detail">Détail</th>
+              <th data-i18n="pt_col_status">Statut</th>
               <th style="width:40px"></th>
             </tr>
           </thead>
@@ -364,11 +364,11 @@
     <!-- ARRETS INPAK -->
     <div class="pane" id="pane-arrets">
       <div class="sh">
-        <div class="st">Arrets Inpak</div>
-        <div class="ss">Lignes 31 a 36 — arrets avec raison et micro-arrets</div>
-        <button onclick="diagnostiquerDoublonsArrets()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128269; Diagnostiquer les doublons</button>
-        <button onclick="nettoyerDoublonsArrets()" style="padding:6px 14px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128465; Nettoyer les doublons</button>
-        <button onclick="openImportArretsModal()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer Grafana</button>
+        <div class="st" data-i18n="tab_arrets">Arrets Inpak</div>
+        <div class="ss" data-i18n="arr_subtitle">Lignes 31 a 36 — arrets avec raison et micro-arrets</div>
+        <button onclick="diagnostiquerDoublonsArrets()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128269; <span data-i18n="arr_btn_diag">Diagnostiquer les doublons</span></button>
+        <button onclick="nettoyerDoublonsArrets()" style="padding:6px 14px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128465; <span data-i18n="arr_btn_clean">Nettoyer les doublons</span></button>
+        <button onclick="openImportArretsModal()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
       </div>
 
       <!-- Zone de diagnostic (masquee par defaut) -->
@@ -376,7 +376,7 @@
 
       <!-- Filtre ligne -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="arrets-filtre-ligne">
-        <button class="arrets-ligne-btn on" data-ligne="all" onclick="filtrerArretsLigne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes</button>
+        <button class="arrets-ligne-btn on" data-ligne="all" onclick="filtrerArretsLigne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
         <button class="arrets-ligne-btn" data-ligne="31" onclick="filtrerArretsLigne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
         <button class="arrets-ligne-btn" data-ligne="32" onclick="filtrerArretsLigne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
         <button class="arrets-ligne-btn" data-ligne="33" onclick="filtrerArretsLigne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
@@ -387,60 +387,60 @@
 
       <!-- Filtre equipe -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="arrets-filtre-equipe">
-        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Equipe</span>
-        <button class="arrets-equipe-btn on" data-equipe="all" onclick="filtrerArretsEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes</button>
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ov_kcard_team">Equipe</span>
+        <button class="arrets-equipe-btn on" data-equipe="all" onclick="filtrerArretsEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
         <button class="arrets-equipe-btn" data-equipe="P1" onclick="filtrerArretsEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
         <button class="arrets-equipe-btn" data-equipe="P2" onclick="filtrerArretsEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
         <button class="arrets-equipe-btn" data-equipe="P3" onclick="filtrerArretsEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
         <button class="arrets-equipe-btn" data-equipe="P4" onclick="filtrerArretsEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
-        <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+        <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
       </div>
 
       <!-- Filtre operateur (multi-selection, rempli par JS) -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Operateur</span>
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="col_operator">Operateur</span>
         <div id="arrets-filtre-operateur" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
 
       <!-- Recherche date/heure precise -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Recherche precise</div></div>
+        <div class="cch"><div class="cct" data-i18n="arr_search_title">Recherche precise</div></div>
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
           <div class="li-field">
-            <label class="li-label">Du</label>
+            <label class="li-label" data-i18n="arr_search_from">Du</label>
             <input type="date" id="arrets-recherche-date" class="li-input">
           </div>
           <div class="li-field">
-            <label class="li-label">Au (optionnel — laisse vide pour un seul jour)</label>
+            <label class="li-label" data-i18n="arr_search_to">Au (optionnel — laisse vide pour un seul jour)</label>
             <input type="date" id="arrets-recherche-date-fin" class="li-input">
           </div>
           <div class="li-field">
-            <label class="li-label">Heure (optionnel, seulement si "Au" est vide)</label>
+            <label class="li-label" data-i18n="arr_search_hour">Heure (optionnel, seulement si "Au" est vide)</label>
             <input type="time" id="arrets-recherche-heure" class="li-input">
           </div>
-          <button onclick="rechercherArrets()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Rechercher</button>
-          <button onclick="reinitialiserRechercheArrets()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Reinitialiser</button>
+          <button onclick="rechercherArrets()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="btn_search">Rechercher</button>
+          <button onclick="reinitialiserRechercheArrets()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="btn_reset">Reinitialiser</button>
         </div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:8px">Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px" data-i18n="arr_search_hint">Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".</div>
       </div>
 
       <!-- Resume frequence -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Frequence par ligne</div></div>
+        <div class="cch"><div class="cct" data-i18n="arr_freq_title">Frequence par ligne</div></div>
         <div id="arrets-resume-wrap"></div>
       </div>
 
       <!-- Arrets avec raison -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Arrets avec raison <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
         <div style="margin-bottom:12px">
           <select id="arrets-raison-select" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
-            <option value="all">Toutes les raisons</option>
+            <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
           </select>
         </div>
         <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
         <div id="arrets-compar-op-wrap" style="display:none;margin-bottom:16px">
-          <div style="font-size:12px;color:var(--tx3);margin-bottom:8px">Duree moyenne par operateur pour cette raison — te permet de comparer</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:8px" data-i18n="arr_compare_op_hint">Duree moyenne par operateur pour cette raison — te permet de comparer</div>
           <div style="height:240px"><canvas id="arretsComparOpChart"></canvas></div>
         </div>
         <div id="arrets-raison-wrap"></div>
@@ -449,7 +449,7 @@
       <!-- Microstops -->
       <div class="cc">
         <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
-          <div class="cct">Micro-arrets <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; afficher le detail</span></div>
+          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
         </div>
         <div id="arrets-micro-wrap" style="display:none"></div>
       </div>
@@ -458,33 +458,33 @@
     <!-- COMPARAISON -->
     <div class="pane" id="pane-cmp2">
       <div class="sh">
-        <div class="st">Comparaison</div>
-        <div class="ss">Compare les equipes (P1 a P5) et les operateurs entre eux</div>
+        <div class="st" data-i18n="tab_cmp2">Comparaison</div>
+        <div class="ss" data-i18n="cmp_subtitle">Compare les equipes (P1 a P5) et les operateurs entre eux</div>
       </div>
 
       <!-- Periode -->
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
         <div class="li-field">
-          <label class="li-label">Du</label>
+          <label class="li-label" data-i18n="arr_search_from">Du</label>
           <input type="date" id="cmp2-date-debut" class="li-input" onchange="buildComparaisonTab()">
         </div>
         <div class="li-field">
-          <label class="li-label">Au</label>
+          <label class="li-label" data-i18n="cmp_period_to">Au</label>
           <input type="date" id="cmp2-date-fin" class="li-input" onchange="buildComparaisonTab()">
         </div>
-        <button onclick="document.getElementById('cmp2-date-debut').value='';document.getElementById('cmp2-date-fin').value='';buildComparaisonTab()" style="padding:9px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Reinitialiser</button>
+        <button onclick="document.getElementById('cmp2-date-debut').value='';document.getElementById('cmp2-date-fin').value='';buildComparaisonTab()" style="padding:9px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="btn_reset">Reinitialiser</button>
       </div>
 
       <!-- Raison -->
       <div style="margin-bottom:16px">
         <select id="cmp2-raison-select" onchange="buildComparaisonTab()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
-          <option value="all">Toutes les raisons</option>
+          <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
         </select>
       </div>
 
       <!-- Filtre ligne -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="cmp2-filtre-ligne">
-        <button class="cmp2-ligne-btn on" data-ligne="all" onclick="filtrerCmp2Ligne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes les lignes</button>
+        <button class="cmp2-ligne-btn on" data-ligne="all" onclick="filtrerCmp2Ligne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="cmp_all_lines">Toutes les lignes</button>
         <button class="cmp2-ligne-btn" data-ligne="31" onclick="filtrerCmp2Ligne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
         <button class="cmp2-ligne-btn" data-ligne="32" onclick="filtrerCmp2Ligne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
         <button class="cmp2-ligne-btn" data-ligne="33" onclick="filtrerCmp2Ligne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
@@ -497,29 +497,29 @@
 
       <!-- Evolution dans le temps (mois par mois) -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Evolution mois par mois</div></div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Duree moyenne par mois, pour voir si ca s'ameliore ou pas dans le temps.</div>
+        <div class="cch"><div class="cct" data-i18n="cmp_evolution_title">Evolution mois par mois</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_evolution_hint">Duree moyenne par mois, pour voir si ca s'ameliore ou pas dans le temps.</div>
         <div style="height:260px"><canvas id="cmp2EvolutionChart"></canvas></div>
       </div>
 
       <!-- Comparaison par equipe -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Comparaison par equipe (P1 a P5)</div></div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Duree moyenne d'arret par equipe, pour la raison et la ligne selectionnees.</div>
+        <div class="cch"><div class="cct" data-i18n="cmp_team_title">Comparaison par equipe (P1 a P5)</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_team_hint">Duree moyenne d'arret par equipe, pour la raison et la ligne selectionnees.</div>
         <div style="height:260px"><canvas id="cmp2EquipeChart"></canvas></div>
       </div>
 
       <!-- Comparaison par operateur, avec filtre equipe -->
       <div class="cc">
-        <div class="cch"><div class="cct">Comparaison par operateur</div></div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).</div>
+        <div class="cch"><div class="cct" data-i18n="cmp_op_title">Comparaison par operateur</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_op_hint">Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).</div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap" id="cmp2-filtre-equipe-op">
-          <button class="cmp2-equipe-op-btn on" data-equipe="all" onclick="filtrerCmp2EquipeOp('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Toutes equipes</button>
+          <button class="cmp2-equipe-op-btn on" data-equipe="all" onclick="filtrerCmp2EquipeOp('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="cmp_all_teams">Toutes equipes</button>
           <button class="cmp2-equipe-op-btn" data-equipe="P1" onclick="filtrerCmp2EquipeOp('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
           <button class="cmp2-equipe-op-btn" data-equipe="P2" onclick="filtrerCmp2EquipeOp('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
           <button class="cmp2-equipe-op-btn" data-equipe="P3" onclick="filtrerCmp2EquipeOp('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
           <button class="cmp2-equipe-op-btn" data-equipe="P4" onclick="filtrerCmp2EquipeOp('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
-          <button class="cmp2-equipe-op-btn" data-equipe="P5" onclick="filtrerCmp2EquipeOp('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P5" onclick="filtrerCmp2EquipeOp('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
         </div>
         <div style="height:260px"><canvas id="cmp2OperateurChart"></canvas></div>
       </div>
@@ -545,13 +545,13 @@
 <!-- Modal import pointages -->
 <div id="pt-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:500px;max-width:95vw">
-    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; Importer pointages Protime</div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="pt_modal_title">Importer pointages Protime</span></div>
     <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON généré par le script <b>exportEnrichi()</b> dans la console Protime</div>
     <textarea id="pt-import-txt" style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:12px;padding:10px;resize:vertical"></textarea>
     <div id="pt-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
     <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
-      <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
-      <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
+      <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
     </div>
   </div>
 </div>
@@ -559,13 +559,13 @@
 <!-- Modal import arrets Inpak -->
 <div id="arrets-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
   <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
-    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; Importer les arrets Inpak</div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="arr_modal_title">Importer les arrets Inpak</span></div>
     <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON genere par <code>analyserArretsInpak()</code> / <code>exporterArretsInpak()</code> depuis le script <code>grafana_arrets_inpak.js</code> (console Grafana)</div>
     <textarea id="arrets-import-txt" placeholder="Colle ici le JSON..." style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
     <div id="arrets-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
     <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
-      <button onclick="document.getElementById('arrets-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
-      <button onclick="importerArretsInpak()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Importer</button>
+      <button onclick="document.getElementById('arrets-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerArretsInpak()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
     </div>
   </div>
 </div>
