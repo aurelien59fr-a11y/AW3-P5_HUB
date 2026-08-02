@@ -966,18 +966,24 @@ function buildMiniCal(){
       var dd=new Date(day);dd.setHours(0,0,0,0);
       var d0=new Date(deb);d0.setHours(0,0,0,0);
       var d1=new Date(fin);d1.setHours(0,0,0,0);
-      if(dd>=d0&&dd<=d1){abs30.push({name:a.n,date:fmtDDMM(day),type:a.t});}
+      if(dd>=d0&&dd<=d1){abs30.push({name:a.n,date:fmtDDMM(day),type:a.t,ts:a.ts||0});}
     });
   });
-  // Grouper par date
+  // Grouper par date, en ne gardant qu'une entree par personne (la plus
+  // recemment importee) si plusieurs types d'absence se chevauchent ce jour-la.
   var byDate={};
-  abs30.forEach(function(x){if(!byDate[x.date])byDate[x.date]=[];byDate[x.date].push({name:x.name.split(' ')[0],type:x.type});});
-  var daysWithAbs=days.filter(function(d){return byDate[fmtDDMM(d)]&&byDate[fmtDDMM(d)].length;});
+  abs30.forEach(function(x){
+    if(!byDate[x.date])byDate[x.date]={};
+    var short=x.name.split(' ')[0];
+    var existing=byDate[x.date][short];
+    if(!existing||x.ts>=existing.ts){ byDate[x.date][short]={name:short,type:x.type,ts:x.ts}; }
+  });
+  var daysWithAbs=days.filter(function(d){var e=byDate[fmtDDMM(d)];return e&&Object.keys(e).length;});
   if(!daysWithAbs.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0">'+t('ov_next30_none')+'</div>';return;}
   var MOIS=MOIS_ABBR_I18N[LANG]||MOIS_ABBR_I18N.fr;
   var h=daysWithAbs.map(function(d){
     var k=fmtDDMM(d);
-    var entries=byDate[k];
+    var entries=Object.values(byDate[k]);
     var dow=(DOW_ABBR_I18N[LANG]||DOW_ABBR_I18N.fr)[d.getDay()];
     return '<div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--bd2)">'
       +'<div style="min-width:70px;font-size:12px;color:var(--tx3)">'+dow+' '+d.getDate()+' '+MOIS[d.getMonth()]+'</div>'
@@ -1269,7 +1275,7 @@ function applyShift(nv){
   if(nv==='ziek'&&old!=='ziek'){
     var fd=dateStr+'/'+curYear;
     if(!ABS.find(function(a){return a.n===nm&&a.a===fd&&a.d===1;})){
-      ABS.push({n:nm,a:fd,b:fd,d:1,y:curYear,t:'ziek'});
+      ABS.push({n:nm,a:fd,b:fd,d:1,y:curYear,t:'ziek',ts:Date.now()});
       buildAbs(document.querySelector('.fb.on').dataset.f);updAbsLbl();
     }
     recalc();buildBT();updKPI();refreshCharts();save();
@@ -1888,7 +1894,7 @@ function applyProtimeImport(){
         if(ABS[k].n===dashName && ABS[k].a===dateA && ABS[k].b===dateB){ ABS.splice(k,1); }
       }
 
-      ABS.push({n:dashName, a:dateA, b:dateB, d:p.count, y:p.lastYear, t:p.value});
+      ABS.push({n:dashName, a:dateA, b:dateB, d:p.count, y:p.lastYear, t:p.value, ts:Date.now()});
     });
   });
 
@@ -2569,7 +2575,7 @@ function importerAbsencesProtime(absences){
         else break;
       }
       var nbJours = Math.round((new Date(fin+'T00:00:00') - new Date(debut+'T00:00:00')) / 86400000) + 1;
-      nouvellesAbs.push({ n: nom, a: dateISOtoFR(debut), b: dateISOtoFR(fin), d: nbJours, y: debut.slice(0,4), t: type });
+      nouvellesAbs.push({ n: nom, a: dateISOtoFR(debut), b: dateISOtoFR(fin), d: nbJours, y: debut.slice(0,4), t: type, ts: Date.now() });
       i++;
     }
   });
