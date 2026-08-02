@@ -424,6 +424,40 @@ var I18N={
     cmp_all_teams:'Toutes equipes',
     cmp_resume_occ_suffix:' occurrence(s)', cmp_resume_of:' de "', cmp_resume_total:' \u2014 temps total : ',
     cmp_month_occurrences:' occurrence(s) ce mois-la',
+    br_title:'Score Bradford', br_subtitle:'S\u00b2 \u00d7 D \u2014 temps r\u00e9el',
+    br_col_role:'Role', br_col_periods:'Periodes', br_col_status:'Statut',
+    br_tooltip_history:'Voir historique', br_tooltip_comment:'Commentaire',
+    br_comment_prefix:'Commentaire \u2014 ', br_comment_last_mod:'Derniere modif : ', br_comment_by:' par ',
+    btn_save:'Enregistrer', br_comment_saved:'Commentaire enregistre', br_comment_deleted:'Commentaire supprime',
+    br_days_suffix_1:' jour', br_days_suffix_n:' jours', br_episode_badge:'Episode',
+    br_no_episode:'Aucun episode maladie dans les 365 derniers jours',
+    br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Jours',
+    br_comment_label:'Commentaire', br_comment_placeholder:'Cliquer pour ajouter un commentaire...',
+    br_history_title:'Historique episodes (365j)',
+    adm_title:'Administration', adm_subtitle:'Outils reserves a l\u2019admin',
+    adm_fb_test_title:'Fiabilite Firebase', adm_fb_test_btn:'Tester la connexion',
+    adm_fb_rules_title:'Roles utilisateurs Firebase',
+    adm_migration_title:'Migration initiale Firebase', adm_migration_status_none:'Non effectuee',
+    adm_migration_btn:'Lancer la migration',
+    adm_session_title:'Session active', adm_session_connected_as:'Connecte en tant que : ', adm_session_role:'Role : ',
+    adm_excel_report_title:'Rapport mensuel Excel', adm_excel_report_btn:'Generer rapport Excel',
+    adm_protime_import_title:'Importer depuis Protime', adm_protime_status_none:'Aucun import',
+    adm_btn_check:'Verifier', adm_btn_import_planning:'Importer dans le planning',
+    adm_btn_purge_protime:'Purger toutes les absences Protime',
+    adm_emp_mgmt_title:'Gestion des employes', adm_btn_add:'+ Ajouter',
+    adm_col_name:'Nom', adm_col_group:'Groupe', adm_col_actions:'Actions',
+    adm_btn_edit:'Modifier', adm_btn_remove:'Retirer',
+    adm_emp_modal_add_title:'Ajouter un employe', adm_emp_modal_edit_prefix:'Modifier ',
+    adm_field_fullname:'Nom complet', adm_field_group:'Groupe', adm_field_role:'Role', adm_field_birthday:'Date de naissance',
+    adm_placeholder_name:'Prenom Nom', adm_placeholder_role:'ex: Operateur',
+    adm_err_name_required:'Le nom est obligatoire.', adm_err_role_required:'Le role est obligatoire.',
+    adm_err_firebase_disconnected:'Firebase non connecte.', adm_saving:'Enregistrement...',
+    adm_toast_saved_suffix:' enregistre !',
+    adm_confirm_remove1:'Retirer ', adm_confirm_remove2:' de l\u2019equipe ? Son historique Bradford sera conserve.',
+    adm_toast_removed_suffix:' retire de l\u2019equipe',
+    err_generic_prefix:'Erreur: ',
+    month_0:'Janvier', month_1:'Fevrier', month_2:'Mars', month_3:'Avril', month_4:'Mai', month_5:'Juin',
+    month_6:'Juillet', month_7:'Aout', month_8:'Septembre', month_9:'Octobre', month_10:'Novembre', month_11:'Decembre',
     arr_limited_days1:'Limite aux ', arr_limited_days2:' plus recents jours (', arr_limited_days3:' jours au total)'
   },
   nl:{
@@ -507,6 +541,40 @@ var I18N={
     cmp_all_teams:'Alle teams',
     cmp_resume_occ_suffix:' voorval(len)', cmp_resume_of:' van "', cmp_resume_total:' \u2014 totale tijd: ',
     cmp_month_occurrences:' voorval(len) die maand',
+    br_title:'Bradford-score', br_subtitle:'S\u00b2 \u00d7 D \u2014 realtime',
+    br_col_role:'Rol', br_col_periods:'Periodes', br_col_status:'Status',
+    br_tooltip_history:'Geschiedenis bekijken', br_tooltip_comment:'Opmerking',
+    br_comment_prefix:'Opmerking \u2014 ', br_comment_last_mod:'Laatst gewijzigd: ', br_comment_by:' door ',
+    btn_save:'Opslaan', br_comment_saved:'Opmerking opgeslagen', br_comment_deleted:'Opmerking verwijderd',
+    br_days_suffix_1:' dag', br_days_suffix_n:' dagen', br_episode_badge:'Episode',
+    br_no_episode:'Geen ziekte-episode in de laatste 365 dagen',
+    br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Dagen',
+    br_comment_label:'Opmerking', br_comment_placeholder:'Klik om een opmerking toe te voegen...',
+    br_history_title:'Geschiedenis episodes (365d)',
+    adm_title:'Administratie', adm_subtitle:'Tools voorbehouden aan de admin',
+    adm_fb_test_title:'Firebase-betrouwbaarheid', adm_fb_test_btn:'Verbinding testen',
+    adm_fb_rules_title:'Firebase-gebruikersrollen',
+    adm_migration_title:'Initi\u00eble Firebase-migratie', adm_migration_status_none:'Niet uitgevoerd',
+    adm_migration_btn:'Migratie starten',
+    adm_session_title:'Actieve sessie', adm_session_connected_as:'Aangemeld als: ', adm_session_role:'Rol: ',
+    adm_excel_report_title:'Maandelijks Excel-rapport', adm_excel_report_btn:'Excel-rapport genereren',
+    adm_protime_import_title:'Importeren vanuit Protime', adm_protime_status_none:'Geen import',
+    adm_btn_check:'Controleren', adm_btn_import_planning:'Importeren in planning',
+    adm_btn_purge_protime:'Alle Protime-afwezigheden wissen',
+    adm_emp_mgmt_title:'Medewerkersbeheer', adm_btn_add:'+ Toevoegen',
+    adm_col_name:'Naam', adm_col_group:'Groep', adm_col_actions:'Acties',
+    adm_btn_edit:'Wijzigen', adm_btn_remove:'Verwijderen',
+    adm_emp_modal_add_title:'Medewerker toevoegen', adm_emp_modal_edit_prefix:'Wijzigen ',
+    adm_field_fullname:'Volledige naam', adm_field_group:'Groep', adm_field_role:'Rol', adm_field_birthday:'Geboortedatum',
+    adm_placeholder_name:'Voornaam Naam', adm_placeholder_role:'bv: Operator',
+    adm_err_name_required:'De naam is verplicht.', adm_err_role_required:'De rol is verplicht.',
+    adm_err_firebase_disconnected:'Firebase niet verbonden.', adm_saving:'Bezig met opslaan...',
+    adm_toast_saved_suffix:' opgeslagen!',
+    adm_confirm_remove1:'', adm_confirm_remove2:' uit het team verwijderen? De Bradford-geschiedenis blijft bewaard.',
+    adm_toast_removed_suffix:' verwijderd uit het team',
+    err_generic_prefix:'Fout: ',
+    month_0:'Januari', month_1:'Februari', month_2:'Maart', month_3:'April', month_4:'Mei', month_5:'Juni',
+    month_6:'Juli', month_7:'Augustus', month_8:'September', month_9:'Oktober', month_10:'November', month_11:'December',
     arr_limited_days1:'Beperkt tot de ', arr_limited_days2:' meest recente dagen (', arr_limited_days3:' dagen in totaal)'
   }
 };
@@ -551,6 +619,8 @@ function setLang(l){
   if(typeof buildPT2==='function'&&document.getElementById('pt-tbody'))buildPT2();
   if(typeof buildArretsInpak==='function'&&document.getElementById('arrets-resume-wrap'))buildArretsInpak();
   if(typeof buildComparaisonTab==='function'&&document.getElementById('cmp2EvolutionChart'))buildComparaisonTab();
+  if(typeof buildBT==='function'&&document.getElementById('btable')&&currentUser&&currentUser.role==='admin')buildBT();
+  if(typeof buildEmpTable==='function'&&document.getElementById('empTbody'))buildEmpTable();
 }
 function toggleLang(){setLang(LANG==='fr'?'nl':'fr');}
 var BD_PREV_STATUS={};
@@ -749,7 +819,7 @@ function buildBT(){
   if(currentUser && currentUser.role !== 'admin') return;
   var tbl=document.getElementById('btable');
   var mx=Math.max.apply(null,BD.map(function(e){return e.sc;}));if(mx<1)mx=1;
-  var h='<thead><tr><th>Employe</th><th>Role</th><th>Jours</th><th>Periodes</th><th>Score</th><th>Statut</th><th style="width:36px"></th></tr></thead><tbody>';
+  var h='<thead><tr><th>'+t('ab_col_emp')+'</th><th>'+t('br_col_role')+'</th><th>'+t('ab_col_days')+'</th><th>'+t('br_col_periods')+'</th><th>Score</th><th>'+t('br_col_status')+'</th><th style="width:36px"></th></tr></thead><tbody>';
   ['TL','INPAK','Prod','Unit'].forEach(function(g){
     var em=BD.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});
     if(!em.length)return;
@@ -760,13 +830,13 @@ function buildBT(){
       var cm=BD_COMMENTS[e.n];
       var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+cm.text.replace(/"/g,"&quot;")+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
       h+='<tr id="bdrow-'+e.n.replace(/\s+/g,'-')+'">';
-      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="Voir historique">'+e.n+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
+      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="'+t('br_tooltip_history')+'">'+e.n+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
       h+='<td style="color:var(--tx3);font-size:12px">'+(emp?emp.r:'')+'</td>';
       h+='<td><span style="font-family:var(--mo)">'+e.D+'</span></td>';
       h+='<td><span style="font-family:var(--mo)">'+e.S+'</span></td>';
       h+='<td><div class="sbw"><div class="sbt"><div class="sbf" style="width:'+pct+'%;background:'+col+'"></div></div><span class="sv" style="color:'+col+'">'+e.sc+'</span></div></td>';
       h+='<td><span class="pill '+st.c+'">'+st.l+'</span></td>';
-      h+='<td style="text-align:center"><span style="cursor:pointer" onclick="openComment(\''+e.n.replace(/'/g,"\\'")+'\')" title="Commentaire">'+cmIcon+'</span></td>';
+      h+='<td style="text-align:center"><span style="cursor:pointer" onclick="openComment(\''+e.n.replace(/'/g,"\\'")+'\')" title="'+t('br_tooltip_comment')+'">'+cmIcon+'</span></td>';
       h+='</tr>';
     });
   });
@@ -779,12 +849,12 @@ function openComment(name){
   var d=document.createElement('div');
   d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.id='cm-popup';d.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:420px;max-width:95vw">'
-    +'<div style="font-weight:700;font-size:15px;margin-bottom:4px">Commentaire — '+name+'</div>'
-    +(cm.date?'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">Derniere modif : '+cm.date+(cm.author?' par '+cm.author:'')+'</div>':'<div style="margin-bottom:12px"></div>')
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:4px">'+t('br_comment_prefix')+name+'</div>'
+    +(cm.date?'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">'+t('br_comment_last_mod')+cm.date+(cm.author?t('br_comment_by')+cm.author:'')+'</div>':'<div style="margin-bottom:12px"></div>')
     +'<textarea id="cm-txt" style="width:100%;height:110px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+prev+'</textarea>'
     +'<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
-    +'<button onclick="document.getElementById(\'cm-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>'
-    +'<button onclick="saveComment(\''+name.replace(/'/g,"\\'")+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
+    +'<button onclick="document.getElementById(\'cm-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">'+t('modal_cancel')+'</button>'
+    +'<button onclick="saveComment(\''+name.replace(/'/g,"\\'")+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('btn_save')+'</button>'
     +'</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
@@ -799,7 +869,7 @@ function saveComment(name){
   if(db) db.ref('bradford/comments/'+name.replace(/[.#$/\[\]]/g,'_')).set(BD_COMMENTS[name]);
   var cmPop=document.getElementById('cm-popup');if(cmPop)cmPop.remove();
   buildBT();
-  toast(txt?'Commentaire enregistre':'Commentaire supprime','#10b981');
+  toast(txt?t('br_comment_saved'):t('br_comment_deleted'),'#10b981');
 }
 
 function openBradfordPanel(name){
@@ -820,27 +890,27 @@ function openBradfordPanel(name){
     var same=a.a===a.b;
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd2)">'
       +'<div><div style="font-size:13px;font-weight:600;color:var(--tx1)">'+(same?a.a:a.a+' → '+a.b)+'</div>'
-      +'<div style="font-size:11px;color:var(--tx3)">'+a.d+' jour'+(a.d>1?'s':'')+'</div></div>'
-      +'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">Episode</span>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+a.d+(a.d>1?t('br_days_suffix_n'):t('br_days_suffix_1'))+'</div></div>'
+      +'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">'+t('br_episode_badge')+'</span>'
       +'</div>';
-  }).join(''):'<div style="color:var(--tx3);font-size:13px;padding:20px 0;text-align:center">Aucun episode maladie dans les 365 derniers jours</div>';
+  }).join(''):'<div style="color:var(--tx3);font-size:13px;padding:20px 0;text-align:center">'+t('br_no_episode')+'</div>';
 
   d.innerHTML='<div style="padding:20px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center">'
     +'<div><div style="font-weight:700;font-size:16px">'+name+'</div><span class="pill '+st.c+'" style="margin-top:4px;display:inline-block">'+st.l+'</span></div>'
     +'<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
     +'</div>'
     +'<div style="padding:16px 20px;display:flex;gap:20px;border-bottom:1px solid var(--bd2)">'
-    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:'+col+'">'+e.sc+'</div><div style="font-size:11px;color:var(--tx3)">Score</div></div>'
-    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--tx1)">'+e.S+'</div><div style="font-size:11px;color:var(--tx3)">Episodes</div></div>'
-    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--tx1)">'+e.D+'</div><div style="font-size:11px;color:var(--tx3)">Jours</div></div>'
+    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:'+col+'">'+e.sc+'</div><div style="font-size:11px;color:var(--tx3)">'+t('br_stat_score')+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--tx1)">'+e.S+'</div><div style="font-size:11px;color:var(--tx3)">'+t('br_stat_episodes')+'</div></div>'
+    +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--tx1)">'+e.D+'</div><div style="font-size:11px;color:var(--tx3)">'+t('br_stat_days')+'</div></div>'
     +'</div>'
     +'<div style="padding:16px 20px;border-bottom:1px solid var(--bd2)">'
-    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Commentaire</div>'
-    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);min-height:36px" onclick="openComment(\''+name.replace(/'/g,"\\'")+'\')">'+( cm&&cm.text?cm.text:'<span style="color:var(--tx3)">Cliquer pour ajouter un commentaire...</span>')+'</div>'
+    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">'+t('br_comment_label')+'</div>'
+    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);min-height:36px" onclick="openComment(\''+name.replace(/'/g,"\\'")+'\')">'+( cm&&cm.text?cm.text:'<span style="color:var(--tx3)">'+t('br_comment_placeholder')+'</span>')+'</div>'
     +(cm&&cm.date?'<div style="font-size:10px;color:var(--tx3);margin-top:4px">'+cm.date+(cm.author?' · '+cm.author:'')+'</div>':'')
     +'</div>'
     +'<div style="padding:16px 20px;flex:1;overflow-y:auto">'
-    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">Historique episodes (365j)</div>'
+    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">'+t('br_history_title')+'</div>'
     +epsHtml
     +'</div>';
   document.body.appendChild(d);
@@ -1444,15 +1514,15 @@ function buildEmpTable(){
       +'<td style="padding:10px 12px;border-bottom:1px solid var(--bd)"><span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:'+bg+';color:'+col+'">'+e.g+'</span></td>'
       +'<td style="padding:10px 12px;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--bd)">'+e.r+'</td>'
       +'<td style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--bd)">'
-      +'<button onclick="editEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;cursor:pointer;font-family:var(--fn);margin-right:4px">Modifier</button>'
-      +'<button onclick="deactivateEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:none;color:var(--red);font-size:11px;cursor:pointer;font-family:var(--fn)">Retirer</button>'
+      +'<button onclick="editEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;cursor:pointer;font-family:var(--fn);margin-right:4px">'+t('adm_btn_edit')+'</button>'
+      +'<button onclick="deactivateEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:none;color:var(--red);font-size:11px;cursor:pointer;font-family:var(--fn)">'+t('adm_btn_remove')+'</button>'
       +'</td></tr>';
   }).join('');
 }
 
 function showAddEmp(){
   editingEmpId = null;
-  document.getElementById('emp-modal-title').textContent = 'Ajouter un employe';
+  document.getElementById('emp-modal-title').textContent = t('adm_emp_modal_add_title');
   document.getElementById('emp-name').value = '';
   document.getElementById('emp-group').value = 'INPAK';
   document.getElementById('emp-role').value = '';
@@ -1464,7 +1534,7 @@ function editEmp(idx){
   var e = EMP[parseInt(idx)];
   if(!e) return;
   editingEmpId = e.id || e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
-  document.getElementById('emp-modal-title').textContent = 'Modifier ' + e.n;
+  document.getElementById('emp-modal-title').textContent = t('adm_emp_modal_edit_prefix') + e.n;
   document.getElementById('emp-name').value = e.n;
   document.getElementById('emp-group').value = e.g;
   document.getElementById('emp-role').value = e.r;
@@ -1484,9 +1554,9 @@ function saveEmp(){
   var group = document.getElementById('emp-group').value;
   var role = document.getElementById('emp-role').value.trim();
   var err = document.getElementById('emp-modal-err');
-  if(!name){ err.textContent = 'Le nom est obligatoire.'; return; }
-  if(!role){ err.textContent = 'Le role est obligatoire.'; return; }
-  if(!db){ err.textContent = 'Firebase non connecte.'; return; }
+  if(!name){ err.textContent = t('adm_err_name_required'); return; }
+  if(!role){ err.textContent = t('adm_err_role_required'); return; }
+  if(!db){ err.textContent = t('adm_err_firebase_disconnected'); return; }
 
   var id = editingEmpId || name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
   var order = editingEmpId ? (EMP.find(function(e){return e.id===editingEmpId;})||{}).order||99 : EMP.length;
@@ -1495,7 +1565,7 @@ function saveEmp(){
   var empData = {name:name, group:group, role:role, active:true, order:order};
   if(bday) empData.birthday = bday;
   document.getElementById('emp-save-btn').disabled = true;
-  document.getElementById('emp-save-btn').textContent = 'Enregistrement...';
+  document.getElementById('emp-save-btn').textContent = t('adm_saving');
 
   db.ref('employees/'+id).set(empData).then(function(){
     // Mettre a jour EMP local
@@ -1521,22 +1591,22 @@ function saveEmp(){
     buildBT();
     buildBirthdayNotif();
     buildBirthdayCal();
-    toast(name + ' enregistre !', '#10b981');
+    toast(name + t('adm_toast_saved_suffix'), '#10b981');
     document.getElementById('emp-save-btn').disabled = false;
-    document.getElementById('emp-save-btn').textContent = 'Enregistrer';
+    document.getElementById('emp-save-btn').textContent = t('btn_save');
   }).catch(function(e){
-    err.textContent = 'Erreur: ' + e.message;
+    err.textContent = t('err_generic_prefix') + e.message;
     document.getElementById('emp-save-btn').disabled = false;
-    document.getElementById('emp-save-btn').textContent = 'Enregistrer';
+    document.getElementById('emp-save-btn').textContent = t('btn_save');
   });
 }
 
 function deactivateEmp(idx){
   var e = EMP[parseInt(idx)];
   if(!e) return;
-  if(!confirm("Retirer " + e.n + " de l'equipe ? Son historique Bradford sera conserve.")) return;
+  if(!confirm(t('adm_confirm_remove1') + e.n + t('adm_confirm_remove2'))) return;
   var id = e.id || e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
-  if(!db){ toast('Firebase non connecte','#ef4444'); return; }
+  if(!db){ toast(t('adm_err_firebase_disconnected'),'#ef4444'); return; }
   db.ref('employees/'+id+'/active').set(false).then(function(){
     EMP.splice(parseInt(idx), 1);
     SHIFTS26.splice(SHIFTS26.findIndex(function(s){return s.n===e.n;}), 1);
@@ -1546,8 +1616,8 @@ function deactivateEmp(idx){
     buildPT();
     buildBT();
     updKPI();
-    toast(e.n + " retire de l'equipe", '#f59e0b');
-  }).catch(function(err){ toast('Erreur: '+err.message,'#ef4444'); });
+    toast(e.n + t('adm_toast_removed_suffix'), '#f59e0b');
+  }).catch(function(err){ toast(t('err_generic_prefix')+err.message,'#ef4444'); });
 }
 
 function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent=t('topbar_connecting');btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent=t('login_btn');btn.disabled=false;});}
