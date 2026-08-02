@@ -366,7 +366,65 @@ var I18N={
     ov_birthday_turns1:' fête ses ', ov_birthday_turns2:' ans aujourd\u2019hui \ud83c\udf89',
     ov_birthday_none:'Aucune date de naissance enregistrée \u2014 ajoutez-les dans Admin > Employés',
     ov_birthday_celebrated:'\u2192 fêté le ', ov_birthday_years:'ans',
-    ov_birthday_today_label:'Aujourd\u2019hui !', ov_birthday_in_days:'dans '
+    ov_birthday_today_label:'Aujourd\u2019hui !', ov_birthday_in_days:'dans ',
+    ab_title:'Absences', ab_col_emp:'Employe', ab_col_start:'Debut', ab_col_end:'Fin',
+    ab_col_days:'Jours', ab_col_intensity:'Intensite', ab_col_year:'Annee',
+    ab_count_suffix:' absences 2025-2026', ab_empty:'Aucune absence maladie',
+    modal_cancel:'Annuler', modal_import:'Importer',
+    pt_subtitle:'Retards & anomalies tourniquet/pointeuse',
+    pt_opt_all_types:'Tous types', pt_opt_retards:'Retards', pt_opt_anomalies_tourniquet:'Anomalies tourniquet',
+    pt_opt_all_status:'Tous statuts', pt_opt_open:'Non traités', pt_opt_done:'Traités',
+    pt_mark_all_done:'Tout marquer comme traité',
+    pt_col_person:'Personne', pt_col_date:'Date', pt_col_type:'Type', pt_col_detail:'Détail', pt_col_status:'Statut',
+    pt_type_retard:'\u23f0 Retard', pt_type_tourniquet:'\u26a0 Tourniquet',
+    pt_status_open:'Non traité', pt_status_done:'Traité',
+    pt_suspect_tooltip:'Suspect : heure matinale sans (J+1) \u2014 possible confusion avec le tourniquet de la veille (bug shift de nuit)',
+    pt_empty:'Aucune anomalie', pt_render_error:'Erreur d\u2019affichage : ',
+    pt_banner_open_suffix:' anomalie(s) non traitée(s)', pt_banner_retards:' retard(s)',
+    pt_banner_tourniquet:' anomalie(s) tourniquet', pt_banner_suspect:' suspecte(s) (bug nuit)',
+    pt_none_open_filtered:'Aucune anomalie non traitée avec ces filtres', pt_everyone:'tout le monde',
+    pt_confirm_mark1:'Marquer ', pt_confirm_mark2:' anomalie(s) comme traitée(s) (', pt_confirm_mark3:') ?\nCette action est faite en masse et peut être annulée ligne par ligne ensuite.',
+    pt_firebase_unavailable:'Connexion Firebase non disponible',
+    pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
+    pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
+    pt_modal_title:'Importer pointages Protime',
+    arr_subtitle:'Lignes 31 a 36 \u2014 arrets avec raison et micro-arrets',
+    arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
+    filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
+    arr_search_title:'Recherche precise', arr_search_from:'Du',
+    arr_search_to:'Au (optionnel \u2014 laisse vide pour un seul jour)',
+    arr_search_hour:'Heure (optionnel, seulement si "Au" est vide)',
+    btn_search:'Rechercher', btn_reset:'Reinitialiser',
+    arr_search_hint:'Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".',
+    arr_freq_title:'Frequence par ligne', arr_with_reason_title:'Arrets avec raison', arr_all_reasons:'Toutes les raisons',
+    arr_compare_op_hint:'Duree moyenne par operateur pour cette raison \u2014 te permet de comparer',
+    arr_micro_title:'Micro-arrets', arr_micro_show:'afficher le detail', arr_micro_hide:'masquer le detail',
+    arr_no_data:'Aucune donnee importee \u2014 utilise le bouton "Importer Grafana".',
+    arr_col_ligne:'Ligne', arr_col_with_reason:'Avec raison', arr_col_micro:'Micro-arrets',
+    arr_col_date:'Date', arr_col_heure:'Heure', arr_col_duree:'Duree', arr_col_raison:'Raison',
+    arr_none_with_reason:'Aucun arret avec raison sur ce filtre.',
+    arr_limited_to1:'Limite aux ', arr_limited_to2:' plus recents (', arr_limited_to3:' au total)',
+    arr_micro_none:'Aucun micro-arret sur ce filtre.',
+    arr_micro_count_sep:' sur ', arr_micro_count_days:' jour(s))',
+    arr_micro_col_number:'Nombre ce jour-la',
+    arr_toast_no_duplicates:'Aucun doublon trouve',
+    arr_confirm_delete1:'', arr_confirm_delete2:' entree(s) a supprimer (doublons + anciens micro-arrets non agreges). Continuer ? Cette action est irreversible.',
+    arr_toast_deleting1:'Suppression de ', arr_toast_deleting2:' doublon(s) en cours\u2026',
+    arr_toast_deleted_suffix:' doublon(s) supprime(s)',
+    arr_toast_error_lot1:'Erreur au lot ', arr_toast_error_lot2:'/', arr_toast_error_lot3:' : ',
+    arr_modal_title:'Importer les arrets Inpak',
+    cmp_subtitle:'Compare les equipes (P1 a P5) et les operateurs entre eux',
+    cmp_period_to:'Au', cmp_all_lines:'Toutes les lignes',
+    cmp_evolution_title:'Evolution mois par mois',
+    cmp_evolution_hint:'Duree moyenne par mois, pour voir si ca s\u2019ameliore ou pas dans le temps.',
+    cmp_team_title:'Comparaison par equipe (P1 a P5)',
+    cmp_team_hint:'Duree moyenne d\u2019arret par equipe, pour la raison et la ligne selectionnees.',
+    cmp_op_title:'Comparaison par operateur',
+    cmp_op_hint:'Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).',
+    cmp_all_teams:'Toutes equipes',
+    cmp_resume_occ_suffix:' occurrence(s)', cmp_resume_of:' de "', cmp_resume_total:' \u2014 temps total : ',
+    cmp_month_occurrences:' occurrence(s) ce mois-la',
+    arr_limited_days1:'Limite aux ', arr_limited_days2:' plus recents jours (', arr_limited_days3:' jours au total)'
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -391,7 +449,65 @@ var I18N={
     ov_birthday_turns1:' wordt vandaag ', ov_birthday_turns2:' jaar \ud83c\udf89',
     ov_birthday_none:'Geen geboortedatums geregistreerd \u2014 voeg ze toe in Admin > Medewerkers',
     ov_birthday_celebrated:'\u2192 gevierd op ', ov_birthday_years:'jaar',
-    ov_birthday_today_label:'Vandaag!', ov_birthday_in_days:'over '
+    ov_birthday_today_label:'Vandaag!', ov_birthday_in_days:'over ',
+    ab_title:'Afwezigheden', ab_col_emp:'Medewerker', ab_col_start:'Start', ab_col_end:'Einde',
+    ab_col_days:'Dagen', ab_col_intensity:'Intensiteit', ab_col_year:'Jaar',
+    ab_count_suffix:' afwezigheden 2025-2026', ab_empty:'Geen ziekteafwezigheid',
+    modal_cancel:'Annuleren', modal_import:'Importeren',
+    pt_subtitle:'Laattijdigheden & prikklok-anomalie\u00ebn',
+    pt_opt_all_types:'Alle types', pt_opt_retards:'Laattijdigheden', pt_opt_anomalies_tourniquet:'Prikklok-anomalie\u00ebn',
+    pt_opt_all_status:'Alle statussen', pt_opt_open:'Niet verwerkt', pt_opt_done:'Verwerkt',
+    pt_mark_all_done:'Alles als verwerkt markeren',
+    pt_col_person:'Persoon', pt_col_date:'Datum', pt_col_type:'Type', pt_col_detail:'Detail', pt_col_status:'Status',
+    pt_type_retard:'\u23f0 Laattijdig', pt_type_tourniquet:'\u26a0 Prikklok',
+    pt_status_open:'Niet verwerkt', pt_status_done:'Verwerkt',
+    pt_suspect_tooltip:'Verdacht: vroeg tijdstip zonder (J+1) \u2014 mogelijk verward met de prikklok van de avond ervoor (nachtploeg-bug)',
+    pt_empty:'Geen anomalie', pt_render_error:'Weergavefout: ',
+    pt_banner_open_suffix:' niet-verwerkte anomalie(\u00ebn)', pt_banner_retards:' laattijdigheid(en)',
+    pt_banner_tourniquet:' prikklok-anomalie(\u00ebn)', pt_banner_suspect:' verdacht(e) (nachtbug)',
+    pt_none_open_filtered:'Geen niet-verwerkte anomalie met deze filters', pt_everyone:'iedereen',
+    pt_confirm_mark1:'Markeer ', pt_confirm_mark2:' anomalie(\u00ebn) als verwerkt (', pt_confirm_mark3:') ?\nDeze actie gebeurt in bulk en kan achteraf regel per regel ongedaan worden gemaakt.',
+    pt_firebase_unavailable:'Firebase-verbinding niet beschikbaar',
+    pt_marked_done_suffix:' anomalie(\u00ebn) gemarkeerd als verwerkt',
+    pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
+    pt_modal_title:'Protime-tijdsregistraties importeren',
+    arr_subtitle:'Lijnen 31 tot 36 \u2014 stilstanden met reden en micro-stilstanden',
+    arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
+    filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
+    arr_search_title:'Precieze zoekopdracht', arr_search_from:'Van',
+    arr_search_to:'Tot (optioneel \u2014 laat leeg voor \u00e9\u00e9n dag)',
+    arr_search_hour:'Uur (optioneel, enkel als "Tot" leeg is)',
+    btn_search:'Zoeken', btn_reset:'Reset',
+    arr_search_hint:'\u00c9\u00e9n dag: vul enkel "Van" in (+ optioneel Uur, venster van 30 min). Periode (bv. meerdere weekends): vul "Van" en "Tot" in.',
+    arr_freq_title:'Frequentie per lijn', arr_with_reason_title:'Stilstanden met reden', arr_all_reasons:'Alle redenen',
+    arr_compare_op_hint:'Gemiddelde duur per operator voor deze reden \u2014 laat je vergelijken',
+    arr_micro_title:'Micro-stilstanden', arr_micro_show:'detail tonen', arr_micro_hide:'detail verbergen',
+    arr_no_data:'Geen gegevens ge\u00efmporteerd \u2014 gebruik de knop "Grafana importeren".',
+    arr_col_ligne:'Lijn', arr_col_with_reason:'Met reden', arr_col_micro:'Micro-stilstanden',
+    arr_col_date:'Datum', arr_col_heure:'Uur', arr_col_duree:'Duur', arr_col_raison:'Reden',
+    arr_none_with_reason:'Geen stilstand met reden voor dit filter.',
+    arr_limited_to1:'Beperkt tot de ', arr_limited_to2:' meest recente (', arr_limited_to3:' in totaal)',
+    arr_micro_none:'Geen micro-stilstand voor dit filter.',
+    arr_micro_count_sep:' van ', arr_micro_count_days:' dag(en))',
+    arr_micro_col_number:'Aantal die dag',
+    arr_toast_no_duplicates:'Geen duplicaten gevonden',
+    arr_confirm_delete1:'', arr_confirm_delete2:' item(s) te verwijderen (duplicaten + oude niet-geaggregeerde micro-stilstanden). Doorgaan? Deze actie is onomkeerbaar.',
+    arr_toast_deleting1:'Bezig met verwijderen van ', arr_toast_deleting2:' duplicaat(en)\u2026',
+    arr_toast_deleted_suffix:' duplicaat(en) verwijderd',
+    arr_toast_error_lot1:'Fout bij batch ', arr_toast_error_lot2:'/', arr_toast_error_lot3:' : ',
+    arr_modal_title:'Inpak-stilstanden importeren',
+    cmp_subtitle:'Vergelijk de teams (P1 tot P5) en de operators onderling',
+    cmp_period_to:'Tot', cmp_all_lines:'Alle lijnen',
+    cmp_evolution_title:'Evolutie maand per maand',
+    cmp_evolution_hint:'Gemiddelde duur per maand, om te zien of het verbetert of niet doorheen de tijd.',
+    cmp_team_title:'Vergelijking per team (P1 tot P5)',
+    cmp_team_hint:'Gemiddelde stilstandsduur per team, voor de geselecteerde reden en lijn.',
+    cmp_op_title:'Vergelijking per operator',
+    cmp_op_hint:'Klik op een team hierboven om enkel zijn operators te vergelijken (bv. enkel P1 vs P2 doordeweeks).',
+    cmp_all_teams:'Alle teams',
+    cmp_resume_occ_suffix:' voorval(len)', cmp_resume_of:' van "', cmp_resume_total:' \u2014 totale tijd: ',
+    cmp_month_occurrences:' voorval(len) die maand',
+    arr_limited_days1:'Beperkt tot de ', arr_limited_days2:' meest recente dagen (', arr_limited_days3:' dagen in totaal)'
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
@@ -405,6 +521,10 @@ var MOIS_ABBR_I18N={
 };
 var DOW_ABBR_I18N={fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'], nl:['Zo','Ma','Di','Wo','Do','Vr','Za']};
 var DOW_FULL_I18N={fr:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'], nl:['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag']};
+var CMP2_MOIS_I18N={
+  fr:['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'],
+  nl:['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+};
 function t(key){var d=I18N[LANG]||I18N.fr;return d[key]!==undefined?d[key]:(I18N.fr[key]!==undefined?I18N.fr[key]:key);}
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){
@@ -426,6 +546,11 @@ function setLang(l){
   if(typeof buildTodayAbs==='function'&&document.getElementById('today-abs'))buildTodayAbs();
   if(typeof buildBirthdayNotif==='function'&&document.getElementById('birthday-notif'))buildBirthdayNotif();
   if(typeof buildBirthdayCal==='function'&&document.getElementById('birthday-cal'))buildBirthdayCal();
+  if(typeof updAbsLbl==='function'&&document.getElementById('abs-lbl'))updAbsLbl();
+  if(typeof buildAbs==='function'&&document.getElementById('agrid'))buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');
+  if(typeof buildPT2==='function'&&document.getElementById('pt-tbody'))buildPT2();
+  if(typeof buildArretsInpak==='function'&&document.getElementById('arrets-resume-wrap'))buildArretsInpak();
+  if(typeof buildComparaisonTab==='function'&&document.getElementById('cmp2EvolutionChart'))buildComparaisonTab();
 }
 function toggleLang(){setLang(LANG==='fr'?'nl':'fr');}
 var BD_PREV_STATUS={};
@@ -1093,10 +1218,10 @@ function applyShift(nv){
 function updAbsLbl(){
   if(currentUser && currentUser.role !== 'admin') return;
   var el=document.getElementById('abs-lbl');
-  if(el) el.textContent=ABS.length+' absences 2025-2026';
+  if(el) el.textContent=ABS.length+t('ab_count_suffix');
 }
 function buildAbs(f){var grid=document.getElementById('agrid');var ziekOnly=ABS.filter(function(a){return a.t==='ziek';});var mx=Math.max.apply(null,ziekOnly.map(function(a){return a.d;}));if(mx<1)mx=1;var list=[].concat(ziekOnly);if(f&&f!=='all')list=list.filter(function(a){return a.y===f||a.n===f;});list.sort(function(a,b){return b.d-a.d;});
-grid.innerHTML=list.map(function(a){var pct=Math.round(a.d/mx*100);return '<div class="arow"><div class="an">'+a.n+'</div><div class="ad">'+a.a+'</div><div class="ad">'+a.b+'</div><div class="aj">'+a.d+'j</div><div class="ab"><div class="abf" style="width:'+pct+'%;background:#ef4444"></div></div><div class="ay">'+a.y+'</div></div>';}).join('')||'<div class="empty">Aucune absence maladie</div>';}
+grid.innerHTML=list.map(function(a){var pct=Math.round(a.d/mx*100);return '<div class="arow"><div class="an">'+a.n+'</div><div class="ad">'+a.a+'</div><div class="ad">'+a.b+'</div><div class="aj">'+a.d+'j</div><div class="ab"><div class="abf" style="width:'+pct+'%;background:#ef4444"></div></div><div class="ay">'+a.y+'</div></div>';}).join('')||'<div class="empty">'+t('ab_empty')+'</div>';}
 document.querySelectorAll('.fb').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');buildAbs(b.dataset.f);});});
 document.querySelectorAll('.ytab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.ytab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');curYear=b.dataset.yr;curMonth=null;buildPT();});});
 function goToday(){
@@ -2540,7 +2665,7 @@ function buildPT2(){
     });
 
     if(!rows.length){
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">Aucune anomalie</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">'+t('pt_empty')+'</td></tr>';
       updPointagesBanner();
       return;
     }
@@ -2549,10 +2674,10 @@ function buildPT2(){
       var k = entry[0], a = entry[1];
       var isOpen = a.statut === 'open';
       var typeCol = a.type === 'retard' ? '#f59e0b' : '#ef4444';
-      var typeLabel = a.type === 'retard' ? '⏰ Retard' : '⚠ Tourniquet';
+      var typeLabel = a.type === 'retard' ? t('pt_type_retard') : t('pt_type_tourniquet');
       var statutBadge = isOpen
-        ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">Non traité</span>'
-        : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">Traité</span>';
+        ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">'+t('pt_status_open')+'</span>'
+        : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">'+t('pt_status_done')+'</span>';
       var cmIcon = a.commentaire
         ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
         : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
@@ -2566,7 +2691,7 @@ function buildPT2(){
         }
       }
       var suspectIcon = isSuspect
-        ? '<span style="color:#f59e0b;font-size:13px;margin-left:6px;cursor:help" title="Suspect : heure matinale sans (J+1) — possible confusion avec le tourniquet de la veille (bug shift de nuit)">&#9888;</span>'
+        ? '<span style="color:#f59e0b;font-size:13px;margin-left:6px;cursor:help" title="'+t('pt_suspect_tooltip')+'">&#9888;</span>'
         : '';
       return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
         + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
@@ -2581,7 +2706,7 @@ function buildPT2(){
     updPointagesBanner();
   } catch(e){
     console.error('[Pointages] Erreur de rendu buildPT2 :', e);
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px">Erreur d\'affichage : ' + e.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px">'+t('pt_render_error') + e.message + '</td></tr>';
   }
 }
 
@@ -2600,10 +2725,10 @@ function updPointagesBanner(){
   }).length;
   if(!open.length){ banner.style.display = 'none'; return; }
   banner.style.display = 'flex';
-  var msg = open.length + ' anomalie(s) non traitée(s)';
-  if(retards) msg += ' · ' + retards + ' retard(s)';
-  if(ptgs) msg += ' · ' + ptgs + ' anomalie(s) tourniquet';
-  if(suspects) msg += ' · <span style="color:#f59e0b">⚠ ' + suspects + ' suspecte(s) (bug nuit)</span>';
+  var msg = open.length + t('pt_banner_open_suffix');
+  if(retards) msg += ' · ' + retards + t('pt_banner_retards');
+  if(ptgs) msg += ' · ' + ptgs + t('pt_banner_tourniquet');
+  if(suspects) msg += ' · <span style="color:#f59e0b">⚠ ' + suspects + t('pt_banner_suspect') + '</span>';
   text.innerHTML = msg;
 }
 
@@ -2626,13 +2751,13 @@ function markAllPtDone(){
     console.log('[markAllPtDone]', toMark.length, 'anomalie(s) à marquer.');
 
     if(!toMark.length){
-      toast('Aucune anomalie non traitée avec ces filtres', '#f59e0b');
+      toast(t('pt_none_open_filtered'), '#f59e0b');
       return;
     }
 
-    var label = (filterPerson !== 'all' ? filterPerson : 'tout le monde')
-      + (filterType !== 'all' ? ' · ' + (filterType === 'retard' ? 'retards' : 'tourniquet') : '');
-    var ok = window.confirm('Marquer ' + toMark.length + ' anomalie(s) comme traitée(s) (' + label + ') ?\nCette action est faite en masse et peut être annulée ligne par ligne ensuite.');
+    var label = (filterPerson !== 'all' ? filterPerson : t('pt_everyone'))
+      + (filterType !== 'all' ? ' · ' + (filterType === 'retard' ? t('pt_opt_retards').toLowerCase() : t('pt_opt_anomalies_tourniquet').toLowerCase()) : '');
+    var ok = window.confirm(t('pt_confirm_mark1') + toMark.length + t('pt_confirm_mark2') + label + t('pt_confirm_mark3'));
     console.log('[markAllPtDone] confirm() a renvoyé :', ok);
     if(!ok) return;
 
@@ -2654,20 +2779,20 @@ function markAllPtDone(){
     });
 
     if(!db){
-      toast('Connexion Firebase non disponible', '#ef4444');
+      toast(t('pt_firebase_unavailable'), '#ef4444');
       return;
     }
 
     Promise.all([db.ref().update(updates)].concat(pushPromises)).then(function(){
       console.log('[markAllPtDone] Mise à jour Firebase réussie.');
-      toast(toMark.length + ' anomalie(s) marquée(s) comme traitée(s)', '#10b981');
+      toast(toMark.length + t('pt_marked_done_suffix'), '#10b981');
     }).catch(function(e){
       console.error('[markAllPtDone] Erreur Firebase :', e);
-      toast('Erreur Firebase : ' + e.message, '#ef4444');
+      toast(t('pt_firebase_error_prefix') + e.message, '#ef4444');
     });
   } catch(e){
     console.error('[markAllPtDone] Erreur inattendue :', e);
-    toast('Erreur : ' + e.message, '#ef4444');
+    toast(t('pt_generic_error_prefix') + e.message, '#ef4444');
   }
 }
 
@@ -3048,7 +3173,7 @@ function toggleMicrostopsDetail(){
   if(!wrap) return;
   var visible = wrap.style.display !== 'none';
   wrap.style.display = visible ? 'none' : 'block';
-  if(toggle) toggle.innerHTML = visible ? '&#9660; afficher le detail' : '&#9650; masquer le detail';
+  if(toggle) toggle.innerHTML = visible ? '&#9660; '+t('arr_micro_show') : '&#9650; '+t('arr_micro_hide');
 }
 
 // Retire les doublons deja presents dans Firebase (crees par l'ancienne
@@ -3114,7 +3239,7 @@ function diagnostiquerDoublonsArrets(){
 }
 
 function nettoyerDoublonsArrets(){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
+  if(!db){ toast(t('pt_firebase_unavailable'), '#ef4444'); return; }
 
   var aSupprimer = [];
 
@@ -3151,20 +3276,20 @@ function nettoyerDoublonsArrets(){
     for(var i = 1; i < entries.length; i++) aSupprimer.push(entries[i].key);
   });
 
-  if(!aSupprimer.length){ toast('Aucun doublon trouve', '#10b981'); return; }
-  if(!confirm(aSupprimer.length + ' entree(s) a supprimer (doublons + anciens micro-arrets non agreges). Continuer ? Cette action est irreversible.')) return;
+  if(!aSupprimer.length){ toast(t('arr_toast_no_duplicates'), '#10b981'); return; }
+  if(!confirm(t('arr_confirm_delete1') + aSupprimer.length + t('arr_confirm_delete2'))) return;
 
   var TAILLE_LOT = 100;
   var lots = [];
   for(var i = 0; i < aSupprimer.length; i += TAILLE_LOT) lots.push(aSupprimer.slice(i, i + TAILLE_LOT));
 
   var fait = 0;
-  toast('Suppression de ' + aSupprimer.length + ' doublon(s) en cours…', '#3b82f6');
+  toast(t('arr_toast_deleting1') + aSupprimer.length + t('arr_toast_deleting2'), '#3b82f6');
   console.log('[Nettoyage doublons] ' + lots.length + ' lot(s) a traiter');
 
   function envoyerLot(idx){
     if(idx >= lots.length){
-      toast(aSupprimer.length + ' doublon(s) supprime(s)', '#10b981');
+      toast(aSupprimer.length + t('arr_toast_deleted_suffix'), '#10b981');
       console.log('[Nettoyage doublons] Termine :', aSupprimer.length, 'doublon(s) supprime(s)');
       return;
     }
@@ -3184,7 +3309,7 @@ function nettoyerDoublonsArrets(){
         envoyerLot(idx);
         return;
       }
-      toast('Erreur au lot ' + (idx+1) + '/' + lots.length + ' : ' + e.message, '#ef4444');
+      toast(t('arr_toast_error_lot1') + (idx+1) + t('arr_toast_error_lot2') + lots.length + t('arr_toast_error_lot3') + e.message, '#ef4444');
       console.error('[Nettoyage doublons] Erreur lot ' + idx, e);
     });
   }
@@ -3261,7 +3386,7 @@ function buildComparaisonTab(){
       var totalMin = arrets.reduce(function(s, a){ return s + (a.duree || 0); }, 0);
       var h = Math.floor(totalMin / 60), m = totalMin % 60;
       wrapResume.style.display = 'block';
-      wrapResume.innerHTML = '<b>' + arrets.length + '</b> occurrence(s)' + (raison !== 'all' ? ' de "' + raison + '"' : '') + ' — temps total : <b>' + h + 'h' + String(m).padStart(2,'0') + '</b>';
+      wrapResume.innerHTML = '<b>' + arrets.length + '</b>' + t('cmp_resume_occ_suffix') + (raison !== 'all' ? t('cmp_resume_of') + raison + '"' : '') + t('cmp_resume_total') + '<b>' + h + 'h' + String(m).padStart(2,'0') + '</b>';
     }
   }
 
@@ -3285,7 +3410,7 @@ function buildComparaisonTab(){
     if(moisTries.length){
       var labelsMois = moisTries.map(function(m){
         var p = m.split('-');
-        var noms = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
+        var noms = CMP2_MOIS_I18N[LANG]||CMP2_MOIS_I18N.fr;
         return noms[parseInt(p[1],10) - 1] + ' ' + p[0].slice(2);
       });
       var datasets = ['P1','P2','P3','P4','P5'].map(function(eq){
@@ -3298,7 +3423,7 @@ function buildComparaisonTab(){
           return c ? c.n : 0;
         });
         return {
-          label: eq === 'P5' ? 'P5 (moi)' : eq,
+          label: eq === 'P5' ? t('arr_p5_moi') : eq,
           data: data,
           borderColor: COULEURS_EQUIPE[eq],
           backgroundColor: COULEURS_EQUIPE[eq],
@@ -3320,7 +3445,7 @@ function buildComparaisonTab(){
               callbacks: {
                 afterLabel: function(c){
                   var occ = c.dataset._occurrences[c.dataIndex];
-                  return occ + ' occurrence(s) ce mois-la';
+                  return occ + t('cmp_month_occurrences');
                 }
               }
             }
@@ -3351,10 +3476,10 @@ function buildComparaisonTab(){
       var nEq = equipes.map(function(e){ return parEquipe[e].n; });
       _cmp2EquipeChart = new Chart(ctxEq, {
         type: 'bar',
-        data: { labels: equipes.map(function(e){ return e === 'P5' ? 'P5 (moi)' : e; }), datasets: [{ data: moyEq, backgroundColor: equipes.map(function(e){ return COULEURS_EQUIPE[e]; }) }] },
+        data: { labels: equipes.map(function(e){ return e === 'P5' ? t('arr_p5_moi') : e; }), datasets: [{ data: moyEq, backgroundColor: equipes.map(function(e){ return COULEURS_EQUIPE[e]; }) }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nEq[c.dataIndex] + ' occurrence(s)'; } } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nEq[c.dataIndex] + t('cmp_resume_occ_suffix'); } } } },
           scales: {
             x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
             y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
@@ -3391,7 +3516,7 @@ function buildComparaisonTab(){
         data: { labels: noms2, datasets: [{ data: moyOp, backgroundColor: '#3b82f6' }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nOp[c.dataIndex] + ' occurrence(s)'; } } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(c){ return nOp[c.dataIndex] + t('cmp_resume_occ_suffix'); } } } },
           scales: {
             x: { grid: { display: false }, ticks: { color: '#8b90a4' } },
             y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' }, title: { display: true, text: 'minutes', color: '#8b90a4' } }
@@ -3521,11 +3646,11 @@ function buildArretsInpak(){
     });
     var lignes = Object.keys(parLigne).sort();
     if(!lignes.length){
-      wrapResume.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucune donnee importee — utilise le bouton "Importer Grafana".</div>';
+      wrapResume.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">'+t('arr_no_data')+'</div>';
     } else {
       wrapResume.innerHTML = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Ligne</th><th style="padding:8px">Avec raison</th><th style="padding:8px">Micro-arrets</th></tr></thead><tbody>'
+        + '<th style="padding:8px">'+t('arr_col_ligne')+'</th><th style="padding:8px">'+t('arr_col_with_reason')+'</th><th style="padding:8px">'+t('arr_col_micro')+'</th></tr></thead><tbody>'
         + lignes.map(function(l){
             return '<tr><td style="padding:8px;font-weight:600">Line ' + l + '</td>'
               + '<td style="padding:8px;color:#ef4444">' + parLigne[l].raison + '</td>'
@@ -3542,14 +3667,14 @@ function buildArretsInpak(){
   if(wrapRaison){
     avecRaison.sort(function(x, y){ return (y.date + y.heure).localeCompare(x.date + x.heure); });
     if(!avecRaison.length){
-      wrapRaison.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun arret avec raison sur ce filtre.</div>';
+      wrapRaison.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">'+t('arr_none_with_reason')+'</div>';
     } else {
       var LIMITE = 200;
       var tronque = avecRaison.length > LIMITE;
       var affiches = avecRaison.slice(0, LIMITE);
       var html = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Heure</th><th style="padding:8px">Duree</th><th style="padding:8px">Ligne</th><th style="padding:8px">Equipe</th><th style="padding:8px">Operateur</th><th style="padding:8px">Raison</th></tr></thead><tbody>';
+        + '<th style="padding:8px">'+t('arr_col_date')+'</th><th style="padding:8px">'+t('arr_col_heure')+'</th><th style="padding:8px">'+t('arr_col_duree')+'</th><th style="padding:8px">'+t('arr_col_ligne')+'</th><th style="padding:8px">'+t('ov_kcard_team')+'</th><th style="padding:8px">'+t('col_operator')+'</th><th style="padding:8px">'+t('arr_col_raison')+'</th></tr></thead><tbody>';
       html += affiches.map(function(a){
         var eq = getEquipe(a.date, a.heure);
         var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
@@ -3566,7 +3691,7 @@ function buildArretsInpak(){
           + '</tr>';
       }).join('');
       html += '</tbody></table>';
-      if(tronque) html += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE + ' plus recents (' + avecRaison.length + ' au total)</div>';
+      if(tronque) html += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">'+t('arr_limited_to1') + LIMITE + t('arr_limited_to2') + avecRaison.length + t('arr_limited_to3')+'</div>';
       wrapRaison.innerHTML = html;
     }
   }
@@ -3575,18 +3700,18 @@ function buildArretsInpak(){
   var wrapMicro = document.getElementById('arrets-micro-wrap');
   var countMicro = document.getElementById('arrets-micro-count');
   var totalMicro = microstops.reduce(function(s, a){ return s + (a.nombre || 0); }, 0);
-  if(countMicro) countMicro.textContent = '(' + totalMicro + ' sur ' + microstops.length + ' jour(s))';
+  if(countMicro) countMicro.textContent = '(' + totalMicro + t('arr_micro_count_sep') + microstops.length + t('arr_micro_count_days');
   if(wrapMicro){
     microstops.sort(function(x, y){ return y.date.localeCompare(x.date) || (y.nombre - x.nombre); });
     if(!microstops.length){
-      wrapMicro.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">Aucun micro-arret sur ce filtre.</div>';
+      wrapMicro.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:12px">'+t('arr_micro_none')+'</div>';
     } else {
       var LIMITE2 = 200;
       var tronque2 = microstops.length > LIMITE2;
       var affiches2 = microstops.slice(0, LIMITE2);
       var html2 = '<table style="width:100%;border-collapse:collapse">'
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
-        + '<th style="padding:8px">Date</th><th style="padding:8px">Ligne</th><th style="padding:8px">Nombre ce jour-la</th></tr></thead><tbody>';
+        + '<th style="padding:8px">'+t('arr_col_date')+'</th><th style="padding:8px">'+t('arr_col_ligne')+'</th><th style="padding:8px">'+t('arr_micro_col_number')+'</th></tr></thead><tbody>';
       html2 += affiches2.map(function(a){
         return '<tr>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
@@ -3595,9 +3720,8 @@ function buildArretsInpak(){
           + '</tr>';
       }).join('');
       html2 += '</tbody></table>';
-      if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Limite aux ' + LIMITE2 + ' plus recents jours (' + microstops.length + ' jours au total)</div>';
+      if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">'+t('arr_limited_days1') + LIMITE2 + t('arr_limited_days2') + microstops.length + t('arr_limited_days3')+'</div>';
       wrapMicro.innerHTML = html2;
     }
   }
 }
-
