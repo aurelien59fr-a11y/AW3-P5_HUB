@@ -352,7 +352,21 @@ var I18N={
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
     plan_today:'Aujourd\u2019hui', plan_print:'Imprimer', plan_no_today:'Aujourd\u2019hui n\u2019est pas un jour planifié.',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
-    legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup'
+    legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup',
+    status_ok:'OK', status_wn:'A surveiller', status_al:'Preoccupant', status_cr:'Critique', legend_watch_short:'Surveiller',
+    ov_title:'Tableau de bord', ov_subtitle:'365 derniers jours \u2022 Week-ends + fériés + ponts',
+    ov_kcard_team:'Equipe', ov_kmeta_okpct:'OK',
+    ov_crm_urgent:'Score > 500 urgent', ov_crm_none:'Score > 500 aucun',
+    ov_alert_from:' est passé de ', ov_alert_to:' à ',
+    ov_chart_bradford:'Scores Bradford', ov_chart_absences_trim:'Absences par trimestre',
+    ov_chart_days_per_emp:'Jours d\u2019absence par employé',
+    ov_next30_title:'Absences \u2014 30 prochains jours', ov_next30_none:'Aucune absence prevue dans les 30 prochains jours',
+    ov_today_prefix:'Absents aujourd\u2019hui', ov_today_allpresent:'Tout le monde est present \u2705',
+    ov_birthdays_title:'Anniversaires à venir', ov_birthday_happy:'Joyeux anniversaire !',
+    ov_birthday_turns1:' fête ses ', ov_birthday_turns2:' ans aujourd\u2019hui \ud83c\udf89',
+    ov_birthday_none:'Aucune date de naissance enregistrée \u2014 ajoutez-les dans Admin > Employés',
+    ov_birthday_celebrated:'\u2192 fêté le ', ov_birthday_years:'ans',
+    ov_birthday_today_label:'Aujourd\u2019hui !', ov_birthday_in_days:'dans '
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -363,7 +377,21 @@ var I18N={
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
     plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
-    legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie'
+    legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie',
+    status_ok:'OK', status_wn:'Te volgen', status_al:'Zorgwekkend', status_cr:'Kritiek', legend_watch_short:'Te volgen',
+    ov_title:'Dashboard', ov_subtitle:'365 laatste dagen \u2022 Weekends + feestdagen + brugdagen',
+    ov_kcard_team:'Team', ov_kmeta_okpct:'OK',
+    ov_crm_urgent:'Score > 500 dringend', ov_crm_none:'Score > 500 geen',
+    ov_alert_from:' ging van ', ov_alert_to:' naar ',
+    ov_chart_bradford:'Bradford-scores', ov_chart_absences_trim:'Afwezigheden per kwartaal',
+    ov_chart_days_per_emp:'Afwezigheidsdagen per medewerker',
+    ov_next30_title:'Afwezigheden \u2014 volgende 30 dagen', ov_next30_none:'Geen geplande afwezigheid in de volgende 30 dagen',
+    ov_today_prefix:'Afwezig vandaag', ov_today_allpresent:'Iedereen is aanwezig \u2705',
+    ov_birthdays_title:'Verjaardagen binnenkort', ov_birthday_happy:'Gefeliciteerd!',
+    ov_birthday_turns1:' wordt vandaag ', ov_birthday_turns2:' jaar \ud83c\udf89',
+    ov_birthday_none:'Geen geboortedatums geregistreerd \u2014 voeg ze toe in Admin > Medewerkers',
+    ov_birthday_celebrated:'\u2192 gevierd op ', ov_birthday_years:'jaar',
+    ov_birthday_today_label:'Vandaag!', ov_birthday_in_days:'over '
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
@@ -371,6 +399,12 @@ var MOIS_I18N={
   fr:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
   nl:['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December']
 };
+var MOIS_ABBR_I18N={
+  fr:['jan','fév','mars','avr','mai','juin','juil','août','sep','oct','nov','déc'],
+  nl:['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
+};
+var DOW_ABBR_I18N={fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'], nl:['Zo','Ma','Di','Wo','Do','Vr','Za']};
+var DOW_FULL_I18N={fr:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'], nl:['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag']};
 function t(key){var d=I18N[LANG]||I18N.fr;return d[key]!==undefined?d[key]:(I18N.fr[key]!==undefined?I18N.fr[key]:key);}
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){
@@ -387,6 +421,11 @@ function setLang(l){
   try{localStorage.setItem('lang',l);}catch(e){}
   applyI18n();
   if(typeof buildPT==='function'&&document.getElementById('ptable'))buildPT();
+  if(typeof updKPI==='function'&&document.getElementById('k-ok')&&typeof BD!=='undefined'&&BD.length)updKPI();
+  if(typeof buildMiniCal==='function'&&document.getElementById('mini-cal'))buildMiniCal();
+  if(typeof buildTodayAbs==='function'&&document.getElementById('today-abs'))buildTodayAbs();
+  if(typeof buildBirthdayNotif==='function'&&document.getElementById('birthday-notif'))buildBirthdayNotif();
+  if(typeof buildBirthdayCal==='function'&&document.getElementById('birthday-cal'))buildBirthdayCal();
 }
 function toggleLang(){setLang(LANG==='fr'?'nl':'fr');}
 var BD_PREV_STATUS={};
@@ -475,7 +514,7 @@ var OPTS={TL:['TL','ziek','verlof','recup'],INPAK:['coordinateur','31/32','33/34
 var ABS=[{n:'Nicolas Fettu',a:'04/01/2025',b:'05/01/2025',d:2,y:'2025'},{n:'Nicolas Fettu',a:'26/04/2025',b:'27/04/2025',d:2,y:'2025'},{n:'Nicolas Fettu',a:'22/11/2025',b:'22/11/2025',d:1,y:'2025'},{n:'Mohamed Lalaoui',a:'29/11/2025',b:'30/11/2025',d:2,y:'2025'},{n:'Ramazani Abdulhassan',a:'28/06/2025',b:'29/06/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'07/06/2025',b:'08/06/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'13/09/2025',b:'14/09/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'14/12/2025',b:'14/12/2025',d:1,y:'2025'},{n:'Balan Marius',a:'13/12/2025',b:'14/12/2025',d:2,y:'2025'},{n:'Lyse Musik',a:'14/12/2025',b:'14/12/2025',d:1,y:'2025'},{n:'Max Secember',a:'26/04/2025',b:'27/04/2025',d:2,y:'2025'},{n:'Monir Salmi',a:'08/02/2025',b:'09/02/2025',d:2,y:'2025'},{n:'Anthony Raimondi',a:'15/11/2025',b:'23/11/2025',d:4,y:'2025'},{n:'Nicolas Fettu',a:'07/02/2026',b:'08/02/2026',d:2,y:'2026'},{n:'Julien Demuyter',a:'11/01/2026',b:'11/01/2026',d:1,y:'2026'},{n:'Julien Demuyter',a:'22/03/2026',b:'22/03/2026',d:1,y:'2026'},{n:'Julien Demuyter',a:'25/04/2026',b:'26/04/2026',d:2,y:'2026'},{n:'Mohamed Lalaoui',a:'14/03/2026',b:'22/03/2026',d:4,y:'2026'},{n:'Mohamed Lalaoui',a:'11/04/2026',b:'19/04/2026',d:4,y:'2026'},{n:'Ramazani Abdulhassan',a:'14/02/2026',b:'15/02/2026',d:2,y:'2026'},{n:'Halima Laadi',a:'11/04/2026',b:'12/04/2026',d:2,y:'2026'},{n:'Hakkim Akkouh',a:'27/06/2026',b:'28/06/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'17/01/2026',b:'18/01/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'28/02/2026',b:'01/03/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'28/03/2026',b:'29/03/2026',d:2,y:'2026'},{n:'Lachen Baraik',a:'31/01/2026',b:'15/02/2026',d:6,y:'2026'}];
 var BD=[{n:'Aurelien Turchi',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Nicolas Fettu',D:3,S:2,sc:12,T:[0,0,1,0]},{n:'Julien Demuyter',D:4,S:3,sc:36,T:[0,0,0,0]},{n:'Mohamed Lalaoui',D:10,S:3,sc:90,T:[0,0,2,0]},{n:'Ramazani Abdulhassan',D:4,S:2,sc:16,T:[0,0,0,2]},{n:'Halima Laadi',D:5,S:3,sc:45,T:[0,0,0,0]},{n:'Hakkim Akkouh',D:2,S:1,sc:2,T:[0,0,0,0]},{n:'Balan Marius',D:2,S:1,sc:2,T:[0,0,0,0]},{n:'Lyse Musik',D:1,S:1,sc:1,T:[0,0,0,0]},{n:'Max Secember',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Larissa Fratutescu',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Monir Salmi',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Anthony Raimondi',D:10,S:4,sc:160,T:[0,0,0,0]},{n:'Brahim Akdim',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Lachen Baraik',D:6,S:1,sc:6,T:[0,0,0,0]}];
 function scColor(s){return s<=50?'#10b981':s<=200?'#f59e0b':s<=500?'#f97316':'#ef4444';}
-function scSt(s){return s<=50?{l:'OK',c:'ok'}:s<=200?{l:'A surveiller',c:'wn'}:s<=500?{l:'Preoccupant',c:'al'}:{l:'Critique',c:'cr'};}
+function scSt(s){return s<=50?{l:t('status_ok'),c:'ok'}:s<=200?{l:t('status_wn'),c:'wn'}:s<=500?{l:t('status_al'),c:'al'}:{l:t('status_cr'),c:'cr'};}
 function sCls(v){var m={'TL':'tl','coordinateur':'coord','31/32':'31','33/34':'33','35/36':'35','extra':'ex','Prod':'pr','Labo':'lb','Batter':'bt','Cleaning':'cl','Inpak':'ip','Bulk':'bk','ziek':'zk','verlof':'vl','recup':'rc','AW1':'aw1','AW2':'aw2'};return 's-'+(m[v]||'em');}
 function sLbl(v){var m={'coordinateur':'COORD','TL':'TL'};return m[v]||v||'-';}
 function todayStr(){var n=new Date();return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0');}
@@ -560,7 +599,7 @@ function updKPI(){
   document.getElementById('k-okp').textContent=Math.round(ok/BD.length*100)+'% OK';
   document.getElementById('k-wn').textContent=wn.length;
   document.getElementById('k-cr').textContent=cr.length;
-  document.getElementById('k-crm').textContent=cr.length>0?'Score > 500 urgent':'Score > 500 aucun';
+  document.getElementById('k-crm').textContent=cr.length>0?t('ov_crm_urgent'):t('ov_crm_none');
   function chip(e,color){var fn=e.n.split(' ')[0];return '<span onclick="goToBradford(\''+e.n.replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:12px;padding:3px 9px;border-radius:99px;background:'+color+'22;color:'+color+';border:1px solid '+color+'55;white-space:nowrap">'+fn+'</span>';}
   document.getElementById('k-wn-names').innerHTML=wn.map(function(e){return chip(e,'#f59e0b');}).join('');
   document.getElementById('k-cr-names').innerHTML=cr.map(function(e){return chip(e,'#ef4444');}).join('');
@@ -572,7 +611,7 @@ function updKPI(){
     var prev=BD_PREV_STATUS[e.n];
     var curr=scSt(e.sc).l;
     if(prev&&prev!==curr&&e.sc>50){
-      alerts.push('<b>'+e.n.split(' ')[0]+'</b> est passé de <i>'+prev+'</i> à <i>'+curr+'</i>');
+      alerts.push('<b>'+e.n.split(' ')[0]+'</b>'+t('ov_alert_from')+'<i>'+prev+'</i>'+t('ov_alert_to')+'<i>'+curr+'</i>');
     }
     BD_PREV_STATUS[e.n]=curr;
   });
@@ -739,12 +778,12 @@ function buildMiniCal(){
   var byDate={};
   abs30.forEach(function(x){if(!byDate[x.date])byDate[x.date]=[];byDate[x.date].push({name:x.name.split(' ')[0],type:x.type});});
   var daysWithAbs=days.filter(function(d){return byDate[fmtDDMM(d)]&&byDate[fmtDDMM(d)].length;});
-  if(!daysWithAbs.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0">Aucune absence prevue dans les 30 prochains jours</div>';return;}
-  var MOIS=['jan','fev','mars','avr','mai','juin','juil','aout','sep','oct','nov','dec'];
+  if(!daysWithAbs.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0">'+t('ov_next30_none')+'</div>';return;}
+  var MOIS=MOIS_ABBR_I18N[LANG]||MOIS_ABBR_I18N.fr;
   var h=daysWithAbs.map(function(d){
     var k=fmtDDMM(d);
     var entries=byDate[k];
-    var dow=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'][d.getDay()];
+    var dow=(DOW_ABBR_I18N[LANG]||DOW_ABBR_I18N.fr)[d.getDay()];
     return '<div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--bd2)">'
       +'<div style="min-width:70px;font-size:12px;color:var(--tx3)">'+dow+' '+d.getDate()+' '+MOIS[d.getMonth()]+'</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:5px">'+entries.map(function(x){
@@ -1939,13 +1978,13 @@ function buildTodayAbs(){
     if((sv==='verlof'||sv==='recup')&&!absToday.find(function(a){return a.n===emp.n;}))
       absToday.push({n:emp.n,t:sv,a:today+'/'+yr,b:today+'/'+yr,d:1});
   });
-  var MOIS=['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
-  var dow=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][now.getDay()];
-  if(title) title.textContent='Absents aujourd\'hui \u2014 '+dow+' '+now.getDate()+' '+MOIS[now.getMonth()];
-  if(!absToday.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">Tout le monde est present \u2705</div>';return;}
+  var MOIS=MOIS_I18N[LANG]||MOIS_I18N.fr;
+  var dow=(DOW_FULL_I18N[LANG]||DOW_FULL_I18N.fr)[now.getDay()];
+  if(title) title.textContent=t('ov_today_prefix')+' \u2014 '+dow+' '+now.getDate()+' '+MOIS[now.getMonth()];
+  if(!absToday.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">'+t('ov_today_allpresent')+'</div>';return;}
   el.innerHTML=absToday.map(function(a){
     var tc=a.t==='ziek'?'#ef4444':a.t==='verlof'?'#3b82f6':'#10b981';
-    var tl=a.t==='ziek'?'Maladie':a.t==='verlof'?'Conge':'Recup';
+    var tl=a.t==='ziek'?t('legend_ziek'):a.t==='verlof'?t('legend_verlof'):t('legend_recup');
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2)"><div style="font-size:13px;font-weight:600;color:var(--tx1)">'+a.n+'</div><span style="font-size:11px;padding:2px 9px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+tl+'</span></div>';
   }).join('');
 }
@@ -2072,11 +2111,11 @@ function buildBirthdayNotif(){
   if(!bdToday.length){ el.style.display='none'; return; }
   el.style.display='flex';
   el.innerHTML = '<div style="font-size:20px">🎂</div>'
-    +'<div><div style="font-weight:700;font-size:14px;color:#fbbf24">Joyeux anniversaire !</div>'
+    +'<div><div style="font-weight:700;font-size:14px;color:#fbbf24">'+t('ov_birthday_happy')+'</div>'
     +'<div style="font-size:13px;color:var(--tx2)">'
     +bdToday.map(function(b){
       var age = new Date().getFullYear()-b.year;
-      return '<b>'+b.n.split(' ')[0]+'</b> fête ses '+age+' ans aujourd\'hui 🎉';
+      return '<b>'+b.n.split(' ')[0]+'</b>'+t('ov_birthday_turns1')+age+t('ov_birthday_turns2');
     }).join(' &nbsp;·&nbsp; ')
     +'</div></div>';
 }
@@ -2087,7 +2126,7 @@ function buildBirthdayCal(){
   var now = new Date();
   var bdAll = getBirthdays();
   if(!bdAll.length){
-    el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">Aucune date de naissance enregistrée — ajoutez-les dans Admin > Employés</div>';
+    el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">'+t('ov_birthday_none')+'</div>';
     return;
   }
 
@@ -2116,8 +2155,8 @@ function buildBirthdayCal(){
     return null;
   }
 
-  var MOIS=['jan','fév','mars','avr','mai','juin','juil','août','sep','oct','nov','déc'];
-  var DOW=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var MOIS=MOIS_ABBR_I18N[LANG]||MOIS_ABBR_I18N.fr;
+  var DOW=DOW_ABBR_I18N[LANG]||DOW_ABBR_I18N.fr;
 
   el.innerHTML = upcoming.map(function(b){
     var isToday = b.daysUntil === 0;
@@ -2125,7 +2164,7 @@ function buildBirthdayCal(){
     var workDay = nextWorkDay(b.next);
     var workInfo = '';
     if(workDay && workDay.offset > 0){
-      workInfo = '<span style="font-size:10px;color:var(--tx3);margin-left:6px">→ fêté le '+DOW[workDay.date.getDay()]+' '+workDay.date.getDate()+' '+MOIS[workDay.date.getMonth()]+'</span>';
+      workInfo = '<span style="font-size:10px;color:var(--tx3);margin-left:6px">'+t('ov_birthday_celebrated')+DOW[workDay.date.getDay()]+' '+workDay.date.getDate()+' '+MOIS[workDay.date.getMonth()]+'</span>';
     }
     var bg = isToday?'rgba(251,191,36,.15)':isSoon?'rgba(59,130,246,.07)':'';
     var border = isToday?'border-left:3px solid #fbbf24':'border-left:3px solid transparent';
@@ -2134,11 +2173,11 @@ function buildBirthdayCal(){
       +(isToday?'<span style="font-size:18px">🎂</span>':'<span style="font-size:16px">🎁</span>')
       +'<div>'
       +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+b.n.split(' ')[0]+'<span style="font-weight:400;color:var(--tx3);font-size:12px"> '+b.n.split(' ').slice(1).join(' ')+'</span></div>'
-      +'<div style="font-size:11px;color:var(--tx3)">'+b.day+' '+MOIS[b.month-1]+' &mdash; '+b.age+' ans'+workInfo+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+b.day+' '+MOIS[b.month-1]+' &mdash; '+b.age+' '+t('ov_birthday_years')+workInfo+'</div>'
       +'</div></div>'
       +'<div style="text-align:right">'
-      +(isToday?'<span style="font-size:12px;font-weight:700;color:#fbbf24">Aujourd\'hui !</span>'
-               :'<span style="font-size:12px;font-weight:600;color:'+(isSoon?'var(--blue)':'var(--tx3)')+'">dans '+b.daysUntil+'j</span>')
+      +(isToday?'<span style="font-size:12px;font-weight:700;color:#fbbf24">'+t('ov_birthday_today_label')+'</span>'
+               :'<span style="font-size:12px;font-weight:600;color:'+(isSoon?'var(--blue)':'var(--tx3)')+'">'+t('ov_birthday_in_days')+b.daysUntil+'j</span>')
       +'</div>'
       +'</div>';
   }).join('');
@@ -3561,3 +3600,4 @@ function buildArretsInpak(){
     }
   }
 }
+
