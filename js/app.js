@@ -3844,16 +3844,36 @@ function importerNCP(){
     errEl.textContent = 'JSON invalide : ' + e.message;
     return;
   }
-  var obj = {};
+  // Deduplication par numero de notification : si le meme NCP apparait
+  // plusieurs fois (ex: exports qui se chevauchent), on garde la version
+  // la plus complete (le plus de versions/historique), pas juste la derniere.
+  var parNotif = {};
+  var doublonsTrouves = 0;
   arr.forEach(function(r){
-    var key = (r.notification || ('ncp_' + Math.random())).toString().replace(/[.#$/\[\]]/g, '_');
-    obj[key] = r;
+    var notif = r.notification;
+    if(!notif) return;
+    if(parNotif[notif]){
+      doublonsTrouves++;
+      var existant = parNotif[notif];
+      var existantScore = existant.nb_versions || 1;
+      var nouveauScore = r.nb_versions || 1;
+      if(nouveauScore >= existantScore) parNotif[notif] = r;
+    } else {
+      parNotif[notif] = r;
+    }
+  });
+  var obj = {};
+  Object.keys(parNotif).forEach(function(notif){
+    var key = notif.toString().replace(/[.#$/\[\]]/g, '_');
+    obj[key] = parNotif[notif];
   });
   if(!db){ errEl.textContent = 'Pas de connexion Firebase.'; return; }
   db.ref('ncp_data').set(obj).then(function(){
     document.getElementById('ncp-import-modal').style.display = 'none';
     document.getElementById('ncp-import-txt').value = '';
-    toast(arr.length + ' NCP importes', '#10b981');
+    var msg = Object.keys(obj).length + ' NCP importes';
+    if(doublonsTrouves > 0) msg += ' (' + doublonsTrouves + ' doublons fusionnes)';
+    toast(msg, '#10b981');
   }).catch(function(err){
     errEl.textContent = 'Erreur Firebase : ' + err.message;
   });
@@ -3901,12 +3921,36 @@ function ncpGetEquipe(r){
 }
 
 function buildNCPTab(){
+  var emptyState = document.getElementById('ncp-empty-state');
+  var contentWrap = document.getElementById('ncp-content-wrap');
+  if(!NCP_DATA || NCP_DATA.length === 0){
+    if(emptyState) emptyState.style.display = 'block';
+    if(contentWrap) contentWrap.style.display = 'none';
+    return;
+  }
+  if(emptyState) emptyState.style.display = 'none';
+  if(contentWrap) contentWrap.style.display = 'block';
+
   var filtres = NCP_DATA.filter(function(r){
     if(NCP_FILTRE_UNITE !== 'all' && r.unite !== NCP_FILTRE_UNITE) return false;
     if(NCP_FILTRE_TYPE !== 'all' && r.type_ncp !== NCP_FILTRE_TYPE) return false;
     if(NCP_FILTRE_EQUIPE !== 'all' && ncpGetEquipe(r) !== NCP_FILTRE_EQUIPE) return false;
     return true;
   });
+
+  // Filtres actifs mais aucun resultat : message clair plutot que des graphiques vides
+  if(filtres.length === 0){
+    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.textContent = '0';
+    });
+    var elPer = document.getElementById('ncp-k-periode'); if(elPer) elPer.textContent = '-';
+    [_ncpEvolutionChart, _ncpEquipeChart, _ncpUniteChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
+    _ncpEvolutionChart = _ncpEquipeChart = _ncpUniteChart = _ncpLignesChart = _ncpProduitsChart = null;
+    var tbody0 = document.getElementById('ncp-tbody');
+    if(tbody0) tbody0.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">Aucun NCP ne correspond a ces filtres.</td></tr>';
+    var countEl0 = document.getElementById('ncp-liste-count'); if(countEl0) countEl0.textContent = '(0)';
+    return;
+  }
 
   // --- KPI ---
   var total = filtres.length;
