@@ -534,6 +534,15 @@
         <button onclick="openImportNCPModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Importer donnees NCP</button>
       </div>
 
+      <!-- Etat vide : affiche tant qu'aucune donnee n'a ete importee -->
+      <div id="ncp-empty-state" style="display:none;text-align:center;padding:60px 20px;color:var(--tx3)">
+        <div style="font-size:32px;margin-bottom:12px">&#9888;</div>
+        <div style="font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:8px">Aucune donnee NCP pour le moment</div>
+        <div style="font-size:13px;max-width:420px;margin:0 auto 16px">Clique sur "Importer donnees NCP" ci-dessus et colle le contenu du fichier NCP_dataset_complet.json pour remplir cet onglet.</div>
+      </div>
+
+      <div id="ncp-content-wrap">
+
       <!-- KPI -->
       <div class="kgrid">
         <div class="kcard bl"><div class="klbl">Total NCP</div><div class="kval" id="ncp-k-total">-</div><div class="kmeta" id="ncp-k-periode">-</div></div>
@@ -605,6 +614,7 @@
             <tbody id="ncp-tbody"></tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
 
