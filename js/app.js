@@ -717,6 +717,7 @@ function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEE
 function toast(msg,col){var t=document.createElement('div');t.className='toast';t.innerHTML='<div class="tdot" style="background:'+col+'"></div>'+msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2500);}
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
+  if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
 });});
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
   db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&(currentUser.role==='admin'||currentUser.role==='visiteur')){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('planning/extraHistorique').on('value',function(snap){var data=snap.val();if(Array.isArray(data)){EXTRA_HIST=data.filter(Boolean);}});
@@ -1430,6 +1431,8 @@ function applyRole(role){
   if(arretsTab) arretsTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var cmp2Tab = document.getElementById('tab-cmp2-btn');
   if(cmp2Tab) cmp2Tab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
+  var ncpTab = document.getElementById('tab-ncp-btn');
+  if(ncpTab) ncpTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -1994,7 +1997,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadNCPData();
         buildEmpTable();
       }
     }
@@ -2075,7 +2078,7 @@ function startApp(){
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadNCPData();
   }
 }
 
@@ -3798,6 +3801,244 @@ function buildArretsInpak(){
       html2 += '</tbody></table>';
       if(tronque2) html2 += '<div style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">'+t('arr_limited_days1') + LIMITE2 + t('arr_limited_days2') + microstops.length + t('arr_limited_days3')+'</div>';
       wrapMicro.innerHTML = html2;
+    }
+  }
+}
+/* ============================================================
+   NCP QUALITE — Inpak + Production, AW1/AW2/AW3
+   Donnees preparees hors-ligne (extraction PDF Outlook), importees
+   ici en JSON puis stockees dans Firebase sous ncp_data/
+============================================================ */
+
+var NCP_DATA = [];
+var NCP_FILTRE_UNITE = 'all';
+var NCP_FILTRE_TYPE = 'all';
+var NCP_FILTRE_EQUIPE = 'all';
+var _ncpEvolutionChart = null, _ncpEquipeChart = null, _ncpUniteChart = null, _ncpLignesChart = null, _ncpProduitsChart = null;
+
+function loadNCPData(){
+  if(!db) return;
+  db.ref('ncp_data').on('value', function(snap){
+    var data = snap.val() || {};
+    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; });
+    buildNCPTab();
+  }, function(error){
+    console.warn('[NCP] Erreur chargement:', error);
+  });
+}
+
+function openImportNCPModal(){
+  document.getElementById('ncp-import-modal').style.display = 'flex';
+}
+
+function importerNCP(){
+  var txt = document.getElementById('ncp-import-txt').value.trim();
+  var errEl = document.getElementById('ncp-import-err');
+  errEl.textContent = '';
+  if(!txt){ errEl.textContent = 'Colle le JSON avant d\'importer.'; return; }
+  var arr;
+  try {
+    arr = JSON.parse(txt);
+    if(!Array.isArray(arr)) throw new Error('Le JSON doit etre un tableau (liste de NCP).');
+  } catch(e){
+    errEl.textContent = 'JSON invalide : ' + e.message;
+    return;
+  }
+  var obj = {};
+  arr.forEach(function(r){
+    var key = (r.notification || ('ncp_' + Math.random())).toString().replace(/[.#$/\[\]]/g, '_');
+    obj[key] = r;
+  });
+  if(!db){ errEl.textContent = 'Pas de connexion Firebase.'; return; }
+  db.ref('ncp_data').set(obj).then(function(){
+    document.getElementById('ncp-import-modal').style.display = 'none';
+    document.getElementById('ncp-import-txt').value = '';
+    toast(arr.length + ' NCP importes', '#10b981');
+  }).catch(function(err){
+    errEl.textContent = 'Erreur Firebase : ' + err.message;
+  });
+}
+
+function filtrerNCPUnite(u){
+  NCP_FILTRE_UNITE = u;
+  document.querySelectorAll('.ncp-unite-btn').forEach(function(b){
+    var on = b.dataset.unite === u;
+    b.classList.toggle('on', on);
+    b.style.background = on ? 'var(--blue)' : 'none';
+    b.style.color = on ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--bd2)';
+  });
+  buildNCPTab();
+}
+
+function filtrerNCPType(ty){
+  NCP_FILTRE_TYPE = ty;
+  document.querySelectorAll('.ncp-type-btn').forEach(function(b){
+    var on = b.dataset.type === ty;
+    var couleur = ty === 'Inpak' ? 'var(--amber)' : ty === 'Production' ? 'var(--red)' : 'var(--blue)';
+    b.classList.toggle('on', on);
+    b.style.background = on ? (b.dataset.type === 'all' ? 'var(--blue)' : couleur) : 'none';
+    b.style.color = on ? '#fff' : (b.dataset.type === 'all' ? 'var(--tx2)' : couleur);
+  });
+  buildNCPTab();
+}
+
+function filtrerNCPEquipe(e){
+  NCP_FILTRE_EQUIPE = e;
+  document.querySelectorAll('.ncp-equipe-btn').forEach(function(b){
+    var on = b.dataset.equipe === e;
+    var couleur = b.dataset.equipe === 'all' ? 'var(--blue)' : COULEURS_EQUIPE[b.dataset.equipe];
+    b.classList.toggle('on', on);
+    b.style.background = on ? couleur : 'none';
+    b.style.color = on ? '#fff' : couleur;
+  });
+  buildNCPTab();
+}
+
+function ncpGetEquipe(r){
+  if(!r.created_date_iso || !r.created_heure) return null;
+  return getEquipe(r.created_date_iso, r.created_heure);
+}
+
+function buildNCPTab(){
+  var filtres = NCP_DATA.filter(function(r){
+    if(NCP_FILTRE_UNITE !== 'all' && r.unite !== NCP_FILTRE_UNITE) return false;
+    if(NCP_FILTRE_TYPE !== 'all' && r.type_ncp !== NCP_FILTRE_TYPE) return false;
+    if(NCP_FILTRE_EQUIPE !== 'all' && ncpGetEquipe(r) !== NCP_FILTRE_EQUIPE) return false;
+    return true;
+  });
+
+  // --- KPI ---
+  var total = filtres.length;
+  var nInpak = filtres.filter(function(r){ return r.type_ncp === 'Inpak'; }).length;
+  var nProd = filtres.filter(function(r){ return r.type_ncp === 'Production'; }).length;
+  var tonnes = filtres.reduce(function(s, r){ return s + (r.total_tonnes || 0); }, 0);
+  var elTotal = document.getElementById('ncp-k-total'); if(elTotal) elTotal.textContent = total;
+  var elInpak = document.getElementById('ncp-k-inpak'); if(elInpak) elInpak.textContent = nInpak;
+  var elInpakPct = document.getElementById('ncp-k-inpak-pct'); if(elInpakPct) elInpakPct.textContent = total ? Math.round(nInpak/total*100) + '%' : '-';
+  var elProd = document.getElementById('ncp-k-prod'); if(elProd) elProd.textContent = nProd;
+  var elProdPct = document.getElementById('ncp-k-prod-pct'); if(elProdPct) elProdPct.textContent = total ? Math.round(nProd/total*100) + '%' : '-';
+  var elTonnes = document.getElementById('ncp-k-tonnes'); if(elTonnes) elTonnes.textContent = Math.round(tonnes) + ' t';
+  var elPeriode = document.getElementById('ncp-k-periode');
+  if(elPeriode && filtres.length){
+    var dates = filtres.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
+    if(dates.length) elPeriode.textContent = dates[0] + ' -> ' + dates[dates.length-1];
+  }
+
+  // --- Evolution mensuelle ---
+  var ctxEvo = document.getElementById('ncpEvolutionChart');
+  if(ctxEvo && typeof Chart !== 'undefined'){
+    var parMois = {};
+    filtres.forEach(function(r){
+      if(!r.created_date_iso) return;
+      var mois = r.created_date_iso.slice(0,7);
+      parMois[mois] = (parMois[mois] || 0) + 1;
+    });
+    var moisTries = Object.keys(parMois).sort();
+    if(_ncpEvolutionChart){ _ncpEvolutionChart.destroy(); _ncpEvolutionChart = null; }
+    _ncpEvolutionChart = new Chart(ctxEvo, {
+      type: 'line',
+      data: { labels: moisTries, datasets: [{ data: moisTries.map(function(m){ return parMois[m]; }), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.1)', fill: true, tension: .3, pointRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } }
+    });
+  }
+
+  // --- Comparaison par equipe ---
+  var ctxEq = document.getElementById('ncpEquipeChart');
+  if(ctxEq && typeof Chart !== 'undefined'){
+    var parEq = { P1:0, P2:0, P3:0, P4:0, P5:0 };
+    filtres.forEach(function(r){ var eq = ncpGetEquipe(r); if(eq && parEq[eq] !== undefined) parEq[eq]++; });
+    var eqListe = ['P1','P2','P3','P4','P5'].filter(function(e){ return parEq[e] > 0; });
+    if(_ncpEquipeChart){ _ncpEquipeChart.destroy(); _ncpEquipeChart = null; }
+    if(eqListe.length){
+      _ncpEquipeChart = new Chart(ctxEq, {
+        type: 'bar',
+        data: { labels: eqListe, datasets: [{ data: eqListe.map(function(e){ return parEq[e]; }), backgroundColor: eqListe.map(function(e){ return COULEURS_EQUIPE[e]; }) }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } }
+      });
+    }
+  }
+
+  // --- Repartition par unite ---
+  var ctxUn = document.getElementById('ncpUniteChart');
+  if(ctxUn && typeof Chart !== 'undefined'){
+    var parUnite = { AW1:0, AW2:0, AW3:0 };
+    filtres.forEach(function(r){ if(r.unite && parUnite[r.unite] !== undefined) parUnite[r.unite]++; });
+    if(_ncpUniteChart){ _ncpUniteChart.destroy(); _ncpUniteChart = null; }
+    _ncpUniteChart = new Chart(ctxUn, {
+      type: 'doughnut',
+      data: { labels: ['AW1','AW2','AW3'], datasets: [{ data: [parUnite.AW1, parUnite.AW2, parUnite.AW3], backgroundColor: ['#3b82f6','#10b981','#f97316'] }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8b90a4', boxWidth: 10, font: { size: 11 } } } } }
+    });
+  }
+
+  // --- Top lignes (cause directe uniquement, exclut les consequences Production) ---
+  var ctxLi = document.getElementById('ncpLignesChart');
+  if(ctxLi && typeof Chart !== 'undefined'){
+    var parLigne = {};
+    filtres.forEach(function(r){
+      if(!r.ligne || r.ligne_type !== 'cause_directe') return;
+      parLigne[r.ligne] = (parLigne[r.ligne] || 0) + 1;
+    });
+    var topLignes = Object.keys(parLigne).sort(function(a,b){ return parLigne[b]-parLigne[a]; }).slice(0,10);
+    if(_ncpLignesChart){ _ncpLignesChart.destroy(); _ncpLignesChart = null; }
+    if(topLignes.length){
+      _ncpLignesChart = new Chart(ctxLi, {
+        type: 'bar',
+        data: { labels: topLignes, datasets: [{ data: topLignes.map(function(l){ return parLigne[l]; }), backgroundColor: '#3b82f6', borderRadius: 4 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y: { grid: { display: false }, ticks: { color: '#8b90a4' } } } }
+      });
+    }
+  }
+
+  // --- Top produits ---
+  var ctxPr = document.getElementById('ncpProduitsChart');
+  if(ctxPr && typeof Chart !== 'undefined'){
+    var parProduit = {};
+    filtres.forEach(function(r){
+      if(!r.code_produit) return;
+      parProduit[r.code_produit] = (parProduit[r.code_produit] || 0) + 1;
+    });
+    var topProduits = Object.keys(parProduit).sort(function(a,b){ return parProduit[b]-parProduit[a]; }).slice(0,10);
+    if(_ncpProduitsChart){ _ncpProduitsChart.destroy(); _ncpProduitsChart = null; }
+    if(topProduits.length){
+      _ncpProduitsChart = new Chart(ctxPr, {
+        type: 'bar',
+        data: { labels: topProduits, datasets: [{ data: topProduits.map(function(p){ return parProduit[p]; }), backgroundColor: '#f97316', borderRadius: 4 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y: { grid: { display: false }, ticks: { color: '#8b90a4' } } } }
+      });
+    }
+  }
+
+  // --- Table (200 plus recents) ---
+  var tbody = document.getElementById('ncp-tbody');
+  var countEl = document.getElementById('ncp-liste-count');
+  if(countEl) countEl.textContent = '(' + filtres.length + ')';
+  if(tbody){
+    var tries = filtres.slice().sort(function(a,b){ return (b.created_date_iso||'').localeCompare(a.created_date_iso||''); });
+    var LIMITE = 200;
+    var tronque = tries.length > LIMITE;
+    var affiches = tries.slice(0, LIMITE);
+    tbody.innerHTML = affiches.map(function(r){
+      var eq = ncpGetEquipe(r);
+      var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
+      return '<tr>'
+        + '<td style="font-family:var(--mo);font-size:12px">' + (r.created_date_iso || '-') + '</td>'
+        + '<td>' + (r.unite || '-') + '</td>'
+        + '<td>' + (eq || '-') + '</td>'
+        + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
+        + '<td>' + (r.ligne || '-') + (r.ligne_type === 'consequence_blocage_aval' ? ' <span style="color:var(--tx3);font-size:10px">(consequence)</span>' : '') + '</td>'
+        + '<td>' + (r.code_produit || '-') + '</td>'
+        + '<td style="font-size:12px;color:var(--tx3)">' + (r.status || '-') + '</td>'
+        + '<td style="font-size:12px">' + (r.description || '-') + '</td>'
+        + '</tr>';
+    }).join('');
+    if(tronque){
+      tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Affichage limite aux ' + LIMITE + ' plus recents sur ' + tries.length + '</td></tr>';
     }
   }
 }
