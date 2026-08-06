@@ -2550,9 +2550,26 @@ function getBirthdayStarForDate(ddmm, yr){
 }
 
 // Charger les birthdays depuis Firebase dans EMP
-// [SUPPRIME] loadBirthdaysFromFirebase() : fonction orpheline, jamais appelee.
-// Les dates de naissance sont desormais chargees directement par le loader
-// principal des employes (db.ref('employees')), qui conserve le champ birthday.
+// Les dates de naissance sont desormais chargees par le loader principal des
+// employes (db.ref('employees')), qui conserve le champ birthday. Cette fonction
+// reste appelee juste apres la connexion : elle sert de filet de securite si les
+// employes ne sont pas encore charges a ce moment-la.
+function loadBirthdaysFromFirebase(){
+  if(!db) return;
+  db.ref('employees').once('value').then(function(snap){
+    var data = snap.val();
+    if(!data) return;
+    Object.keys(data).forEach(function(id){
+      var emp = data[id];
+      if(!emp.birthday) return;
+      var found = EMP.find(function(e){ return e.n === emp.name; });
+      if(found) found.birthday = emp.birthday;
+    });
+    buildBirthdayNotif();
+    buildBirthdayCal();
+    buildPT(); // refresh planning avec les etoiles d anniversaire
+  });
+}
 
 // ============================================================
 // Test de fiabilite Firebase (Admin)
