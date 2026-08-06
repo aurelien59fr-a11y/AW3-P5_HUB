@@ -21,8 +21,13 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .tbtn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
 .tbtn:hover{background:var(--bg3);color:var(--tx)}
 .save-lbl{font-size:11px;color:var(--tx3);font-family:var(--mo)}
-.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 24px;overflow-x:auto}
-.tab{padding:0 20px;height:48px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:13px;font-family:var(--fn);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:7px}
+.tabs{display:flex;flex-wrap:nowrap;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 24px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--bd2) transparent;cursor:grab;user-select:none}
+.tabs.is-dragging{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none}
+.tabs::-webkit-scrollbar{height:4px}
+.tabs::-webkit-scrollbar-track{background:transparent}
+.tabs::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:99px}
+.tabs::-webkit-scrollbar-thumb:hover{background:var(--tx3)}
+.tab{flex:0 0 auto;scroll-snap-align:center;padding:0 20px;height:48px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:13px;font-family:var(--fn);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:7px}
 .tab:hover{color:var(--tx)}
 .tab.on{color:var(--blue);border-bottom-color:var(--blue)}
 .content{padding:28px 24px;flex:1}
@@ -174,6 +179,35 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
   .kgrid{grid-template-columns:1fr;gap:8px}
   .login-logo .dot, .logo-dot{width:44px;height:44px}
 }
+/* ===== Barre d onglets defilante ===== */
+.tabs-wrap{position:relative}
+.tabs-wrap::before,.tabs-wrap::after{content:'';position:absolute;top:0;bottom:0;width:34px;pointer-events:none;opacity:0;transition:opacity .18s ease;z-index:3}
+.tabs-wrap::before{left:0;background:linear-gradient(90deg,var(--bg2) 10%,rgba(0,0,0,0))}
+.tabs-wrap::after{right:0;background:linear-gradient(270deg,var(--bg2) 10%,rgba(0,0,0,0))}
+.tabs-wrap.can-l::before{opacity:1}
+.tabs-wrap.can-r::after{opacity:1}
+.tabs-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:4;width:26px;height:26px;border-radius:99px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx2);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0}
+.tabs-nav:hover{color:var(--tx);border-color:var(--blue)}
+.tabs-nav.l{left:2px}
+.tabs-nav.r{right:2px}
+.tabs-wrap.can-l .tabs-nav.l{display:flex}
+.tabs-wrap.can-r .tabs-nav.r{display:flex}
+
+/* ===== Grille KPI a 5 cartes (onglet NCP) ===== */
+.kcard.pu::before{background:#8b5cf6}
+.kcard.pu .kval{color:#8b5cf6}
+.kgrid5{grid-template-columns:repeat(5,1fr)}
+@media (max-width:1200px){.kgrid5{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:768px){.kgrid5{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.kgrid5{grid-template-columns:1fr}}
+
+/* ===== Selecteur de periode NCP ===== */
+.ncp-date-input{padding:6px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:12px;color-scheme:dark}
+.ncp-date-input:focus{outline:none;border-color:var(--blue)}
+.ncp-preset-btn{padding:6px 12px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer;transition:all .15s}
+.ncp-preset-btn:hover{border-color:var(--blue);color:var(--tx)}
+.ncp-preset-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
 `;
   document.head.appendChild(style);
 })();
@@ -719,6 +753,126 @@ document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click'
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
 });});
+
+// ==============================================================
+// Barre d onglets : defilement horizontal (molette, glisser, tactile)
+// ==============================================================
+(function(){
+  var nav = document.querySelector('nav.tabs');
+  if(!nav) return;
+
+  // Enveloppe la barre pour pouvoir afficher les degrades et les fleches
+  var wrap = nav.parentElement;
+  if(!wrap || !wrap.classList.contains('tabs-wrap')){
+    wrap = document.createElement('div');
+    wrap.className = 'tabs-wrap';
+    nav.parentNode.insertBefore(wrap, nav);
+    wrap.appendChild(nav);
+  }
+
+  var btnL = document.createElement('button');
+  btnL.className = 'tabs-nav l';
+  btnL.type = 'button';
+  btnL.setAttribute('aria-label', 'Onglets precedents');
+  btnL.innerHTML = '&#8249;';
+  var btnR = document.createElement('button');
+  btnR.className = 'tabs-nav r';
+  btnR.type = 'button';
+  btnR.setAttribute('aria-label', 'Onglets suivants');
+  btnR.innerHTML = '&#8250;';
+  wrap.appendChild(btnL);
+  wrap.appendChild(btnR);
+
+  function pas(){ return Math.max(140, nav.clientWidth * 0.6); }
+  btnL.addEventListener('click', function(){ nav.scrollBy({ left: -pas(), behavior: 'smooth' }); });
+  btnR.addEventListener('click', function(){ nav.scrollBy({ left: pas(), behavior: 'smooth' }); });
+
+  // Indicateurs de bord : on sait s il reste des onglets a gauche / a droite
+  function majBords(){
+    var max = nav.scrollWidth - nav.clientWidth;
+    wrap.classList.toggle('can-l', nav.scrollLeft > 4);
+    wrap.classList.toggle('can-r', nav.scrollLeft < max - 4);
+  }
+  nav.addEventListener('scroll', majBords, { passive: true });
+  window.addEventListener('resize', majBords);
+  if(window.ResizeObserver){ try { new ResizeObserver(majBords).observe(nav); } catch(e){} }
+
+  // Molette verticale -> defilement horizontal
+  nav.addEventListener('wheel', function(e){
+    if(Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    var max = nav.scrollWidth - nav.clientWidth;
+    if(max <= 0) return;
+    var next = nav.scrollLeft + e.deltaY;
+    if(next < 0) next = 0;
+    if(next > max) next = max;
+    if(next === nav.scrollLeft) return;
+    e.preventDefault();
+    nav.scrollLeft = next;
+  }, { passive: false });
+
+  // Glisser-deposer (souris, stylet, tactile)
+  var drag = false, xDep = 0, sDep = 0, bouge = 0;
+  nav.addEventListener('pointerdown', function(e){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    drag = true; bouge = 0;
+    xDep = e.clientX; sDep = nav.scrollLeft;
+    nav.classList.add('is-dragging');
+  });
+  nav.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    var dx = e.clientX - xDep;
+    if(Math.abs(dx) > 3){
+      bouge = Math.abs(dx);
+      if(nav.setPointerCapture && e.pointerId !== undefined){ try { nav.setPointerCapture(e.pointerId); } catch(err){} }
+    }
+    nav.scrollLeft = sDep - dx;
+  });
+  function finDrag(){
+    if(!drag) return;
+    drag = false;
+    nav.classList.remove('is-dragging');
+  }
+  nav.addEventListener('pointerup', finDrag);
+  nav.addEventListener('pointercancel', finDrag);
+  nav.addEventListener('pointerleave', finDrag);
+  // Un glisser ne doit pas declencher le changement d onglet
+  nav.addEventListener('click', function(e){
+    if(bouge > 6){ e.stopPropagation(); e.preventDefault(); bouge = 0; }
+  }, true);
+
+  // L onglet actif reste toujours visible
+  function voirActif(){
+    var on = nav.querySelector('.tab.on');
+    if(!on) return;
+    var gauche = on.offsetLeft;
+    var droite = gauche + on.offsetWidth;
+    if(gauche < nav.scrollLeft + 30){
+      nav.scrollTo({ left: Math.max(0, gauche - 40), behavior: 'smooth' });
+    } else if(droite > nav.scrollLeft + nav.clientWidth - 30){
+      nav.scrollTo({ left: droite - nav.clientWidth + 40, behavior: 'smooth' });
+    }
+    majBords();
+  }
+  nav.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.tab') : null;
+    if(b) setTimeout(voirActif, 60);
+  });
+  window.voirOngletActif = voirActif;
+
+  // Fleches gauche / droite au clavier
+  nav.addEventListener('keydown', function(e){
+    if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    var visibles = [].slice.call(nav.querySelectorAll('.tab')).filter(function(t){ return t.offsetParent !== null; });
+    var idx = visibles.indexOf(document.activeElement);
+    if(idx === -1) return;
+    var suiv = visibles[idx + (e.key === 'ArrowRight' ? 1 : -1)];
+    if(suiv){ e.preventDefault(); suiv.focus(); suiv.click(); }
+  });
+
+  setTimeout(function(){ majBords(); voirActif(); }, 300);
+  setTimeout(majBords, 1200);
+})();
+
 function initFirebase(app){db=firebase.database(app);db.ref('planning/shifts2026').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var changed=false;SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length){emp.s=data[emp.n];changed=true;}});if(changed){buildPT();recalc();buildBT();updKPI();refreshCharts();}updSlbl(new Date().toISOString());});
   db.ref('planning/shifts2027').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});if(curYear==='2027')buildPT();});db.ref('planning/shifts2025').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});});if(currentUser&&(currentUser.role==='admin'||currentUser.role==='visiteur')){db.ref('planning/absences').on('value',function(snap){if(isSyncing)return;var data=snap.val();if(!data)return;var arr=Array.isArray(data)?data:Object.values(data);ABS.splice(0,ABS.length);arr.forEach(function(a){if(a)ABS.push(a);});buildAbs(document.querySelector('.fb.on')?document.querySelector('.fb.on').dataset.f:'all');updAbsLbl();recalc();buildBT();updKPI();refreshCharts();});}db.ref('planning/extraHistorique').on('value',function(snap){var data=snap.val();if(Array.isArray(data)){EXTRA_HIST=data.filter(Boolean);}});
   db.ref('.info/connected').on('value',function(snap){var el=document.getElementById('conn-status');if(!el)return;if(snap.val()){el.textContent='En ligne';el.style.color='var(--green)';}else{el.textContent='Hors ligne';el.style.color='var(--amber)';}});
@@ -1572,7 +1726,7 @@ function saveEmp(){
 
   var bday = document.getElementById('emp-birthday')?document.getElementById('emp-birthday').value:'';
   var empData = {name:name, group:group, role:role, active:true, order:order};
-  if(bday) empData.birthday = bday;
+  empData.birthday = bday || '';
   document.getElementById('emp-save-btn').disabled = true;
   document.getElementById('emp-save-btn').textContent = t('adm_saving');
 
@@ -1580,11 +1734,9 @@ function saveEmp(){
     // Mettre a jour EMP local
     var existing = EMP.findIndex(function(e){return (e.id||e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_'))===id;});
     if(existing !== -1){
-      EMP[existing] = {n:name, g:group, r:role, id:id};
-      if(bday) EMP[existing].birthday = bday;
+      EMP[existing] = {n:name, g:group, r:role, id:id, birthday: bday || ''};
     } else {
-      var newEmp = {n:name, g:group, r:role, id:id};
-      if(bday) newEmp.birthday = bday;
+      var newEmp = {n:name, g:group, r:role, id:id, birthday: bday || ''};
       EMP.push(newEmp);
       // Ajouter dans SHIFTS26 et SHIFTS25
       var nbDates26 = WEEKS26.reduce(function(a,w){return a+w.d.length;},0);
@@ -2008,12 +2160,12 @@ function startApp(){
         var empArr=[];
         Object.keys(data).forEach(function(k){
           var e=data[k];
-          if(e&&e.active!==false)empArr.push({n:e.name,g:e.group,r:e.role,id:k,order:e.order||99});
+          if(e&&e.active!==false)empArr.push({n:e.name,g:e.group,r:e.role,id:k,order:e.order||99,birthday:e.birthday||''});
         });
         empArr.sort(function(a,b){return a.order-b.order;});
         if(empArr.length>0){
           EMP.splice(0,EMP.length);
-          empArr.forEach(function(e){EMP.push({n:e.n,g:e.g,r:e.r,id:e.id});});
+          empArr.forEach(function(e){EMP.push({n:e.n,g:e.g,r:e.r,id:e.id,birthday:e.birthday||''});});
           // Mettre a jour OPTS depuis Firebase si disponible
         }
       }
@@ -2398,22 +2550,9 @@ function getBirthdayStarForDate(ddmm, yr){
 }
 
 // Charger les birthdays depuis Firebase dans EMP
-function loadBirthdaysFromFirebase(){
-  if(!db) return;
-  db.ref('employees').once('value').then(function(snap){
-    var data = snap.val();
-    if(!data) return;
-    Object.keys(data).forEach(function(id){
-      var emp = data[id];
-      if(!emp.birthday) return;
-      var found = EMP.find(function(e){return e.n===emp.name;});
-      if(found) found.birthday = emp.birthday;
-    });
-    buildBirthdayNotif();
-    buildBirthdayCal();
-    buildPT(); // refresh planning avec étoiles
-  });
-}
+// [SUPPRIME] loadBirthdaysFromFirebase() : fonction orpheline, jamais appelee.
+// Les dates de naissance sont desormais chargees directement par le loader
+// principal des employes (db.ref('employees')), qui conserve le champ birthday.
 
 // ============================================================
 // Test de fiabilite Firebase (Admin)
@@ -2521,9 +2660,33 @@ function classifierTypeAbsence(titre, detail, groupe){
   return null; // type inconnu : on ignore plutot que de deviner
 }
 
+// ==============================================================
+// Formatage des dates -- toujours a la francaise (JJ/MM/AAAA)
+// ==============================================================
+// dFR() est tolerante : elle accepte une date ISO (2026-08-05), une date
+// ISO horodatee (2026-08-05T14:30 ou 2026-08-05 14:30) et laisse passer
+// telle quelle toute valeur qui n est pas une date ISO.
+function dFR(v){
+  if(v === undefined || v === null || v === '') return '-';
+  var s = String(v);
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return m[3] + '/' + m[2] + '/' + m[1];
+  var mh = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}:\d{2})/);
+  if(mh) return mh[3] + '/' + mh[2] + '/' + mh[1] + ' ' + mh[4];
+  return s;
+}
+
+// AAAA-MM -> 'aout 2026' (libelle court pour les axes de graphiques)
+var MOIS_COURTS_FR = ['janv.','fevr.','mars','avr.','mai','juin','juil.','aout','sept.','oct.','nov.','dec.'];
+function moisFR(ym){
+  var m = String(ym).match(/^(\d{4})-(\d{2})$/);
+  if(!m) return String(ym);
+  return MOIS_COURTS_FR[parseInt(m[2], 10) - 1] + ' ' + m[1];
+}
+
+// Conservee pour compatibilite : delegue desormais a dFR()
 function dateISOtoFR(iso){
-  var p = iso.split('-'); // YYYY-MM-DD
-  return p[2] + '/' + p[1] + '/' + p[0];
+  return dFR(iso);
 }
 
 // Trouve l'index (dans WEEKS/SHIFTS de l'annee correspondante) d'une date ISO
@@ -2774,7 +2937,7 @@ function buildPT2(){
         : '';
       return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
         + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
-        + '<td style="font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+        + '<td style="font-family:var(--mo);font-size:12px">' + dFR(a.date) + '</td>'
         + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
         + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + suspectIcon + '</td>'
         + '<td>' + statutBadge + '</td>'
@@ -2893,7 +3056,7 @@ function openPtComment(key){
   d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:440px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column">'
     + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + a.nom + '</div>'
-    + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + a.date + ' — ' + a.detail + '</div>'
+    + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + dFR(a.date) + ' — ' + a.detail + '</div>'
     + '<div style="display:flex;gap:8px;margin-bottom:14px">'
     + '<button onclick="setPtStatut(\'' + key + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
     + '<button onclick="setPtStatut(\'' + key + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
@@ -3760,7 +3923,7 @@ function buildArretsInpak(){
         var dureeTxt = (a.duree != null) ? a.duree + ' min' : '-';
         var operateur = getOperateur(a.date, a.heure, a.ligne) || '-';
         return '<tr>'
-          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + dFR(a.date) + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.heure + '</td>'
           + '<td style="padding:8px;font-family:var(--mo);font-size:12px;color:var(--tx1)">' + dureeTxt + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
@@ -3793,7 +3956,7 @@ function buildArretsInpak(){
         + '<th style="padding:8px">'+t('arr_col_date')+'</th><th style="padding:8px">'+t('arr_col_ligne')+'</th><th style="padding:8px">'+t('arr_micro_col_number')+'</th></tr></thead><tbody>';
       html2 += affiches2.map(function(a){
         return '<tr>'
-          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + a.date + '</td>'
+          + '<td style="padding:8px;font-family:var(--mo);font-size:12px">' + dFR(a.date) + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
           + '<td style="padding:8px;font-size:13px;color:#f59e0b">' + a.nombre + '</td>'
           + '</tr>';
@@ -3814,7 +3977,10 @@ var NCP_DATA = [];
 var NCP_FILTRE_UNITE = 'all';
 var NCP_FILTRE_TYPE = 'all';
 var NCP_FILTRE_EQUIPE = 'all';
-var _ncpEvolutionChart = null, _ncpEquipeChart = null, _ncpUniteChart = null, _ncpLignesChart = null, _ncpProduitsChart = null;
+var NCP_FILTRE_DEBUT = '';
+var NCP_FILTRE_FIN = '';
+var NCP_PRESET_ACTIF = 'all';
+var _ncpEvolutionChart = null, _ncpCausesChart = null, _ncpTonnageChart = null, _ncpLignesChart = null, _ncpProduitsChart = null;
 
 function loadNCPData(){
   if(!db) return;
@@ -3915,6 +4081,60 @@ function filtrerNCPEquipe(e){
   buildNCPTab();
 }
 
+// --- Selection d une periode (dates libres ou raccourcis) ---
+function ncpISO(dt){
+  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+}
+
+function majNCPPresets(){
+  document.querySelectorAll('.ncp-preset-btn').forEach(function(b){
+    b.classList.toggle('on', b.dataset.preset === NCP_PRESET_ACTIF);
+  });
+}
+
+function filtrerNCPDates(){
+  var eD = document.getElementById('ncp-date-debut');
+  var eF = document.getElementById('ncp-date-fin');
+  NCP_FILTRE_DEBUT = eD ? eD.value : '';
+  NCP_FILTRE_FIN = eF ? eF.value : '';
+  // Si les deux bornes sont inversees, on les remet dans l ordre
+  if(NCP_FILTRE_DEBUT && NCP_FILTRE_FIN && NCP_FILTRE_DEBUT > NCP_FILTRE_FIN){
+    var tmp = NCP_FILTRE_DEBUT;
+    NCP_FILTRE_DEBUT = NCP_FILTRE_FIN;
+    NCP_FILTRE_FIN = tmp;
+    if(eD) eD.value = NCP_FILTRE_DEBUT;
+    if(eF) eF.value = NCP_FILTRE_FIN;
+  }
+  NCP_PRESET_ACTIF = (!NCP_FILTRE_DEBUT && !NCP_FILTRE_FIN) ? 'all' : 'perso';
+  majNCPPresets();
+  buildNCPTab();
+}
+
+function ncpPresetPeriode(cle){
+  NCP_PRESET_ACTIF = cle;
+  var auj = new Date();
+  var debut = '', fin = '';
+  if(cle !== 'all'){
+    fin = ncpISO(auj);
+    var d;
+    if(cle === 'mois'){
+      d = new Date(auj.getFullYear(), auj.getMonth(), 1);
+    } else if(cle === 'annee'){
+      d = new Date(auj.getFullYear(), 0, 1);
+    } else {
+      d = new Date(auj.getTime());
+      d.setDate(d.getDate() - parseInt(cle, 10));
+    }
+    debut = ncpISO(d);
+  }
+  NCP_FILTRE_DEBUT = debut;
+  NCP_FILTRE_FIN = fin;
+  var eD = document.getElementById('ncp-date-debut'); if(eD) eD.value = debut;
+  var eF = document.getElementById('ncp-date-fin'); if(eF) eF.value = fin;
+  majNCPPresets();
+  buildNCPTab();
+}
+
 function ncpGetEquipe(r){
   if(!r.created_date_iso || !r.created_heure) return null;
   return getEquipe(r.created_date_iso, r.created_heure);
@@ -3935,17 +4155,19 @@ function buildNCPTab(){
     if(NCP_FILTRE_UNITE !== 'all' && r.unite !== NCP_FILTRE_UNITE) return false;
     if(NCP_FILTRE_TYPE !== 'all' && r.type_ncp !== NCP_FILTRE_TYPE) return false;
     if(NCP_FILTRE_EQUIPE !== 'all' && ncpGetEquipe(r) !== NCP_FILTRE_EQUIPE) return false;
+    if(NCP_FILTRE_DEBUT && (!r.created_date_iso || r.created_date_iso < NCP_FILTRE_DEBUT)) return false;
+    if(NCP_FILTRE_FIN && (!r.created_date_iso || r.created_date_iso > NCP_FILTRE_FIN)) return false;
     return true;
   });
 
   // Filtres actifs mais aucun resultat : message clair plutot que des graphiques vides
   if(filtres.length === 0){
-    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes'].forEach(function(id){
+    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes','ncp-k-ouvertes'].forEach(function(id){
       var el = document.getElementById(id); if(el) el.textContent = '0';
     });
     var elPer = document.getElementById('ncp-k-periode'); if(elPer) elPer.textContent = '-';
-    [_ncpEvolutionChart, _ncpEquipeChart, _ncpUniteChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
-    _ncpEvolutionChart = _ncpEquipeChart = _ncpUniteChart = _ncpLignesChart = _ncpProduitsChart = null;
+    [_ncpEvolutionChart, _ncpCausesChart, _ncpTonnageChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
+    _ncpEvolutionChart = _ncpCausesChart = _ncpTonnageChart = _ncpLignesChart = _ncpProduitsChart = null;
     var tbody0 = document.getElementById('ncp-tbody');
     if(tbody0) tbody0.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">Aucun NCP ne correspond a ces filtres.</td></tr>';
     var countEl0 = document.getElementById('ncp-liste-count'); if(countEl0) countEl0.textContent = '(0)';
@@ -3963,10 +4185,16 @@ function buildNCPTab(){
   var elProd = document.getElementById('ncp-k-prod'); if(elProd) elProd.textContent = nProd;
   var elProdPct = document.getElementById('ncp-k-prod-pct'); if(elProdPct) elProdPct.textContent = total ? Math.round(nProd/total*100) + '%' : '-';
   var elTonnes = document.getElementById('ncp-k-tonnes'); if(elTonnes) elTonnes.textContent = Math.round(tonnes) + ' t';
+  // NCP encore ouvertes : tout ce qui n a pas ete libere par la qualite
+  var nCloturees = filtres.filter(function(r){ return r.status === 'Vrijgave door QA'; }).length;
+  var nOuvertes = total - nCloturees;
+  var elOuv = document.getElementById('ncp-k-ouvertes'); if(elOuv) elOuv.textContent = nOuvertes;
+  var elClo = document.getElementById('ncp-k-cloture-pct');
+  if(elClo) elClo.textContent = total ? (Math.round(nCloturees / total * 100) + '% cloturees (' + nCloturees + ')') : '-';
   var elPeriode = document.getElementById('ncp-k-periode');
   if(elPeriode && filtres.length){
     var dates = filtres.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
-    if(dates.length) elPeriode.textContent = dates[0] + ' -> ' + dates[dates.length-1];
+    if(dates.length) elPeriode.textContent = dFR(dates[0]) + ' au ' + dFR(dates[dates.length-1]);
   }
 
   // --- Evolution mensuelle ---
@@ -3979,43 +4207,93 @@ function buildNCPTab(){
       parMois[mois] = (parMois[mois] || 0) + 1;
     });
     var moisTries = Object.keys(parMois).sort();
+    var moisActuel = new Date().toISOString().slice(0, 7);
+    var moisEnCours = moisTries.length > 0 && moisTries[moisTries.length - 1] === moisActuel;
     if(_ncpEvolutionChart){ _ncpEvolutionChart.destroy(); _ncpEvolutionChart = null; }
     _ncpEvolutionChart = new Chart(ctxEvo, {
       type: 'line',
-      data: { labels: moisTries, datasets: [{ data: moisTries.map(function(m){ return parMois[m]; }), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.1)', fill: true, tension: .3, pointRadius: 3 }] },
+      data: { labels: moisTries.map(moisFR), datasets: [{
+        data: moisTries.map(function(m){ return parMois[m]; }),
+        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.1)', fill: true, tension: .3, pointRadius: 3,
+        // Le mois en cours n est pas termine : on le trace en pointilles
+        segment: { borderDash: function(ctx){ return (moisEnCours && ctx.p1DataIndex === moisTries.length - 1) ? [5, 4] : undefined; } }
+      }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
         scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } }
     });
   }
 
-  // --- Comparaison par equipe ---
-  var ctxEq = document.getElementById('ncpEquipeChart');
-  if(ctxEq && typeof Chart !== 'undefined'){
-    var parEq = { P1:0, P2:0, P3:0, P4:0, P5:0 };
-    filtres.forEach(function(r){ var eq = ncpGetEquipe(r); if(eq && parEq[eq] !== undefined) parEq[eq]++; });
-    var eqListe = ['P1','P2','P3','P4','P5'].filter(function(e){ return parEq[e] > 0; });
-    if(_ncpEquipeChart){ _ncpEquipeChart.destroy(); _ncpEquipeChart = null; }
-    if(eqListe.length){
-      _ncpEquipeChart = new Chart(ctxEq, {
-        type: 'bar',
-        data: { labels: eqListe, datasets: [{ data: eqListe.map(function(e){ return parEq[e]; }), backgroundColor: eqListe.map(function(e){ return COULEURS_EQUIPE[e]; }) }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } }
+  // --- Top 10 des causes reelles (Pareto) ---
+  // Remplace l ancien graphique 'Comparaison par equipe' : celui-ci comparait
+  // les equipes sur l heure de creation de la fiche qualite, pas sur l heure
+  // reelle du defaut, ce qui penalisait mecaniquement les equipes de journee.
+  var ctxCa = document.getElementById('ncpCausesChart');
+  if(ctxCa && typeof Chart !== 'undefined'){
+    var parCause = {};
+    filtres.forEach(function(r){
+      if(!r.problems) return;
+      String(r.problems).split('|').forEach(function(p){
+        var lib = p.trim();
+        if(!lib) return;
+        parCause[lib] = (parCause[lib] || 0) + 1;
+      });
+    });
+    var causes = Object.keys(parCause).sort(function(x, y){ return parCause[y] - parCause[x]; });
+    var topCauses = causes.slice(0, 10);
+    if(_ncpCausesChart){ _ncpCausesChart.destroy(); _ncpCausesChart = null; }
+    if(topCauses.length){
+      var totalCauses = causes.reduce(function(s, k){ return s + parCause[k]; }, 0);
+      var cumul = 0;
+      var cumulPct = topCauses.map(function(c){ cumul += parCause[c]; return Math.round(cumul / totalCauses * 100); });
+      _ncpCausesChart = new Chart(ctxCa, {
+        data: {
+          labels: topCauses.map(function(c){ return c.length > 24 ? c.slice(0, 23) + '\u2026' : c; }),
+          datasets: [
+            { type: 'bar', data: topCauses.map(function(c){ return parCause[c]; }), backgroundColor: '#8b5cf6', borderRadius: 4, order: 2 },
+            { type: 'line', data: cumulPct, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#f59e0b', tension: .25, yAxisID: 'y2', order: 1 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+            tooltip: { callbacks: {
+              title: function(items){ return topCauses[items[0].dataIndex]; },
+              label: function(c){ return c.datasetIndex === 1 ? ('Cumul : ' + c.parsed.y + '%') : (c.parsed.y + ' NCP'); }
+            } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 9 }, maxRotation: 55, minRotation: 40, autoSkip: false } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', precision: 0 } },
+            y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#f59e0b', font: { size: 10 }, callback: function(v){ return v + '%'; } } }
+          } }
       });
     }
   }
 
-  // --- Repartition par unite ---
-  var ctxUn = document.getElementById('ncpUniteChart');
-  if(ctxUn && typeof Chart !== 'undefined'){
-    var parUnite = { AW1:0, AW2:0, AW3:0 };
-    filtres.forEach(function(r){ if(r.unite && parUnite[r.unite] !== undefined) parUnite[r.unite]++; });
-    if(_ncpUniteChart){ _ncpUniteChart.destroy(); _ncpUniteChart = null; }
-    _ncpUniteChart = new Chart(ctxUn, {
-      type: 'doughnut',
-      data: { labels: ['AW1','AW2','AW3'], datasets: [{ data: [parUnite.AW1, parUnite.AW2, parUnite.AW3], backgroundColor: ['#3b82f6','#10b981','#f97316'] }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8b90a4', boxWidth: 10, font: { size: 11 } } } } }
+  // --- Tonnage bloque par famille de produit ---
+  // Remplace l ancien donut 'Repartition par unite' : trois parts quasi egales
+  // n apportaient aucune information exploitable.
+  var ctxTo = document.getElementById('ncpTonnageChart');
+  if(ctxTo && typeof Chart !== 'undefined'){
+    var parFam = {};
+    filtres.forEach(function(r){
+      var t = parseFloat(r.total_tonnes) || 0;
+      if(t <= 0) return;
+      var fam = r.famille_produit || 'Inconnu';
+      parFam[fam] = (parFam[fam] || 0) + t;
     });
+    var topFam = Object.keys(parFam).sort(function(x, y){ return parFam[y] - parFam[x]; }).slice(0, 10);
+    if(_ncpTonnageChart){ _ncpTonnageChart.destroy(); _ncpTonnageChart = null; }
+    if(topFam.length){
+      _ncpTonnageChart = new Chart(ctxTo, {
+        type: 'bar',
+        data: { labels: topFam, datasets: [{ data: topFam.map(function(f){ return Math.round(parFam[f]); }), backgroundColor: '#10b981', borderRadius: 4 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.parsed.x + ' t bloquees'; } } } },
+          scales: {
+            x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } },
+            y: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 11 } } }
+          } }
+      });
+    }
   }
 
   // --- Top lignes (cause directe uniquement, exclut les consequences Production) ---
@@ -4071,7 +4349,7 @@ function buildNCPTab(){
       var eq = ncpGetEquipe(r);
       var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
       return '<tr>'
-        + '<td style="font-family:var(--mo);font-size:12px">' + (r.created_date_iso || '-') + '</td>'
+        + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + '</td>'
         + '<td>' + (r.unite || '-') + '</td>'
         + '<td>' + (eq || '-') + '</td>'
         + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
