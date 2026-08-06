@@ -4003,7 +4003,7 @@ function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
     var data = snap.val() || {};
-    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; });
+    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; });
     buildNCPTab();
   }, function(error){
     console.warn('[NCP] Erreur chargement:', error);
@@ -4153,7 +4153,7 @@ function ncpPresetPeriode(cle){
 }
 
 function ncpGetEquipe(r){
-  if(!r.created_date_iso || !r.created_heure) return null;
+  if(!r.created_date_iso || !r.created_heure || r.heure_fiable === false) return null;
   return getEquipe(r.created_date_iso, r.created_heure);
 }
 
@@ -4186,7 +4186,7 @@ function buildNCPTab(){
     [_ncpEvolutionChart, _ncpCausesChart, _ncpTonnageChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
     _ncpEvolutionChart = _ncpCausesChart = _ncpTonnageChart = _ncpLignesChart = _ncpProduitsChart = null;
     var tbody0 = document.getElementById('ncp-tbody');
-    if(tbody0) tbody0.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">Aucun NCP ne correspond a ces filtres.</td></tr>';
+    if(tbody0) tbody0.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">Aucun NCP ne correspond a ces filtres.</td></tr>';
     var countEl0 = document.getElementById('ncp-liste-count'); if(countEl0) countEl0.textContent = '(0)';
     return;
   }
@@ -4366,7 +4366,7 @@ function buildNCPTab(){
       var eq = ncpGetEquipe(r);
       var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
       return '<tr>'
-        + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + '</td>'
+        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx3)">' + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + (r.heure_fiable === false ? ' <span title="Date fichier posterieure a la creation : equipe non deduite" style="color:var(--tx3)">*</span>' : '') + '</td>'
         + '<td>' + (r.unite || '-') + '</td>'
         + '<td>' + (eq || '-') + '</td>'
         + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
@@ -4377,7 +4377,7 @@ function buildNCPTab(){
         + '</tr>';
     }).join('');
     if(tronque){
-      tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Affichage limite aux ' + LIMITE + ' plus recents sur ' + tries.length + '</td></tr>';
+      tbody.innerHTML += '<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Affichage limite aux ' + LIMITE + ' plus recents sur ' + tries.length + '</td></tr>';
     }
   }
 }
