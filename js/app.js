@@ -4003,7 +4003,7 @@ function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
     var data = snap.val() || {};
-    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; if(!r.ligne && r.unite === 'AW1'){ var ml = /\bL\s?([1-9])\b/i.exec(r.description || ''); if(ml){ r.ligne = 'L0' + ml[1]; r.ligne_source = 'L_court_AW1'; r.ligne_type = 'cause_directe'; } } });
+    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } });
     buildNCPTab();
   }, function(error){
     console.warn('[NCP] Erreur chargement:', error);
@@ -4285,7 +4285,7 @@ function buildNCPTab(){
     }
   }
 
-  // --- Tonnage bloque par famille de produit ---
+  // --- Tonnage bloque par client ---
   // Remplace l ancien donut 'Repartition par unite' : trois parts quasi egales
   // n apportaient aucune information exploitable.
   var ctxTo = document.getElementById('ncpTonnageChart');
