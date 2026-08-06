@@ -4003,18 +4003,18 @@ function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
     var data = snap.val() || {};
-    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } });
+    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } r.lignes_multiples = ncpLignesCitees(r); }); NCP_DATA = ncpEclaterLignes(NCP_DATA);
     buildNCPTab();
   }, function(error){
     console.warn('[NCP] Erreur chargement:', error);
   });
 }
 
-function openImportNCPModal(){
+function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12]; if(u === 'AW2') return [21,22,23,24,25,26]; if(u === 'AW3') return [31,32,33,34,35,36]; return [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; } function ncpLignesCitees(r){ if(r.type_ncp === 'Production') return []; var V = ncpLignesValides(r.unite || ''); var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, m, vus = []; while((m = rex.exec(String(r.description || ''))) !== null){ var v = parseInt(m[1],10); if(V.indexOf(v) !== -1 && vus.indexOf(v) === -1) vus.push(v); } return vus.map(function(v){ return 'L' + ('0' + v).slice(-2); }); } function ncpEclaterLignes(list){ var out = []; list.forEach(function(r){ var lg = r.lignes_multiples || []; if(lg.length < 2){ out.push(r); return; } lg.forEach(function(l){ var c = {}; for(var k in r){ c[k] = r[k]; } c.ligne = l; c.ligne_type = 'cause_directe'; c.ligne_source = 'multi_lignes'; c.ncp_partage = lg.length; c.total_pallets = (Number(r.total_pallets) || 0) / lg.length; c.total_tonnes = (Number(r.total_tonnes) || 0) / lg.length; c.total_kg = (Number(r.total_kg) || 0) / lg.length; out.push(c); }); }); return out; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } function ncpEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); } function openImportNCPModal(){
   document.getElementById('ncp-import-modal').style.display = 'flex';
 }
 
-function importerNCP(){
+function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.cells[0].textContent.trim(); if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Type', r.type_ncp], ['Equipe deduite', ncpGetEquipe(r) || 'non deduite'], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="font-size:16px;font-weight:600;margin-bottom:14px">' + ncpEsc(r.description) + '</div>'; if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bottom:10px">Fiche repartie sur ' + r.ncp_partage + ' lignes : palettes et tonnage divises</div>'; h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin-bottom:16px">'; f.forEach(function(c){ h += '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0"><span style="font-size:11px;color:var(--tx3)">' + c[0] + '</span><span style="font-size:12px;text-align:right">' + ncpEsc(c[1] || '-') + '</span></div>'; }); h += '</div>'; var bloc = function(t, v){ if(Array.isArray(v)) v = v.join(' | '); return v ? '<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">' + t + '</div><div style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v) + '</div></div>' : ''; }; h += bloc('Probleme', r.problems) + bloc('Mesures', r.measures) + bloc('Toutes les mesures', r.toutes_mesures) + bloc('Info palettes', r.ncp_extra_info); var hist = r.historique_actions || []; if(hist.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px">Historique (' + hist.length + ' version(s))</div>'; hist.forEach(function(v){ h += '<div style="border-left:2px solid var(--bd2);padding-left:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(v.date_version) + '</div><div style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v.detail) + '</div></div>'; }); } var body = document.getElementById('ncp-detail-body'); if(body) body.innerHTML = h; var md = document.getElementById('ncp-detail-modal'); if(md) md.style.display = 'flex'; } function importerNCP(){
   var txt = document.getElementById('ncp-import-txt').value.trim();
   var errEl = document.getElementById('ncp-import-err');
   errEl.textContent = '';
@@ -4153,7 +4153,7 @@ function ncpPresetPeriode(cle){
 }
 
 function ncpGetEquipe(r){
-  if(!r.created_date_iso || !r.created_heure || r.heure_fiable === false) return null;
+  if(ncpEstNonClasse(r)) return null; if(!r.created_date_iso || !r.created_heure || r.heure_fiable === false) return null;
   return getEquipe(r.created_date_iso, r.created_heure);
 }
 
@@ -4203,11 +4203,11 @@ function buildNCPTab(){
   var elProdPct = document.getElementById('ncp-k-prod-pct'); if(elProdPct) elProdPct.textContent = total ? Math.round(nProd/total*100) + '%' : '-';
   var elTonnes = document.getElementById('ncp-k-tonnes'); if(elTonnes) elTonnes.textContent = Math.round(tonnes) + ' t';
   // NCP encore ouvertes : tout ce qui n a pas ete libere par la qualite
-  var nCloturees = filtres.filter(function(r){ return r.status === 'Vrijgave door QA'; }).length;
-  var nOuvertes = total - nCloturees;
+  var nNonClasses = filtres.filter(ncpEstNonClasse).length;
+  var nOuvertes = nNonClasses;
   var elOuv = document.getElementById('ncp-k-ouvertes'); if(elOuv) elOuv.textContent = nOuvertes;
   var elClo = document.getElementById('ncp-k-cloture-pct');
-  if(elClo) elClo.textContent = total ? (Math.round(nCloturees / total * 100) + '% cloturees (' + nCloturees + ')') : '-';
+  if(elClo) elClo.textContent = total ? (Math.round(nNonClasses / total * 100) + '% du total, a attribuer') : '-';
   var elPeriode = document.getElementById('ncp-k-periode');
   if(elPeriode && filtres.length){
     var dates = filtres.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
@@ -4355,7 +4355,7 @@ function buildNCPTab(){
 
   // --- Table (200 plus recents) ---
   var tbody = document.getElementById('ncp-tbody');
-  var countEl = document.getElementById('ncp-liste-count');
+  ncpInitClicks(); var countEl = document.getElementById('ncp-liste-count');
   if(countEl) countEl.textContent = '(' + filtres.length + ')';
   if(tbody){
     var tries = filtres.slice().sort(function(a,b){ return (b.created_date_iso||'').localeCompare(a.created_date_iso||''); });
