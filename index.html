@@ -47,6 +47,7 @@
       <span class="chip" id="dchip"></span>
     </div>
   </header>
+  <div class="tabs-wrap">
   <nav class="tabs">
     <button class="tab on" data-tab="ov">&#9672; <span data-i18n="tab_ov">Vue d&rsquo;ensemble</span></button>
     <button class="tab" data-tab="br">&#9673; <span data-i18n="tab_br">Bradford</span></button>
@@ -58,6 +59,7 @@
     <button class="tab" id="tab-ncp-btn" data-tab="ncp" style="display:none">&#9888; NCP Qualite</button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; <span data-i18n="tab_admin">Admin</span></button>
   </nav>
+  </div>
   <main class="content">
     <div class="pane on" id="pane-ov">
       <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" data-i18n="ov_subtitle">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
@@ -544,11 +546,28 @@
       <div id="ncp-content-wrap">
 
       <!-- KPI -->
-      <div class="kgrid">
+      <div class="kgrid kgrid5">
         <div class="kcard bl"><div class="klbl">Total NCP</div><div class="kval" id="ncp-k-total">-</div><div class="kmeta" id="ncp-k-periode">-</div></div>
         <div class="kcard am"><div class="klbl">Inpak</div><div class="kval" id="ncp-k-inpak">-</div><div class="kmeta" id="ncp-k-inpak-pct">-</div></div>
         <div class="kcard rd"><div class="klbl">Production</div><div class="kval" id="ncp-k-prod">-</div><div class="kmeta" id="ncp-k-prod-pct">-</div></div>
         <div class="kcard gn"><div class="klbl">Tonnage bloque</div><div class="kval" id="ncp-k-tonnes">-</div><div class="kmeta">total periode filtree</div></div>
+        <div class="kcard pu"><div class="klbl">Encore ouvertes</div><div class="kval" id="ncp-k-ouvertes">-</div><div class="kmeta" id="ncp-k-cloture-pct">-</div></div>
+      </div>
+
+      <!-- Filtre periode -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Periode</span>
+        <button class="ncp-preset-btn on" data-preset="all" onclick="ncpPresetPeriode('all')">Tout</button>
+        <button class="ncp-preset-btn" data-preset="mois" onclick="ncpPresetPeriode('mois')">Mois en cours</button>
+        <button class="ncp-preset-btn" data-preset="30" onclick="ncpPresetPeriode('30')">30 jours</button>
+        <button class="ncp-preset-btn" data-preset="90" onclick="ncpPresetPeriode('90')">90 jours</button>
+        <button class="ncp-preset-btn" data-preset="annee" onclick="ncpPresetPeriode('annee')">Annee en cours</button>
+        <span style="width:1px;height:22px;background:var(--bd2);margin:0 6px"></span>
+        <label for="ncp-date-debut" style="font-size:11px;color:var(--tx3)">Du</label>
+        <input type="date" class="ncp-date-input" id="ncp-date-debut" onchange="filtrerNCPDates()">
+        <label for="ncp-date-fin" style="font-size:11px;color:var(--tx3)">au</label>
+        <input type="date" class="ncp-date-input" id="ncp-date-fin" onchange="filtrerNCPDates()">
+        <button class="ncp-preset-btn" onclick="ncpPresetPeriode('all')" title="Reinitialiser la periode">&#8634;</button>
       </div>
 
       <!-- Filtre unite -->
@@ -578,6 +597,10 @@
         <button class="ncp-equipe-btn" data-equipe="P4" onclick="filtrerNCPEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
         <button class="ncp-equipe-btn" data-equipe="P5" onclick="filtrerNCPEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
       </div>
+      <div style="font-size:11px;color:var(--tx3);margin:-8px 0 16px;max-width:760px;line-height:1.5">
+        Note : l equipe est deduite de l heure de creation de la fiche qualite, pas de l heure reelle du defaut.
+        Ce filtre sert a explorer les donnees, il ne constitue pas une comparaison de performance entre equipes.
+      </div>
 
       <!-- Evolution mensuelle -->
       <div class="cc" style="margin-bottom:16px">
@@ -586,8 +609,16 @@
       </div>
 
       <div class="two">
-        <div class="cc"><div class="cch"><div class="cct">Comparaison par equipe</div></div><div class="cw" style="height:240px"><canvas id="ncpEquipeChart"></canvas></div></div>
-        <div class="cc"><div class="cch"><div class="cct">Repartition par unite</div></div><div class="cw" style="height:240px"><canvas id="ncpUniteChart"></canvas></div></div>
+        <div class="cc">
+          <div class="cch"><div class="cct">Top 10 des causes</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Motifs les plus frequents &mdash; la courbe orange donne le cumul en %</div>
+          <div class="cw" style="height:300px"><canvas id="ncpCausesChart"></canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cch"><div class="cct">Tonnage bloque par famille</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Impact matiere reel, en tonnes, par famille de produit</div>
+          <div class="cw" style="height:300px"><canvas id="ncpTonnageChart"></canvas></div>
+        </div>
       </div>
 
       <div class="two">
