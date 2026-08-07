@@ -695,7 +695,7 @@
           <label>Nom du candidat</label>
           <input type="text" id="rec-f-nom" placeholder="Ex: J. Dupont">
           <label>Date de l'entretien</label>
-          <input type="date" id="rec-f-date">
+          <input type="date" id="rec-f-date">          <div class="rec-row"><div style="flex:1"><label>Poste vise</label><select id="rec-f-poste"><option value="">-</option><option>Operateur emballage</option><option>Operateur production</option><option>Conducteur de ligne</option><option>Cariste</option><option>Technicien</option><option>Autre</option></select></div><div style="flex:1"><label>Unite</label><select id="rec-f-unite"><option value="">-</option><option>AW1</option><option>AW2</option><option>AW3</option></select></div><div style="flex:1"><label>Regime horaire</label><select id="rec-f-shift"><option value="">-</option><option>3 shifts semaine</option><option>Week-end</option><option>Jour fixe</option></select></div></div>          <div class="rec-row"><div style="flex:1"><label>Evaluateur</label><input type="text" id="rec-f-evaluateur" placeholder="Qui a mene l entretien"></div><div style="flex:1"><label>Suite donnee</label><select id="rec-f-issue"><option value="">En cours</option><option value="non_retenu">Non retenu</option><option value="embauche">Embauche</option><option value="confirme">Confirme apres essai</option><option value="parti">Parti pendant l essai</option></select></div><div style="flex:1"><label>Employe lie (suivi a 12 mois)</label><select id="rec-f-empid"><option value="">-</option></select></div></div>
         </div>
 
         <div class="cc" id="rec-axes-container"></div>
@@ -747,7 +747,7 @@
           </div>
           <div style="height:320px"><canvas id="rec-radar"></canvas></div>
         </div>
-        <div class="cc" id="rec-tableau-card" style="display:none">
+        <div class="two"><div class="cc"><div class="cch"><div class="cct">Distribution des notes par axe</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Sur tous les candidats evalues. Un axe ou tout le monde a la meme note ne discrimine rien et doit etre reformule.</div><div style="height:300px"><canvas id="rec-distrib"></canvas></div></div><div class="cc"><div class="cch"><div class="cct">Prediction contre realite</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px" id="rec-pred-info">-</div><div style="height:300px"><canvas id="rec-pred"></canvas></div></div></div>        <div class="two"><div class="cc"><div class="cch"><div class="cct">Entonnoir de recrutement</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Evalues, juges bon fit, embauches, puis confirmes apres la periode d essai.</div><div style="height:260px"><canvas id="rec-funnel"></canvas></div></div><div class="cc"><div class="cch"><div class="cct">Entretiens par mois</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Charge d entretiens sur les 12 derniers mois.</div><div style="height:260px"><canvas id="rec-mois"></canvas></div></div></div>        <div class="cc" id="rec-tableau-card" style="display:none">
           <div class="cch"><div class="cct">Détail des scores</div></div>
           <div style="overflow-x:auto">
             <table class="bt" id="rec-tableau-scores"></table>
