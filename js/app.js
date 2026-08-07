@@ -699,7 +699,7 @@ var CMP2_MOIS_I18N={
   nl:['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 };
 function t(key){var d=I18N[LANG]||I18N.fr;return d[key]!==undefined?d[key]:(I18N.fr[key]!==undefined?I18N.fr[key]:key);}
-function applyI18n(){
+function applyI18n(){ try { if(window.recAppliquerLangue) window.recAppliquerLangue(); } catch(e){}
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     var k=el.getAttribute('data-i18n');el.textContent=t(k);
   });
@@ -4611,7 +4611,7 @@ function goToSubnav(name){
     s.classList.toggle('on', s.id === 'rec-tab-'+name);
   });
 }
-function initSubnav(){
+var REC_LBL_NL = { 'Candidats': 'Kandidaten', '+ Entretien': '+ Gesprek', 'Analyse': 'Analyse', 'Candidats évalués': 'Beoordeelde kandidaten', 'Identité': 'Identiteit', 'Nom du candidat': 'Naam kandidaat', 'Date de l\'entretien': 'Datum gesprek', 'Poste vise': 'Functie', 'Unite': 'Unit', 'Regime horaire': 'Uurregeling', 'Evaluateur': 'Beoordelaar', 'Suite donnee': 'Resultaat', 'Employe lie (suivi a 12 mois)': 'Gelinkte medewerker', 'Annuler': 'Annuleren', 'Enregistrer': 'Opslaan', 'Verdict global de compatibilité': 'Algemeen besluit', 'Vérification des références — assiduité': 'Referentiecheck aanwezigheid', 'Comparer des candidats': 'Kandidaten vergelijken', 'Détail des scores': 'Detail van de scores', 'Distribution des notes par axe': 'Spreiding van de scores per as', 'Prediction contre realite': 'Voorspelling tegenover realiteit', 'Entonnoir de recrutement': 'Wervingsfunnel', 'Entretiens par mois': 'Gesprekken per maand', 'Grille d’évaluation': 'Evaluatieraster', 'Questionnaire imprimable (candidat)': 'Printbare vragenlijst (kandidaat)', 'Mode entretien (plein écran)': 'Gespreksmodus (volledig scherm)' }; function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-fr', el.textContent.trim()); return el.getAttribute('data-fr'); } window.recAppliquerLangue = function(){ var pane = document.getElementById('pane-recrutement'); if(!pane) return; var nl = (typeof LANG !== 'undefined' && LANG === 'nl'); pane.querySelectorAll('.cct, label, .rec-subtab, #rec-btn-annuler, #rec-btn-enregistrer').forEach(function(el){ var fr = recTexteFR(el); el.textContent = (nl && REC_LBL_NL[fr]) ? REC_LBL_NL[fr] : fr; }); var qi = QUESTIONNAIRE_I18N[nl ? 'nl' : 'fr']; if(qi && qi.axes){ pane.querySelectorAll('.rec-axe').forEach(function(div, i){ if(!qi.axes[i]) return; var tEl = div.querySelector('.rec-axe-titre'); var qEl = div.querySelector('.rec-axe-question'); if(tEl) tEl.textContent = qi.axes[i].titre; if(qEl) qEl.textContent = qi.axes[i].q; }); } }; function initSubnav(){
   document.querySelectorAll('#pane-recrutement .rec-subtab').forEach(function(btn){
     btn.addEventListener('click', function(){ goToSubnav(btn.dataset.recsub); });
   });
@@ -5077,7 +5077,7 @@ function initRecrutementUI(){
   initialized = true;
   buildAxes();
   initSubnav();
-  attachListenersOnce(); recRemplirEmployes(); setTimeout(recRestaurerBrouillon, 900);
+  attachListenersOnce(); recRemplirEmployes(); window.recAppliquerLangue(); setTimeout(recRestaurerBrouillon, 900);
   $('rec-f-date').value = new Date().toISOString().slice(0,10);
 }
 
