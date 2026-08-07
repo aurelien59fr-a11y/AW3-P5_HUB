@@ -208,6 +208,77 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .ncp-preset-btn:hover{border-color:var(--blue);color:var(--tx)}
 .ncp-preset-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
 
+/* ===== Onglet Recrutement ===== */
+#pane-recrutement .rec-subnav{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+#pane-recrutement .rec-subtab{padding:6px 16px;border-radius:var(--r);border:1px solid var(--bd);background:none;color:var(--tx2);font-family:var(--fn);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
+#pane-recrutement .rec-subtab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+#pane-recrutement .rec-section{display:none}
+#pane-recrutement .rec-section.on{display:block;animation:fi .18s ease}
+#pane-recrutement label{display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px}
+#pane-recrutement label:first-child{margin-top:0}
+#pane-recrutement input[type=text],#pane-recrutement input[type=date],#pane-recrutement textarea,#pane-recrutement select{width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3)}
+#pane-recrutement textarea{resize:vertical;min-height:56px}
+#pane-recrutement select{color-scheme:dark}
+#pane-recrutement .rec-axe{border-top:1px solid var(--bd);padding-top:14px;margin-top:14px}
+#pane-recrutement .rec-axe:first-of-type{border-top:none;margin-top:0;padding-top:0}
+#pane-recrutement .rec-axe-titre{font-weight:700;font-size:14px;margin-bottom:2px;color:var(--tx)}
+#pane-recrutement .rec-axe-question{font-size:12.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45}
+#pane-recrutement .rec-toggle-reperes{background:none;border:none;color:var(--blue);font-size:11.5px;font-weight:600;padding:0;margin-bottom:10px;cursor:pointer;text-decoration:underline}
+#pane-recrutement .rec-reperes{background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 11px;margin-bottom:12px}
+#pane-recrutement .rec-repere{display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.4;color:var(--tx2);margin-bottom:8px}
+#pane-recrutement .rec-repere:last-child{margin-bottom:0}
+#pane-recrutement .rec-repere-n{flex-shrink:0;width:20px;height:20px;border-radius:5px;color:#fff;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center}
+#pane-recrutement .rec-repere-n.rec-s1{background:var(--red)}
+#pane-recrutement .rec-repere-n.rec-s3{background:var(--amber);color:#111}
+#pane-recrutement .rec-repere-n.rec-s4{background:var(--green)}
+#pane-recrutement .rec-scale{display:flex;gap:6px}
+#pane-recrutement .rec-scale button{flex:1;padding:10px 0;border-radius:var(--r);border:1.5px solid var(--bd2);background:var(--bg3);font-weight:700;font-size:14px;color:var(--tx2);cursor:pointer}
+#pane-recrutement .rec-scale button.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+#pane-recrutement .rec-scale-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:5px}
+#pane-recrutement .rec-axe-note{margin-top:10px}
+#pane-recrutement .rec-axe-note-label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 5px}
+#pane-recrutement .rec-btn{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;border:none;padding:11px 16px;border-radius:var(--r);font-weight:600;font-size:13.5px;cursor:pointer;width:100%;font-family:var(--fn)}
+#pane-recrutement .rec-btn.rec-rouge{background:var(--red)}
+#pane-recrutement .rec-row{display:flex;gap:10px}
+#pane-recrutement .rec-row>*{flex:1}
+#pane-recrutement .rec-liste-item-wrap{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bd)}
+#pane-recrutement .rec-liste-item-wrap:last-child{border-bottom:none}
+#pane-recrutement .rec-liste-item{display:flex;justify-content:space-between;align-items:center;padding:13px 4px;cursor:pointer;flex:1}
+#pane-recrutement .rec-liste-item .rec-nom{font-weight:700;font-size:14.5px;color:var(--tx)}
+#pane-recrutement .rec-liste-item .rec-meta{font-size:11.5px;color:var(--tx3);margin-top:2px}
+#pane-recrutement .rec-btn-suppr-mini{background:none;border:none;color:var(--tx3);font-size:16px;cursor:pointer;padding:8px;line-height:1}
+#pane-recrutement .rec-btn-suppr-mini:hover{color:var(--red)}
+#pane-recrutement .rec-empty{text-align:center;padding:40px 20px;color:var(--tx3)}
+#pane-recrutement .rec-empty .rec-signe{font-size:32px;margin-bottom:8px}
+#pane-recrutement .rec-verdict-choix{display:flex;gap:8px;flex-wrap:wrap}
+#pane-recrutement .rec-verdict-choix button{flex:1;min-width:100px;padding:10px 6px;border-radius:var(--r);border:1.5px solid var(--bd2);background:var(--bg3);font-weight:600;font-size:12px;cursor:pointer;color:var(--tx2);font-family:var(--fn)}
+#pane-recrutement .rec-verdict-choix button.sel-bon{background:var(--green);border-color:var(--green);color:#fff}
+#pane-recrutement .rec-verdict-choix button.sel-creuser{background:var(--amber);border-color:var(--amber);color:#111}
+#pane-recrutement .rec-verdict-choix button.sel-incompatible{background:var(--red);border-color:var(--red);color:#fff}
+#pane-recrutement .rec-cc-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg3);margin-bottom:8px}
+#pane-recrutement .rec-cc-item input{width:16px;height:16px}
+#pane-recrutement .rec-cc-item span{font-size:13px;font-weight:500;color:var(--tx)}
+#pane-recrutement .rec-score-cell{font-weight:700;text-align:center;border-radius:5px;color:#fff;padding:2px 8px;display:inline-block;min-width:20px}
+#pane-recrutement .rec-s1,#pane-recrutement .rec-s2{background:var(--red)}
+#pane-recrutement .rec-s3{background:var(--amber);color:#111}
+#pane-recrutement .rec-s4,#pane-recrutement .rec-s5{background:var(--green)}
+#pane-recrutement .pill.rec-encours{background:rgba(139,146,164,.15);color:var(--tx2)}
+#pane-recrutement .rec-mode-entretien-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#8b5cf6;color:#fff;border:none;border-radius:var(--r);padding:13px;font-weight:600;font-size:14px;cursor:pointer;width:100%;margin-bottom:16px;font-family:var(--fn)}
+#pane-recrutement .rec-hidden{display:none!important}
+.rec-io-overlay{position:fixed;inset:0;background:var(--bg);z-index:9997;display:flex;flex-direction:column}
+.rec-io-overlay.rec-hidden{display:none!important}
+.rec-io-top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--bg2);color:var(--tx);border-bottom:1px solid var(--bd);flex-shrink:0}
+.rec-io-close{background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer;padding:2px 6px}
+.rec-io-progress{font-weight:700;font-size:12px;color:var(--blue);letter-spacing:.04em}
+.rec-io-body{flex:1;overflow-y:auto;padding:22px 18px;max-width:640px;margin:0 auto;width:100%}
+.rec-io-nav{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--bd);background:var(--bg2);flex-shrink:0}
+.rec-io-nav button:disabled{opacity:.4;cursor:default}
+.rec-io-question-titre{font-size:19px;font-weight:700;margin-bottom:10px;line-height:1.25;color:var(--tx)}
+.rec-io-question-txt{font-size:14px;color:var(--tx2);line-height:1.5;margin-bottom:16px}
+.rec-io-body .rec-scale button{font-size:18px;padding:15px 0}
+.rec-io-body label{display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-top:18px;margin-bottom:6px}
+.rec-io-body textarea{width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);resize:vertical;min-height:56px}
+
 `;
   document.head.appendChild(style);
 })();
@@ -752,6 +823,7 @@ function toast(msg,col){var t=document.createElement('div');t.className='toast';
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
+  if(b.dataset.tab === 'recrutement' && typeof buildRecrutementTab === 'function') buildRecrutementTab();
 });});
 
 // ==============================================================
@@ -1587,6 +1659,8 @@ function applyRole(role){
   if(cmp2Tab) cmp2Tab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var ncpTab = document.getElementById('tab-ncp-btn');
   if(ncpTab) ncpTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
+  var recTab = document.getElementById('tab-recrutement-btn');
+  if(recTab) recTab.style.display = isAdmin ? 'flex' : 'none';
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -4381,3 +4455,636 @@ function buildNCPTab(){
     }
   }
 }
+
+
+// ============================================================
+// ONGLET RECRUTEMENT — Évaluation mentalité candidats
+// Ajouté le 07/08 — stockage Firebase (recrutement/candidats), admin only
+// ============================================================
+(function(){
+
+var AXES = [
+  {key:"securite", titre:"1. Sécurité des personnes et de soi-même", q:"Racontez une situation où respecter une consigne de sécurité vous a fait perdre du temps ou gêné la cadence. Qu'avez-vous fait ?",
+    a1:"Contourne la règle si personne ne regarde, minimise le risque (\u00ab ça arrive jamais \u00bb).",
+    a3:"Respecte les règles pour lui-même mais ne dit rien si un collègue prend un risque.",
+    a5:"Respecte systématiquement, et alerte/rappelle la règle à un collègue en danger — exemple concret vécu."},
+  {key:"rigueur", titre:"2. Sécurité alimentaire", q:"Un collègue saute une étape d'hygiène par gain de temps, sans conséquence visible. Vous réagissez comment ?",
+    a1:"Relativise (\u00ab si ça se voit pas, c'est pas grave \u00bb).",
+    a3:"Suit les règles lui-même mais n'intervient pas face aux autres.",
+    a5:"Rappelle la règle avec tact, exemple vécu de vigilance réelle."},
+  {key:"fiabilite", titre:"3. Fiabilité / ponctualité", q:"Le travail est en horaires postés/tournants. Racontez une période où votre rythme de vie a été bousculé par le travail — comment vous avez géré ?",
+    a1:"Aucun exemple concret, minimise ou nie tout problème passé (\u00ab jamais en retard \u00bb sans contexte).",
+    a3:"Reconnaît des difficultés passées, quelques ajustements ponctuels mais pas de vraie méthode.",
+    a5:"Exemple précis d'organisation proactive (garde, sommeil, trajet géré à l'avance), stabilité dans la durée."},
+  {key:"equipe", titre:"4. Esprit d'équipe", q:"Un collègue est clairement en difficulté sur sa cadence et ça ralentit toute la ligne. Vous faites quoi ?",
+    a1:"\u00ab C'est pas mon problème \u00bb, indifférence, ou dénonciation agressive.",
+    a3:"Aide si on le lui demande mais n'anticipe pas de lui-même.",
+    a5:"Aide spontanée, remonte l'info intelligemment, exemple concret d'entraide vécue."},
+  {key:"feedback", titre:"5. Réaction à l'erreur / au feedback", q:"Racontez la dernière fois qu'un responsable vous a fait une remarque. Réaction sur le moment, et après ?",
+    a1:"Rejette systématiquement la faute sur les autres, sur la défensive, rancunier.",
+    a3:"Accepte en surface (\u00ab ok \u00bb) mais sans changement observable derrière.",
+    a5:"Reconnaît, explique concrètement ce qu'il/elle a changé après."},
+  {key:"stress", titre:"6. Gestion du stress / cadence", q:"Décrivez une journée où tout s'enchaînait mal (retard, panne, sous-effectif). Comment vous avez tenu ?",
+    a1:"Dramatise excessivement, ou nie totalement avoir été stressé (peu crédible).",
+    a3:"Tient le coup, reconnaît la difficulté mais sans stratégie claire.",
+    a5:"Reste factuel, cherche des solutions, exemple concret de sang-froid."},
+  {key:"hierarchie", titre:"7. Rapport à la hiérarchie", q:"Qu'attendez-vous d'un chef d'équipe ? Qu'est-ce qui vous déplaît chez un mauvais manager ?",
+    a1:"Attentes floues, vision très rigide/soumise, ou au contraire rejet de toute autorité.",
+    a3:"Attentes basiques (\u00ab qu'on me dise ce que je dois faire \u00bb).",
+    a5:"Attentes claires et matures (communication, reconnaissance) cohérentes avec un vrai collectif."},
+  {key:"motivation", titre:"8. Motivation réelle", q:"Pourquoi ce poste, et pourquoi maintenant ? Qu'est-ce que vous cherchez concrètement ?",
+    a1:"Réponse évasive, ou en décalage avec le poste (cherche du calme/solo alors que c'est un poste d'équipe en cadence).",
+    a3:"Motivation basique (salaire, proximité) sans lien avec le collectif.",
+    a5:"Motivation cohérente avec l'équipe et le rythme, réponse honnête et réfléchie."}
+];
+
+var QUESTIONNAIRE_I18N = {
+  fr: {
+    title: "Grille d'entretien — Sécurité, fiabilité & mentalité",
+    subtitle: "Merci de répondre en donnant des exemples concrets vécus.",
+    nameLabel: "Nom du candidat :",
+    dateLabel: "Date :",
+    axes: [
+      {titre:"1. Sécurité des personnes et de soi-même", q:"Racontez une situation où respecter une consigne de sécurité vous a fait perdre du temps ou gêné la cadence. Qu'avez-vous fait ?"},
+      {titre:"2. Sécurité alimentaire", q:"Un collègue saute une étape d'hygiène par gain de temps, sans conséquence visible. Vous réagissez comment ?"},
+      {titre:"3. Fiabilité / ponctualité", q:"Le travail est en horaires postés/tournants. Racontez une période où votre rythme de vie a été bousculé par le travail — comment vous avez géré ?"},
+      {titre:"4. Esprit d'équipe", q:"Un collègue est clairement en difficulté sur sa cadence et ça ralentit toute la ligne. Vous faites quoi ?"},
+      {titre:"5. Réaction à l'erreur / au feedback", q:"Racontez la dernière fois qu'un responsable vous a fait une remarque. Réaction sur le moment, et après ?"},
+      {titre:"6. Gestion du stress / cadence", q:"Décrivez une journée où tout s'enchaînait mal (retard, panne, sous-effectif). Comment vous avez tenu ?"},
+      {titre:"7. Rapport à la hiérarchie", q:"Qu'attendez-vous d'un chef d'équipe ? Qu'est-ce qui vous déplaît chez un mauvais manager ?"},
+      {titre:"8. Motivation réelle", q:"Pourquoi ce poste, et pourquoi maintenant ? Qu'est-ce que vous cherchez concrètement ?"}
+    ]
+  },
+  nl: {
+    title: "Interviewgrid — Veiligheid, betrouwbaarheid & mentaliteit",
+    subtitle: "Gelieve te antwoorden met concrete, zelf beleefde voorbeelden.",
+    nameLabel: "Naam van de kandidaat:",
+    dateLabel: "Datum:",
+    axes: [
+      {titre:"1. Veiligheid van personen en van uzelf", q:"Vertel over een situatie waarin het naleven van een veiligheidsvoorschrift u tijd deed verliezen of het tempo hinderde. Wat heeft u gedaan?"},
+      {titre:"2. Voedselveiligheid", q:"Een collega slaat een hygiënestap over om tijd te winnen, zonder zichtbaar gevolg. Hoe reageert u?"},
+      {titre:"3. Betrouwbaarheid / stiptheid", q:"Het werk gebeurt in wisselende ploegendiensten. Vertel over een periode waarin uw levensritme verstoord werd door het werk — hoe heeft u dat aangepakt?"},
+      {titre:"4. Teamgeest", q:"Een collega heeft duidelijk moeite met het tempo en dat vertraagt de hele lijn. Wat doet u?"},
+      {titre:"5. Reactie op fouten / feedback", q:"Vertel over de laatste keer dat een leidinggevende opmerkingen maakte over uw werk. Hoe reageerde u op dat moment, en nadien?"},
+      {titre:"6. Omgaan met stress / werktempo", q:"Beschrijf een dag waarop alles fout liep (vertraging, panne, onderbezetting). Hoe hield u vol?"},
+      {titre:"7. Verhouding met leidinggevenden", q:"Wat verwacht u van een ploegleider? Wat stoort u aan een slechte manager?"},
+      {titre:"8. Echte motivatie", q:"Waarom deze functie, en waarom nu? Wat zoekt u concreet?"}
+    ]
+  },
+  en: {
+    title: "Interview grid — Safety, reliability & mindset",
+    subtitle: "Please answer with concrete examples from your own experience.",
+    nameLabel: "Candidate name:",
+    dateLabel: "Date:",
+    axes: [
+      {titre:"1. Safety of others and yourself", q:"Tell me about a time when following a safety rule cost you time or slowed down the pace. What did you do?"},
+      {titre:"2. Food safety", q:"A colleague skips a hygiene step to save time, with no visible consequence. How do you react?"},
+      {titre:"3. Reliability / punctuality", q:"The job involves rotating shift work. Tell me about a time your routine was disrupted by your work schedule — how did you handle it?"},
+      {titre:"4. Team spirit", q:"A colleague is clearly struggling to keep up the pace and it's slowing down the whole line. What do you do?"},
+      {titre:"5. Reaction to mistakes / feedback", q:"Tell me about the last time a supervisor gave you feedback on your work. How did you react in the moment, and afterward?"},
+      {titre:"6. Handling stress / pace", q:"Describe a day when everything went wrong (delays, breakdown, understaffing). How did you cope?"},
+      {titre:"7. Relationship with management", q:"What do you expect from a team leader? What bothers you about a bad manager?"},
+      {titre:"8. Real motivation", q:"Why this job, and why now? What are you actually looking for?"}
+    ]
+  }
+};
+
+var candidats = [];
+var editId = null;
+var currentScores = {};
+var currentNotes = {};
+var currentVerdict = null;
+var radarChart = null;
+var interviewIndex = 0;
+var initialized = false;
+var listenerAttached = false;
+
+function $(id){ return document.getElementById(id); }
+
+function recToast(msg, col){
+  if(typeof toast === 'function') toast(msg, col || '#3b82f6');
+}
+
+function firebaseAvailable(){
+  return typeof db !== 'undefined' && db;
+}
+
+function attacherListenerCandidats(){
+  if(listenerAttached) return;
+  if(!firebaseAvailable()) return;
+  listenerAttached = true;
+  db.ref('recrutement/candidats').on('value', function(snap){
+    var data = snap.val() || {};
+    candidats = Object.keys(data).map(function(k){ return data[k]; });
+    candidats.sort(function(a,b){ return (a.id||'').localeCompare(b.id||''); });
+    renderListe();
+    renderCompareChecklist();
+  }, function(err){
+    console.warn('[Recrutement] Erreur lecture Firebase:', err);
+    recToast('Accès refusé aux données recrutement', '#ef4444');
+  });
+}
+
+function sauvegarderCandidat(data){
+  if(!firebaseAvailable()){ recToast('Firebase non disponible', '#ef4444'); return Promise.reject(new Error('no-db')); }
+  return db.ref('recrutement/candidats/'+data.id).set(data);
+}
+
+function supprimerCandidatFB(id){
+  if(!firebaseAvailable()) return Promise.reject(new Error('no-db'));
+  return db.ref('recrutement/candidats/'+id).remove();
+}
+
+function verdictLabel(v){
+  return v==='bon' ? 'Bon fit' : v==='creuser' ? 'À creuser' : v==='incompatible' ? 'Incompatible' : 'En cours';
+}
+function verdictPillClass(v){
+  return v==='bon' ? 'ok' : v==='creuser' ? 'wn' : v==='incompatible' ? 'cr' : 'rec-encours';
+}
+
+// ---------- Sous-navigation (Candidats / Entretien / Analyse) ----------
+function goToSubnav(name){
+  document.querySelectorAll('#pane-recrutement .rec-subtab').forEach(function(b){
+    b.classList.toggle('on', b.dataset.recsub === name);
+  });
+  document.querySelectorAll('#pane-recrutement .rec-section').forEach(function(s){
+    s.classList.toggle('on', s.id === 'rec-tab-'+name);
+  });
+}
+function initSubnav(){
+  document.querySelectorAll('#pane-recrutement .rec-subtab').forEach(function(btn){
+    btn.addEventListener('click', function(){ goToSubnav(btn.dataset.recsub); });
+  });
+}
+
+// ---------- Grille d'axes ----------
+function buildAxes(){
+  var c = $('rec-axes-container');
+  if(!c) return;
+  c.innerHTML = '<div class="cch"><div class="cct">Grille d\u2019évaluation</div></div>';
+  AXES.forEach(function(axe){
+    var div = document.createElement('div');
+    div.className = 'rec-axe';
+    div.innerHTML =
+      '<div class="rec-axe-titre">'+axe.titre+'</div>'+
+      '<div class="rec-axe-question">'+axe.q+'</div>'+
+      '<button type="button" class="rec-toggle-reperes">Voir les repères de notation \u25be</button>'+
+      '<div class="rec-reperes rec-hidden">'+
+        '<div class="rec-repere"><span class="rec-repere-n rec-s1">1</span>'+axe.a1+'</div>'+
+        '<div class="rec-repere"><span class="rec-repere-n rec-s3">3</span>'+axe.a3+'</div>'+
+        '<div class="rec-repere"><span class="rec-repere-n rec-s4">5</span>'+axe.a5+'</div>'+
+      '</div>'+
+      '<div class="rec-scale" data-axe="'+axe.key+'">'+
+        [1,2,3,4,5].map(function(n){ return '<button type="button" data-n="'+n+'">'+n+'</button>'; }).join('')+
+      '</div>'+
+      '<div class="rec-scale-labels"><span>Alerte</span><span>Excellent</span></div>'+
+      '<div class="rec-axe-note-label">Exemple concret donné (optionnel)</div>'+
+      '<textarea class="rec-axe-note" data-axe="'+axe.key+'" placeholder="Ce que le candidat a répondu concrètement..."></textarea>';
+    c.appendChild(div);
+  });
+  c.querySelectorAll('.rec-toggle-reperes').forEach(function(t){
+    t.addEventListener('click', function(){
+      var rep = t.nextElementSibling;
+      rep.classList.toggle('rec-hidden');
+      t.textContent = rep.classList.contains('rec-hidden') ? 'Voir les repères de notation \u25be' : 'Masquer les repères \u25b4';
+    });
+  });
+  c.querySelectorAll('.rec-scale').forEach(function(scale){
+    scale.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        scale.querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); });
+        b.classList.add('sel');
+        currentScores[scale.dataset.axe] = parseInt(b.dataset.n, 10);
+      });
+    });
+  });
+  c.querySelectorAll('.rec-axe-note').forEach(function(t){
+    t.addEventListener('input', function(){ currentNotes[t.dataset.axe] = t.value; });
+  });
+}
+
+// ---------- Formulaire ----------
+function resetFormulaire(){
+  editId = null;
+  currentScores = {};
+  currentNotes = {};
+  currentVerdict = null;
+  $('rec-f-nom').value = '';
+  $('rec-f-date').value = new Date().toISOString().slice(0,10);
+  $('rec-f-suivi').value = '';
+  $('rec-f-ref-statut').value = '';
+  $('rec-f-ref-notes').value = '';
+  document.querySelectorAll('#pane-recrutement .rec-scale button').forEach(function(b){ b.classList.remove('sel'); });
+  document.querySelectorAll('#pane-recrutement .rec-verdict-choix button').forEach(function(b){ b.className=''; });
+  document.querySelectorAll('#pane-recrutement .rec-axe-note').forEach(function(t){ t.value=''; });
+  $('rec-edit-actions').style.display = 'none';
+}
+
+function ouvrirCandidat(id){
+  var c = candidats.filter(function(x){ return x.id===id; })[0];
+  if(!c) return;
+  resetFormulaire();
+  editId = c.id;
+  currentScores = Object.assign({}, c.scores || {});
+  currentNotes = Object.assign({}, c.notes || {});
+  currentVerdict = c.verdict;
+  $('rec-f-nom').value = c.nom;
+  $('rec-f-date').value = c.date;
+  $('rec-f-suivi').value = c.suivi || '';
+  $('rec-f-ref-statut').value = (c.reference && c.reference.statut) || '';
+  $('rec-f-ref-notes').value = (c.reference && c.reference.notes) || '';
+  document.querySelectorAll('#pane-recrutement .rec-scale').forEach(function(scale){
+    var val = currentScores[scale.dataset.axe];
+    scale.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('sel', parseInt(b.dataset.n,10)===val);
+    });
+  });
+  document.querySelectorAll('#pane-recrutement .rec-axe-note').forEach(function(t){
+    t.value = currentNotes[t.dataset.axe] || '';
+  });
+  if(currentVerdict){
+    var btn = document.querySelector('#pane-recrutement .rec-verdict-choix button[data-v="'+currentVerdict+'"]');
+    if(btn) btn.classList.add('sel-'+currentVerdict);
+  }
+  $('rec-edit-actions').style.display = 'flex';
+  goToSubnav('formulaire');
+}
+
+// ---------- Liste ----------
+function renderListe(){
+  var wrap = $('rec-liste-items');
+  var vide = $('rec-liste-vide');
+  if(!wrap || !vide) return;
+  wrap.innerHTML = '';
+  if(!candidats.length){ vide.style.display='block'; return; }
+  vide.style.display='none';
+  candidats.slice().reverse().forEach(function(c){
+    var vals = Object.keys(c.scores||{}).map(function(k){ return c.scores[k]; });
+    var moyenne = vals.length ? (vals.reduce(function(a,b){return a+b;},0)/vals.length).toFixed(1) : '-';
+    var outer = document.createElement('div');
+    outer.className = 'rec-liste-item-wrap';
+    var div = document.createElement('div');
+    div.className = 'rec-liste-item';
+    div.innerHTML =
+      '<div><div class="rec-nom">'+c.nom+'</div><div class="rec-meta">'+c.date+' &middot; moyenne '+moyenne+'/5</div></div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+      (c.reference && c.reference.statut==='surveiller' ? '<span title="Point d\u2019attention assiduité" style="font-size:14px">\u26a0\ufe0f</span>' : '')+
+      '<span class="pill '+verdictPillClass(c.verdict)+'">'+verdictLabel(c.verdict)+'</span>'+
+      '</div>';
+    div.addEventListener('click', function(){ ouvrirCandidat(c.id); });
+    var del = document.createElement('button');
+    del.className = 'rec-btn-suppr-mini';
+    del.textContent = '\ud83d\uddd1';
+    del.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(confirm('Supprimer l\u2019entretien de '+c.nom+' ? Cette action est irréversible.')){
+        supprimerCandidatFB(c.id).then(function(){ recToast('Candidat supprimé', '#ef4444'); });
+      }
+    });
+    outer.appendChild(div);
+    outer.appendChild(del);
+    wrap.appendChild(outer);
+  });
+}
+
+// ---------- Impression (téléchargement HTML autonome) ----------
+function enveloppeImprimable(titre, corps){
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>'+titre+'</title><style>'+
+    'body{font-family:Arial,Helvetica,sans-serif;color:#111;max-width:760px;margin:30px auto;padding:0 16px}'+
+    'h1{font-size:21px;margin-bottom:2px}.pa-meta{font-size:12.5px;color:#555;margin-bottom:18px}'+
+    '.pa-verdict{font-size:14px;font-weight:bold;margin-bottom:14px}.pa-field{font-size:13.5px;margin-bottom:10px}'+
+    'table{width:100%;border-collapse:collapse;margin-bottom:16px}'+
+    'th,td{border:1px solid #ccc;padding:7px 9px;text-align:left;font-size:12.5px;vertical-align:top}th{background:#f0f0f0}'+
+    '.q-block{margin-bottom:22px;page-break-inside:avoid}.q-num{font-weight:bold;font-size:14px;margin-bottom:4px}'+
+    '.q-text{font-size:12.5px;color:#333;margin-bottom:8px;line-height:1.45}.q-box{border:1px solid #999;border-radius:4px;height:78px}'+
+    '.print-hint{background:#FFF6DD;border:1px solid #F0D98C;border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:22px;color:#5a4a1a}'+
+    '@media print{.print-hint{display:none}}'+
+    '</style></head><body>'+
+    '<div class="print-hint">Ouvre le menu de ton navigateur puis choisis <strong>Imprimer</strong> ou <strong>Enregistrer en PDF</strong>.</div>'+
+    corps+'</body></html>';
+}
+function telechargerHTML(filename, htmlContent){
+  try{
+    var blob = new Blob([htmlContent], {type:'text/html'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    recToast('Fichier téléchargé — ouvre-le pour imprimer', '#10b981');
+  }catch(e){
+    recToast('Impossible de générer le fichier', '#ef4444');
+  }
+}
+function exporterFichePDF(){
+  if(!editId) return;
+  var c = candidats.filter(function(x){ return x.id===editId; })[0];
+  if(!c) return;
+  var rows = AXES.map(function(a){
+    var score = (c.scores && c.scores[a.key]) ? c.scores[a.key] : '-';
+    var note = (c.notes && c.notes[a.key]) ? c.notes[a.key] : '';
+    return '<tr><td>'+a.titre+'</td><td style="text-align:center">'+score+'/5</td><td>'+note+'</td></tr>';
+  }).join('');
+  var refLabels = {positif:"Retour positif sur l'assiduité", surveiller:"Point d'attention signalé", injoignable:"Ancien employeur injoignable / refus"};
+  var refLabel = (c.reference && c.reference.statut) ? refLabels[c.reference.statut] : 'Non vérifié';
+  var corps =
+    '<h1>Évaluation mentalité — '+c.nom+'</h1>'+
+    '<div class="pa-meta">Entretien du '+c.date+' &middot; Ploeg 5 — AW3</div>'+
+    '<div class="pa-verdict">Verdict global : '+verdictLabel(c.verdict)+'</div>'+
+    '<table><tr><th>Critère</th><th>Score</th><th>Exemple concret / notes</th></tr>'+rows+'</table>'+
+    '<div style="margin-bottom:10px"><strong>Vérification référence — assiduité :</strong> '+refLabel+(c.reference && c.reference.notes ? '<br>'+c.reference.notes : '')+'</div>'+
+    (c.suivi ? '<div><strong>Point à vérifier en période d\u2019essai :</strong><br>'+c.suivi+'</div>' : '');
+  var html = enveloppeImprimable('Fiche — '+c.nom, corps);
+  var nomFichier = 'fiche-'+c.nom.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'.html';
+  telechargerHTML(nomFichier, html);
+}
+function imprimerQuestionnaire(lang){
+  var t = QUESTIONNAIRE_I18N[lang];
+  var blocks = t.axes.map(function(a){
+    return '<div class="q-block"><div class="q-num">'+a.titre+'</div><div class="q-text">'+a.q+'</div><div class="q-box"></div></div>';
+  }).join('');
+  var corps =
+    '<h1>'+t.title+'</h1><div class="pa-meta">'+t.subtitle+'</div>'+
+    '<div class="pa-field">'+t.nameLabel+' ____________________________________</div>'+
+    '<div class="pa-field">'+t.dateLabel+' ____________________________________</div>'+
+    '<div style="margin-top:14px">'+blocks+'</div>';
+  var html = enveloppeImprimable(t.title, corps);
+  telechargerHTML('questionnaire-candidat-'+lang+'.html', html);
+}
+
+// ---------- Mode entretien plein écran ----------
+function syncFormulaireDepuisState(){
+  document.querySelectorAll('#rec-axes-container .rec-scale').forEach(function(scale){
+    var key = scale.dataset.axe;
+    scale.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('sel', parseInt(b.dataset.n,10)===currentScores[key]);
+    });
+  });
+  document.querySelectorAll('#rec-axes-container .rec-axe-note').forEach(function(t){
+    t.value = currentNotes[t.dataset.axe] || '';
+  });
+}
+function openInterviewStep(){
+  var axe = AXES[interviewIndex];
+  var body = $('rec-io-body');
+  var noteVal = currentNotes[axe.key] || '';
+  body.innerHTML =
+    '<div class="rec-io-question-titre">'+axe.titre+'</div>'+
+    '<div class="rec-io-question-txt">'+axe.q+'</div>'+
+    '<button type="button" class="rec-toggle-reperes" id="rec-io-toggle-reperes">Voir les repères de notation \u25be</button>'+
+    '<div class="rec-reperes rec-hidden" id="rec-io-reperes">'+
+      '<div class="rec-repere"><span class="rec-repere-n rec-s1">1</span>'+axe.a1+'</div>'+
+      '<div class="rec-repere"><span class="rec-repere-n rec-s3">3</span>'+axe.a3+'</div>'+
+      '<div class="rec-repere"><span class="rec-repere-n rec-s4">5</span>'+axe.a5+'</div>'+
+    '</div>'+
+    '<div class="rec-scale" data-axe="'+axe.key+'" id="rec-io-scale">'+
+      [1,2,3,4,5].map(function(n){ return '<button type="button" data-n="'+n+'" class="'+(currentScores[axe.key]===n?'sel':'')+'">'+n+'</button>'; }).join('')+
+    '</div>'+
+    '<div class="rec-scale-labels"><span>Alerte</span><span>Excellent</span></div>'+
+    '<label>Exemple concret donné (optionnel)</label>'+
+    '<textarea id="rec-io-note" placeholder="Ce que le candidat a répondu concrètement...">'+noteVal+'</textarea>';
+  $('rec-io-progress').textContent = (interviewIndex+1)+' / '+AXES.length;
+  $('rec-io-toggle-reperes').addEventListener('click', function(){ $('rec-io-reperes').classList.toggle('rec-hidden'); });
+  $('rec-io-scale').querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){
+      $('rec-io-scale').querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); });
+      b.classList.add('sel');
+      currentScores[axe.key] = parseInt(b.dataset.n,10);
+    });
+  });
+  $('rec-io-note').addEventListener('input', function(e){ currentNotes[axe.key] = e.target.value; });
+  $('rec-io-prev').disabled = (interviewIndex===0);
+  $('rec-io-next').textContent = (interviewIndex===AXES.length-1) ? 'Terminer \u2713' : 'Suivant \u25b8';
+}
+
+// ---------- Analyse (radar) ----------
+var COULEURS = ['#10b981','#f59e0b','#ef4444','#8b5cf6','#3b82f6'];
+function renderCompareChecklist(){
+  var wrap = $('rec-compare-checklist');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  candidats.forEach(function(c){
+    var div = document.createElement('label');
+    div.className = 'rec-cc-item';
+    div.innerHTML = '<input type="checkbox" value="'+c.id+'" class="rec-cc-check"><span>'+c.nom+'</span>';
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('.rec-cc-check').forEach(function(chk){
+    chk.addEventListener('change', renderAnalyse);
+  });
+  var checks = wrap.querySelectorAll('.rec-cc-check');
+  if(checks.length){
+    checks[checks.length-1].checked = true;
+    if(checks.length>1) checks[checks.length-2].checked = true;
+  }
+  renderAnalyse();
+}
+function renderAnalyse(){
+  var checked = document.querySelectorAll('#pane-recrutement .rec-cc-check:checked');
+  var ids = Array.prototype.map.call(checked, function(c){ return c.value; });
+  var selected = candidats.filter(function(c){ return ids.indexOf(c.id) !== -1; });
+  var canvas = $('rec-radar');
+  var vide = $('rec-analyse-vide');
+  var tableauCard = $('rec-tableau-card');
+  if(!canvas || !vide || !tableauCard) return;
+
+  if(!selected.length){
+    vide.style.display = 'block';
+    canvas.style.display = 'none';
+    tableauCard.style.display = 'none';
+    if(radarChart){ radarChart.destroy(); radarChart = null; }
+    return;
+  }
+  vide.style.display = 'none';
+  canvas.style.display = 'block';
+  tableauCard.style.display = 'block';
+
+  var labels = AXES.map(function(a){ return a.titre.replace(/^[0-9]+\. /,''); });
+  var datasets = selected.map(function(c,i){
+    return {
+      label: c.nom,
+      data: AXES.map(function(a){ return (c.scores && c.scores[a.key]) ? c.scores[a.key] : 0; }),
+      borderColor: COULEURS[i % COULEURS.length],
+      backgroundColor: COULEURS[i % COULEURS.length]+'33',
+      borderWidth: 2,
+      pointBackgroundColor: COULEURS[i % COULEURS.length]
+    };
+  });
+
+  if(radarChart) radarChart.destroy();
+  if(typeof Chart !== 'undefined'){
+    radarChart = new Chart(canvas, {
+      type: 'radar',
+      data: { labels: labels, datasets: datasets },
+      options: {
+        scales: { r: { min:0, max:5, ticks:{ stepSize:1, color:'#8b90a4', backdropColor:'transparent' }, pointLabels:{ font:{ size:10 }, color:'#8b90a4' }, grid:{ color:'rgba(255,255,255,.08)' }, angleLines:{ color:'rgba(255,255,255,.08)' } } },
+        plugins: { legend: { position:'bottom', labels:{ boxWidth:12, font:{ size:11 }, color:'#e8eaf0' } } },
+        maintainAspectRatio:false
+      }
+    });
+  }
+
+  var table = $('rec-tableau-scores');
+  var html = '<thead><tr><th>Critère</th>'+selected.map(function(c){ return '<th>'+c.nom+'</th>'; }).join('')+'</tr></thead><tbody>';
+  AXES.forEach(function(a){
+    html += '<tr><td>'+a.titre.replace(/^[0-9]+\. /,'')+'</td>';
+    selected.forEach(function(c){
+      var v = c.scores && c.scores[a.key];
+      html += v ? '<td><span class="rec-score-cell rec-s'+v+'">'+v+'</span></td>' : '<td>-</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+// ---------- Attache des écouteurs (une seule fois) ----------
+function attachListenersOnce(){
+  document.querySelectorAll('#pane-recrutement .rec-verdict-choix button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#pane-recrutement .rec-verdict-choix button').forEach(function(x){ x.className=''; });
+      currentVerdict = b.dataset.v;
+      b.classList.add('sel-'+b.dataset.v);
+    });
+  });
+
+  $('rec-btn-annuler').addEventListener('click', function(){
+    resetFormulaire();
+    goToSubnav('liste');
+  });
+
+  $('rec-btn-enregistrer').addEventListener('click', function(){
+    var nom = $('rec-f-nom').value.trim();
+    if(!nom){ recToast('Ajoute un nom', '#ef4444'); return; }
+
+    var scoresArr = Object.keys(currentScores).map(function(k){ return currentScores[k]; });
+    var moyenne = scoresArr.length ? scoresArr.reduce(function(a,b){return a+b;},0)/scoresArr.length : null;
+    var nbBas = scoresArr.filter(function(s){ return s<=2; }).length;
+    if(currentVerdict==='bon' && moyenne!==null && (moyenne<3 || nbBas>=2)){
+      if(!confirm('Le verdict \u00ab Bon fit \u00bb semble en décalage avec des scores plutôt bas sur certains critères. Enregistrer quand même ?')) return;
+    }
+    if(currentVerdict==='incompatible' && moyenne!==null && moyenne>=4){
+      if(!confirm('Le verdict \u00ab Incompatible \u00bb semble en décalage avec des scores plutôt hauts. Enregistrer quand même ?')) return;
+    }
+
+    var data = {
+      id: editId || (Date.now()+''),
+      nom: nom,
+      date: $('rec-f-date').value || new Date().toISOString().slice(0,10),
+      scores: Object.assign({}, currentScores),
+      notes: Object.assign({}, currentNotes),
+      verdict: currentVerdict,
+      suivi: $('rec-f-suivi').value.trim(),
+      reference: {
+        statut: $('rec-f-ref-statut').value,
+        notes: $('rec-f-ref-notes').value.trim()
+      }
+    };
+
+    sauvegarderCandidat(data).then(function(){
+      recToast('Entretien enregistré', '#10b981');
+      resetFormulaire();
+      goToSubnav('liste');
+    }).catch(function(err){
+      console.error('[Recrutement] Erreur sauvegarde:', err);
+      recToast('Erreur lors de l\u2019enregistrement', '#ef4444');
+    });
+  });
+
+  $('rec-btn-supprimer').addEventListener('click', function(){
+    if(!editId) return;
+    var c = candidats.filter(function(x){ return x.id===editId; })[0];
+    if(!c) return;
+    if(confirm('Supprimer l\u2019entretien de '+c.nom+' ? Cette action est irréversible.')){
+      supprimerCandidatFB(editId).then(function(){
+        resetFormulaire();
+        goToSubnav('liste');
+        recToast('Candidat supprimé', '#ef4444');
+      });
+    }
+  });
+
+  $('rec-btn-export-json').addEventListener('click', function(){
+    var json = JSON.stringify(candidats, null, 2);
+    try{
+      var blob = new Blob([json], {type:'application/json'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'candidats-recrutement-aw3.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      recToast('Export téléchargé', '#10b981');
+    }catch(e){
+      recToast('Erreur export', '#ef4444');
+    }
+  });
+
+  $('rec-btn-import-json').addEventListener('click', function(){ $('rec-file-import').click(); });
+  $('rec-file-import').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    file.text().then(function(text){
+      var imported;
+      try{ imported = JSON.parse(text); }catch(err){ recToast('Fichier invalide', '#ef4444'); return; }
+      if(!Array.isArray(imported)){ recToast('Fichier invalide', '#ef4444'); return; }
+      var nouveaux = imported.filter(function(c){
+        return c && c.id && !candidats.some(function(x){ return x.id===c.id; });
+      });
+      if(!nouveaux.length){ recToast('Rien de nouveau à importer', '#f59e0b'); return; }
+      if(confirm(nouveaux.length+' nouveau(x) candidat(s) trouvé(s). Les ajouter ?')){
+        var updates = {};
+        nouveaux.forEach(function(c){ updates[c.id] = c; });
+        db.ref('recrutement/candidats').update(updates).then(function(){
+          recToast('Import réussi', '#10b981');
+        }).catch(function(){ recToast('Erreur import', '#ef4444'); });
+      }
+    });
+    e.target.value = '';
+  });
+
+  $('rec-btn-pdf').addEventListener('click', exporterFichePDF);
+  $('rec-btn-print-fr').addEventListener('click', function(){ imprimerQuestionnaire('fr'); });
+  $('rec-btn-print-nl').addEventListener('click', function(){ imprimerQuestionnaire('nl'); });
+  $('rec-btn-print-en').addEventListener('click', function(){ imprimerQuestionnaire('en'); });
+
+  $('rec-btn-mode-entretien').addEventListener('click', function(){
+    interviewIndex = 0;
+    openInterviewStep();
+    $('rec-io-overlay').classList.remove('rec-hidden');
+  });
+  $('rec-io-close').addEventListener('click', function(){
+    $('rec-io-overlay').classList.add('rec-hidden');
+    syncFormulaireDepuisState();
+  });
+  $('rec-io-prev').addEventListener('click', function(){
+    if(interviewIndex>0){ interviewIndex--; openInterviewStep(); }
+  });
+  $('rec-io-next').addEventListener('click', function(){
+    if(interviewIndex < AXES.length-1){
+      interviewIndex++; openInterviewStep();
+    } else {
+      $('rec-io-overlay').classList.add('rec-hidden');
+      syncFormulaireDepuisState();
+      recToast('Renseigne le verdict pour terminer', '#f59e0b');
+      var vc = $('rec-verdict-choix');
+      if(vc) vc.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+}
+
+function initRecrutementUI(){
+  if(initialized) return;
+  initialized = true;
+  buildAxes();
+  initSubnav();
+  attachListenersOnce();
+  $('rec-f-date').value = new Date().toISOString().slice(0,10);
+}
+
+// Hook global appelé au clic sur l'onglet "Recrutement"
+window.buildRecrutementTab = function(){
+  initRecrutementUI();
+  attacherListenerCandidats();
+};
+
+})();
