@@ -599,7 +599,7 @@
         <button class="ncp-equipe-btn" data-equipe="P5" onclick="filtrerNCPEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5 (moi)</button>
       </div>
       <div style="font-size:11px;color:var(--tx3);margin:-8px 0 16px;max-width:760px;line-height:1.5">
-        Note : l equipe est deduite de l heure de creation de la fiche qualite, pas de l heure reelle du defaut.
+        Note : l equipe est deduite de l heure de la fiche quand celle-ci est fiable, sinon de l heure du defaut ecrite dans le texte (marquee ~ dans la colonne Date). <span id="ncp-couverture"></span>
         Ce filtre sert a explorer les donnees, il ne constitue pas une comparaison de performance entre equipes.
       </div>
 
@@ -618,7 +618,7 @@
         <div class="cc">
           <div class="cch"><div class="cct">Tonnage bloque par client</div></div>
           <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Impact matiere reel, en tonnes, par client</div>
-          <div class="cw" style="height:300px"><canvas id="ncpTonnageChart"></canvas></div>
+          <div class="cw" style="height:300px"><canvas id="ncpTonnageChart"></canvas></div></div><div class="cc"><div class="cch"><div class="cct">Familles de defauts</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Les 457 motifs distincts regroupes en grandes familles &mdash; barres bleues : nombre de mentions, courbe orange : cumul en % sur l axe de droite</div><div class="cw" style="height:300px"><canvas id="ncpFamillesChart"></canvas></div></div><div class="cc" style="display:none">
         </div>
       </div>
 
