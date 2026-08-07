@@ -4595,7 +4595,7 @@ function supprimerCandidatFB(id){
   return db.ref('recrutement/candidats/'+id).remove();
 }
 
-function verdictLabel(v){
+var AXES_POIDS = { securite: 2.5, rigueur: 2.5, fiabilite: 1.5, equipe: 1, feedback: 1, stress: 1, hierarchie: 0.75, motivation: 1 }; var AXES_CRITIQUES = ['securite', 'rigueur']; var _recDistribChart = null, _recPredChart = null, _recFunnelChart = null, _recMoisChart = null; function recVal(id){ var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; } function recSet(id, v){ var e = document.getElementById(id); if(e) e.value = v || ''; } function recScorePondere(c){ var s = c.scores || {}; var num = 0, den = 0; Object.keys(AXES_POIDS).forEach(function(k){ if(s[k]){ num += s[k] * AXES_POIDS[k]; den += AXES_POIDS[k]; } }); return den ? (num / den) : null; } function recAlerte(c){ var s = c.scores || {}; for(var i = 0; i < AXES_CRITIQUES.length; i++){ if(s[AXES_CRITIQUES[i]] && s[AXES_CRITIQUES[i]] <= 2) return AXES_CRITIQUES[i]; } return null; } function recLibelleAxe(k){ for(var i = 0; i < AXES.length; i++){ if(AXES[i].key === k) return AXES[i].titre.replace(/^[0-9]+\. /, ''); } return k; } function recIssueLabel(v){ return v === 'non_retenu' ? 'non retenu' : v === 'embauche' ? 'embauche' : v === 'confirme' ? 'confirme apres essai' : v === 'parti' ? 'parti pendant l essai' : 'en cours'; } function recCouleurNote(n){ return n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : n === 4 ? '#34d399' : '#10b981'; } function recBarres(c){ var s = c.scores || {}; var h = '<div style="display:flex;gap:3px;margin-top:6px">'; AXES.forEach(function(a){ var n = s[a.key] || 0; h += '<div title="' + a.titre.replace(/"/g, '') + ' : ' + (n || '-') + '/5" style="width:24px;height:6px;border-radius:3px;background:' + (n ? recCouleurNote(n) : 'var(--bd2)') + '"></div>'; }); return h + '</div>'; } function recSauverBrouillon(){ try { localStorage.setItem('rec_brouillon', JSON.stringify({ id: editId, nom: recVal('rec-f-nom'), scores: currentScores, notes: currentNotes, verdict: currentVerdict, ts: Date.now() })); } catch(e){} } function recEffacerBrouillon(){ try { localStorage.removeItem('rec_brouillon'); } catch(e){} } function recRestaurerBrouillon(){ var b = null; try { b = JSON.parse(localStorage.getItem('rec_brouillon') || 'null'); } catch(e){} if(!b || !b.scores || !Object.keys(b.scores).length) return; if(!confirm('Un entretien non enregistre a ete retrouve' + (b.nom ? ' (' + b.nom + ')' : '') + '. Le reprendre ?')){ recEffacerBrouillon(); return; } editId = b.id || null; currentScores = b.scores || {}; currentNotes = b.notes || {}; currentVerdict = b.verdict || null; recSet('rec-f-nom', b.nom); syncFormulaireDepuisState(); } function recRemplirEmployes(){ var sel = document.getElementById('rec-f-empid'); if(!sel || sel.getAttribute('data-fill')) return; sel.setAttribute('data-fill', '1'); var h = '<option value="">-</option>'; (window.EMP || []).forEach(function(e){ if(e.id) h += '<option value="' + e.id + '">' + e.n + '</option>'; }); sel.innerHTML = h; } function recBradford(c){ if(!c.empId) return null; var emp = (window.EMP || []).filter(function(e){ return e.id === c.empId; })[0]; if(!emp) return null; var b = (window.BD || []).filter(function(x){ return x.n === emp.n; })[0]; return (b && typeof b.sc === 'number') ? b.sc : null; } function verdictLabel(v){
   return v==='bon' ? 'Bon fit' : v==='creuser' ? 'À creuser' : v==='incompatible' ? 'Incompatible' : 'En cours';
 }
 function verdictPillClass(v){
@@ -4654,12 +4654,12 @@ function buildAxes(){
       b.addEventListener('click', function(){
         scale.querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); });
         b.classList.add('sel');
-        currentScores[scale.dataset.axe] = parseInt(b.dataset.n, 10);
+        currentScores[scale.dataset.axe] = parseInt(b.dataset.n, 10); recSauverBrouillon();
       });
     });
   });
   c.querySelectorAll('.rec-axe-note').forEach(function(t){
-    t.addEventListener('input', function(){ currentNotes[t.dataset.axe] = t.value; });
+    t.addEventListener('input', function(){ currentNotes[t.dataset.axe] = t.value; recSauverBrouillon(); });
   });
 }
 
@@ -4673,7 +4673,7 @@ function resetFormulaire(){
   $('rec-f-date').value = new Date().toISOString().slice(0,10);
   $('rec-f-suivi').value = '';
   $('rec-f-ref-statut').value = '';
-  $('rec-f-ref-notes').value = '';
+  $('rec-f-ref-notes').value = '';  ['rec-f-poste','rec-f-unite','rec-f-shift','rec-f-evaluateur','rec-f-issue','rec-f-empid'].forEach(function(id){ recSet(id, ''); });
   document.querySelectorAll('#pane-recrutement .rec-scale button').forEach(function(b){ b.classList.remove('sel'); });
   document.querySelectorAll('#pane-recrutement .rec-verdict-choix button').forEach(function(b){ b.className=''; });
   document.querySelectorAll('#pane-recrutement .rec-axe-note').forEach(function(t){ t.value=''; });
@@ -4692,7 +4692,7 @@ function ouvrirCandidat(id){
   $('rec-f-date').value = c.date;
   $('rec-f-suivi').value = c.suivi || '';
   $('rec-f-ref-statut').value = (c.reference && c.reference.statut) || '';
-  $('rec-f-ref-notes').value = (c.reference && c.reference.notes) || '';
+  $('rec-f-ref-notes').value = (c.reference && c.reference.notes) || '';  recRemplirEmployes(); recSet('rec-f-poste', c.poste); recSet('rec-f-unite', c.unite); recSet('rec-f-shift', c.shift); recSet('rec-f-evaluateur', c.evaluateur); recSet('rec-f-issue', c.issue); recSet('rec-f-empid', c.empId);
   document.querySelectorAll('#pane-recrutement .rec-scale').forEach(function(scale){
     var val = currentScores[scale.dataset.axe];
     scale.querySelectorAll('button').forEach(function(b){
@@ -4726,7 +4726,7 @@ function renderListe(){
     var div = document.createElement('div');
     div.className = 'rec-liste-item';
     div.innerHTML =
-      '<div><div class="rec-nom">'+c.nom+'</div><div class="rec-meta">'+c.date+' &middot; moyenne '+moyenne+'/5</div></div>'+
+      '<div style="flex:1"><div class="rec-nom">'+c.nom+(recAlerte(c) ? ' <span title="Note eliminatoire sur '+recLibelleAxe(recAlerte(c))+'" style="color:#ef4444;font-size:11px;font-weight:700">&#9888; ALERTE SECURITE</span>' : '')+'</div><div class="rec-meta">'+c.date+' &middot; pondere '+(recScorePondere(c)!==null?recScorePondere(c).toFixed(1):'-')+'/5 &middot; brut '+moyenne+'/5'+(c.poste?' &middot; '+c.poste:'')+(c.unite?' '+c.unite:'')+' &middot; '+recIssueLabel(c.issue)+'</div>'+recBarres(c)+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
       (c.reference && c.reference.statut==='surveiller' ? '<span title="Point d\u2019attention assiduité" style="font-size:14px">\u26a0\ufe0f</span>' : '')+
       '<span class="pill '+verdictPillClass(c.verdict)+'">'+verdictLabel(c.verdict)+'</span>'+
@@ -4859,7 +4859,7 @@ function openInterviewStep(){
 
 // ---------- Analyse (radar) ----------
 var COULEURS = ['#10b981','#f59e0b','#ef4444','#8b5cf6','#3b82f6'];
-function renderCompareChecklist(){
+function renderCompareChecklist(){ recBuildGraphiques();
   var wrap = $('rec-compare-checklist');
   if(!wrap) return;
   wrap.innerHTML = '';
@@ -4879,7 +4879,7 @@ function renderCompareChecklist(){
   }
   renderAnalyse();
 }
-function renderAnalyse(){
+function recBuildGraphiques(){ if(typeof Chart === 'undefined') return; var all = candidats || []; var cd = document.getElementById('rec-distrib'); if(cd){ var ds = AXES.map(function(a){ var arr = [0, 0, 0, 0, 0]; all.forEach(function(c){ var n = (c.scores || {})[a.key]; if(n) arr[n - 1]++; }); return arr; }); var sets = [1, 2, 3, 4, 5].map(function(n, i){ return { label: n + '/5', data: AXES.map(function(a, j){ return ds[j][i]; }), backgroundColor: recCouleurNote(n), stack: 's' }; }); if(_recDistribChart){ _recDistribChart.destroy(); } _recDistribChart = new Chart(cd, { type: 'bar', data: { labels: AXES.map(function(a){ return a.titre.replace(/^[0-9]+\. /, '').slice(0, 18); }), datasets: sets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8b90a4', boxWidth: 10, font: { size: 10 } } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 45, minRotation: 45, font: { size: 9 } } }, y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', precision: 0 } } } } }); } var cp = document.getElementById('rec-pred'); if(cp){ var pts = []; all.forEach(function(c){ var x = recScorePondere(c); var y = recBradford(c); if(x !== null && y !== null) pts.push({ x: Number(x.toFixed(2)), y: y, nom: c.nom }); }); var info = document.getElementById('rec-pred-info'); if(info) info.textContent = pts.length ? (pts.length + ' candidat(s) relie(s) a un employe. Score pondere de l entretien en X, score Bradford actuel en Y : un nuage qui descend vers la droite valide la grille.') : 'Aucun candidat relie a un employe pour le moment. Renseigne le champ Employe lie sur une fiche embauchee pour alimenter ce graphique.'; if(_recPredChart){ _recPredChart.destroy(); } _recPredChart = new Chart(cp, { type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: '#3b82f6', pointRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){ var p = ctx.raw; return p.nom + ' : entretien ' + p.x + '/5, Bradford ' + p.y; } } } }, scales: { x: { min: 1, max: 5, title: { display: true, text: 'Score entretien pondere', color: '#8b90a4' }, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, title: { display: true, text: 'Score Bradford', color: '#8b90a4' }, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } } }); } var cf = document.getElementById('rec-funnel'); if(cf){ var nEv = all.length; var nBon = all.filter(function(c){ return c.verdict === 'bon'; }).length; var nEmb = all.filter(function(c){ return c.issue === 'embauche' || c.issue === 'confirme'; }).length; var nCon = all.filter(function(c){ return c.issue === 'confirme'; }).length; if(_recFunnelChart){ _recFunnelChart.destroy(); } _recFunnelChart = new Chart(cf, { type: 'bar', data: { labels: ['Evalues', 'Bon fit', 'Embauches', 'Confirmes'], datasets: [{ data: [nEv, nBon, nEmb, nCon], backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981'], borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', precision: 0 } }, y: { grid: { display: false }, ticks: { color: '#8b90a4' } } } } }); } var cm = document.getElementById('rec-mois'); if(cm){ var mois = [], cnt = []; var d0 = new Date(); for(var k = 11; k >= 0; k--){ var dd = new Date(d0.getFullYear(), d0.getMonth() - k, 1); mois.push(dd.getFullYear() + '-' + ('0' + (dd.getMonth() + 1)).slice(-2)); cnt.push(0); } all.forEach(function(c){ var i = mois.indexOf(String(c.date || '').slice(0, 7)); if(i >= 0) cnt[i]++; }); if(_recMoisChart){ _recMoisChart.destroy(); } _recMoisChart = new Chart(cm, { type: 'bar', data: { labels: mois, datasets: [{ data: cnt, backgroundColor: '#8b5cf6', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 9 } } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', precision: 0 } } } } }); } } function renderAnalyse(){ recRemplirEmployes(); recBuildGraphiques();
   var checked = document.querySelectorAll('#pane-recrutement .rec-cc-check:checked');
   var ids = Array.prototype.map.call(checked, function(c){ return c.value; });
   var selected = candidats.filter(function(c){ return ids.indexOf(c.id) !== -1; });
@@ -4911,7 +4911,7 @@ function renderAnalyse(){
     };
   });
 
-  if(radarChart) radarChart.destroy();
+  if(candidats.length > 1){ var moyRef = AXES.map(function(a){ var n = 0, s = 0; candidats.forEach(function(c){ var v = (c.scores || {})[a.key]; if(v){ s += v; n++; } }); return n ? Number((s / n).toFixed(2)) : 0; }); datasets.push({ label: 'Moyenne de tous les candidats', data: moyRef, borderColor: 'rgba(255,255,255,.4)', backgroundColor: 'rgba(255,255,255,.05)', borderWidth: 1, borderDash: [5, 4], pointRadius: 2, pointBackgroundColor: 'rgba(255,255,255,.5)' }); }  if(radarChart) radarChart.destroy();
   if(typeof Chart !== 'undefined'){
     radarChart = new Chart(canvas, {
       type: 'radar',
@@ -4955,12 +4955,12 @@ function attachListenersOnce(){
 
   $('rec-btn-enregistrer').addEventListener('click', function(){
     var nom = $('rec-f-nom').value.trim();
-    if(!nom){ recToast('Ajoute un nom', '#ef4444'); return; }
+    if(!nom){ recToast('Ajoute un nom', '#ef4444'); return; }    var dbl = candidats.filter(function(x){ return x.id !== editId && String(x.nom || '').trim().toLowerCase() === nom.toLowerCase(); }); if(dbl.length && !confirm('Une fiche existe deja pour ' + nom + ' (entretien du ' + dbl[0].date + '). Creer une seconde fiche quand meme ?')) return;
 
     var scoresArr = Object.keys(currentScores).map(function(k){ return currentScores[k]; });
     var moyenne = scoresArr.length ? scoresArr.reduce(function(a,b){return a+b;},0)/scoresArr.length : null;
     var nbBas = scoresArr.filter(function(s){ return s<=2; }).length;
-    if(currentVerdict==='bon' && moyenne!==null && (moyenne<3 || nbBas>=2)){
+    var alerteK = recAlerte({ scores: currentScores }); if(alerteK && currentVerdict === 'bon' && !confirm('Note eliminatoire (1 ou 2) sur ' + recLibelleAxe(alerteK) + '. En agroalimentaire ce critere ne se compense pas par les autres. Enregistrer quand meme en Bon fit ?')) return;    if(currentVerdict==='bon' && moyenne!==null && (moyenne<3 || nbBas>=2)){
       if(!confirm('Le verdict \u00ab Bon fit \u00bb semble en décalage avec des scores plutôt bas sur certains critères. Enregistrer quand même ?')) return;
     }
     if(currentVerdict==='incompatible' && moyenne!==null && moyenne>=4){
@@ -4974,14 +4974,14 @@ function attachListenersOnce(){
       scores: Object.assign({}, currentScores),
       notes: Object.assign({}, currentNotes),
       verdict: currentVerdict,
-      suivi: $('rec-f-suivi').value.trim(),
+      suivi: $('rec-f-suivi').value.trim(), poste: recVal('rec-f-poste'), unite: recVal('rec-f-unite'), shift: recVal('rec-f-shift'), evaluateur: recVal('rec-f-evaluateur'), issue: recVal('rec-f-issue'), empId: recVal('rec-f-empid'), pondere: recScorePondere({ scores: currentScores }),
       reference: {
         statut: $('rec-f-ref-statut').value,
         notes: $('rec-f-ref-notes').value.trim()
       }
     };
 
-    sauvegarderCandidat(data).then(function(){
+    sauvegarderCandidat(data).then(function(){ recEffacerBrouillon();
       recToast('Entretien enregistré', '#10b981');
       resetFormulaire();
       goToSubnav('liste');
@@ -5077,7 +5077,7 @@ function initRecrutementUI(){
   initialized = true;
   buildAxes();
   initSubnav();
-  attachListenersOnce();
+  attachListenersOnce(); recRemplirEmployes(); setTimeout(recRestaurerBrouillon, 900);
   $('rec-f-date').value = new Date().toISOString().slice(0,10);
 }
 
