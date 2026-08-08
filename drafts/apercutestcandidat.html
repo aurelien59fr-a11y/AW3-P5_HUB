@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aperçu — Test candidat (avant intégration)</title>
+<style>
+  :root{--bg:#0f1117;--bg2:#171b25;--bg3:#1e2436;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);--tx:#e8eaf0;--tx2:#8b90a4;--tx3:#555c72;--blue:#3b82f6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--orange:#f97316;--fn:'Inter',-apple-system,sans-serif;--r:8px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh}
+  .banner{background:linear-gradient(90deg,#3b2f0a,#241d08);border-bottom:1px solid #5a4a1a;color:#f0d98c;font-size:12.5px;padding:10px 18px;text-align:center}
+  .banner b{color:#FFC20F}
+  .wrap{max-width:640px;margin:0 auto;padding:28px 18px 60px}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:var(--tx2);font-size:12.5px;margin-bottom:22px}
+  .toggle-view{display:flex;gap:8px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--bd);border-radius:20px;padding:4px;width:fit-content}
+  .toggle-view button{border:none;background:none;color:var(--tx2);padding:6px 14px;border-radius:16px;font-size:12px;font-family:var(--fn);cursor:pointer;font-weight:600}
+  .toggle-view button.on{background:var(--blue);color:#fff}
+
+  /* ---- Vue candidat (quiz plein écran) ---- */
+  #view-candidat{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:0;overflow:hidden}
+  .qz-top{padding:16px 22px;border-bottom:1px solid var(--bd)}
+  .qz-progress-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:10px}
+  .qz-progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
+  .qz-count{font-size:11px;color:var(--tx3);font-family:monospace}
+  .qz-body{padding:36px 26px 30px;min-height:320px;display:flex;flex-direction:column;justify-content:center}
+  #screen-intro .qz-body, #screen-end .qz-body{text-align:center}
+  .qz-q-label{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;text-align:center}
+  /* Les 3 options ont exactement le même poids visuel — aucune n'est traitée comme un "moins bon" choix */
+  .qz-option{display:block;width:100%;text-align:left;background:var(--bg3);border:1.5px solid var(--bd2);border-radius:12px;padding:16px 20px;margin-bottom:12px;color:var(--tx);font-size:14.5px;line-height:1.5;cursor:pointer;font-family:var(--fn);transition:all .15s}
+  .qz-option:hover{border-color:var(--blue);background:rgba(59,130,246,.08)}
+  .qz-option.sel{border-color:var(--blue);background:rgba(59,130,246,.15)}
+  .qz-truefalse{display:flex;gap:10px}
+  .qz-truefalse .qz-option{text-align:center;font-weight:600;flex:1;display:flex;align-items:center;justify-content:center}
+  .qz-nav{display:flex;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--bd)}
+  .qz-btn{padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer}
+  .qz-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .qz-btn:disabled{opacity:.35;cursor:default}
+  #screen-intro h2{font-size:20px;margin-bottom:10px}
+  #screen-intro p{color:var(--tx2);font-size:13.5px;line-height:1.6;max-width:420px;margin:0 auto 26px}
+  .intro-badge{display:inline-block;background:var(--bg3);border:1px solid var(--bd2);border-radius:20px;padding:6px 14px;font-size:11.5px;color:var(--tx2);margin-bottom:18px}
+  input.qz-name{width:100%;max-width:320px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:14px;margin-bottom:20px;text-align:center}
+  #screen-end .big-check{font-size:44px;margin-bottom:10px}
+
+  /* ---- Vue recruteur ---- */
+  #view-recruteur{display:none}
+  .rec-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  .rec-card h3{font-size:13px;margin:0 0 14px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
+  .trait-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .trait-name{width:110px;font-size:12.5px;color:var(--tx2);flex-shrink:0}
+  .trait-bar-bg{flex:1;height:10px;background:var(--bg3);border-radius:5px;overflow:hidden}
+  .trait-bar-fill{height:100%;border-radius:5px}
+  .trait-val{width:34px;font-size:11px;color:var(--tx3);font-family:monospace;text-align:right}
+  .alert-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 16px;font-size:12.5px;color:#f0c98c;display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .alert-box:last-child{margin-bottom:0}
+  .ok-box{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.35);border-radius:10px;padding:12px 16px;font-size:12.5px;color:#7fe3bd}
+
+  /* ---- Mockup champs identité ---- */
+  .mock-field-row{display:flex;gap:10px;margin-top:10px}
+  .mock-field{flex:1}
+  .mock-field label{display:block;font-size:11.5px;color:var(--tx2);margin-bottom:5px}
+  .mock-field input{width:100%;padding:9px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:13px}
+  .new-tag{display:inline-block;background:rgba(16,185,129,.15);color:#34d399;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="banner">🔍 <b>Aperçu uniquement</b> — rien n'est encore modifié sur ton dashboard live. Teste le questionnaire ci-dessous, puis dis-moi si je committe.</div>
+
+<div class="wrap">
+  <h1>Test d'auto-évaluation candidat</h1>
+  <div class="sub">v3 — 30 questions, 3 réponses réelles à chaque fois (pas de "je sais pas")</div>
+
+  <div class="toggle-view">
+    <button class="on" onclick="setView('candidat')">👤 Vue candidat</button>
+    <button onclick="setView('recruteur')">🧑‍💼 Vue recruteur (résultat)</button>
+    <button onclick="setView('identite')">➕ Champs ajoutés</button>
+  </div>
+
+  <!-- ========== VUE CANDIDAT ========== -->
+  <div id="view-candidat">
+    <div id="quiz-root"></div>
+  </div>
+
+  <!-- ========== VUE RECRUTEUR ========== -->
+  <div id="view-recruteur">
+    <div class="rec-card">
+      <h3>Auto-évaluation candidat</h3>
+      <div id="rec-alert-slot"></div>
+      <div style="margin-top:14px" id="trait-bars"></div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:10px">Repère indicatif de cohérence avec le profil recherché — à croiser avec l'entretien, jamais un score qui décide seul.</div>
+    </div>
+    <div style="font-size:12px;color:var(--tx3);text-align:center">👉 Remplis le quiz dans "Vue candidat" pour voir ce panneau se remplir en direct.</div>
+  </div>
+
+  <!-- ========== CHAMPS IDENTITÉ ========== -->
+  <div id="view-identite" style="display:none">
+    <div class="rec-card">
+      <h3>Identité — carte du formulaire d'entretien</h3>
+      <label style="display:block;font-size:11.5px;color:var(--tx2);margin-bottom:5px">Nom du candidat</label>
+      <input class="mock-field input" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:13px" placeholder="Ex: J. Dupont" disabled>
+      <div class="mock-field-row">
+        <div class="mock-field"><label>Téléphone <span class="new-tag">NOUVEAU</span></label><input placeholder="Ex: 0470 12 34 56" disabled></div>
+        <div class="mock-field"><label>Email <span class="new-tag">NOUVEAU</span></label><input placeholder="Ex: j.dupont@mail.com" disabled></div>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:12px">Ajoutés dans la carte "Identité", juste sous le nom — repris automatiquement sur la fiche PDF exportée.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------- Données du quiz ----------------
+// Chaque question a 3 réponses réelles et distinctes (pas "2 vraies + 1 échappatoire") :
+// a = mentalité qui pose problème sur ce trait, c = mentalité "correcte mais passive", b = mentalité recherchée (proactive).
+// Les 3 sont affichées avec le même poids visuel et dans un ordre mélangé à chaque question.
+// 3 questions par axe x 8 axes = 24 + 6 items désirabilité sociale = 30 questions.
+var PAIRES = [
+  {axe:'securite', a:"Si je suis sûr qu'il n'y a aucun danger, je peux contourner une règle de sécurité qui me ralentit.", c:"Je respecte la règle moi-même, mais je ne dis rien si je vois quelqu'un d'autre la contourner.", b:"Je respecte les règles de sécurité même quand ça ralentit, et je le rappelle si besoin."},
+  {axe:'securite', a:"Si je vois un collègue prendre un risque, ce n'est pas à moi de dire quoi que ce soit.", c:"Si je vois un collègue prendre un risque, je le remarque mais je n'interviens pas sur le moment.", b:"Si je vois un collègue prendre un risque, je lui dis, même si ça peut être mal pris."},
+  {axe:'securite', a:"Porter les équipements de protection est parfois inutile si on fait attention.", c:"Je porte les équipements quand on me le rappelle, sinon ça m'arrive d'oublier.", b:"Je porte systématiquement les équipements, même si ça me semble inutile ce jour-là."},
+
+  {axe:'rigueur', a:"Sauter une étape d'hygiène une fois, sans conséquence visible, ce n'est pas grave.", c:"Je respecte les étapes importantes, mais j'accélère parfois sur les détails quand je suis pressé.", b:"Une étape d'hygiène doit toujours être respectée, même si ça ne se voit pas."},
+  {axe:'rigueur', a:"Je préfère qu'on me laisse de la souplesse sur les procédures.", c:"Je suis les procédures, mais ça ne me dérange pas de les ajuster si un collègue le fait aussi.", b:"Je préfère des procédures strictes, les mêmes pour tout le monde."},
+  {axe:'rigueur', a:"Se laver les mains rapidement suffit si on n'a rien touché de sale en apparence.", c:"Je respecte la procédure la plupart du temps, sauf quand je suis vraiment pressé.", b:"Je respecte toujours la procédure complète, sans raccourci."},
+
+  {axe:'fiabilite', a:"Mes horaires peuvent varier un peu selon comment je me sens le matin.", c:"J'essaie d'être à l'heure, mais ça m'arrive d'être en retard sans prévenir à l'avance.", b:"Je m'organise à l'avance pour être à l'heure, quoi qu'il arrive."},
+  {axe:'fiabilite', a:"Un imprévu personnel justifie d'arriver en retard sans prévenir.", c:"Je préviens quand je peux, mais pas toujours assez à l'avance.", b:"Même en cas d'imprévu, je préviens avant l'heure prévue."},
+  {axe:'fiabilite', a:"Si je suis fatigué, je peux décider de ne pas venir sans trop anticiper les conséquences pour l'équipe.", c:"Si je suis fatigué je viens quand même, mais je ne préviens pas toujours que je serai moins efficace.", b:"Même fatigué, je préviens le plus tôt possible pour que l'équipe s'organise."},
+
+  {axe:'equipe', a:"Chacun gère sa cadence, ce n'est pas à moi d'aider les autres.", c:"J'aide si on me le demande, mais je n'y pense pas spontanément.", b:"Si un collègue est à la peine, je l'aide spontanément sans qu'on me le demande."},
+  {axe:'equipe', a:"Je préfère travailler seul, à mon rythme.", c:"Ça m'est égal de travailler seul ou en équipe, tant que le travail est fait.", b:"Je préfère travailler en équipe, même si ça demande de s'ajuster aux autres."},
+  {axe:'equipe', a:"Je préfère qu'on évalue mon travail individuellement, indépendamment du reste de l'équipe.", c:"Je trouve normal d'être jugé sur l'équipe, mais je préfère qu'on retienne surtout mon travail à moi.", b:"Je trouve normal que le résultat de l'équipe compte autant que mon travail individuel."},
+
+  {axe:'feedback', a:"Quand on me fait une remarque, je préfère d'abord expliquer pourquoi ce n'est pas ma faute.", c:"Quand on me fait une remarque, je l'accepte sur le moment, mais ça me reste un peu en tête.", b:"Quand on me fait une remarque, je préfère d'abord comprendre ce que je peux changer."},
+  {axe:'feedback', a:"Je retiens longtemps une remarque qui m'a vexé.", c:"Une remarque qui m'a vexé, j'y repense parfois, mais ça ne dure pas trop longtemps.", b:"Une remarque, même désagréable, je passe vite à autre chose une fois comprise."},
+  {axe:'feedback', a:"Je préfère qu'on me laisse deviner ce qui ne va pas plutôt qu'on me le dise franchement.", c:"Je préfère qu'on me le dise, mais en douceur et pas devant les autres.", b:"Je préfère qu'on me dise clairement et directement ce qui ne va pas."},
+
+  {axe:'stress', a:"Quand tout s'enchaîne mal, j'ai besoin de le montrer pour évacuer la pression.", c:"Quand tout s'enchaîne mal, je tiens le coup sur le moment mais je suis à cran après.", b:"Quand tout s'enchaîne mal, je préfère rester concentré sur ce qu'il reste à faire."},
+  {axe:'stress', a:"Sous pression, je vais plus vite quitte à faire plus d'erreurs.", c:"Sous pression, j'essaie de garder le rythme mais je fais parfois des erreurs sans m'en rendre compte.", b:"Sous pression, je garde le même soin même si ça ralentit un peu."},
+  {axe:'stress', a:"Quand je suis stressé, je préfère qu'on me laisse tranquille.", c:"Quand je suis stressé, ça dépend des jours — parfois j'en parle, parfois non.", b:"Quand je suis stressé, je préfère en parler avec quelqu'un de l'équipe."},
+
+  {axe:'hierarchie', a:"Je préfère un chef qui me dise précisément quoi faire à chaque étape.", c:"Ça dépend des tâches — sur certaines j'aime être guidé, sur d'autres non.", b:"Je préfère un chef qui fixe un objectif et me laisse m'organiser."},
+  {axe:'hierarchie', a:"Si je ne suis pas d'accord avec une consigne, je fais autrement à ma façon.", c:"Si je ne suis pas d'accord, je fais ce qu'on me demande, mais je le fais savoir après coup.", b:"Si je ne suis pas d'accord avec une consigne, j'en parle avant de faire autrement."},
+  {axe:'hierarchie', a:"Je préfère peu de contact avec mon responsable, juste l'essentiel.", c:"Un contact ponctuel me suffit, je n'ai pas besoin de plus.", b:"Je préfère un contact régulier avec mon responsable, même pour de petites choses."},
+
+  {axe:'motivation', a:"Ce poste est surtout une solution pour l'instant, en attendant mieux.", c:"Ce poste me convient pour le moment, je ne me projette pas plus loin que ça.", b:"Ce poste correspond à ce que je cherche pour la suite, pas juste en attendant."},
+  {axe:'motivation', a:"Je viens travailler, je fais mes heures, et je rentre.", c:"Je fais bien mon travail, mais je ne cherche pas particulièrement à en savoir plus sur le reste.", b:"Je viens travailler, mais j'aime aussi comprendre le fonctionnement global de l'équipe."},
+  {axe:'motivation', a:"Ce qui compte le plus pour moi dans un poste, c'est la stabilité avant tout.", c:"La stabilité compte, mais progresser un peu avec le temps aussi.", b:"Ce qui compte le plus pour moi dans un poste, c'est d'apprendre et progresser."}
+];
+// Désirabilité sociale : Vrai / Parfois / Faux — "Parfois" est la réponse honnête la plus courante, pas une échappatoire.
+var DESIRABILITE = [
+  "Je n'ai jamais, même une seule fois, été en retard à un rendez-vous important.",
+  "Je suis toujours de bonne humeur, même quand ça ne va pas.",
+  "Je n'ai jamais menti, même un petit mensonge pour ne pas blesser quelqu'un.",
+  "Je m'entends bien avec absolument tout le monde, sans exception.",
+  "Je n'ai jamais été énervé contre un collègue, même une seule fois.",
+  "Je respecte absolument toutes les règles, sans aucune exception, depuis toujours."
+];
+var AXE_LABELS = {securite:'Sécurité',rigueur:'Rigueur',fiabilite:'Fiabilité',equipe:'Équipe',feedback:'Feedback',stress:'Stress',hierarchie:'Hiérarchie',motivation:'Motivation'};
+var AXE_COLORS = {securite:'#ef4444',rigueur:'#f59e0b',fiabilite:'#3b82f6',equipe:'#10b981',feedback:'#8b5cf6',stress:'#f97316',hierarchie:'#06b6d4',motivation:'#ec4899'};
+
+// Construit la liste finale des questions en mélangeant paires + désirabilité (pas groupées à la fin)
+var QUESTIONS = [];
+PAIRES.forEach(function(p, i){ QUESTIONS.push({type:'paire', data:p, shuf:(i*5+2)%3}); });
+DESIRABILITE.forEach(function(d){ QUESTIONS.push({type:'desirabilite', data:d}); });
+QUESTIONS = QUESTIONS.map(function(q,i){return {q:q,k:(i*11+5)%QUESTIONS.length};}).sort(function(a,b){return a.k-b.k;}).map(function(x){return x.q;});
+
+var idx = -1; // -1 = intro
+var answers = {}; // index -> 'a'|'c'|'b'  ou  'true'|'parfois'|'false'
+
+function setView(v){
+  document.getElementById('view-candidat').style.display = v==='candidat' ? 'block':'none';
+  document.getElementById('view-recruteur').style.display = v==='recruteur' ? 'block':'none';
+  document.getElementById('view-identite').style.display = v==='identite' ? 'block':'none';
+  document.querySelectorAll('.toggle-view button').forEach(function(b){b.classList.remove('on');});
+  event.target.classList.add('on');
+  if(v==='recruteur') renderRecruteur();
+}
+
+function rotate(arr, n){ n = ((n%arr.length)+arr.length)%arr.length; return arr.slice(n).concat(arr.slice(0,n)); }
+
+function renderQuiz(){
+  var root = document.getElementById('quiz-root');
+  if(idx === -1){
+    root.innerHTML =
+      '<div id="screen-intro"><div class="qz-body">'+
+      '<div class="intro-badge">⏱ Environ 15-18 minutes</div>'+
+      '<h2>Avant l’entretien</h2>'+
+      '<p>Ce petit questionnaire nous aide à mieux te connaître. Choisis à chaque fois la réponse qui te ressemble vraiment le plus — il n’y a pas de piège, sois honnête.</p>'+
+      '<input class="qz-name" placeholder="Ton prénom + nom" id="qz-name-input">'+
+      '<div><button class="qz-btn primary" onclick="startQuiz()">Commencer →</button></div>'+
+      '</div></div>';
+    return;
+  }
+  if(idx >= QUESTIONS.length){
+    root.innerHTML =
+      '<div id="screen-end"><div class="qz-body">'+
+      '<div class="big-check">✅</div>'+
+      '<h2>Merci !</h2>'+
+      '<p>Tes réponses ont été enregistrées. Tu peux rendre l’appareil — l’entretien peut commencer.</p>'+
+      '</div></div>';
+    return;
+  }
+  var item = QUESTIONS[idx];
+  var pct = Math.round((idx)/QUESTIONS.length*100);
+  var body = '';
+  if(item.type==='paire'){
+    var p = item.data;
+    var opts = rotate([
+      {key:'a', text:p.a},
+      {key:'c', text:p.c},
+      {key:'b', text:p.b}
+    ], item.shuf);
+    body = '<div class="qz-q-label">Ce qui me ressemble le plus</div>' +
+      opts.map(function(o){ return '<button class="qz-option" data-v="'+o.key+'" onclick="answer(\''+o.key+'\')">'+o.text+'</button>'; }).join('');
+  } else {
+    body =
+      '<div class="qz-q-label">Vrai, parfois, ou faux pour toi ?</div>'+
+      '<div style="font-size:15.5px;text-align:center;margin-bottom:22px;line-height:1.5">'+item.data+'</div>'+
+      '<div class="qz-truefalse">'+
+      '<button class="qz-option" data-v="true" onclick="answer(\'true\')">Vrai</button>'+
+      '<button class="qz-option" data-v="parfois" onclick="answer(\'parfois\')">Parfois</button>'+
+      '<button class="qz-option" data-v="false" onclick="answer(\'false\')">Faux</button>'+
+      '</div>';
+  }
+  root.innerHTML =
+    '<div class="qz-top"><div class="qz-count">Question '+(idx+1)+' / '+QUESTIONS.length+'</div>'+
+    '<div class="qz-progress-bar"><div class="qz-progress-fill" style="width:'+pct+'%"></div></div></div>'+
+    '<div class="qz-body">'+body+'</div>'+
+    '<div class="qz-nav"><button class="qz-btn" onclick="prevQ()" '+(idx===0?'disabled':'')+'>← Précédent</button>'+
+    '<button class="qz-btn primary" id="qz-next" onclick="nextQ()" disabled>Suivant →</button></div>';
+
+  var saved = answers[idx];
+  if(saved !== undefined){
+    root.querySelectorAll('.qz-option').forEach(function(b){
+      if(b.dataset.v===saved) b.classList.add('sel');
+    });
+    document.getElementById('qz-next').disabled = false;
+  }
+}
+function startQuiz(){ idx = 0; renderQuiz(); }
+function answer(v){
+  answers[idx] = v;
+  document.querySelectorAll('.qz-option').forEach(function(b){ b.classList.toggle('sel', b.dataset.v===v); });
+  document.getElementById('qz-next').disabled = false;
+}
+function nextQ(){ idx++; renderQuiz(); }
+function prevQ(){ idx--; renderQuiz(); }
+
+function renderRecruteur(){
+  var scores = {}; var counts = {};
+  Object.keys(AXE_LABELS).forEach(function(a){ scores[a]=0; counts[a]=0; });
+  var desirScore = 0, desirTotal = 0;
+  QUESTIONS.forEach(function(item, i){
+    var a = answers[i];
+    if(a===undefined) return;
+    if(item.type==='paire'){
+      counts[item.data.axe]++;
+      if(a==='b') scores[item.data.axe]+=1;
+      else if(a==='c') scores[item.data.axe]+=0.5;
+    } else {
+      desirTotal++;
+      if(a==='true') desirScore+=1;
+      else if(a==='parfois') desirScore+=0.5;
+    }
+  });
+  var alertSlot = document.getElementById('rec-alert-slot');
+  var answeredAny = Object.keys(answers).length>0;
+
+  if(!answeredAny){
+    alertSlot.innerHTML = '<div class="ok-box">Aucune réponse pour l’instant — remplis le quiz dans l’onglet "Vue candidat".</div>';
+  } else {
+    var badges = [];
+
+    // Signal 1 : désirabilité sociale (basé uniquement sur les 6 questions vrai/parfois/faux)
+    if(desirTotal>0 && (desirScore/desirTotal) >= 0.65){
+      badges.push('<div class="alert-box">⚠️ <div><b>Tendance à se présenter sous un jour trop favorable.</b><br>Score de désirabilité sociale '+Math.round(desirScore/desirTotal*100)+'% — à interpréter les autres réponses avec un peu plus de recul.</div></div>');
+    }
+
+    // Signal 2 : profil "trop lisse" sur les 24 questions comportementales, indépendant du signal 1 —
+    // détecte le cas où quelqu'un répond prudemment aux 6 questions de désirabilité mais choisit quand
+    // même systématiquement la réponse "idéale" sur (presque) tous les thèmes comportementaux.
+    var axesAnswered = Object.keys(AXE_LABELS).filter(function(a){ return counts[a]>0; });
+    var axesQuasiParfaits = axesAnswered.filter(function(a){ return (scores[a]/counts[a]) >= 0.9; });
+    if(axesAnswered.length>=4 && axesQuasiParfaits.length >= Math.ceil(axesAnswered.length*0.75)){
+      badges.push('<div class="alert-box">⚠️ <div><b>Profil anormalement parfait sur les réponses comportementales.</b><br>'+axesQuasiParfaits.length+'/'+axesAnswered.length+' thèmes à 90%+ — peu réaliste sur un profil honnête, quel que soit le score de désirabilité sociale. À creuser en entretien plutôt qu’à prendre pour argent comptant.</div></div>');
+    }
+
+    alertSlot.innerHTML = badges.length ? badges.join('') : '<div class="ok-box">✓ Pas de signal d’alerte (désirabilité sociale '+Math.round(desirTotal? desirScore/desirTotal*100:0)+'%, profil cohérent sur les thèmes comportementaux).</div>';
+  }
+
+  var barsHtml = '';
+  Object.keys(AXE_LABELS).forEach(function(a){
+    var pct = counts[a] ? Math.round(scores[a]/counts[a]*100) : 0;
+    barsHtml += '<div class="trait-row"><div class="trait-name">'+AXE_LABELS[a]+'</div>'+
+      '<div class="trait-bar-bg"><div class="trait-bar-fill" style="width:'+(counts[a]?pct:0)+'%;background:'+AXE_COLORS[a]+'"></div></div>'+
+      '<div class="trait-val">'+(counts[a]? pct+'%':'—')+'</div></div>';
+  });
+  document.getElementById('trait-bars').innerHTML = barsHtml;
+}
+
+renderQuiz();
+</script>
+</body>
+</html>
