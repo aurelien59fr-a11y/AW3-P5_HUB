@@ -4440,8 +4440,9 @@ function buildNCPTab(){
     tbody.innerHTML = affiches.map(function(r){
       var eq = ncpGetEquipe(r);
       var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
+      var autreDeclarant = ncpEstNonClasse(r);
       return '<tr>'
-        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx);font-weight:600">' + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + ncpBadgeSrc(r) + '</td>'
+        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx);font-weight:600">' + (autreDeclarant ? '<span title="Bloque par une personne autre qu\'Inpak ou Production (' + ncpEsc(ncpNomAff(r.reporter)) + ')" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a78bfa;margin-right:6px;vertical-align:middle"></span>' : '') + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + ncpBadgeSrc(r) + '</td>'
         + '<td>' + (r.unite || '-') + '</td>'
         + '<td>' + (eq || '-') + '</td>'
         + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
