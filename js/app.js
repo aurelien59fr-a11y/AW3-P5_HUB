@@ -1444,10 +1444,15 @@ function updateExtraBadge(nm,i){
     p.className='sp-extra'+(list.length?' filled':' empty');
   });
 }
-function openPopup(pill){activePill=pill;popup=document.getElementById('popup');var nm=pill.dataset.n;var emp=EMP.find(function(e){return e.n===nm;});var opts=OPTS[emp?emp.g:'INPAK']||[];var cur=pill.dataset.s;var h='<div class="ptit">'+nm.split(' ')[0]+'</div>';opts.forEach(function(o){h+='<div class="popt" data-v="'+o+'"><span class="sp '+sCls(o)+'" style="'+(o===cur?'outline:1.5px solid #3b82f6':'')+'">'+sLbl(o)+'</span><span style="font-size:11px;color:var(--tx2)">'+(o==='ziek'?'Maladie':o==='verlof'?'Conge':o==='recup'?'Recuperation':o==='TL'?'Present':o==='AW1'?'Vers AW1':o==='AW2'?'Vers AW2':o)+'</span></div>';});h+='<div class="pcancel">Annuler</div>';popup.innerHTML=h;
+function openPopup(pill){activePill=pill;popup=document.getElementById('popup');if(popup&&popup.parentNode!==document.body)document.body.appendChild(popup);var nm=pill.dataset.n;var emp=EMP.find(function(e){return e.n===nm;});var opts=OPTS[emp?emp.g:'INPAK']||[];var cur=pill.dataset.s;var h='<div class="ptit">'+nm.split(' ')[0]+'</div>';opts.forEach(function(o){h+='<div class="popt" data-v="'+o+'"><span class="sp '+sCls(o)+'" style="'+(o===cur?'outline:1.5px solid #3b82f6':'')+'">'+sLbl(o)+'</span><span style="font-size:11px;color:var(--tx2)">'+(o==='ziek'?'Maladie':o==='verlof'?'Conge':o==='recup'?'Recuperation':o==='TL'?'Present':o==='AW1'?'Vers AW1':o==='AW2'?'Vers AW2':o)+'</span></div>';});h+='<div class="pcancel">Annuler</div>';popup.innerHTML=h;
 var r=pill.getBoundingClientRect();
-var left=r.left+window.scrollX;
+// IMPORTANT : #popup est en position:fixed (repere = fenetre visible),
+// donc ses coordonnees ne doivent JAMAIS inclure window.scrollX/scrollY.
+// Les ajouter (comme avant) decalait le menu de tout le defilement de la
+// page, le poussant hors ecran des qu'on scrollait dans le tableau.
+var left=r.left;
 if(left+180>window.innerWidth-8) left=window.innerWidth-188;
+if(left<8) left=8;
 popup.style.left=left+'px';
 popup.style.visibility='hidden';
 popup.style.display='block';
@@ -1458,16 +1463,16 @@ var spaceBelow=window.innerHeight-r.bottom-marge;
 var spaceAbove=r.top-marge;
 var top;
 if(spaceBelow>=popupHeight){
-  top=r.bottom+window.scrollY+4;
+  top=r.bottom+4;
 }else if(spaceAbove>=popupHeight){
-  top=r.top+window.scrollY-popupHeight-4;
+  top=r.top-popupHeight-4;
 }else if(spaceBelow>=spaceAbove){
   // Ni en dessous ni au-dessus il n'y a la place pour tout afficher :
   // on colle en bas de l'ecran visible, le popup reste scrollable (voir CSS .popup).
-  top=window.scrollY+window.innerHeight-popupHeight-marge;
-  if(top<r.bottom+window.scrollY) top=r.bottom+window.scrollY+4;
+  top=window.innerHeight-popupHeight-marge;
+  if(top<r.bottom+4) top=r.bottom+4;
 }else{
-  top=window.scrollY+marge;
+  top=marge;
 }
 popup.style.top=top+'px';
 popup.querySelectorAll('.popt').forEach(function(o){o.addEventListener('click',function(){applyShift(o.dataset.v);});});popup.querySelector('.pcancel').addEventListener('click',closePopup);}
@@ -4494,10 +4499,13 @@ function buildNCPTab(){
   }
 
   NCP_VUE = filtres; ncpMajCouverture(filtres); // --- KPI ---
-  var total = filtres.length;
-  var nInpak = filtres.filter(function(r){ return r.type_ncp === 'Inpak'; }).length;
-  var nProd = filtres.filter(function(r){ return r.type_ncp === 'Production'; }).length;
-  var tonnes = filtres.reduce(function(s, r){ return s + (r.total_tonnes || 0); }, 0);
+  // Client "BLK" = bulk interne / surproduction, pas un vrai defaut client :
+  // exclu des totaux/KPI/graphiques, mais reste visible dans la liste ci-dessous.
+  var filtresKPI = filtres.filter(function(r){ return r.famille_produit !== 'BLK'; });
+  var total = filtresKPI.length;
+  var nInpak = filtresKPI.filter(function(r){ return r.type_ncp === 'Inpak'; }).length;
+  var nProd = filtresKPI.filter(function(r){ return r.type_ncp === 'Production'; }).length;
+  var tonnes = filtresKPI.reduce(function(s, r){ return s + (r.total_tonnes || 0); }, 0);
   var elTotal = document.getElementById('ncp-k-total'); if(elTotal) elTotal.textContent = total;
   var elInpak = document.getElementById('ncp-k-inpak'); if(elInpak) elInpak.textContent = nInpak;
   var elInpakPct = document.getElementById('ncp-k-inpak-pct'); if(elInpakPct) elInpakPct.textContent = total ? Math.round(nInpak/total*100) + '%' : '-';
@@ -4505,14 +4513,14 @@ function buildNCPTab(){
   var elProdPct = document.getElementById('ncp-k-prod-pct'); if(elProdPct) elProdPct.textContent = total ? Math.round(nProd/total*100) + '%' : '-';
   var elTonnes = document.getElementById('ncp-k-tonnes'); if(elTonnes) elTonnes.textContent = Math.round(tonnes) + ' t';
   // NCP encore ouvertes : tout ce qui n a pas ete libere par la qualite
-  var nNonClasses = filtres.filter(ncpEstNonClasse).length;
+  var nNonClasses = filtresKPI.filter(ncpEstNonClasse).length;
   var nOuvertes = nNonClasses;
   var elOuv = document.getElementById('ncp-k-ouvertes'); if(elOuv) elOuv.textContent = nOuvertes;
   var elClo = document.getElementById('ncp-k-cloture-pct');
   if(elClo) elClo.textContent = total ? (Math.round(nNonClasses / total * 100) + '% du total, a attribuer') : '-';
   var elPeriode = document.getElementById('ncp-k-periode');
-  if(elPeriode && filtres.length){
-    var dates = filtres.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
+  if(elPeriode && filtresKPI.length){
+    var dates = filtresKPI.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
     if(dates.length) elPeriode.textContent = dFR(dates[0]) + ' au ' + dFR(dates[dates.length-1]);
   }
 
@@ -4520,7 +4528,7 @@ function buildNCPTab(){
   var ctxEvo = document.getElementById('ncpEvolutionChart');
   if(ctxEvo && typeof Chart !== 'undefined'){
     var parMois = {};
-    filtres.forEach(function(r){
+    filtresKPI.forEach(function(r){
       if(!r.created_date_iso) return;
       var mois = r.created_date_iso.slice(0,7);
       parMois[mois] = (parMois[mois] || 0) + 1;
@@ -4549,7 +4557,7 @@ function buildNCPTab(){
   var ctxCa = document.getElementById('ncpCausesChart');
   if(ctxCa && typeof Chart !== 'undefined'){
     var parCause = {};
-    filtres.forEach(function(r){
+    filtresKPI.forEach(function(r){
       if(!r.problems) return;
       String(r.problems).split('|').forEach(function(p){
         var lib = p.trim();
@@ -4587,13 +4595,13 @@ function buildNCPTab(){
     }
   }
 
-  var ctxFa = document.getElementById('ncpFamillesChart'); if(ctxFa && typeof Chart !== 'undefined'){ var parFam = {}; var totFam = 0; filtres.forEach(function(r){ if(!r.problems) return; String(r.problems).split('|').forEach(function(p){ var lib = p.trim(); if(!lib) return; var fa = ncpFamille(lib); parFam[fa] = (parFam[fa] || 0) + 1; totFam++; }); }); var fams = Object.keys(parFam).sort(function(a, b){ return parFam[b] - parFam[a]; }); if(_ncpFamillesChart){ _ncpFamillesChart.destroy(); _ncpFamillesChart = null; } if(fams.length){ var cumF = 0; var cumFPct = fams.map(function(f){ cumF += parFam[f]; return Math.round(cumF / totFam * 100); }); _ncpFamillesChart = new Chart(ctxFa, { data: { labels: fams, datasets: [ { type: 'bar', data: fams.map(function(f){ return parFam[f]; }), backgroundColor: '#3b82f6', borderRadius: 4, order: 2 }, { type: 'line', data: cumFPct, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f59e0b', tension: .25, yAxisID: 'y2', order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.datasetIndex === 1 ? ('cumul ' + c.parsed.y + '%') : (c.parsed.y + ' mentions, ' + Math.round(c.parsed.y / totFam * 100) + '% du total'); } } } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 40, minRotation: 40, font: { size: 10 } } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#f59e0b', callback: function(v){ return v + '%'; } } } } } }); } }   var ctxDe = document.getElementById('ncpDelaiChart'); if(ctxDe && typeof Chart !== 'undefined'){ var seaux = [0, 0, 0, 0, 0]; var nMes = 0, somme = 0, sup7 = 0, nonSoldees = 0; filtres.forEach(function(r){ if(!ncpEstSoldee(r)) nonSoldees++; var j = ncpDelai(r); if(j === null) return; nMes++; somme += j; if(j > 7) sup7++; if(j <= 2) seaux[0]++; else if(j <= 7) seaux[1]++; else if(j <= 14) seaux[2]++; else if(j <= 30) seaux[3]++; else seaux[4]++; }); var elInfo = document.getElementById('ncp-delai-info'); if(elInfo) elInfo.textContent = 'Jours entre la creation et la derniere mise a jour de la fiche. Moyenne ' + (nMes ? (somme / nMes).toFixed(1) : '-') + ' j sur ' + nMes + ' fiches, ' + sup7 + ' au-dela de 7 jours. ' + nonSoldees + ' fiches ne sont pas encore liberees par la qualite.'; if(_ncpDelaiChart){ _ncpDelaiChart.destroy(); _ncpDelaiChart = null; } _ncpDelaiChart = new Chart(ctxDe, { type: 'bar', data: { labels: ['0-2 j', '3-7 j', '8-14 j', '15-30 j', 'plus de 30 j'], datasets: [{ data: seaux, backgroundColor: ['#10b981', '#34d399', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } } }); }   // --- Tonnage bloque par client ---
+  var ctxFa = document.getElementById('ncpFamillesChart'); if(ctxFa && typeof Chart !== 'undefined'){ var parFam = {}; var totFam = 0; filtresKPI.forEach(function(r){ if(!r.problems) return; String(r.problems).split('|').forEach(function(p){ var lib = p.trim(); if(!lib) return; var fa = ncpFamille(lib); parFam[fa] = (parFam[fa] || 0) + 1; totFam++; }); }); var fams = Object.keys(parFam).sort(function(a, b){ return parFam[b] - parFam[a]; }); if(_ncpFamillesChart){ _ncpFamillesChart.destroy(); _ncpFamillesChart = null; } if(fams.length){ var cumF = 0; var cumFPct = fams.map(function(f){ cumF += parFam[f]; return Math.round(cumF / totFam * 100); }); _ncpFamillesChart = new Chart(ctxFa, { data: { labels: fams, datasets: [ { type: 'bar', data: fams.map(function(f){ return parFam[f]; }), backgroundColor: '#3b82f6', borderRadius: 4, order: 2 }, { type: 'line', data: cumFPct, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f59e0b', tension: .25, yAxisID: 'y2', order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.datasetIndex === 1 ? ('cumul ' + c.parsed.y + '%') : (c.parsed.y + ' mentions, ' + Math.round(c.parsed.y / totFam * 100) + '% du total'); } } } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 40, minRotation: 40, font: { size: 10 } } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#f59e0b', callback: function(v){ return v + '%'; } } } } } }); } }   var ctxDe = document.getElementById('ncpDelaiChart'); if(ctxDe && typeof Chart !== 'undefined'){ var seaux = [0, 0, 0, 0, 0]; var nMes = 0, somme = 0, sup7 = 0, nonSoldees = 0; filtresKPI.forEach(function(r){ if(!ncpEstSoldee(r)) nonSoldees++; var j = ncpDelai(r); if(j === null) return; nMes++; somme += j; if(j > 7) sup7++; if(j <= 2) seaux[0]++; else if(j <= 7) seaux[1]++; else if(j <= 14) seaux[2]++; else if(j <= 30) seaux[3]++; else seaux[4]++; }); var elInfo = document.getElementById('ncp-delai-info'); if(elInfo) elInfo.textContent = 'Jours entre la creation et la derniere mise a jour de la fiche. Moyenne ' + (nMes ? (somme / nMes).toFixed(1) : '-') + ' j sur ' + nMes + ' fiches, ' + sup7 + ' au-dela de 7 jours. ' + nonSoldees + ' fiches ne sont pas encore liberees par la qualite.'; if(_ncpDelaiChart){ _ncpDelaiChart.destroy(); _ncpDelaiChart = null; } _ncpDelaiChart = new Chart(ctxDe, { type: 'bar', data: { labels: ['0-2 j', '3-7 j', '8-14 j', '15-30 j', 'plus de 30 j'], datasets: [{ data: seaux, backgroundColor: ['#10b981', '#34d399', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } } }); }   // --- Tonnage bloque par client ---
   // Remplace l ancien donut 'Repartition par unite' : trois parts quasi egales
   // n apportaient aucune information exploitable.
   var ctxTo = document.getElementById('ncpTonnageChart');
   if(ctxTo && typeof Chart !== 'undefined'){
     var parFam = {};
-    filtres.forEach(function(r){
+    filtresKPI.forEach(function(r){
       var t = parseFloat(r.total_tonnes) || 0;
       if(t <= 0) return;
       var fam = r.famille_produit || 'Inconnu';
@@ -4619,7 +4627,7 @@ function buildNCPTab(){
   var ctxLi = document.getElementById('ncpLignesChart');
   if(ctxLi && typeof Chart !== 'undefined'){
     var parLigne = {};
-    filtres.forEach(function(r){
+    filtresKPI.forEach(function(r){
       if(!r.ligne || r.ligne_type !== 'cause_directe') return;
       parLigne[r.ligne] = (parLigne[r.ligne] || 0) + 1;
     });
@@ -4639,7 +4647,7 @@ function buildNCPTab(){
   var ctxPr = document.getElementById('ncpProduitsChart');
   if(ctxPr && typeof Chart !== 'undefined'){
     var parProduit = {};
-    filtres.forEach(function(r){
+    filtresKPI.forEach(function(r){
       if(!r.code_produit) return;
       parProduit[r.code_produit] = (parProduit[r.code_produit] || 0) + 1;
     });
@@ -4657,7 +4665,7 @@ function buildNCPTab(){
 
   // --- Table (200 plus recents) ---
   var tbody = document.getElementById('ncp-tbody');
-  ncpInitClicks(); ncpBuildDeclarants(filtres); ncpBuildRecurrences(filtres); var countEl = document.getElementById('ncp-liste-count');
+  ncpInitClicks(); ncpBuildDeclarants(filtresKPI); ncpBuildRecurrences(filtresKPI); var countEl = document.getElementById('ncp-liste-count');
   if(countEl) countEl.textContent = '(' + filtres.length + ')';
   if(tbody){
     var tries = filtres.slice().sort(function(a,b){ return (b.created_date_iso||'').localeCompare(a.created_date_iso||''); });
