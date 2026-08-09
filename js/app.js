@@ -108,7 +108,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .lgbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .lch{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
 #no-today{display:none;align-items:center;gap:8px;margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:12px;color:var(--tx2)}
-.popup{position:fixed;z-index:1000;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:8px;min-width:165px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
+.popup{position:fixed;z-index:1000;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:8px;min-width:165px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .ptit{font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px 8px;border-bottom:1px solid var(--bd);margin-bottom:6px}
 .popt{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx);transition:background .1s}
 .popt:hover{background:var(--bg3)}
@@ -1449,17 +1449,27 @@ var r=pill.getBoundingClientRect();
 var left=r.left+window.scrollX;
 if(left+180>window.innerWidth-8) left=window.innerWidth-188;
 popup.style.left=left+'px';
+popup.style.maxHeight='';
 popup.style.visibility='hidden';
 popup.style.display='block';
 var popupHeight=popup.offsetHeight;
 popup.style.visibility='visible';
-var spaceBelow=window.innerHeight-r.bottom;
+var marge=8;
+var spaceBelow=window.innerHeight-r.bottom-marge;
+var spaceAbove=r.top-marge;
 var top;
-if(spaceBelow>=popupHeight+8){
+if(spaceBelow>=popupHeight){
   top=r.bottom+window.scrollY+4;
-}else{
+}else if(spaceAbove>=popupHeight){
   top=r.top+window.scrollY-popupHeight-4;
-  if(top<window.scrollY+4) top=window.scrollY+4;
+}else if(spaceBelow>=spaceAbove){
+  // Ni en dessous ni au-dessus il n'y a la place pour tout afficher :
+  // on prend le cote le plus spacieux et on active le scroll (voir CSS .popup).
+  top=r.bottom+window.scrollY+4;
+  popup.style.maxHeight=Math.max(120,spaceBelow)+'px';
+}else{
+  top=window.scrollY+marge;
+  popup.style.maxHeight=Math.max(120,spaceAbove)+'px';
 }
 popup.style.top=top+'px';
 popup.querySelectorAll('.popt').forEach(function(o){o.addEventListener('click',function(){applyShift(o.dataset.v);});});popup.querySelector('.pcancel').addEventListener('click',closePopup);}
@@ -4147,7 +4157,16 @@ function ncpRevenirOriginal(){
   document.getElementById('ncp-import-modal').style.display = 'flex';
 }
 
-function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.cells[0].textContent.trim(); if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Type', r.type_ncp], ['Equipe deduite', ncpGetEquipe(r) || 'non deduite'], ['Source de l heure', ncpLibelleSrc(r)], ['Bakorder', ncpBakorder(r) || '-'], ['Production rattachable', (ncpBakorderLien(r) || ['-']).join(' | ')], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px"><div class="ncp-tr" style="font-size:16px;font-weight:600">' + ncpEsc(r.description) + '</div><button id="ncp-traduire-btn" onclick="ncpTraduire()" style="flex-shrink:0;padding:5px 12px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">&#127760; Traduire</button></div>'; if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bottom:10px">Fiche repartie sur ' + r.ncp_partage + ' lignes : palettes et tonnage divises</div>'; h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin-bottom:16px">'; f.forEach(function(c){ h += '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0"><span style="font-size:11px;color:var(--tx3)">' + c[0] + '</span><span style="font-size:12px;text-align:right">' + ncpEsc(c[1] || '-') + '</span></div>'; }); h += '</div>'; var bloc = function(t, v){ if(Array.isArray(v)) v = v.join(' | '); return v ? '<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">' + t + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v) + '</div></div>' : ''; }; h += bloc('Probleme', r.problems) + bloc('Mesures', r.measures) + bloc('Toutes les mesures', r.toutes_mesures) + bloc('Info palettes', r.ncp_extra_info); var hist = r.historique_actions || []; if(hist.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px">Historique (' + hist.length + ' version(s))</div>'; hist.forEach(function(v){ h += '<div style="border-left:2px solid var(--bd2);padding-left:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(v.date_version) + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v.detail) + '</div></div>'; }); } var deg = r.degustationsLiees || []; if(deg.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px;margin-top:14px">Degustations liees (' + deg.length + ')</div>'; deg.forEach(function(d){ var dt = d.dateProduction ? new Date(d.dateProduction).toLocaleString('fr-BE') : '-'; h += '<div style="border-left:2px solid var(--blue);padding-left:10px;margin-bottom:10px">' + '<div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(dt) + ' &middot; ' + ncpEsc(d.ligne || '-') + (d.employe ? ' &middot; ' + ncpEsc(d.employe) : '') + '</div>' + '<div style="font-size:12px">' + ncpEsc(d.produit || '-') + (d.bakorder ? ' (bakorder ' + ncpEsc(d.bakorder) + ')' : '') + '</div>' + (d.remarque ? '<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap">' + ncpEsc(d.remarque) + '</div>' : '') + (d.actionEffectuee ? '<div style="font-size:12px;color:var(--amber);white-space:pre-wrap">&#8594; ' + ncpEsc(d.actionEffectuee) + '</div>' : '') + '</div>'; }); } var body = document.getElementById('ncp-detail-body'); if(body) body.innerHTML = h; var md = document.getElementById('ncp-detail-modal'); if(md) md.style.display = 'flex'; } function importerNCP(){
+function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.cells[0].textContent.trim(); if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on + (ncpJour(r.created_on) ? ' (' + ncpJour(r.created_on) + ')' : '')], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Type', r.type_ncp], ['Source de l heure', ncpLibelleSrc(r)], ['Bakorder', ncpBakorder(r) || '-'], ['Production rattachable', (ncpBakorderLien(r) || ['-']).join(' | ')], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px"><div class="ncp-tr" style="font-size:16px;font-weight:600">' + ncpEsc(r.description) + '</div><button id="ncp-traduire-btn" onclick="ncpTraduire()" style="flex-shrink:0;padding:5px 12px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">&#127760; Traduire</button></div>'; if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bottom:10px">Fiche repartie sur ' + r.ncp_partage + ' lignes : palettes et tonnage divises</div>'; h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin-bottom:16px">'; f.forEach(function(c){ h += '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0"><span style="font-size:11px;color:var(--tx3)">' + c[0] + '</span><span style="font-size:12px;text-align:right">' + ncpEsc(c[1] || '-') + '</span></div>'; });
+  var auto = (function(){ var save = r.equipe_override; r.equipe_override = null; var v = ncpGetEquipe(r); r.equipe_override = save; return v; })();
+  var equipes5 = ['P1','P2','P3','P4','P5'];
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0">'
+    + '<span style="font-size:11px;color:var(--tx3)">Equipe' + (r.equipe_override ? ' <span style="color:var(--amber)" title="Corrigee manuellement, deduction auto : ' + (auto || 'non deduite') + '">(corrigee)</span>' : '') + '</span>'
+    + '<select onchange="ncpSetEquipeOverride(\'' + r.notification + '\', this.value===\'auto\'?null:this.value)" style="font-size:12px;background:var(--bg3);color:var(--tx1);border:1px solid var(--bd2);border-radius:6px;padding:2px 6px">'
+    + '<option value="auto"' + (!r.equipe_override ? ' selected' : '') + '>Auto (' + (auto || 'non deduite') + ')</option>'
+    + equipes5.map(function(e){ return '<option value="' + e + '"' + (r.equipe_override === e ? ' selected' : '') + '>' + e + '</option>'; }).join('')
+    + '</select></div>';
+  h += '</div>'; var bloc = function(t, v){ if(Array.isArray(v)) v = v.join(' | '); return v ? '<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">' + t + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v) + '</div></div>' : ''; }; h += bloc('Probleme', r.problems) + bloc('Mesures', r.measures) + bloc('Toutes les mesures', r.toutes_mesures) + bloc('Info palettes', r.ncp_extra_info); var hist = r.historique_actions || []; if(hist.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px">Historique (' + hist.length + ' version(s))</div>'; hist.forEach(function(v){ h += '<div style="border-left:2px solid var(--bd2);padding-left:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(v.date_version) + (ncpJour(v.date_version) ? ' (' + ncpJour(v.date_version) + ')' : '') + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v.detail) + '</div></div>'; }); } var deg = r.degustationsLiees || []; if(deg.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px;margin-top:14px">Degustations liees (' + deg.length + ')</div>'; deg.forEach(function(d){ var dt = d.dateProduction ? (new Date(d.dateProduction).toLocaleString('fr-BE') + ' (' + ncpJour(d.dateProduction) + ')') : '-'; h += '<div style="border-left:2px solid var(--blue);padding-left:10px;margin-bottom:10px">' + '<div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(dt) + ' &middot; ' + ncpEsc(d.ligne || '-') + (d.employe ? ' &middot; ' + ncpEsc(d.employe) : '') + '</div>' + '<div style="font-size:12px">' + ncpEsc(d.produit || '-') + (d.bakorder ? ' (bakorder ' + ncpEsc(d.bakorder) + ')' : '') + '</div>' + (d.remarque ? '<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap">' + ncpEsc(d.remarque) + '</div>' : '') + (d.actionEffectuee ? '<div style="font-size:12px;color:var(--amber);white-space:pre-wrap">&#8594; ' + ncpEsc(d.actionEffectuee) + '</div>' : '') + '</div>'; }); } var body = document.getElementById('ncp-detail-body'); if(body) body.innerHTML = h; var md = document.getElementById('ncp-detail-modal'); if(md) md.style.display = 'flex'; } function importerNCP(){
   var txt = document.getElementById('ncp-import-txt').value.trim();
   var errEl = document.getElementById('ncp-import-err');
   errEl.textContent = '';
@@ -4236,6 +4255,19 @@ function ncpISO(dt){
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
 }
 
+// Jour de la semaine a partir d'une date "DD/MM/YYYY" ou "YYYY-MM-DD".
+// Ajoute pour eviter toute confusion/erreur de calcul manuel du jour.
+var NCP_JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+function ncpJour(dateStr){
+  if(!dateStr) return '';
+  var iso;
+  if(/^\d{4}-\d{2}-\d{2}/.test(dateStr)) iso = dateStr.slice(0,10);
+  else { var p = dateStr.split('/'); if(p.length !== 3) return ''; iso = p[2] + '-' + p[1] + '-' + p[0]; }
+  var d = new Date(iso + 'T00:00:00');
+  if(isNaN(d.getTime())) return '';
+  return NCP_JOURS[d.getDay()];
+}
+
 function majNCPPresets(){
   document.querySelectorAll('.ncp-preset-btn').forEach(function(b){
     b.classList.toggle('on', b.dataset.preset === NCP_PRESET_ACTIF);
@@ -4301,8 +4333,20 @@ function ncpHeureInfo(r){
   return { heure: null, src: null, date_iso: null };
 }
 function ncpBadgeSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') return ' <span title="Heure reelle prise sur la degustation liee (la plus fiable)" style="color:#10b981">&#9679;</span>'; if(i.src === 'fiche') return ''; if(i.src === 'texte') return ' <span title="Heure du defaut lue dans le texte du NCP (prioritaire sur l heure de la fiche)" style="color:var(--amber)">~</span>'; return ' <span title="Aucune heure exploitable : equipe non deduite" style="color:var(--tx3)">*</span>'; } function ncpLibelleSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') return 'heure reelle de la degustation liee (' + i.heure + ') - la plus fiable'; if(i.src === 'texte') return 'heure ecrite dans le texte du NCP (' + i.heure + ') - prioritaire sur la fiche'; if(i.src === 'fiche') return 'heure de la fiche (' + i.heure + ')'; return 'aucune heure exploitable'; } function ncpMajCouverture(rows){ var el = document.getElementById('ncp-couverture'); if(!el) return; var d = 0, f = 0, x = 0, n = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r)){ n++; return; } var s = ncpHeureInfo(r).src; if(s === 'degustation') d++; else if(s === 'texte') x++; else if(s === 'fiche') f++; }); var tot = rows.length; var att = d + f + x; el.innerHTML = '<br>Couverture sur cette selection : ' + att + ' fiches sur ' + tot + ' avec une equipe (' + (tot ? Math.round(att / tot * 100) : 0) + '%), dont ' + d + ' sur une degustation liee, ' + x + ' sur l heure ecrite dans le texte et ' + f + ' sur l heure de la fiche (repli). ' + n + ' non classees, ' + (tot - att - n) + ' sans heure exploitable.'; } function ncpGetEquipe(r){
+  if(r.equipe_override) return r.equipe_override;
   if(ncpEstNonClasse(r)) return null; var _hi = ncpHeureInfo(r); if(!_hi.heure) return null;
   return getEquipe(_hi.date_iso || r.created_date_iso, _hi.heure);
+}
+function ncpSetEquipeOverride(notif, valeur){
+  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
+  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
+  var chemin = 'ncp_data/' + notif + '/equipe_override';
+  var ecrire = valeur ? db.ref(chemin).set(valeur) : db.ref(chemin).remove();
+  ecrire.then(function(){
+    if(r) r.equipe_override = valeur || null;
+    toast(valeur ? ('Equipe forcee a ' + valeur) : 'Retour a la deduction automatique', '#10b981');
+    ncpDetail(notif);
+  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
 }
 
 function buildNCPTab(){
@@ -4515,7 +4559,7 @@ function buildNCPTab(){
       var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
       var autreDeclarant = ncpEstNonClasse(r);
       return '<tr>'
-        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx);font-weight:600">' + (autreDeclarant ? '<span title="Bloque par une personne autre qu\'Inpak ou Production (' + ncpEsc(ncpNomAff(r.reporter)) + ')" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a78bfa;margin-right:6px;vertical-align:middle"></span>' : '') + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + ncpBadgeSrc(r) + '</td>'
+        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx);font-weight:600">' + (autreDeclarant ? '<span title="Bloque par une personne autre qu\'Inpak ou Production (' + ncpEsc(ncpNomAff(r.reporter)) + ')" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a78bfa;margin-right:6px;vertical-align:middle"></span>' : '') + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + '<span style="color:var(--tx3);font-size:10px"> (' + ncpJour(r.created_date_iso) + ')</span>' + ncpBadgeSrc(r) + '</td>'
         + '<td>' + (r.unite || '-') + '</td>'
         + '<td>' + (eq || '-') + '</td>'
         + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
