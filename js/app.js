@@ -108,7 +108,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .lgbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .lch{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
 #no-today{display:none;align-items:center;gap:8px;margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:12px;color:var(--tx2)}
-.popup{position:fixed;z-index:1000;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:8px;min-width:165px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.popup{position:fixed;z-index:1000;background:var(--bg2);border:1px solid var(--bd2);border-radius:10px;padding:8px;min-width:165px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;max-height:min(70vh,420px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .ptit{font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px 8px;border-bottom:1px solid var(--bd);margin-bottom:6px}
 .popt{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--tx);transition:background .1s}
 .popt:hover{background:var(--bg3)}
@@ -1449,10 +1449,9 @@ var r=pill.getBoundingClientRect();
 var left=r.left+window.scrollX;
 if(left+180>window.innerWidth-8) left=window.innerWidth-188;
 popup.style.left=left+'px';
-popup.style.maxHeight='';
 popup.style.visibility='hidden';
 popup.style.display='block';
-var popupHeight=popup.offsetHeight;
+var popupHeight=popup.offsetHeight; // deja plafonne par max-height en CSS
 popup.style.visibility='visible';
 var marge=8;
 var spaceBelow=window.innerHeight-r.bottom-marge;
@@ -1464,12 +1463,11 @@ if(spaceBelow>=popupHeight){
   top=r.top+window.scrollY-popupHeight-4;
 }else if(spaceBelow>=spaceAbove){
   // Ni en dessous ni au-dessus il n'y a la place pour tout afficher :
-  // on prend le cote le plus spacieux et on active le scroll (voir CSS .popup).
-  top=r.bottom+window.scrollY+4;
-  popup.style.maxHeight=Math.max(120,spaceBelow)+'px';
+  // on colle en bas de l'ecran visible, le popup reste scrollable (voir CSS .popup).
+  top=window.scrollY+window.innerHeight-popupHeight-marge;
+  if(top<r.bottom+window.scrollY) top=r.bottom+window.scrollY+4;
 }else{
   top=window.scrollY+marge;
-  popup.style.maxHeight=Math.max(120,spaceAbove)+'px';
 }
 popup.style.top=top+'px';
 popup.querySelectorAll('.popt').forEach(function(o){o.addEventListener('click',function(){applyShift(o.dataset.v);});});popup.querySelector('.pcancel').addEventListener('click',closePopup);}
