@@ -5502,16 +5502,48 @@ function ncpEstDebloque(r){
   return !m.some(function(x){ return NCP_ACTIONS_RESTANTES.test(x); });
 }
 
-/* Vu par le labo = une degustation liee OU declare par une personne nommee
-   (labo / qualite de semaine, cf ncpEstNonClasse) */
-function ncpVuParLabo(r){
-  return !!(r.degustationsLiees && r.degustationsLiees.length) || ncpEstNonClasse(r);
+/* Bloc de shift couvrant un instant donne (miroir de getEquipe)
+   Semaine : 05h-13h / 13h-21h / 21h-05h   -   Week-end : 05h-17h / 17h-05h */
+function ncpBlocShift(dateISO, heure){
+  if(!dateISO || !heure) return null;
+  var hh = parseInt(String(heure).split(':')[0], 10);
+  if(isNaN(hh)) return null;
+  var d = new Date(dateISO + 'T00:00:00');
+  if(isNaN(d.getTime())) return null;
+  var jour = function(x){ return x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2); };
+  var mk = function(ds, h){ return new Date(ds + 'T' + ('0'+h).slice(-2) + ':00:00'); };
+  var dow = d.getDay(), we = (dow === 0 || dow === 6);
+  if(hh >= 5){
+    if(we){
+      if(hh < 17) return { d: mk(dateISO,5), f: mk(dateISO,17), b: '05h-17h' };
+      return { d: mk(dateISO,17), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '17h-05h' };
+    }
+    if(hh < 13) return { d: mk(dateISO,5),  f: mk(dateISO,13), b: '05h-13h' };
+    if(hh < 21) return { d: mk(dateISO,13), f: mk(dateISO,21), b: '13h-21h' };
+    return { d: mk(dateISO,21), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '21h-05h' };
+  }
+  var v = new Date(d.getTime() - 86400000), vs = jour(v), vdow = v.getDay();
+  if(vdow === 0 || vdow === 6) return { d: mk(vs,17), f: mk(dateISO,5), b: '17h-05h' };
+  return { d: mk(vs,21), f: mk(dateISO,5), b: '21h-05h' };
 }
 
-/* Sans controle labo = encore bloque ET jamais passe par le labo */
-function ncpSansLabo(r){ return !ncpEstDebloque(r) && !ncpVuParLabo(r); }
-function ncpSansLaboInpak(r){ return ncpSansLabo(r) && r.type_ncp === 'Inpak'; }
-function ncpSansLaboProd(r){ return ncpSansLabo(r) && r.type_ncp === 'Production'; }
+/* Hors shift = la fiche a ete creee en dehors du bloc horaire du shift
+   concerne par le defaut (heure reelle du defaut via ncpHeureInfo). */
+function ncpHorsShift(r){
+  if(!r.created_date_iso || !r.created_heure) return false;
+  var hi = ncpHeureInfo(r);
+  if(!hi || !hi.heure) return false;
+  var bloc = ncpBlocShift(hi.date_iso || r.created_date_iso, hi.heure);
+  if(!bloc) return false;
+  var crea = new Date(r.created_date_iso + 'T' + r.created_heure + ':00');
+  if(isNaN(crea.getTime())) return false;
+  return crea < bloc.d || crea >= bloc.f;
+}
+
+function ncpSansLabo(r){ return ncpHorsShift(r); }
+function ncpSansLaboInpak(r){ return ncpHorsShift(r) && r.type_ncp === 'Inpak'; }
+function ncpSansLaboProd(r){ return ncpHorsShift(r) && r.type_ncp === 'Production'; }
+
 
 /* Meme base que les KPI existants : NCP_VUE sans les BLK */
 function ncpBaseKPI(){
@@ -5568,10 +5600,10 @@ function ncpMajTuilesExtra(){
   ncpKpiListe = function(k){
     var b = ncpBaseKPI();
     if(k === 'debloque') return ncpRendreListe('NCP debloques', b.filter(ncpEstDebloque));
-    if(k === 'inpak')    return ncpRendreListe('NCP Inpak (hors sans controle labo)', b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
-    if(k === 'prod')     return ncpRendreListe('NCP Production (hors sans controle labo)', b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
-    if(k === 'slinpak')  return ncpRendreListe('NCP sans controle labo - Inpak', b.filter(ncpSansLaboInpak));
-    if(k === 'slprod')   return ncpRendreListe('NCP sans controle labo - Production', b.filter(ncpSansLaboProd));
+    if(k === 'inpak')    return ncpRendreListe('NCP Inpak (dans le shift)', b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
+    if(k === 'prod')     return ncpRendreListe('NCP Production (dans le shift)', b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
+    if(k === 'slinpak')  return ncpRendreListe('NCP hors shift - Inpak', b.filter(ncpSansLaboInpak));
+    if(k === 'slprod')   return ncpRendreListe('NCP hors shift - Production', b.filter(ncpSansLaboProd));
     return _kpi.call(this, k);
   };
   var _build = buildNCPTab;
