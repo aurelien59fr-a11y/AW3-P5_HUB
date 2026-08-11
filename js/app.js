@@ -197,6 +197,8 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 /* ===== Grille KPI a 5 cartes (onglet NCP) ===== */
 .kcard.pu::before{background:#8b5cf6}
 .kcard.pu .kval{color:#8b5cf6}
+.kcard.pk::before{background:#ec4899}
+.kcard.pk .kval{color:#ec4899}
 .kgrid5{grid-template-columns:repeat(5,1fr)}
 @media (max-width:1200px){.kgrid5{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:768px){.kgrid5{grid-template-columns:repeat(2,1fr)}}
@@ -1046,7 +1048,7 @@ function updKPI(){
 }
 var chB,chT,chJ;
 function initCharts(){var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB=new Chart(document.getElementById('cBrad'),{type:'bar',data:{labels:s.map(function(e){return e.n.split(' ')[0];}),datasets:[{data:s.map(function(e){return e.sc;}),backgroundColor:s.map(function(e){return scColor(e.sc)+'bb';}),borderColor:s.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var tr={'Q1 2025':0,'Q2 2025':0,'Q3 2025':0,'Q4 2025':0,'Q1 2026':0,'Q2 2026':0};ABS.forEach(function(a){var p=a.a.split('/');var k='Q'+Math.ceil(Number(p[1])/3)+' '+p[2];if(tr[k]!==undefined)tr[k]+=a.d;});chT=new Chart(document.getElementById('cTrim'),{type:'line',data:{labels:Object.keys(tr),datasets:[{data:Object.values(tr),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',borderWidth:2,pointBackgroundColor:'#3b82f6',pointRadius:5,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ=new Chart(document.getElementById('cJour'),{type:'bar',data:{labels:jj.map(function(e){return e.n.split(' ').pop();}),datasets:[{data:jj.map(function(e){return e.D;}),backgroundColor:jj.map(function(e){return scColor(e.sc)+'99';}),borderColor:jj.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});}
-function refreshCharts(){var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB.data.labels=s.map(function(e){return e.n.split(' ')[0];});chB.data.datasets[0].data=s.map(function(e){return e.sc;});chB.data.datasets[0].backgroundColor=s.map(function(e){return scColor(e.sc)+'bb';});chB.data.datasets[0].borderColor=s.map(function(e){return scColor(e.sc);});chB.update();var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ.data.labels=jj.map(function(e){return e.n.split(' ').pop();});chJ.data.datasets[0].data=jj.map(function(e){return e.D;});chJ.data.datasets[0].backgroundColor=jj.map(function(e){return scColor(e.sc)+'99';});chJ.data.datasets[0].borderColor=jj.map(function(e){return scColor(e.sc);});chJ.update();}
+function refreshCharts(){if(!chB||!chT||!chJ)return;var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB.data.labels=s.map(function(e){return e.n.split(' ')[0];});chB.data.datasets[0].data=s.map(function(e){return e.sc;});chB.data.datasets[0].backgroundColor=s.map(function(e){return scColor(e.sc)+'bb';});chB.data.datasets[0].borderColor=s.map(function(e){return scColor(e.sc);});chB.update();var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ.data.labels=jj.map(function(e){return e.n.split(' ').pop();});chJ.data.datasets[0].data=jj.map(function(e){return e.D;});chJ.data.datasets[0].backgroundColor=jj.map(function(e){return scColor(e.sc)+'99';});chJ.data.datasets[0].borderColor=jj.map(function(e){return scColor(e.sc);});chJ.update();}
 function buildBT(){
   if(currentUser && currentUser.role !== 'admin') return;
   var tbl=document.getElementById('btable');
@@ -4109,7 +4111,7 @@ function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12
     });
     t = 'NCP debloques (liberes par la qualite)';
   } ncpRendreListe(t, rows); } function ncpBindKpi(){ var p = [['ncp-k-total','total'],['ncp-k-inpak','inpak'],['ncp-k-prod','prod'],
-         ['ncp-k-tonnes','tonnes'],['ncp-k-ouvertes','nonclasse'],['ncp-k-debloque','debloque']]; p.forEach(function(x){ var el = document.getElementById(x[0]); var c = el ? el.parentNode : null; if(!c || c.getAttribute('data-kpibound')) return; c.setAttribute('data-kpibound','1'); c.style.cursor = 'pointer'; c.title = 'Cliquer pour voir les NCP concernes'; c.addEventListener('click', function(){ ncpKpiListe(x[1]); }); }); } function ncpBuildDeclarants(rows){ ncpBindKpi(); var box = document.getElementById('ncp-declarants'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!ncpEstNonClasse(r)) return; var k = ncpNomCle(r.reporter); if(!m[k]) m[k] = { n: 0, t: 0, u: {}, sem: 0, we: 0 }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); if(r.unite) m[k].u[r.unite] = 1; if(r.created_date_iso){ var j = new Date(r.created_date_iso + 'T12:00:00').getDay(); if(j === 0 || j === 6) m[k].we++; else m[k].sem++; } }); var a = Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(x, y){ return y[1].n - x[1].n; }); var tot = 0; a.forEach(function(x){ tot += x[1].n; }); var cnt = document.getElementById('ncp-decl-count'); var rat = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r) && ncpBakorderLien(r)) rat++; }); if(cnt) cnt.textContent = '(' + a.length + ' personnes, ' + tot + ' NCP, dont ' + rat + ' rattachables a une equipe via un bakorder partage)'; if(!a.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">Aucun NCP non classe sur cette periode.</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">'; a.forEach(function(x){ var v = x[1]; var un = Object.keys(v.u).sort().join(' '); h += '<div onclick="ncpListeDeclarant(\'' + x[0] + '\')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:13px;font-weight:600;color:#fff">' + ncpEsc(ncpNomAff(x[0])) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + (un || 'unite inconnue') + ' - ' + v.t.toFixed(1) + ' t - semaine ' + v.sem + ' / weekend ' + v.we + '</div></div><div style="font-size:18px;font-weight:700;color:#a78bfa">' + v.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
+         ['ncp-k-tonnes','tonnes'],['ncp-k-debloque','debloque']]; p.forEach(function(x){ var el = document.getElementById(x[0]); var c = el ? el.parentNode : null; if(!c || c.getAttribute('data-kpibound')) return; c.setAttribute('data-kpibound','1'); c.style.cursor = 'pointer'; c.title = 'Cliquer pour voir les NCP concernes'; c.addEventListener('click', function(){ ncpKpiListe(x[1]); }); }); } function ncpBuildDeclarants(rows){ ncpBindKpi(); var box = document.getElementById('ncp-declarants'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!ncpEstNonClasse(r)) return; var k = ncpNomCle(r.reporter); if(!m[k]) m[k] = { n: 0, t: 0, u: {}, sem: 0, we: 0 }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); if(r.unite) m[k].u[r.unite] = 1; if(r.created_date_iso){ var j = new Date(r.created_date_iso + 'T12:00:00').getDay(); if(j === 0 || j === 6) m[k].we++; else m[k].sem++; } }); var a = Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(x, y){ return y[1].n - x[1].n; }); var tot = 0; a.forEach(function(x){ tot += x[1].n; }); var cnt = document.getElementById('ncp-decl-count'); var rat = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r) && ncpBakorderLien(r)) rat++; }); if(cnt) cnt.textContent = '(' + a.length + ' personnes, ' + tot + ' NCP, dont ' + rat + ' rattachables a une equipe via un bakorder partage)'; if(!a.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">Aucun NCP non classe sur cette periode.</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">'; a.forEach(function(x){ var v = x[1]; var un = Object.keys(v.u).sort().join(' '); h += '<div onclick="ncpListeDeclarant(\'' + x[0] + '\')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:13px;font-weight:600;color:#fff">' + ncpEsc(ncpNomAff(x[0])) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + (un || 'unite inconnue') + ' - ' + v.t.toFixed(1) + ' t - semaine ' + v.sem + ' / weekend ' + v.we + '</div></div><div style="font-size:18px;font-weight:700;color:#a78bfa">' + v.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
 // la meme logique que les Arrets Inpak (SHIFTS + groupes de lignes).
 // Uniquement pertinent pour les NCP de type "Inpak" (lignes 31 a 36).
 function ncpOperateurs(r){
@@ -4250,7 +4252,7 @@ function ncpRevenirOriginal(){
   document.getElementById('ncp-import-modal').style.display = 'flex';
 }
 
-function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.cells[0].textContent.trim(); if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on + (ncpJour(r.created_on) ? ' (' + ncpJour(r.created_on) + ')' : '')], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Operateur(s) INPAK', ncpOperateurs(r) || (r.type_ncp === 'Inpak' ? 'non identifie' : '-')], ['Type', r.type_ncp], ['Source de l heure', ncpLibelleSrc(r)], ['Bakorder', ncpBakorder(r) || '-'], ['Production rattachable', (ncpBakorderLien(r) || ['-']).join(' | ')], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px"><div class="ncp-tr" style="font-size:16px;font-weight:600">' + ncpEsc(r.description) + '</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">'
+function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.getAttribute('data-notif') || ''; if(!c){ var mm = tr.cells[0].textContent.match(/\d{6,}/); c = mm ? mm[0] : ''; } if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on + (ncpJour(r.created_on) ? ' (' + ncpJour(r.created_on) + ')' : '')], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Operateur(s) INPAK', ncpOperateurs(r) || (r.type_ncp === 'Inpak' ? 'non identifie' : '-')], ['Type', r.type_ncp], ['Source de l heure', ncpLibelleSrc(r)], ['Bakorder', ncpBakorder(r) || '-'], ['Production rattachable', (ncpBakorderLien(r) || ['-']).join(' | ')], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px"><div class="ncp-tr" style="font-size:16px;font-weight:600">' + ncpEsc(r.description) + '</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">'
   + '<button id="ncp-decote-btn" onclick="ncpToggleDeCote(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.de_cote ? 'var(--blue)' : 'var(--bd2)') + ';background:' + (r.de_cote ? 'rgba(59,130,246,.12)' : 'none') + ';color:' + (r.de_cote ? 'var(--blue)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">' + (r.de_cote ? '&#128204; De cote' : '&#128204; Mettre de cote') + '</button>'
   + '<button id="ncp-comment-btn" onclick="ncpOpenComment(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.commentaire_perso ? 'var(--amber)' : 'var(--bd2)') + ';background:' + (r.commentaire_perso ? 'rgba(245,158,11,.12)' : 'none') + ';color:' + (r.commentaire_perso ? 'var(--amber)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">&#9998; ' + (r.commentaire_perso ? 'Commentaire' : 'Commenter') + '</button>'
   + '<button id="ncp-controle-btn" onclick="ncpToggleControle(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.controle_perso ? 'var(--green)' : 'var(--bd2)') + ';background:' + (r.controle_perso ? 'rgba(16,185,129,.12)' : 'none') + ';color:' + (r.controle_perso ? 'var(--green)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">' + (r.controle_perso ? '&#10003; Controle' : '&#9711; Marquer controle') + '</button>'
@@ -4634,7 +4636,7 @@ function buildNCPTab(){
 
   // Filtres actifs mais aucun resultat : message clair plutot que des graphiques vides
   if(filtres.length === 0){
-    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes','ncp-k-ouvertes'].forEach(function(id){
+    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes','ncp-k-debloque','ncp-k-sl-inpak','ncp-k-sl-prod'].forEach(function(id){
       var el = document.getElementById(id); if(el) el.textContent = '0';
     });
     var elPer = document.getElementById('ncp-k-periode'); if(elPer) elPer.textContent = '-';
@@ -5479,4 +5481,103 @@ window.buildRecrutementTab = function(){
   attacherListenerCandidats();
 };
 
+})();
+
+
+/* ==================== NCP : tuiles KPI exclusives ====================
+   Total = Inpak + Production + Sans controle labo Inpak + Sans controle labo Prod
+   Un NCP n apparait que dans une seule tuile.
+   ==================================================================== */
+var NCP_ACTIONS_RESTANTES = /strippen|dierenvoeding|kwaliteit|stickeren|ompakken|overstapelen|metaaldetector|vergisting|speciale bestemming|tape|bid|bulken|onderneem actie/i;
+
+function ncpMesures(r){
+  return String(r.toutes_mesures || r.measures || '').split(/[|,]/).map(function(s){ return s.trim(); }).filter(Boolean);
+}
+
+/* Debloque = Vrijgave explicite ET aucune action restante derriere
+   (Dierenvoeding, Strippen, Ompakken... restent bloques) */
+function ncpEstDebloque(r){
+  var m = ncpMesures(r);
+  if(!m.some(function(x){ return /^vrijgave$/i.test(x); })) return false;
+  return !m.some(function(x){ return NCP_ACTIONS_RESTANTES.test(x); });
+}
+
+/* Vu par le labo = une degustation liee OU declare par une personne nommee
+   (labo / qualite de semaine, cf ncpEstNonClasse) */
+function ncpVuParLabo(r){
+  return !!(r.degustationsLiees && r.degustationsLiees.length) || ncpEstNonClasse(r);
+}
+
+/* Sans controle labo = encore bloque ET jamais passe par le labo */
+function ncpSansLabo(r){ return !ncpEstDebloque(r) && !ncpVuParLabo(r); }
+function ncpSansLaboInpak(r){ return ncpSansLabo(r) && r.type_ncp === 'Inpak'; }
+function ncpSansLaboProd(r){ return ncpSansLabo(r) && r.type_ncp === 'Production'; }
+
+/* Meme base que les KPI existants : NCP_VUE sans les BLK */
+function ncpBaseKPI(){
+  return (NCP_VUE || []).filter(function(r){ return r.famille_produit !== 'BLK'; });
+}
+
+var NCP_KPI_MAP = {
+  'ncp-k-total':'total', 'ncp-k-inpak':'inpak', 'ncp-k-prod':'prod',
+  'ncp-k-tonnes':'tonnes', 'ncp-k-debloque':'debloque',
+  'ncp-k-sl-inpak':'slinpak', 'ncp-k-sl-prod':'slprod'
+};
+
+function ncpBindTuiles(){
+  var g = document.querySelector('#ncp-content-wrap .kgrid');
+  if(!g) return;
+  if(!g.getAttribute('data-kpideleg')){
+    g.setAttribute('data-kpideleg','1');
+    g.addEventListener('click', function(ev){
+      var card = ev.target.closest ? ev.target.closest('.kcard') : null;
+      if(!card) return;
+      var v = card.querySelector('.kval');
+      if(!v || !NCP_KPI_MAP[v.id]) return;
+      ev.stopPropagation();
+      ncpKpiListe(NCP_KPI_MAP[v.id]);
+    }, true);
+  }
+  Array.prototype.forEach.call(g.querySelectorAll('.kcard'), function(c){
+    var v = c.querySelector('.kval');
+    if(v && NCP_KPI_MAP[v.id]){ c.style.cursor = 'pointer'; c.title = 'Cliquer pour voir la liste'; }
+  });
+}
+
+function ncpMajTuilesExtra(){
+  function set(id, v){ var e = document.getElementById(id); if(e) e.textContent = v; }
+  var b = ncpBaseKPI(), tot = b.length;
+  var deb = 0, i = 0, p = 0, si = 0, sp = 0;
+  b.forEach(function(r){
+    if(ncpEstDebloque(r)) deb++;
+    var t = r.type_ncp;
+    if(ncpSansLabo(r)){ if(t === 'Inpak') si++; else if(t === 'Production') sp++; }
+    else              { if(t === 'Inpak') i++;  else if(t === 'Production') p++;  }
+  });
+  function pct(n){ return tot ? Math.round(n / tot * 100) + '% du total' : '-'; }
+  set('ncp-k-inpak', i);      set('ncp-k-inpak-pct', pct(i));
+  set('ncp-k-prod', p);       set('ncp-k-prod-pct', pct(p));
+  set('ncp-k-debloque', deb); set('ncp-k-debloque-pct', pct(deb));
+  set('ncp-k-sl-inpak', si);  set('ncp-k-sl-inpak-pct', pct(si) + ' - a controler');
+  set('ncp-k-sl-prod', sp);   set('ncp-k-sl-prod-pct', pct(sp) + ' - a controler');
+  ncpBindTuiles();
+}
+
+(function(){
+  var _kpi = ncpKpiListe;
+  ncpKpiListe = function(k){
+    var b = ncpBaseKPI();
+    if(k === 'debloque') return ncpRendreListe('NCP debloques', b.filter(ncpEstDebloque));
+    if(k === 'inpak')    return ncpRendreListe('NCP Inpak (hors sans controle labo)', b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
+    if(k === 'prod')     return ncpRendreListe('NCP Production (hors sans controle labo)', b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
+    if(k === 'slinpak')  return ncpRendreListe('NCP sans controle labo - Inpak', b.filter(ncpSansLaboInpak));
+    if(k === 'slprod')   return ncpRendreListe('NCP sans controle labo - Production', b.filter(ncpSansLaboProd));
+    return _kpi.call(this, k);
+  };
+  var _build = buildNCPTab;
+  buildNCPTab = function(){
+    var out = _build.apply(this, arguments);
+    try { ncpMajTuilesExtra(); } catch(e){ console.warn('tuiles NCP', e); }
+    return out;
+  };
 })();
