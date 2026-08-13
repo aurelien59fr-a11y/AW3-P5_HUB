@@ -167,10 +167,17 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .sp-note-dot.filled{border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.14);color:#f4c17a;font-weight:600}
 .notes-panel{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .notes-panel-title{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
-.note-card{display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border:1px solid var(--bd2);border-left:3px solid var(--amber);border-radius:8px;padding:10px 12px;cursor:pointer;transition:background .1s}
+.note-card{display:flex;flex-direction:column;gap:6px;background:var(--bg2);border:1px solid var(--bd2);border-left:3px solid var(--amber);border-radius:8px;padding:10px 12px;cursor:pointer;transition:background .1s}
 .note-card:hover{background:#1e2436}
-.note-card-date{flex:none;font-family:var(--mo);font-size:11px;font-weight:700;color:var(--amber);min-width:40px}
-.note-card-txt{font-size:13px;color:var(--tx1);white-space:pre-wrap;word-break:break-word;line-height:1.4}
+.note-card-row{display:flex;gap:10px;align-items:flex-start}
+.note-card-date{flex:none;font-family:var(--mo);font-size:11px;font-weight:700;color:var(--amber);min-width:40px;padding-top:2px}
+.note-card-txt{flex:1;min-width:0;font-size:13px;color:var(--tx1);white-space:pre-wrap;word-break:break-word;line-height:1.4}
+.note-translate-row{display:flex;gap:6px;flex:none}
+.note-translate-btn{display:flex;align-items:center;justify-content:center;width:28px;height:20px;border-radius:4px;border:1px solid var(--bd2);background:rgba(255,255,255,.04);cursor:pointer;padding:0}
+.note-translate-btn:hover{border-color:var(--blue)}
+.note-translate-btn:disabled{opacity:.6;cursor:default}
+.note-translation{display:none;gap:6px;align-items:flex-start;margin-top:2px;padding-top:8px;border-top:1px dashed var(--bd2);font-size:13px;color:var(--tx2);white-space:pre-wrap;word-break:break-word}
+.note-translation .ntr-flag{flex:none;margin-top:2px}
 @media (max-width:768px){
   .notes-panel{margin-top:10px}
   .note-card{padding:10px}
@@ -595,7 +602,9 @@ var I18N={
     extra_empty_day:'Aucun ajout pour ce jour',
     note_modal_title:'Note visible', note_modal_hint:' — visible directement sur le planning, sans clic',
     note_placeholder:'Ecrire une note visible sur le planning...',
-    note_del_btn:'Supprimer', note_close_btn:'Annuler', note_save_btn:'Enregistrer'
+    note_del_btn:'Supprimer', note_close_btn:'Annuler', note_save_btn:'Enregistrer',
+    note_translate_nl:'Traduire en néerlandais', note_translate_en:'Traduire en anglais',
+    note_translate_error:'Traduction indisponible pour le moment'
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -721,7 +730,9 @@ var I18N={
     extra_empty_day:'Niets toegevoegd voor deze dag',
     note_modal_title:'Zichtbare notitie', note_modal_hint:' — rechtstreeks zichtbaar op de planning, geen klik nodig',
     note_placeholder:'Schrijf een notitie die zichtbaar is op de planning...',
-    note_del_btn:'Verwijderen', note_close_btn:'Annuleren', note_save_btn:'Opslaan'
+    note_del_btn:'Verwijderen', note_close_btn:'Annuleren', note_save_btn:'Opslaan',
+    note_translate_nl:'Vertalen naar Nederlands', note_translate_en:'Vertalen naar Engels',
+    note_translate_error:'Vertaling momenteel niet beschikbaar'
   },
   en:{
     login_email:'Email', login_password:'Password', login_btn:'Log in',
@@ -847,7 +858,9 @@ var I18N={
     extra_empty_day:'Nothing added for this day',
     note_modal_title:'Visible note', note_modal_hint:' — visible directly on the planning, no click needed',
     note_placeholder:'Write a note visible on the planning...',
-    note_del_btn:'Delete', note_close_btn:'Cancel', note_save_btn:'Save'
+    note_del_btn:'Delete', note_close_btn:'Cancel', note_save_btn:'Save',
+    note_translate_nl:'Translate to Dutch', note_translate_en:'Translate to English',
+    note_translate_error:'Translation unavailable right now'
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
@@ -1538,13 +1551,58 @@ function renderNotesPanel(entries){
   panel.innerHTML='<div class="notes-panel-title">'+t('plan_notes_panel_title')+'</div>'
     +entries.map(function(e){
       return '<div class="note-card" data-n="Note" data-i="'+e.i+'">'
+        +'<div class="note-card-row">'
         +'<div class="note-card-date">'+e.d+'</div>'
         +'<div class="note-card-txt">'+escHtml(e.txt).replace(/\n/g,'<br>')+'</div>'
+        +'<div class="note-translate-row">'
+        +'<button type="button" class="note-translate-btn" data-i="'+e.i+'" data-target="nl" title="'+t('note_translate_nl')+'">'+(LANG_FLAG_SVG.nl||'')+'</button>'
+        +'<button type="button" class="note-translate-btn" data-i="'+e.i+'" data-target="en" title="'+t('note_translate_en')+'">'+(LANG_FLAG_SVG.en||'')+'</button>'
+        +'</div>'
+        +'</div>'
+        +'<div class="note-translation" id="note-tr-'+e.i+'"></div>'
         +'</div>';
     }).join('');
   panel.querySelectorAll('.note-card').forEach(function(c){
     c.addEventListener('click',function(){openNoteEditFor(c.dataset.n,parseInt(c.dataset.i));});
   });
+  panel.querySelectorAll('.note-translate-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      translateNoteEntry(parseInt(btn.dataset.i),btn.dataset.target,btn);
+    });
+  });
+}
+var NOTE_TRANSLATE_CACHE={}; // 'texte|langue-cible' -> texte traduit (evite de re-appeler l'API)
+function translateNoteEntry(i,target,btn){
+  var row=currentNoteRow();if(!row)return;
+  var txt=(row.s[i]||'').trim();if(!txt)return;
+  var box=document.getElementById('note-tr-'+i);
+  if(!box)return;
+  var cacheKey=txt+'|'+target;
+  if(NOTE_TRANSLATE_CACHE[cacheKey]){
+    showNoteTranslation(box,target,NOTE_TRANSLATE_CACHE[cacheKey]);
+    return;
+  }
+  var prevHTML=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<span style="font-size:10px;color:var(--tx3)">…</span>';
+  fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt)+'&langpair=fr|'+target)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var out=data&&data.responseData&&data.responseData.translatedText?data.responseData.translatedText:null;
+      if(!out)throw new Error('empty translation');
+      NOTE_TRANSLATE_CACHE[cacheKey]=out;
+      showNoteTranslation(box,target,out);
+      btn.innerHTML=prevHTML;btn.disabled=false;
+    })
+    .catch(function(){
+      toast(t('note_translate_error'),'#ef4444');
+      btn.innerHTML=prevHTML;btn.disabled=false;
+    });
+}
+function showNoteTranslation(box,target,text){
+  box.style.display='flex';
+  box.innerHTML='<span class="ntr-flag">'+(LANG_FLAG_SVG[target]||'')+'</span><span>'+escHtml(text)+'</span>';
 }
 function refreshNotesPanel(){
   if(!LAST_FILTERED_DATES)return;
