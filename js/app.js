@@ -162,6 +162,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .sp-nett-empty:hover{border-color:var(--blue);color:var(--tx)}
 .sp-nett-oui{background:rgba(16,185,129,.18);color:#10b981;border:1px solid rgba(16,185,129,.4)}
 .sp-nett-non{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.sp-note{display:inline-block;max-width:130px;padding:4px 7px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:10.5px;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-align:left;cursor:pointer;vertical-align:top}
+.sp-note:hover{border-color:var(--amber)}
+.sp-note.empty{color:var(--tx3);text-align:center;white-space:nowrap;max-width:none;min-width:24px;padding:3px 8px}
+.sp-note.filled{border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.10);color:#f4c17a;font-weight:500}
 
 /* ===== Responsive mobile ===== */
 @media (max-width: 768px){
@@ -425,6 +429,7 @@ var SHIFTS26 = [
   {n:"Lachen Baraik",g:"Unit",s:["Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","ziek","ziek","ziek","ziek","ziek","ziek","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","verlof","verlof","verlof","verlof","verlof","verlof","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk"]},
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
+  {n:"Note",g:"EXTRA",s:[]},
 ];
 
 var SHIFTS25 = [
@@ -445,6 +450,7 @@ var SHIFTS25 = [
   {n:"Lachen Baraik",g:"Unit",s:["Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk"]},
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
+  {n:"Note",g:"EXTRA",s:[]},
 ];
 
 var currentUser=null,db=null,isSyncing=false,curYear='2026',curMonth=null,activePill=null,popup=null;
@@ -812,6 +818,7 @@ var SHIFTS27 = [
   {n:"Lachen Baraik",g:"Unit",s:["Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk"]},
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
+  {n:"Note",g:"EXTRA",s:[]},
 ];
 
 var H2025={"01/01": "17h-05h", "04/01": "05h-17h", "05/01": "05h-17h", "11/01": "17h-05h", "12/01": "17h-05h", "18/01": "05h-17h", "19/01": "05h-17h", "25/01": "17h-05h", "26/01": "17h-05h", "01/02": "05h-17h", "02/02": "05h-17h", "08/02": "17h-05h", "09/02": "17h-05h", "15/02": "05h-17h", "16/02": "05h-17h", "22/02": "17h-05h", "23/02": "17h-05h", "01/03": "05h-17h", "02/03": "05h-17h", "08/03": "17h-05h", "09/03": "17h-05h", "15/03": "05h-17h", "16/03": "05h-17h", "22/03": "17h-05h", "23/03": "17h-05h", "29/03": "05h-17h", "30/03": "05h-17h", "05/04": "17h-05h", "06/04": "17h-05h", "12/04": "05h-17h", "13/04": "05h-17h", "19/04": "17h-05h", "20/04": "17h-05h", "21/04": "17h-05h", "26/04": "05h-17h", "27/04": "05h-17h", "01/05": "17h-05h", "02/05": "17h-05h", "03/05": "17h-05h", "04/05": "17h-05h", "10/05": "05h-17h", "11/05": "05h-17h", "17/05": "17h-05h", "18/05": "17h-05h", "24/05": "05h-17h", "25/05": "05h-17h", "29/05": "17h-05h", "30/05": "17h-05h", "31/05": "17h-05h", "01/06": "17h-05h", "07/06": "05h-17h", "08/06": "05h-17h", "09/06": "05h-17h", "14/06": "17h-05h", "15/06": "17h-05h", "21/06": "05h-17h", "22/06": "05h-17h", "28/06": "17h-05h", "29/06": "17h-05h", "05/07": "05h-17h", "06/07": "05h-17h", "12/07": "17h-05h", "13/07": "17h-05h", "19/07": "05h-17h", "20/07": "05h-17h", "21/07": "05h-17h", "26/07": "17h-05h", "27/07": "17h-05h", "02/08": "05h-17h", "03/08": "05h-17h", "09/08": "17h-05h", "10/08": "17h-05h", "15/08": "05h-17h", "16/08": "05h-17h", "17/08": "05h-17h", "23/08": "17h-05h", "24/08": "17h-05h", "30/08": "05h-17h", "31/08": "05h-17h", "06/09": "17h-05h", "07/09": "17h-05h", "13/09": "05h-17h", "14/09": "05h-17h", "20/09": "17h-05h", "21/09": "17h-05h", "27/09": "05h-17h", "28/09": "05h-17h", "04/10": "17h-05h", "05/10": "17h-05h", "11/10": "05h-17h", "12/10": "05h-17h", "18/10": "17h-05h", "19/10": "17h-05h", "25/10": "05h-17h", "26/10": "05h-17h", "01/11": "17h-05h", "02/11": "17h-05h", "08/11": "05h-17h", "09/11": "05h-17h", "10/11": "05h-17h", "11/11": "05h-17h", "15/11": "17h-05h", "16/11": "17h-05h", "22/11": "05h-17h", "23/11": "05h-17h", "29/11": "17h-05h", "30/11": "17h-05h", "06/12": "05h-17h", "07/12": "05h-17h", "13/12": "17h-05h", "14/12": "17h-05h", "20/12": "05h-17h", "21/12": "05h-17h", "25/12": "17h-05h", "26/12": "17h-05h", "27/12": "17h-05h", "28/12": "17h-05h"};
@@ -1294,7 +1301,7 @@ function buildPT(){
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?'Divers / Extra':g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc">'+emp.n+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?'Divers / Extra':g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc">'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
       var bd=EMP.find(function(e){return e.n===emp.n;});
       if(!bd||!bd.birthday) return false;
       var parts=bd.birthday.split('-');
@@ -1304,12 +1311,18 @@ function buildPT(){
     })();
     if(isExtra){
       var isNett=emp.n==='Nettoyeur externe';
+      var isNote=emp.n==='Note';
       if(isNett){
         var nCls=sv==='Oui'?'sp-nett-oui':sv==='Non'?'sp-nett-non':'sp-nett-empty';
         var nLbl=sv==='Oui'?'Oui':sv==='Non'?'Non':'+';
         h+='<td class="'+(col===ti?'td-td':'')+'">'
           +'<span class="sp-nett '+nCls+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+nLbl+'</span>'
           +'</td>';
+      } else if(isNote){
+      var noteEsc=escHtml(sv);
+      h+='<td class="'+(col===ti?'td-td':'')+'" style="text-align:left;vertical-align:top">'
+        +'<span class="sp-note'+(sv?' filled':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+noteEsc+'">'+(sv?noteEsc.replace(/\n/g,'<br>'):'+')+'</span>'
+        +'</td>';
       } else {
       var list=parseExtraList(sv);
       var esc=(sv||'').replace(/"/g,'&quot;');
@@ -1324,7 +1337,62 @@ function buildPT(){
       +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span>'
       +(isBdToday?'<span style="font-size:10px;margin-left:2px" title="Anniversaire de '+emp.n.split(' ')[0]+'">⭐</span>':'')
       +'</td>';
-    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});tbl.querySelectorAll('.sp-note').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openNoteEdit(p);});});var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+function rowLabel(n){
+  if(n==='Commentaire')return 'Personnel extra';
+  return n;
+}
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var NOTE_EDIT_CTX=null; // {nm,i}
+function openNoteEdit(span){
+  if(!canEdit())return;
+  var nm=span.dataset.n,i=parseInt(span.dataset.i);
+  NOTE_EDIT_CTX={nm:nm,i:i};
+  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var row=shifts.find(function(e){return e.n===nm;});
+  if(!row)return;
+  var cur=row.s[i]||'';
+  var d=document.createElement('div');
+  d.id='note-popup';
+  d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  d.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:380px;max-width:95vw">'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">Note visible</div>'
+    +'<div style="font-size:11px;color:var(--tx3);margin-bottom:14px">'+(allDates()[i]||'')+' &mdash; visible directement sur le planning, sans clic</div>'
+    +'<textarea id="note-txt" placeholder="Ecrire une note visible sur le planning..." style="width:100%;height:90px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+escHtml(cur)+'</textarea>'
+    +'<div style="display:flex;justify-content:space-between;margin-top:16px">'
+    +'<button id="note-del-btn" style="padding:8px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:#ef4444;font-family:var(--fn);font-size:12px;cursor:pointer">Supprimer</button>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="note-close-btn" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">Annuler</button>'
+    +'<button id="note-save-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;font-size:13px;cursor:pointer">Enregistrer</button>'
+    +'</div></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',function(e){if(e.target===d)d.remove();});
+  document.getElementById('note-close-btn').addEventListener('click',function(){d.remove();});
+  document.getElementById('note-save-btn').addEventListener('click',function(){noteSave(document.getElementById('note-txt').value);d.remove();});
+  document.getElementById('note-del-btn').addEventListener('click',function(){noteSave('');d.remove();});
+  document.getElementById('note-txt').focus();
+}
+function noteSave(txt){
+  var ctx=NOTE_EDIT_CTX;if(!ctx)return;
+  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var row=shifts.find(function(e){return e.n===ctx.nm;});
+  if(!row)return;
+  while(row.s.length<=ctx.i)row.s.push('');
+  row.s[ctx.i]=(txt||'').trim();
+  updateNoteCell(ctx.nm,ctx.i);
+  save();
+}
+function updateNoteCell(nm,i){
+  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var row=shifts.find(function(e){return e.n===nm;});
+  var txt=row.s[i]||'';
+  var esc=escHtml(txt);
+  document.querySelectorAll('.sp-note[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
+    p.dataset.s=esc;
+    p.innerHTML=txt?esc.replace(/\n/g,'<br>'):'+';
+    p.className='sp-note'+(txt?' filled':' empty');
+  });
+}
 function toggleNettoyeur(span){
   if(!canEdit())return;
   var nm=span.dataset.n,i=parseInt(span.dataset.i),cur=span.dataset.s||'';
@@ -1360,10 +1428,12 @@ function extraSaveHist(nom){
   if(EXTRA_HIST.indexOf(nom)===-1){EXTRA_HIST.push(nom);EXTRA_HIST.sort();}
 }
 var EXTRA_EDIT_CTX=null; // {nm, i}
+var EXTRA_EDIT_IDX=-1; // index en cours de modification dans la liste, -1 = mode ajout
 function openExtraEdit(span){
   if(!canEdit())return;
   var nm=span.dataset.n,i=parseInt(span.dataset.i);
   EXTRA_EDIT_CTX={nm:nm,i:i};
+  EXTRA_EDIT_IDX=-1;
   var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
   var row=shifts.find(function(e){return e.n===nm;});
   if(!row)return;
@@ -1371,7 +1441,7 @@ function openExtraEdit(span){
   d.id='extra-popup';
   d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:380px;max-width:95vw">'
-    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">Personnel supplementaire</div>'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">Personnel extra</div>'
     +'<div style="font-size:11px;color:var(--tx3);margin-bottom:14px">'+(allDates()[i]||'')+'</div>'
     +'<div id="extra-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>'
     +'<div style="display:flex;gap:6px">'
@@ -1381,13 +1451,17 @@ function openExtraEdit(span){
     +OPTS.INPAK.map(function(o){return '<option value="'+o+'">'+sLbl(o)+'</option>';}).join('')
     +'</select>'
     +'</div>'
-    +'<button id="extra-add-btn" style="width:100%;margin-top:8px;padding:8px;border-radius:var(--r);border:1px dashed var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">+ Ajouter</button>'
+    +'<div style="display:flex;gap:6px;margin-top:8px">'
+    +'<button id="extra-add-btn" style="flex:1;padding:8px;border-radius:var(--r);border:1px dashed var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">+ Ajouter</button>'
+    +'<button id="extra-cancel-btn" style="display:none;padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer">Annuler</button>'
+    +'</div>'
     +'<div style="display:flex;justify-content:flex-end;margin-top:16px">'
     +'<button id="extra-close-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Fermer</button>'
     +'</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
   document.getElementById('extra-add-btn').addEventListener('click',extraAddWorker);
+  document.getElementById('extra-cancel-btn').addEventListener('click',extraCancelEdit);
   document.getElementById('extra-close-btn').addEventListener('click',function(){d.remove();});
   renderExtraList();
   document.getElementById('extra-nom').focus();
@@ -1399,14 +1473,44 @@ function renderExtraList(){
   var list=parseExtraList(row.s[ctx.i]);
   var box=document.getElementById('extra-list');if(!box)return;
   box.innerHTML=list.length?list.map(function(w,idx){
-    return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:6px 10px">'
+    var isEditing=(idx===EXTRA_EDIT_IDX);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid '+(isEditing?'var(--blue)':'var(--bd2)')+';border-radius:8px;padding:6px 10px">'
       +'<span style="font-size:13px;color:var(--tx1)">'+w.n+(w.p?' <span style="color:var(--tx3);font-size:11px">('+sLbl(w.p)+')</span>':'')+'</span>'
-      +'<span data-idx="'+idx+'" class="extra-rm" style="cursor:pointer;color:var(--tx3);font-size:16px;line-height:1;padding:0 4px">&times;</span>'
+      +'<span style="display:flex;gap:10px">'
+      +'<span data-idx="'+idx+'" class="extra-edit" title="Modifier" style="cursor:pointer;color:var(--tx3);font-size:13px;line-height:1;padding:0 2px">&#9998;</span>'
+      +'<span data-idx="'+idx+'" class="extra-rm" title="Supprimer" style="cursor:pointer;color:var(--tx3);font-size:16px;line-height:1;padding:0 2px">&times;</span>'
+      +'</span>'
       +'</div>';
   }).join(''):'<div style="font-size:12px;color:var(--tx3);font-style:italic;text-align:center;padding:8px 0">Aucun ajout pour ce jour</div>';
   box.querySelectorAll('.extra-rm').forEach(function(btn){
     btn.addEventListener('click',function(){extraRemoveWorker(parseInt(btn.dataset.idx));});
   });
+  box.querySelectorAll('.extra-edit').forEach(function(btn){
+    btn.addEventListener('click',function(){extraStartEdit(parseInt(btn.dataset.idx));});
+  });
+}
+function extraStartEdit(idx){
+  var ctx=EXTRA_EDIT_CTX;if(!ctx)return;
+  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var row=shifts.find(function(e){return e.n===ctx.nm;});
+  var list=parseExtraList(row.s[ctx.i]);
+  var w=list[idx];if(!w)return;
+  EXTRA_EDIT_IDX=idx;
+  var nomEl=document.getElementById('extra-nom'),posteEl=document.getElementById('extra-poste'),btn=document.getElementById('extra-add-btn'),cancelEl=document.getElementById('extra-cancel-btn');
+  nomEl.value=w.n;
+  if(w.p)posteEl.value=w.p;
+  if(btn)btn.textContent='Enregistrer les modifications';
+  if(cancelEl)cancelEl.style.display='inline-block';
+  renderExtraList();
+  nomEl.focus();
+}
+function extraCancelEdit(){
+  EXTRA_EDIT_IDX=-1;
+  var nomEl=document.getElementById('extra-nom'),btn=document.getElementById('extra-add-btn'),cancelEl=document.getElementById('extra-cancel-btn');
+  if(nomEl)nomEl.value='';
+  if(btn)btn.textContent='+ Ajouter';
+  if(cancelEl)cancelEl.style.display='none';
+  renderExtraList();
 }
 function extraAddWorker(){
   var ctx=EXTRA_EDIT_CTX;if(!ctx)return;
@@ -1417,12 +1521,16 @@ function extraAddWorker(){
   var row=shifts.find(function(e){return e.n===ctx.nm;});
   while(row.s.length<=ctx.i)row.s.push('');
   var list=parseExtraList(row.s[ctx.i]);
-  list.push({n:nom,p:posteEl.value});
+  if(EXTRA_EDIT_IDX>=0&&EXTRA_EDIT_IDX<list.length){
+    list[EXTRA_EDIT_IDX]={n:nom,p:posteEl.value};
+  } else {
+    list.push({n:nom,p:posteEl.value});
+  }
   row.s[ctx.i]=stringifyExtraList(list);
   extraSaveHist(nom);
   updateExtraBadge(ctx.nm,ctx.i);
-  renderExtraList();
-  nomEl.value='';nomEl.focus();
+  extraCancelEdit();
+  nomEl.focus();
   save();
 }
 function extraRemoveWorker(idx){
@@ -1433,7 +1541,7 @@ function extraRemoveWorker(idx){
   list.splice(idx,1);
   row.s[ctx.i]=stringifyExtraList(list);
   updateExtraBadge(ctx.nm,ctx.i);
-  renderExtraList();
+  if(EXTRA_EDIT_IDX===idx){extraCancelEdit();}else{renderExtraList();}
   save();
 }
 function updateExtraBadge(nm,i){
