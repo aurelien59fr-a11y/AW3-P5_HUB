@@ -162,7 +162,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .sp-nett-empty:hover{border-color:var(--blue);color:var(--tx)}
 .sp-nett-oui{background:rgba(16,185,129,.18);color:#10b981;border:1px solid rgba(16,185,129,.4)}
 .sp-nett-non{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
-.sp-note{display:inline-block;max-width:130px;padding:4px 7px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:10.5px;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-align:left;cursor:pointer;vertical-align:top}
+.sp-note{display:inline-block;max-width:130px;padding:4px 7px;border-radius:6px;border:1px dashed var(--bd2);background:rgba(255,255,255,.03);color:var(--tx2);font-size:10.5px;line-height:1.35;white-space:pre-wrap;word-break:break-word;text-align:center;cursor:pointer;vertical-align:top}
 .sp-note:hover{border-color:var(--amber)}
 .sp-note.empty{color:var(--tx3);text-align:center;white-space:nowrap;max-width:none;min-width:24px;padding:3px 8px}
 .sp-note.filled{border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.10);color:#f4c17a;font-weight:500}
@@ -1320,7 +1320,7 @@ function buildPT(){
           +'</td>';
       } else if(isNote){
       var noteEsc=escHtml(sv);
-      h+='<td class="'+(col===ti?'td-td':'')+'" style="text-align:left;vertical-align:top">'
+      h+='<td class="'+(col===ti?'td-td':'')+'" style="text-align:center;vertical-align:top">'
         +'<span class="sp-note'+(sv?' filled':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+noteEsc+'">'+(sv?noteEsc.replace(/\n/g,'<br>'):'+')+'</span>'
         +'</td>';
       } else {
