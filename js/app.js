@@ -586,7 +586,16 @@ var I18N={
     err_generic_prefix:'Erreur: ',
     month_0:'Janvier', month_1:'Fevrier', month_2:'Mars', month_3:'Avril', month_4:'Mai', month_5:'Juin',
     month_6:'Juillet', month_7:'Aout', month_8:'Septembre', month_9:'Octobre', month_10:'Novembre', month_11:'Decembre',
-    arr_limited_days1:'Limite aux ', arr_limited_days2:' plus recents jours (', arr_limited_days3:' jours au total)'
+    arr_limited_days1:'Limite aux ', arr_limited_days2:' plus recents jours (', arr_limited_days3:' jours au total)',
+    plan_section_extra:'Divers / Extra',
+    plan_row_extra_staff:'Personnel extra', plan_row_ext_cleaner:'Nettoyeur externe', plan_row_note:'Note',
+    plan_notes_panel_title:'Notes du planning',
+    extra_modal_title:'Personnel extra', extra_name_ph:'Nom', extra_add_btn:'+ Ajouter', extra_save_btn:'Enregistrer les modifications',
+    extra_cancel_btn:'Annuler', extra_close_btn:'Fermer', extra_edit_title:'Modifier', extra_remove_title:'Supprimer',
+    extra_empty_day:'Aucun ajout pour ce jour',
+    note_modal_title:'Note visible', note_modal_hint:' — visible directement sur le planning, sans clic',
+    note_placeholder:'Ecrire une note visible sur le planning...',
+    note_del_btn:'Supprimer', note_close_btn:'Annuler', note_save_btn:'Enregistrer'
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -703,25 +712,172 @@ var I18N={
     err_generic_prefix:'Fout: ',
     month_0:'Januari', month_1:'Februari', month_2:'Maart', month_3:'April', month_4:'Mei', month_5:'Juni',
     month_6:'Juli', month_7:'Augustus', month_8:'September', month_9:'Oktober', month_10:'November', month_11:'December',
-    arr_limited_days1:'Beperkt tot de ', arr_limited_days2:' meest recente dagen (', arr_limited_days3:' dagen in totaal)'
+    arr_limited_days1:'Beperkt tot de ', arr_limited_days2:' meest recente dagen (', arr_limited_days3:' dagen in totaal)',
+    plan_section_extra:'Diversen / Extra',
+    plan_row_extra_staff:'Extra personeel', plan_row_ext_cleaner:'Externe schoonmaker', plan_row_note:'Notitie',
+    plan_notes_panel_title:'Notities van de planning',
+    extra_modal_title:'Extra personeel', extra_name_ph:'Naam', extra_add_btn:'+ Toevoegen', extra_save_btn:'Wijzigingen opslaan',
+    extra_cancel_btn:'Annuleren', extra_close_btn:'Sluiten', extra_edit_title:'Wijzigen', extra_remove_title:'Verwijderen',
+    extra_empty_day:'Niets toegevoegd voor deze dag',
+    note_modal_title:'Zichtbare notitie', note_modal_hint:' — rechtstreeks zichtbaar op de planning, geen klik nodig',
+    note_placeholder:'Schrijf een notitie die zichtbaar is op de planning...',
+    note_del_btn:'Verwijderen', note_close_btn:'Annuleren', note_save_btn:'Opslaan'
+  },
+  en:{
+    login_email:'Email', login_password:'Password', login_btn:'Log in',
+    login_forgot:'Forgot password?', login_autoconnect:'You will stay automatically logged in',
+    topbar_connecting:'Connecting...', topbar_logout:'Log out',
+    tab_ov:'Overview', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
+    tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin',
+    plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
+    plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
+    legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
+    legend_ziek:'Sick leave', legend_verlof:'Leave', legend_recup:'Recovery',
+    status_ok:'OK', status_wn:'To watch', status_al:'Concerning', status_cr:'Critical', legend_watch_short:'To watch',
+    ov_title:'Dashboard', ov_subtitle:'Last 365 days • Weekends + public holidays + bridge days',
+    ov_kcard_team:'Team', ov_kmeta_okpct:'OK',
+    ov_crm_urgent:'Score > 500 urgent', ov_crm_none:'Score > 500 none',
+    ov_alert_from:' went from ', ov_alert_to:' to ',
+    ov_chart_bradford:'Bradford scores', ov_chart_absences_trim:'Absences per quarter',
+    ov_chart_days_per_emp:'Absence days per employee',
+    ov_next30_title:'Absences — next 30 days', ov_next30_none:'No absence planned in the next 30 days',
+    ov_today_prefix:'Absent today', ov_today_allpresent:'Everyone is present ✅',
+    ov_birthdays_title:'Upcoming birthdays', ov_birthday_happy:'Happy birthday!',
+    ov_birthday_turns1:' turns ', ov_birthday_turns2:' today 🎉',
+    ov_birthday_none:'No birthdates recorded — add them in Admin > Employees',
+    ov_birthday_celebrated:'→ celebrated on ', ov_birthday_years:'years',
+    ov_birthday_today_label:'Today!', ov_birthday_in_days:'in ',
+    ab_title:'Absences', ab_col_emp:'Employee', ab_col_start:'Start', ab_col_end:'End',
+    ab_col_days:'Days', ab_col_intensity:'Intensity', ab_col_year:'Year',
+    ab_count_suffix:' absences 2025-2026', ab_empty:'No sick leave',
+    modal_cancel:'Cancel', modal_import:'Import',
+    pt_subtitle:'Lateness & turnstile/clock anomalies',
+    pt_opt_all_types:'All types', pt_opt_retards:'Lateness', pt_opt_anomalies_tourniquet:'Turnstile anomalies',
+    pt_opt_all_status:'All statuses', pt_opt_open:'Not processed', pt_opt_done:'Processed',
+    pt_mark_all_done:'Mark all as processed',
+    pt_col_person:'Person', pt_col_date:'Date', pt_col_type:'Type', pt_col_detail:'Detail', pt_col_status:'Status',
+    pt_type_retard:'⏰ Late', pt_type_tourniquet:'⚠ Turnstile',
+    pt_status_open:'Not processed', pt_status_done:'Processed',
+    pt_suspect_tooltip:'Suspect: early time with no (D+1) — possibly confused with the previous evening’s turnstile scan (night shift bug)',
+    pt_empty:'No anomaly', pt_render_error:'Display error: ',
+    pt_banner_open_suffix:' unprocessed anomaly(ies)', pt_banner_retards:' lateness(es)',
+    pt_banner_tourniquet:' turnstile anomaly(ies)', pt_banner_suspect:' suspect(s) (night bug)',
+    pt_none_open_filtered:'No unprocessed anomaly with these filters', pt_everyone:'everyone',
+    pt_confirm_mark1:'Mark ', pt_confirm_mark2:' anomaly(ies) as processed (', pt_confirm_mark3:') ?\nThis action is done in bulk and can be undone row by row afterwards.',
+    pt_firebase_unavailable:'Firebase connection unavailable',
+    pt_marked_done_suffix:' anomaly(ies) marked as processed',
+    pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
+    pt_modal_title:'Import Protime time records',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops',
+    arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana',
+    filter_all_fem:'All', arr_p5_moi:'P5 (me)', col_operator:'Operator',
+    arr_search_title:'Precise search', arr_search_from:'From',
+    arr_search_to:'To (optional — leave empty for a single day)',
+    arr_search_hour:'Hour (optional, only if "To" is empty)',
+    btn_search:'Search', btn_reset:'Reset',
+    arr_search_hint:'Single day: just fill in "From" (+ optional Hour, 30 min window). Range (e.g. several weekends): fill in "From" and "To".',
+    arr_freq_title:'Frequency per line', arr_with_reason_title:'Stops with reason', arr_all_reasons:'All reasons',
+    arr_compare_op_hint:'Average duration per operator for this reason — lets you compare',
+    arr_micro_title:'Micro-stops', arr_micro_show:'show detail', arr_micro_hide:'hide detail',
+    arr_no_data:'No data imported — use the "Import Grafana" button.',
+    arr_col_ligne:'Line', arr_col_with_reason:'With reason', arr_col_micro:'Micro-stops',
+    arr_col_date:'Date', arr_col_heure:'Hour', arr_col_duree:'Duration', arr_col_raison:'Reason',
+    arr_none_with_reason:'No stop with reason for this filter.',
+    arr_limited_to1:'Limited to the ', arr_limited_to2:' most recent (', arr_limited_to3:' in total)',
+    arr_micro_none:'No micro-stop for this filter.',
+    arr_micro_count_sep:' out of ', arr_micro_count_days:' day(s))',
+    arr_micro_col_number:'Count that day',
+    arr_toast_no_duplicates:'No duplicates found',
+    arr_confirm_delete1:'', arr_confirm_delete2:' item(s) to delete (duplicates + old non-aggregated micro-stops). Continue? This action is irreversible.',
+    arr_toast_deleting1:'Deleting ', arr_toast_deleting2:' duplicate(s)…',
+    arr_toast_deleted_suffix:' duplicate(s) deleted',
+    arr_toast_error_lot1:'Error on batch ', arr_toast_error_lot2:'/', arr_toast_error_lot3:': ',
+    arr_modal_title:'Import Inpak stops',
+    cmp_subtitle:'Compare the teams (P1 to P5) and operators against each other',
+    cmp_period_to:'To', cmp_all_lines:'All lines',
+    cmp_evolution_title:'Month-by-month evolution',
+    cmp_evolution_hint:'Average duration per month, to see whether it’s improving over time.',
+    cmp_team_title:'Comparison by team (P1 to P5)',
+    cmp_team_hint:'Average stop duration per team, for the selected reason and line.',
+    cmp_op_title:'Comparison by operator',
+    cmp_op_hint:'Click a team above to compare only its operators (e.g. only P1 vs P2 on weekdays).',
+    cmp_all_teams:'All teams',
+    cmp_resume_occ_suffix:' occurrence(s)', cmp_resume_of:' of "', cmp_resume_total:' — total time: ',
+    cmp_month_occurrences:' occurrence(s) that month',
+    br_title:'Bradford Score', br_subtitle:'S² × D — real time',
+    br_col_role:'Role', br_col_periods:'Periods', br_col_status:'Status',
+    br_tooltip_history:'View history', br_tooltip_comment:'Comment',
+    br_comment_prefix:'Comment — ', br_comment_last_mod:'Last modified: ', br_comment_by:' by ',
+    btn_save:'Save', br_comment_saved:'Comment saved', br_comment_deleted:'Comment deleted',
+    br_days_suffix_1:' day', br_days_suffix_n:' days', br_episode_badge:'Episode',
+    br_no_episode:'No sick episode in the last 365 days',
+    br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Days',
+    br_comment_label:'Comment', br_comment_placeholder:'Click to add a comment...',
+    br_history_title:'Episode history (365d)',
+    adm_title:'Administration', adm_subtitle:'Tools reserved for admin',
+    adm_fb_test_title:'Firebase reliability', adm_fb_test_btn:'Test connection',
+    adm_fb_rules_title:'Firebase user roles',
+    adm_migration_title:'Initial Firebase migration', adm_migration_status_none:'Not done',
+    adm_migration_btn:'Start migration',
+    adm_session_title:'Active session', adm_session_connected_as:'Logged in as: ', adm_session_role:'Role: ',
+    adm_excel_report_title:'Monthly Excel report', adm_excel_report_btn:'Generate Excel report',
+    adm_protime_import_title:'Import from Protime', adm_protime_status_none:'No import',
+    adm_btn_check:'Check', adm_btn_import_planning:'Import into planning',
+    adm_btn_purge_protime:'Purge all Protime absences',
+    adm_emp_mgmt_title:'Employee management', adm_btn_add:'+ Add',
+    adm_col_name:'Name', adm_col_group:'Group', adm_col_actions:'Actions',
+    adm_btn_edit:'Edit', adm_btn_remove:'Remove',
+    adm_emp_modal_add_title:'Add an employee', adm_emp_modal_edit_prefix:'Edit ',
+    adm_field_fullname:'Full name', adm_field_group:'Group', adm_field_role:'Role', adm_field_birthday:'Date of birth',
+    adm_placeholder_name:'First Last', adm_placeholder_role:'e.g.: Operator',
+    adm_err_name_required:'Name is required.', adm_err_role_required:'Role is required.',
+    adm_err_firebase_disconnected:'Firebase not connected.', adm_saving:'Saving...',
+    adm_toast_saved_suffix:' saved!',
+    adm_confirm_remove1:'Remove ', adm_confirm_remove2:' from the team? Their Bradford history will be kept.',
+    adm_toast_removed_suffix:' removed from the team',
+    err_generic_prefix:'Error: ',
+    month_0:'January', month_1:'February', month_2:'March', month_3:'April', month_4:'May', month_5:'June',
+    month_6:'July', month_7:'August', month_8:'September', month_9:'October', month_10:'November', month_11:'December',
+    arr_limited_days1:'Limited to the ', arr_limited_days2:' most recent days (', arr_limited_days3:' days in total)',
+    plan_section_extra:'Miscellaneous / Extra',
+    plan_row_extra_staff:'Extra staff', plan_row_ext_cleaner:'External cleaner', plan_row_note:'Note',
+    plan_notes_panel_title:'Planning notes',
+    extra_modal_title:'Extra staff', extra_name_ph:'Name', extra_add_btn:'+ Add', extra_save_btn:'Save changes',
+    extra_cancel_btn:'Cancel', extra_close_btn:'Close', extra_edit_title:'Edit', extra_remove_title:'Remove',
+    extra_empty_day:'Nothing added for this day',
+    note_modal_title:'Visible note', note_modal_hint:' — visible directly on the planning, no click needed',
+    note_placeholder:'Write a note visible on the planning...',
+    note_del_btn:'Delete', note_close_btn:'Cancel', note_save_btn:'Save'
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
 var MOIS_I18N={
   fr:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-  nl:['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December']
+  nl:['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'],
+  en:['January','February','March','April','May','June','July','August','September','October','November','December']
 };
 var MOIS_ABBR_I18N={
   fr:['jan','fév','mars','avr','mai','juin','juil','août','sep','oct','nov','déc'],
-  nl:['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
+  nl:['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'],
+  en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 };
-var DOW_ABBR_I18N={fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'], nl:['Zo','Ma','Di','Wo','Do','Vr','Za']};
-var DOW_FULL_I18N={fr:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'], nl:['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag']};
+var DOW_ABBR_I18N={fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'], nl:['Zo','Ma','Di','Wo','Do','Vr','Za'], en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']};
+var DOW_FULL_I18N={fr:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'], nl:['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'], en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']};
 var CMP2_MOIS_I18N={
   fr:['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'],
-  nl:['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+  nl:['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'],
+  en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 };
 function t(key){var d=I18N[LANG]||I18N.fr;return d[key]!==undefined?d[key]:(I18N.fr[key]!==undefined?I18N.fr[key]:key);}
+var LANG_ORDER=['fr','nl','en'];
+var LANG_TITLE={fr:'Français',nl:'Nederlands (Vlaanderen)',en:'English'};
+// Drapeaux en SVG inline (fiables sur tous les appareils, contrairement aux emojis drapeaux) :
+// NL = toujours le drapeau belge (noir/jaune/rouge), EN = toujours le drapeau d'Angleterre (croix de Saint-Georges).
+var LANG_FLAG_SVG={
+  fr:'<svg width="20" height="14" viewBox="0 0 3 2" style="display:block;border-radius:2px;overflow:hidden;flex:none"><rect width="1" height="2" fill="#0055A4"/><rect x="1" width="1" height="2" fill="#FFFFFF"/><rect x="2" width="1" height="2" fill="#EF4135"/></svg>',
+  nl:'<svg width="20" height="14" viewBox="0 0 3 2" style="display:block;border-radius:2px;overflow:hidden;flex:none"><rect width="1" height="2" fill="#000000"/><rect x="1" width="1" height="2" fill="#FDDA24"/><rect x="2" width="1" height="2" fill="#EF3340"/></svg>',
+  en:'<svg width="20" height="14" viewBox="0 0 30 20" style="display:block;border-radius:2px;overflow:hidden;flex:none"><rect width="30" height="20" fill="#FFFFFF"/><rect x="12" width="6" height="20" fill="#CE1124"/><rect y="7" width="30" height="6" fill="#CE1124"/></svg>'
+};
 function applyI18n(){ try { if(window.recAppliquerLangue) window.recAppliquerLangue(); } catch(e){}
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     var k=el.getAttribute('data-i18n');el.textContent=t(k);
@@ -730,7 +886,11 @@ function applyI18n(){ try { if(window.recAppliquerLangue) window.recAppliquerLan
     var k=el.getAttribute('data-i18n-ph');el.placeholder=t(k);
   });
   var lb=document.getElementById('lang-toggle');
-  if(lb)lb.textContent=LANG==='fr'?'NL':'FR';
+  if(lb){
+    lb.innerHTML=(LANG_FLAG_SVG[LANG]||'')+'<span>'+LANG.toUpperCase()+'</span>';
+    var next=LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length];
+    lb.title='→ '+(LANG_TITLE[next]||next);
+  }
 }
 function setLang(l){
   LANG=l;
@@ -750,7 +910,7 @@ function setLang(l){
   if(typeof buildBT==='function'&&document.getElementById('btable')&&currentUser&&currentUser.role==='admin')buildBT();
   if(typeof buildEmpTable==='function'&&document.getElementById('empTbody'))buildEmpTable();
 }
-function toggleLang(){setLang(LANG==='fr'?'nl':'fr');}
+function toggleLang(){setLang(LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length]);}
 var BD_PREV_STATUS={};
 var EMP=[{n:'Aurelien Turchi',g:'TL',r:'Team Leader'},{n:'Nicolas Fettu',g:'INPAK',r:'Coordinateur'},{n:'Julien Demuyter',g:'INPAK',r:'Coordinateur'},{n:'Mohamed Lalaoui',g:'INPAK',r:'Operateur'},{n:'Ramazani Abdulhassan',g:'INPAK',r:'Operateur'},{n:'Halima Laadi',g:'INPAK',r:'Operateur'},{n:'Hakkim Akkouh',g:'INPAK',r:'Operateur'},{n:'Balan Marius',g:'INPAK',r:'Operateur'},{n:'Lyse Musik',g:'INPAK',r:'Labo'},{n:'Max Secember',g:'Prod',r:'Production'},{n:'Larissa Fratutescu',g:'Prod',r:'Production'},{n:'Monir Salmi',g:'Unit',r:'Batter/Cleaning'},{n:'Anthony Raimondi',g:'Unit',r:'Inpak'},{n:'Brahim Akdim',g:'Unit',r:'Batter/Cleaning'},{n:'Lachen Baraik',g:'Unit',r:'Bulk'}];
 
@@ -1301,7 +1461,7 @@ function buildPT(){
   var d=x.d;
   var parts=d.split('/');
   var dt=new Date(Date.UTC(parseInt(curYear),parseInt(parts[1])-1,parseInt(parts[0])));
-  var days=['Di','Lu','Ma','Me','Je','Ve','Sa'];
+  var days=DOW_ABBR_I18N[LANG]||DOW_ABBR_I18N.fr;
   var dayLbl=days[dt.getUTCDay()];
   var isT=(col===ti);
   var hMap=curYear==='2027'?H2027:curYear==='2026'?H2026:H2025;
@@ -1313,7 +1473,7 @@ function buildPT(){
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?'Divers / Extra':g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc">'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc">'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
       var bd=EMP.find(function(e){return e.n===emp.n;});
       if(!bd||!bd.birthday) return false;
       var parts=bd.birthday.split('-');
@@ -1353,7 +1513,9 @@ function buildPT(){
       +'</td>';
     }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});tbl.querySelectorAll('.sp-note-dot').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openNoteEdit(p);});});renderNotesPanel(noteEntries);var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
 function rowLabel(n){
-  if(n==='Commentaire')return 'Personnel extra';
+  if(n==='Commentaire')return t('plan_row_extra_staff');
+  if(n==='Nettoyeur externe')return t('plan_row_ext_cleaner');
+  if(n==='Note')return t('plan_row_note');
   return n;
 }
 function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -1373,7 +1535,7 @@ function renderNotesPanel(entries){
   if(!panel)return;
   if(!entries||!entries.length){panel.style.display='none';panel.innerHTML='';return;}
   panel.style.display='flex';
-  panel.innerHTML='<div class="notes-panel-title">Notes du planning</div>'
+  panel.innerHTML='<div class="notes-panel-title">'+t('plan_notes_panel_title')+'</div>'
     +entries.map(function(e){
       return '<div class="note-card" data-n="Note" data-i="'+e.i+'">'
         +'<div class="note-card-date">'+e.d+'</div>'
@@ -1405,14 +1567,14 @@ function openNoteEditFor(nm,i){
   d.id='note-popup';
   d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:380px;max-width:95vw">'
-    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">Note visible</div>'
-    +'<div style="font-size:11px;color:var(--tx3);margin-bottom:14px">'+(allDates()[i]||'')+' &mdash; visible directement sur le planning, sans clic</div>'
-    +'<textarea id="note-txt" placeholder="Ecrire une note visible sur le planning..." style="width:100%;height:90px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+escHtml(cur)+'</textarea>'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">'+t('note_modal_title')+'</div>'
+    +'<div style="font-size:11px;color:var(--tx3);margin-bottom:14px">'+(allDates()[i]||'')+t('note_modal_hint')+'</div>'
+    +'<textarea id="note-txt" placeholder="'+t('note_placeholder')+'" style="width:100%;height:90px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+escHtml(cur)+'</textarea>'
     +'<div style="display:flex;justify-content:space-between;margin-top:16px">'
-    +'<button id="note-del-btn" style="padding:8px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:#ef4444;font-family:var(--fn);font-size:12px;cursor:pointer">Supprimer</button>'
+    +'<button id="note-del-btn" style="padding:8px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:#ef4444;font-family:var(--fn);font-size:12px;cursor:pointer">'+t('note_del_btn')+'</button>'
     +'<div style="display:flex;gap:8px">'
-    +'<button id="note-close-btn" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">Annuler</button>'
-    +'<button id="note-save-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;font-size:13px;cursor:pointer">Enregistrer</button>'
+    +'<button id="note-close-btn" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">'+t('note_close_btn')+'</button>'
+    +'<button id="note-save-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;font-size:13px;cursor:pointer">'+t('note_save_btn')+'</button>'
     +'</div></div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
@@ -1493,22 +1655,22 @@ function openExtraEdit(span){
   d.id='extra-popup';
   d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.innerHTML='<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:380px;max-width:95vw">'
-    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">Personnel extra</div>'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:2px">'+t('extra_modal_title')+'</div>'
     +'<div style="font-size:11px;color:var(--tx3);margin-bottom:14px">'+(allDates()[i]||'')+'</div>'
     +'<div id="extra-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>'
     +'<div style="display:flex;gap:6px">'
-    +'<input id="extra-nom" list="extra-hist" placeholder="Nom" style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:8px 10px">'
+    +'<input id="extra-nom" list="extra-hist" placeholder="'+t('extra_name_ph')+'" style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:8px 10px">'
     +'<datalist id="extra-hist">'+EXTRA_HIST.map(function(h){return '<option value="'+h.replace(/"/g,'&quot;')+'">';}).join('')+'</datalist>'
     +'<select id="extra-poste" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:8px 6px">'
     +OPTS.INPAK.map(function(o){return '<option value="'+o+'">'+sLbl(o)+'</option>';}).join('')
     +'</select>'
     +'</div>'
     +'<div style="display:flex;gap:6px;margin-top:8px">'
-    +'<button id="extra-add-btn" style="flex:1;padding:8px;border-radius:var(--r);border:1px dashed var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">+ Ajouter</button>'
-    +'<button id="extra-cancel-btn" style="display:none;padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer">Annuler</button>'
+    +'<button id="extra-add-btn" style="flex:1;padding:8px;border-radius:var(--r);border:1px dashed var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">'+t('extra_add_btn')+'</button>'
+    +'<button id="extra-cancel-btn" style="display:none;padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer">'+t('extra_cancel_btn')+'</button>'
     +'</div>'
     +'<div style="display:flex;justify-content:flex-end;margin-top:16px">'
-    +'<button id="extra-close-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Fermer</button>'
+    +'<button id="extra-close-btn" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('extra_close_btn')+'</button>'
     +'</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
@@ -1529,11 +1691,11 @@ function renderExtraList(){
     return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid '+(isEditing?'var(--blue)':'var(--bd2)')+';border-radius:8px;padding:6px 10px">'
       +'<span style="font-size:13px;color:var(--tx1)">'+w.n+(w.p?' <span style="color:var(--tx3);font-size:11px">('+sLbl(w.p)+')</span>':'')+'</span>'
       +'<span style="display:flex;gap:10px">'
-      +'<span data-idx="'+idx+'" class="extra-edit" title="Modifier" style="cursor:pointer;color:var(--tx3);font-size:13px;line-height:1;padding:0 2px">&#9998;</span>'
-      +'<span data-idx="'+idx+'" class="extra-rm" title="Supprimer" style="cursor:pointer;color:var(--tx3);font-size:16px;line-height:1;padding:0 2px">&times;</span>'
+      +'<span data-idx="'+idx+'" class="extra-edit" title="'+t('extra_edit_title')+'" style="cursor:pointer;color:var(--tx3);font-size:13px;line-height:1;padding:0 2px">&#9998;</span>'
+      +'<span data-idx="'+idx+'" class="extra-rm" title="'+t('extra_remove_title')+'" style="cursor:pointer;color:var(--tx3);font-size:16px;line-height:1;padding:0 2px">&times;</span>'
       +'</span>'
       +'</div>';
-  }).join(''):'<div style="font-size:12px;color:var(--tx3);font-style:italic;text-align:center;padding:8px 0">Aucun ajout pour ce jour</div>';
+  }).join(''):'<div style="font-size:12px;color:var(--tx3);font-style:italic;text-align:center;padding:8px 0">'+t('extra_empty_day')+'</div>';
   box.querySelectorAll('.extra-rm').forEach(function(btn){
     btn.addEventListener('click',function(){extraRemoveWorker(parseInt(btn.dataset.idx));});
   });
@@ -1551,7 +1713,7 @@ function extraStartEdit(idx){
   var nomEl=document.getElementById('extra-nom'),posteEl=document.getElementById('extra-poste'),btn=document.getElementById('extra-add-btn'),cancelEl=document.getElementById('extra-cancel-btn');
   nomEl.value=w.n;
   if(w.p)posteEl.value=w.p;
-  if(btn)btn.textContent='Enregistrer les modifications';
+  if(btn)btn.textContent=t('extra_save_btn');
   if(cancelEl)cancelEl.style.display='inline-block';
   renderExtraList();
   nomEl.focus();
@@ -1560,7 +1722,7 @@ function extraCancelEdit(){
   EXTRA_EDIT_IDX=-1;
   var nomEl=document.getElementById('extra-nom'),btn=document.getElementById('extra-add-btn'),cancelEl=document.getElementById('extra-cancel-btn');
   if(nomEl)nomEl.value='';
-  if(btn)btn.textContent='+ Ajouter';
+  if(btn)btn.textContent=t('extra_add_btn');
   if(cancelEl)cancelEl.style.display='none';
   renderExtraList();
 }
@@ -5165,7 +5327,9 @@ function goToSubnav(name){
     s.classList.toggle('on', s.id === 'rec-tab-'+name);
   });
 }
-var REC_LBL_NL = { 'Candidats': 'Kandidaten', '+ Entretien': '+ Gesprek', 'Analyse': 'Analyse', 'Candidats évalués': 'Beoordeelde kandidaten', 'Identité': 'Identiteit', 'Nom du candidat': 'Naam kandidaat', 'Date de l\'entretien': 'Datum gesprek', 'Poste vise': 'Functie', 'Unite': 'Unit', 'Regime horaire': 'Uurregeling', 'Evaluateur': 'Beoordelaar', 'Suite donnee': 'Resultaat', 'Employe lie (suivi a 12 mois)': 'Gelinkte medewerker', 'Annuler': 'Annuleren', 'Enregistrer': 'Opslaan', 'Verdict global de compatibilité': 'Algemeen besluit', 'Vérification des références — assiduité': 'Referentiecheck aanwezigheid', 'Comparer des candidats': 'Kandidaten vergelijken', 'Détail des scores': 'Detail van de scores', 'Distribution des notes par axe': 'Spreiding van de scores per as', 'Prediction contre realite': 'Voorspelling tegenover realiteit', 'Entonnoir de recrutement': 'Wervingsfunnel', 'Entretiens par mois': 'Gesprekken per maand', 'Grille d’évaluation': 'Evaluatieraster', 'Questionnaire imprimable (candidat)': 'Printbare vragenlijst (kandidaat)', 'Mode entretien (plein écran)': 'Gespreksmodus (volledig scherm)' }; function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-fr', el.textContent.trim()); return el.getAttribute('data-fr'); } window.recAppliquerLangue = function(){ var pane = document.getElementById('pane-recrutement'); if(!pane) return; var nl = (typeof LANG !== 'undefined' && LANG === 'nl'); pane.querySelectorAll('.cct, label, .rec-subtab, #rec-btn-annuler, #rec-btn-enregistrer').forEach(function(el){ var fr = recTexteFR(el); el.textContent = (nl && REC_LBL_NL[fr]) ? REC_LBL_NL[fr] : fr; }); var qi = QUESTIONNAIRE_I18N[nl ? 'nl' : 'fr']; if(qi && qi.axes){ pane.querySelectorAll('.rec-axe').forEach(function(div, i){ if(!qi.axes[i]) return; var tEl = div.querySelector('.rec-axe-titre'); var qEl = div.querySelector('.rec-axe-question'); if(tEl) tEl.textContent = qi.axes[i].titre; if(qEl) qEl.textContent = qi.axes[i].q; }); } }; function initSubnav(){
+var REC_LBL_NL = { 'Candidats': 'Kandidaten', '+ Entretien': '+ Gesprek', 'Analyse': 'Analyse', 'Candidats évalués': 'Beoordeelde kandidaten', 'Identité': 'Identiteit', 'Nom du candidat': 'Naam kandidaat', 'Date de l\'entretien': 'Datum gesprek', 'Poste vise': 'Functie', 'Unite': 'Unit', 'Regime horaire': 'Uurregeling', 'Evaluateur': 'Beoordelaar', 'Suite donnee': 'Resultaat', 'Employe lie (suivi a 12 mois)': 'Gelinkte medewerker', 'Annuler': 'Annuleren', 'Enregistrer': 'Opslaan', 'Verdict global de compatibilité': 'Algemeen besluit', 'Vérification des références — assiduité': 'Referentiecheck aanwezigheid', 'Comparer des candidats': 'Kandidaten vergelijken', 'Détail des scores': 'Detail van de scores', 'Distribution des notes par axe': 'Spreiding van de scores per as', 'Prediction contre realite': 'Voorspelling tegenover realiteit', 'Entonnoir de recrutement': 'Wervingsfunnel', 'Entretiens par mois': 'Gesprekken per maand', 'Grille d’évaluation': 'Evaluatieraster', 'Questionnaire imprimable (candidat)': 'Printbare vragenlijst (kandidaat)', 'Mode entretien (plein écran)': 'Gespreksmodus (volledig scherm)' };
+var REC_LBL_EN = { 'Candidats': 'Candidates', '+ Entretien': '+ Interview', 'Analyse': 'Analysis', 'Candidats évalués': 'Assessed candidates', 'Identité': 'Identity', 'Nom du candidat': 'Candidate name', 'Date de l\'entretien': 'Interview date', 'Poste vise': 'Target position', 'Unite': 'Unit', 'Regime horaire': 'Shift schedule', 'Evaluateur': 'Assessor', 'Suite donnee': 'Outcome', 'Employe lie (suivi a 12 mois)': 'Linked employee', 'Annuler': 'Cancel', 'Enregistrer': 'Save', 'Verdict global de compatibilité': 'Overall fit verdict', 'Vérification des références — assiduité': 'Reference check — attendance', 'Comparer des candidats': 'Compare candidates', 'Détail des scores': 'Score detail', 'Distribution des notes par axe': 'Score distribution per axis', 'Prediction contre realite': 'Prediction vs reality', 'Entonnoir de recrutement': 'Recruitment funnel', 'Entretiens par mois': 'Interviews per month', 'Grille d’évaluation': 'Assessment grid', 'Questionnaire imprimable (candidat)': 'Printable questionnaire (candidate)', 'Mode entretien (plein écran)': 'Interview mode (full screen)' };
+function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-fr', el.textContent.trim()); return el.getAttribute('data-fr'); } window.recAppliquerLangue = function(){ var pane = document.getElementById('pane-recrutement'); if(!pane) return; var l = (typeof LANG !== 'undefined' ? LANG : 'fr'); var recLbl = l === 'nl' ? REC_LBL_NL : (l === 'en' ? REC_LBL_EN : null); pane.querySelectorAll('.cct, label, .rec-subtab, #rec-btn-annuler, #rec-btn-enregistrer').forEach(function(el){ var fr = recTexteFR(el); el.textContent = (recLbl && recLbl[fr]) ? recLbl[fr] : fr; }); var qi = QUESTIONNAIRE_I18N[l] || QUESTIONNAIRE_I18N.fr; if(qi && qi.axes){ pane.querySelectorAll('.rec-axe').forEach(function(div, i){ if(!qi.axes[i]) return; var tEl = div.querySelector('.rec-axe-titre'); var qEl = div.querySelector('.rec-axe-question'); if(tEl) tEl.textContent = qi.axes[i].titre; if(qEl) qEl.textContent = qi.axes[i].q; }); } }; function initSubnav(){
   document.querySelectorAll('#pane-recrutement .rec-subtab').forEach(function(btn){
     btn.addEventListener('click', function(){ goToSubnav(btn.dataset.recsub); });
   });
