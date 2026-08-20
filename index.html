@@ -53,6 +53,7 @@
     <button class="tab" data-tab="br">&#9673; <span data-i18n="tab_br">Bradford</span></button>
     <button class="tab" data-tab="pl">&#9638; <span data-i18n="tab_pl">Planning</span></button>
     <button class="tab" data-tab="ab">&#9675; <span data-i18n="tab_ab">Absences</span></button>
+    <button class="tab" id="tab-formations-btn" data-tab="formations">&#127891; <span>Formations</span></button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; <span data-i18n="tab_pt">Pointages</span></button>
     <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; <span data-i18n="tab_arrets">Arrets Inpak</span></button>
     <button class="tab" id="tab-cmp2-btn" data-tab="cmp2" style="display:none">&#128101; <span data-i18n="tab_cmp2">Comparaison</span></button>
@@ -65,6 +66,7 @@
     <div class="pane on" id="pane-ov">
       <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" data-i18n="ov_subtitle">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
       <div id="birthday-notif" style="display:none;align-items:center;gap:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
+<div id="formation-notif" style="display:none;align-items:center;gap:14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
       <div class="kgrid">
         <div class="kcard bl"><div class="klbl" data-i18n="ov_kcard_team">Equipe</div><div class="kval">15</div><div class="kmeta">TL + INPAK + Prod + Unit</div></div>
         <div class="kcard gn"><div class="klbl">Score &le; 50</div><div class="kval" id="k-ok">-</div><div class="kmeta" id="k-okp">-</div></div>
@@ -78,6 +80,7 @@
       </div>
       <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_days_per_emp">Jours d&rsquo;absence par employ&eacute;</div></div><div class="cw" style="height:220px"><canvas id="cJour"></canvas></div></div>
       <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" data-i18n="ov_next30_title">Absences &mdash; 30 prochains jours</div></div><div id="mini-cal" style="padding:0 4px"></div></div>
+<div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127891; Formations a venir</div></div><div id="mini-cal-formations" style="padding:0 4px"></div></div>
       <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="today-abs-title" data-i18n="ov_today_prefix">Absents aujourd'hui</div></div><div id="today-abs" style="padding:4px"></div></div>
       <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127874; <span data-i18n="ov_birthdays_title">Anniversaires à venir</span></div></div><div id="birthday-cal" style="padding:4px"></div></div>
     </div>
@@ -148,6 +151,12 @@
         <div class="agrid" id="agrid"></div>
       </div>
     </div>
+    
+    <div class="pane" id="pane-formations">
+<div class="sh"><div class="st">Formations</div><div class="ss">Planification et rappels des formations du personnel</div><button id="form-btn-add" onclick="openFormationModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">+ Nouvelle formation</button></div>
+<div class="cc"><div class="cch"><div class="cct">A venir</div></div><div id="form-liste-avenir"></div></div>
+<div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">Passees</div></div><div id="form-liste-passees"></div></div>
+</div>
     <!-- ADMIN -->
     <div class="pane" id="pane-admin">
       <div class="sh"><div class="st" data-i18n="adm_title">Administration</div><div class="ss" data-i18n="adm_subtitle">Outils reserves a l'admin</div></div>
@@ -779,7 +788,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=16"></script>
+  <script src="js/app.js?v=17"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
@@ -832,5 +841,32 @@
   </div>
 </div>
 
+
+<div id="formation-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center" onclick="if(event.target===this)closeFormationModal()">
+<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw;max-height:88vh;overflow:auto">
+<div style="font-weight:700;font-size:15px;margin-bottom:16px" id="formation-modal-title">Nouvelle formation</div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Titre</label>
+<input type="text" id="form-f-titre" placeholder="Ex: Formation securite incendie" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);margin-bottom:12px">
+<div style="display:flex;gap:10px;margin-bottom:12px">
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Date</label><input type="date" id="form-f-date" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Heure debut</label><input type="time" id="form-f-heure-debut" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Heure fin</label><input type="time" id="form-f-heure-fin" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+</div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Lieu / formateur (optionnel)</label>
+<input type="text" id="form-f-lieu" placeholder="Ex: Salle de reunion, formateur externe..." style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);margin-bottom:12px">
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Employes concernes</label>
+<div id="form-f-employes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Notes (optionnel)</label>
+<textarea id="form-f-notes" placeholder="Details, materiel a prevoir..." style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);resize:vertical;min-height:56px;margin-bottom:14px"></textarea>
+<div id="formation-modal-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-bottom:6px"></div>
+<div style="display:flex;gap:10px;justify-content:space-between;align-items:center">
+<button id="form-btn-delete" onclick="deleteFormation()" style="display:none;padding:8px 16px;border-radius:var(--r);border:1px solid rgba(239,68,68,.4);background:none;color:#ef4444;font-family:var(--fn);font-size:12px;cursor:pointer">Supprimer</button>
+<div style="display:flex;gap:10px;margin-left:auto">
+<button onclick="closeFormationModal()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>
+<button onclick="saveFormation()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>7
