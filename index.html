@@ -178,8 +178,11 @@
 {<br>
 &nbsp;&nbsp;"rules": {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"users": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$uid": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;},<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"employees": {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
@@ -793,7 +796,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=19"></script>
+  <script src="js/app.js?v=20"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
