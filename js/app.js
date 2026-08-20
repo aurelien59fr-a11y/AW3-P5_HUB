@@ -2722,16 +2722,18 @@ function startApp(){
       buildMiniCalFormations();
       checkFormationNotif();
     });
-  // Charger comptes employes depuis Firebase
-  db.ref('users').on('value', function(snap){
-    var data = snap.val() || {};
-    ACCOUNTS = {};
-    Object.keys(data).forEach(function(uid){
-      var u = data[uid];
-      if(u && u.employeId) ACCOUNTS[u.employeId] = {uid: uid, role: u.role, email: u.email};
+  // Charger comptes employes depuis Firebase (admin uniquement, cote regles Firebase)
+  if(currentUser && currentUser.role === 'admin'){
+    db.ref('users').on('value', function(snap){
+      var data = snap.val() || {};
+      ACCOUNTS = {};
+      Object.keys(data).forEach(function(uid){
+        var u = data[uid];
+        if(u && u.employeId) ACCOUNTS[u.employeId] = {uid: uid, role: u.role, email: u.email};
+      });
+      buildComptesEmpListe();
     });
-    buildComptesEmpListe();
-  });
+  }
 // Charger shifts 2025
     db.ref('planning/shifts2025').once('value').then(function(snap){
       var data=snap.val();
