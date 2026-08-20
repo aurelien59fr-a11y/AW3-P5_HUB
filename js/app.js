@@ -1869,7 +1869,7 @@ popup.style.top=top+'px';
 popup.querySelectorAll('.popt').forEach(function(o){o.addEventListener('click',function(){applyShift(o.dataset.v);});});popup.querySelector('.pcancel').addEventListener('click',closePopup);}
 function closePopup(){if(popup)popup.style.display='none';activePill=null;}
 document.addEventListener('click',function(e){if(popup&&!popup.contains(e.target))closePopup();});
-function canEdit(){if(!currentUser){toast('Non connecte','#ef4444');return false;}if(currentUser.role==='admin'||currentUser.role==='subchef'){return true;}toast('Acces non autorise','#ef4444');return false;}
+function canEdit(){if(!currentUser){toast('Non connecte','#ef4444');return false;}if(currentUser.role==='admin'||currentUser.role==='subchef'||currentUser.editPlanning){return true;}toast('Acces non autorise','#ef4444');return false;}
 function applyShift(nv){
   if(!activePill)return;
   if(!canEdit())return;
@@ -2089,6 +2089,30 @@ function applyRole(role){
   var formAddBtn = document.getElementById('form-btn-add');
   if(formAddBtn) formAddBtn.style.display = canEditFormations ? 'inline-flex' : 'none';
 
+  // Acces personnalise par onglet (defini par l'admin dans Comptes employes)
+  if(!isAdmin && role !== 'subchef' && currentUser && currentUser.tabs){
+    var tCfg = currentUser.tabs;
+    ['ov','br','pl','ab','formations','pt','arrets','cmp2','ncp','recrutement'].forEach(function(t){
+      var tBtn = document.querySelector('.tab[data-tab="'+t+'"]');
+      if(tBtn) tBtn.style.display = tCfg[t] ? 'flex' : 'none';
+    });
+    var badge2 = document.getElementById('role-badge');
+    if(badge2){
+      badge2.textContent='Accès personnalisé';
+      badge2.style.background='rgba(249,115,22,.15)';
+      badge2.style.color='var(--orange)';
+      badge2.style.borderColor='rgba(249,115,22,.3)';
+    }
+    var activeTabBtn2 = document.querySelector('.tab.on');
+    if(activeTabBtn2 && !tCfg[activeTabBtn2.dataset.tab]){
+      var order2 = ['pl','ov','formations','br','ab','pt','arrets','cmp2','ncp','recrutement'];
+      var firstOk = null;
+      for(var i2=0;i2<order2.length;i2++){ if(tCfg[order2[i2]]){ firstOk = order2[i2]; break; } }
+      var firstBtn = firstOk && document.querySelector('.tab[data-tab="'+firstOk+'"]');
+      if(firstBtn) firstBtn.click();
+    }
+  }
+
 
   // Email dans panneau admin
   var ae = document.getElementById('admin-email-display');
@@ -2154,7 +2178,7 @@ function applyRole(role){
 function canEdit(){
   if(!currentUser){toast('Non connecte','#ef4444');return false;}
   // Admin et sous-chef peuvent modifier le planning
-  if(currentUser.role==='admin'||currentUser.role==='subchef') return true;
+  if(currentUser.role==='admin'||currentUser.role==='subchef'||currentUser.editPlanning) return true;
   toast('Acces non autorise','#ef4444');
   return false;
 }
@@ -2304,7 +2328,7 @@ window.addEventListener('load',function(){
   var cfg={apiKey:"AIzaSyAexVCEfVxmShZ-m7xFAVfk9AzReBi2WTQ",authDomain:"aw3-p5-hub.firebaseapp.com",databaseURL:"https://aw3-p5-hub-default-rtdb.europe-west1.firebasedatabase.app",projectId:"aw3-p5-hub",storageBucket:"aw3-p5-hub.firebasestorage.app",messagingSenderId:"685884843934",appId:"1:685884843934:web:ab8f7b8e362959f1ab988f"};
   var app;try{app=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(cfg);}catch(e){app=firebase.app();}
   firebase.auth(app).onAuthStateChanged(function(user){
-    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid+'/role').once('value').then(function(snap){var role=snap.val()||'subchef';console.log('[DIAGNOSTIC] UID connecte :', user.uid, '| role lu depuis Firebase :', JSON.stringify(snap.val()), '| role applique :', role);currentUser.role=role;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
+    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid).once('value').then(function(snap){var uRec=snap.val()||{};var role=uRec.role||'subchef';console.log('[DIAGNOSTIC] UID connecte :', user.uid, '| donnees lues depuis Firebase :', JSON.stringify(uRec), '| role applique :', role);currentUser.role=role;currentUser.tabs=uRec.tabs||null;currentUser.editPlanning=!!uRec.editPlanning;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
     else{document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
   });
 });
@@ -6182,11 +6206,14 @@ function deleteFormation(){
 }
 
 
-function posteVersRole(poste){
-  if(poste === 'Team Leader') return 'admin';
-  if(poste === 'Coordinateur') return 'visiteur';
-  return 'employe';
+function posteVersPermissions(poste){
+  if(poste === 'Team Leader') return {role:'admin', tabs:null, editPlanning:false};
+  if(poste === 'Coordinateur') return {role:'custom', tabs:{ov:true,br:true,pl:true,ab:true,formations:true,pt:false,arrets:true,cmp2:false,ncp:true,recrutement:false}, editPlanning:true};
+  return {role:'custom', tabs:{ov:false,br:false,pl:true,ab:false,formations:true,pt:false,arrets:false,cmp2:false,ncp:false,recrutement:false}, editPlanning:false};
 }
+
+var ALL_TABS = ['ov','br','pl','ab','formations','pt','arrets','cmp2','ncp','recrutement'];
+var TAB_LABELS = {ov:'Vue d\'ensemble', br:'Bradford', pl:'Planning', ab:'Absences', formations:'Formations', pt:'Pointages', arrets:'Arrêts Inpak', cmp2:'CMP2', ncp:'NCP Qualité', recrutement:'Recrutement'};
 
 function genLoginInterne(nomComplet){
   var parts = (nomComplet||'').trim().split(/\s+/);
@@ -6204,41 +6231,73 @@ function genLoginInterne(nomComplet){
 function buildComptesEmpListe(){
   var cont = document.getElementById('comptes-emp-liste');
   if(!cont) return;
-  var roleLabels = {admin:'Administrateur', subchef:'Sous-chef', visiteur:'Coordinateur (lecture seule)', employe:'Employé'};
   var items = EMP.filter(function(e){ return e.id; });
   if(!items.length){ cont.innerHTML = '<div style="color:var(--tx2);padding:12px">Aucun employé Firebase trouvé.</div>'; return; }
   cont.innerHTML = items.map(function(e){
     var acc = ACCOUNTS[e.id];
-    var proposedRole = posteVersRole(e.r);
+    var perm = posteVersPermissions(e.r);
     var rowId = 'cpt-'+e.id;
     if(acc){
+      var accLabel = acc.role === 'admin' ? 'Administrateur' : (acc.role === 'subchef' ? 'Sous-chef' : 'Accès personnalisé');
       return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
-        +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+(roleLabels[acc.role]||acc.role)+'</div></div>'
+        +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+accLabel+'</div></div>'
         +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; Compte actif</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span></div>'
         +'</div>';
     }
-    return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px" id="'+rowId+'">'
+    var tabsHtml = ALL_TABS.map(function(t){
+      var checked = perm.tabs && perm.tabs[t] ? ' checked' : '';
+      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2);margin-right:10px;margin-bottom:4px"><input type="checkbox" id="'+rowId+'-tab-'+t+'"'+checked+' style="accent-color:var(--blue)">'+TAB_LABELS[t]+'</label>';
+    }).join('');
+    return '<div class="cc" style="margin-bottom:8px;padding:12px 16px" id="'+rowId+'">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">'
       +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<select id="'+rowId+'-role" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
-      +'<option value="employe"'+(proposedRole==='employe'?' selected':'')+'>Employé (Planning + Formations)</option>'
-      +'<option value="visiteur"'+(proposedRole==='visiteur'?' selected':'')+'>Coordinateur (lecture seule)</option>'
-      +'<option value="subchef"'+(proposedRole==='subchef'?' selected':'')+'>Sous-chef</option>'
-      +'<option value="admin"'+(proposedRole==='admin'?' selected':'')+'>Administrateur</option>'
+      +'<select id="'+rowId+'-role" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
+      +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>Accès personnalisé</option>'
+      +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>Sous-chef</option>'
+      +'<option value="admin"'+(perm.role==='admin'?' selected':'')+'>Administrateur</option>'
       +'</select>'
       +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:12px;cursor:pointer">Créer un compte</button>'
-      +'</div></div>';
+      +'</div></div>'
+      +'<div id="'+rowId+'-permpanel" style="display:'+(perm.role==='custom'?'block':'none')+';padding-top:8px;border-top:1px solid var(--bd)">'
+      +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
+      +'<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)"><input type="checkbox" id="'+rowId+'-editplanning"'+(perm.editPlanning?' checked':'')+' style="accent-color:var(--blue)">Peut modifier le planning</label>'
+      +'</div>'
+      +'</div>';
   }).join('');
+}
+
+function toggleComptePermPanel(empId){
+  var sel = document.getElementById('cpt-'+empId+'-role');
+  var panel = document.getElementById('cpt-'+empId+'-permpanel');
+  if(!sel || !panel) return;
+  panel.style.display = sel.value === 'custom' ? 'block' : 'none';
 }
 
 function creerCompteEmployeUI(empId){
   var emp = EMP.find(function(e){ return e.id === empId; });
   if(!emp) return;
-  var sel = document.getElementById('cpt-'+empId+'-role');
-  var role = sel ? sel.value : posteVersRole(emp.r);
+  var rowId = 'cpt-'+empId;
+  var sel = document.getElementById(rowId+'-role');
+  var role = sel ? sel.value : 'custom';
+  var tabs = null, editPlanning = false;
+  if(role === 'custom'){
+    tabs = {};
+    ALL_TABS.forEach(function(t){
+      var cb = document.getElementById(rowId+'-tab-'+t);
+      tabs[t] = !!(cb && cb.checked);
+    });
+    var epCb = document.getElementById(rowId+'-editplanning');
+    editPlanning = !!(epCb && epCb.checked);
+  }
   var login = genLoginInterne(emp.n);
-  if(!confirm('Créer le compte pour '+emp.n+' ?\n\nEmail : '+login.email+'\nMot de passe : '+login.password+'\nRôle : '+role)) return;
-  creerCompteEmploye(emp, role, login).then(function(res){
+  var recap = 'Créer le compte pour '+emp.n+' ?\n\nEmail : '+login.email+'\nMot de passe : '+login.password+'\nRôle : '+(role==='admin'?'Administrateur':(role==='subchef'?'Sous-chef':'Accès personnalisé'));
+  if(role === 'custom'){
+    recap += '\nOnglets : '+ALL_TABS.filter(function(t){return tabs[t];}).map(function(t){return TAB_LABELS[t];}).join(', ');
+    recap += '\nModifier planning : '+(editPlanning?'Oui':'Non');
+  }
+  if(!confirm(recap)) return;
+  creerCompteEmploye(emp, role, login, tabs, editPlanning).then(function(res){
     toast('Compte créé pour '+emp.n, '#10b981');
     alert('Compte créé !\n\nEmail : '+res.email+'\nMot de passe : '+res.password+'\n\nCommunique ces identifiants à '+emp.n+'.');
   }).catch(function(err){
@@ -6247,7 +6306,7 @@ function creerCompteEmployeUI(empId){
   });
 }
 
-function creerCompteEmploye(emp, role, login){
+function creerCompteEmploye(emp, role, login, tabs, editPlanning){
   login = login || genLoginInterne(emp.n);
   var secApp;
   try{ secApp = firebase.app('Secondary'); }
@@ -6256,13 +6315,18 @@ function creerCompteEmploye(emp, role, login){
   return secAuth.createUserWithEmailAndPassword(login.email, login.password).then(function(cred){
     var uid = cred.user.uid;
     return secAuth.signOut().then(function(){
-      return db.ref('users/'+uid).set({
+      var rec = {
         role: role,
         email: login.email,
         employeId: emp.id,
         nom: emp.n,
         createdAt: Date.now()
-      });
+      };
+      if(role === 'custom'){
+        rec.tabs = tabs || {};
+        rec.editPlanning = !!editPlanning;
+      }
+      return db.ref('users/'+uid).set(rec);
     }).then(function(){
       return db.ref('employees/'+emp.id+'/accountUid').set(uid);
     }).then(function(){
