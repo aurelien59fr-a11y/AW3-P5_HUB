@@ -925,6 +925,7 @@ function setLang(l){
 }
 function toggleLang(){setLang(LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length]);}
 var BD_PREV_STATUS={};
+var ACCOUNTS={};
 var FORMATIONS=[];
 var formationEditId=null;
 var canEditFormations=false;
@@ -2018,6 +2019,7 @@ function applyRole(role){
   var isAdmin = role === 'admin';
   var isSubchef = role === 'subchef';
   var isVisiteur = role === 'visiteur';
+  var isEmploye = role === 'employe';
 
   // Toujours repartir d'un etat "tout visible" avant d'appliquer les
   // restrictions du role courant — indispensable si on change de compte
@@ -2029,6 +2031,19 @@ function applyRole(role){
     var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
     if(btn) btn.style.display = 'flex';
   });
+
+  // Employe — acces limite a Planning + Formations
+  if(isEmploye){
+    ['ov','br','ab'].forEach(function(tab){
+      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+      if(btn) btn.style.display = 'none';
+    });
+    var activeTabBtn = document.querySelector('.tab.on');
+    if(activeTabBtn && activeTabBtn.dataset.tab !== 'pl' && activeTabBtn.dataset.tab !== 'formations'){
+      var plBtn = document.querySelector('.tab[data-tab="pl"]');
+      if(plBtn) plBtn.click();
+    }
+  }
 
   // Badge role
   var badge = document.getElementById('role-badge');
@@ -2043,6 +2058,11 @@ function applyRole(role){
       badge.style.background='rgba(139,146,164,.15)';
       badge.style.color='var(--tx2)';
       badge.style.borderColor='rgba(139,146,164,.3)';
+    } else if(isEmploye){
+      badge.textContent='Employé';
+      badge.style.background='rgba(249,115,22,.15)';
+      badge.style.color='var(--orange)';
+      badge.style.borderColor='rgba(249,115,22,.3)';
     } else {
       badge.textContent='Sous-chef';
       badge.style.background='rgba(59,130,246,.15)';
@@ -2678,6 +2698,16 @@ function startApp(){
       buildMiniCalFormations();
       checkFormationNotif();
     });
+  // Charger comptes employes depuis Firebase
+  db.ref('users').on('value', function(snap){
+    var data = snap.val() || {};
+    ACCOUNTS = {};
+    Object.keys(data).forEach(function(uid){
+      var u = data[uid];
+      if(u && u.employeId) ACCOUNTS[u.employeId] = {uid: uid, role: u.role, email: u.email};
+    });
+    buildComptesEmpListe();
+  });
 // Charger shifts 2025
     db.ref('planning/shifts2025').once('value').then(function(snap){
       var data=snap.val();
@@ -6148,5 +6178,95 @@ function deleteFormation(){
   db.ref('formations/'+formationEditId).remove().then(function(){
     toast('Formation supprimee', '#ef4444');
     closeFormationModal();
+  });
+}
+
+
+function posteVersRole(poste){
+  if(poste === 'Team Leader') return 'admin';
+  if(poste === 'Coordinateur') return 'visiteur';
+  return 'employe';
+}
+
+function genLoginInterne(nomComplet){
+  var parts = (nomComplet||'').trim().split(/\s+/);
+  var prenom = parts[0] || '';
+  var nom = parts.slice(1).join(' ') || prenom;
+  function strip(s){
+    return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+  }
+  var p = strip(prenom), n = strip(nom);
+  var email = (p||'x')+'.'+(n||'x')+'@aw3p5.local';
+  var pass = (p.charAt(0)||'x')+(p.charAt(p.length-1)||'x')+(n.charAt(0)||'x')+(n.charAt(n.length-1)||'x');
+  return {email: email, password: pass};
+}
+
+function buildComptesEmpListe(){
+  var cont = document.getElementById('comptes-emp-liste');
+  if(!cont) return;
+  var roleLabels = {admin:'Administrateur', subchef:'Sous-chef', visiteur:'Coordinateur (lecture seule)', employe:'Employé'};
+  var items = EMP.filter(function(e){ return e.id; });
+  if(!items.length){ cont.innerHTML = '<div style="color:var(--tx2);padding:12px">Aucun employé Firebase trouvé.</div>'; return; }
+  cont.innerHTML = items.map(function(e){
+    var acc = ACCOUNTS[e.id];
+    var proposedRole = posteVersRole(e.r);
+    var rowId = 'cpt-'+e.id;
+    if(acc){
+      return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
+        +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+(roleLabels[acc.role]||acc.role)+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; Compte actif</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span></div>'
+        +'</div>';
+    }
+    return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px" id="'+rowId+'">'
+      +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<select id="'+rowId+'-role" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
+      +'<option value="employe"'+(proposedRole==='employe'?' selected':'')+'>Employé (Planning + Formations)</option>'
+      +'<option value="visiteur"'+(proposedRole==='visiteur'?' selected':'')+'>Coordinateur (lecture seule)</option>'
+      +'<option value="subchef"'+(proposedRole==='subchef'?' selected':'')+'>Sous-chef</option>'
+      +'<option value="admin"'+(proposedRole==='admin'?' selected':'')+'>Administrateur</option>'
+      +'</select>'
+      +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:12px;cursor:pointer">Créer un compte</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function creerCompteEmployeUI(empId){
+  var emp = EMP.find(function(e){ return e.id === empId; });
+  if(!emp) return;
+  var sel = document.getElementById('cpt-'+empId+'-role');
+  var role = sel ? sel.value : posteVersRole(emp.r);
+  var login = genLoginInterne(emp.n);
+  if(!confirm('Créer le compte pour '+emp.n+' ?\n\nEmail : '+login.email+'\nMot de passe : '+login.password+'\nRôle : '+role)) return;
+  creerCompteEmploye(emp, role, login).then(function(res){
+    toast('Compte créé pour '+emp.n, '#10b981');
+    alert('Compte créé !\n\nEmail : '+res.email+'\nMot de passe : '+res.password+'\n\nCommunique ces identifiants à '+emp.n+'.');
+  }).catch(function(err){
+    console.error('[COMPTES] Erreur creation compte :', err);
+    toast('Erreur création compte : '+(err && err.message ? err.message : err), '#ef4444');
+  });
+}
+
+function creerCompteEmploye(emp, role, login){
+  login = login || genLoginInterne(emp.n);
+  var secApp;
+  try{ secApp = firebase.app('Secondary'); }
+  catch(e){ secApp = firebase.initializeApp(firebase.app().options, 'Secondary'); }
+  var secAuth = secApp.auth();
+  return secAuth.createUserWithEmailAndPassword(login.email, login.password).then(function(cred){
+    var uid = cred.user.uid;
+    return secAuth.signOut().then(function(){
+      return db.ref('users/'+uid).set({
+        role: role,
+        email: login.email,
+        employeId: emp.id,
+        nom: emp.n,
+        createdAt: Date.now()
+      });
+    }).then(function(){
+      return db.ref('employees/'+emp.id+'/accountUid').set(uid);
+    }).then(function(){
+      return {email: login.email, password: login.password, uid: uid};
+    });
   });
 }
