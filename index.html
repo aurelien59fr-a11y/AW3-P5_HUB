@@ -56,7 +56,6 @@
     <button class="tab" id="tab-formations-btn" data-tab="formations">&#127891; <span>Formations</span></button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; <span data-i18n="tab_pt">Pointages</span></button>
     <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; <span data-i18n="tab_arrets">Arrets Inpak</span></button>
-    <button class="tab" id="tab-cmp2-btn" data-tab="cmp2" style="display:none">&#128101; <span data-i18n="tab_cmp2">Comparaison</span></button>
     <button class="tab" id="tab-ncp-btn" data-tab="ncp" style="display:none">&#9888; NCP Qualite</button>
     <button class="tab" id="tab-recrutement-btn" data-tab="recrutement" style="display:none">&#128100; <span>Recrutement</span></button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; <span data-i18n="tab_admin">Admin</span></button>
@@ -466,70 +465,15 @@
         <div id="arrets-resume-wrap"></div>
       </div>
 
-      <!-- Arrets avec raison -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
-        <div style="margin-bottom:12px">
+      <!-- Raison (filtre partage avec les graphiques ci-dessous) -->
+<div style="margin-bottom:12px">
           <select id="arrets-raison-select" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
             <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
           </select>
         </div>
-        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
-        <div id="arrets-compar-op-wrap" style="display:none;margin-bottom:16px">
-          <div style="font-size:12px;color:var(--tx3);margin-bottom:8px" data-i18n="arr_compare_op_hint">Duree moyenne par operateur pour cette raison — te permet de comparer</div>
-          <div style="height:240px"><canvas id="arretsComparOpChart"></canvas></div>
-        </div>
-        <div id="arrets-raison-wrap"></div>
-      </div>
 
-      <!-- Microstops -->
-      <div class="cc">
-        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
-          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
-        </div>
-        <div id="arrets-micro-wrap" style="display:none"></div>
-      </div>
-    </div>
-
-    <!-- COMPARAISON -->
-    <div class="pane" id="pane-cmp2">
-      <div class="sh">
-        <div class="st" data-i18n="tab_cmp2">Comparaison</div>
-        <div class="ss" data-i18n="cmp_subtitle">Compare les equipes (P1 a P5) et les operateurs entre eux</div>
-      </div>
-
-      <!-- Periode -->
-      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
-        <div class="li-field">
-          <label class="li-label" data-i18n="arr_search_from">Du</label>
-          <input type="date" id="cmp2-date-debut" class="li-input" onchange="buildComparaisonTab()">
-        </div>
-        <div class="li-field">
-          <label class="li-label" data-i18n="cmp_period_to">Au</label>
-          <input type="date" id="cmp2-date-fin" class="li-input" onchange="buildComparaisonTab()">
-        </div>
-        <button onclick="document.getElementById('cmp2-date-debut').value='';document.getElementById('cmp2-date-fin').value='';buildComparaisonTab()" style="padding:9px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="btn_reset">Reinitialiser</button>
-      </div>
-
-      <!-- Raison -->
-      <div style="margin-bottom:16px">
-        <select id="cmp2-raison-select" onchange="buildComparaisonTab()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
-          <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
-        </select>
-      </div>
-
-      <!-- Filtre ligne -->
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="cmp2-filtre-ligne">
-        <button class="cmp2-ligne-btn on" data-ligne="all" onclick="filtrerCmp2Ligne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="cmp_all_lines">Toutes les lignes</button>
-        <button class="cmp2-ligne-btn" data-ligne="31" onclick="filtrerCmp2Ligne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
-        <button class="cmp2-ligne-btn" data-ligne="32" onclick="filtrerCmp2Ligne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
-        <button class="cmp2-ligne-btn" data-ligne="33" onclick="filtrerCmp2Ligne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
-        <button class="cmp2-ligne-btn" data-ligne="34" onclick="filtrerCmp2Ligne('34')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 34</button>
-        <button class="cmp2-ligne-btn" data-ligne="35" onclick="filtrerCmp2Ligne('35')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 35</button>
-        <button class="cmp2-ligne-btn" data-ligne="36" onclick="filtrerCmp2Ligne('36')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 36</button>
-      </div>
-
-      <div id="cmp2-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx1)"></div>
+<!-- Comparaison equipes / operateurs (fusionne avec Comparaison) -->
+<div id="cmp2-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx1)"></div>
 
       <!-- Evolution dans le temps (mois par mois) -->
       <div class="cc" style="margin-bottom:16px">
@@ -558,6 +502,23 @@
           <button class="cmp2-equipe-op-btn" data-equipe="P5" onclick="filtrerCmp2EquipeOp('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
         </div>
         <div style="height:260px"><canvas id="cmp2OperateurChart"></canvas></div>
+      </div>
+
+
+<!-- Arrets avec raison -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        
+        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
+        <div id="arrets-raison-wrap"></div>
+      </div>
+
+      <!-- Microstops -->
+      <div class="cc">
+        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
+          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
+        </div>
+        <div id="arrets-micro-wrap" style="display:none"></div>
       </div>
     </div>
 
@@ -809,7 +770,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
