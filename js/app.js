@@ -3886,6 +3886,7 @@ function importerArretsInpak(){
 function filtrerArretsRaison(){
   ARRETS_RAISON_FILTRE = document.getElementById('arrets-raison-select').value || 'all';
   buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
 var ARRETS_OPERATEURS_FILTRE = {}; // {} = tous, sinon {nom: true, ...} = seulement ceux-la
@@ -3944,6 +3945,7 @@ function filtrerArretsLigne(ligne){
     b.style.borderColor = actif ? 'var(--blue)' : 'var(--bd2)';
   });
   buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
 var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', P5:'#10b981' };
@@ -3959,6 +3961,7 @@ function filtrerArretsEquipe(equipe){
     b.style.borderColor = coul;
   });
   buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
 function rechercherArrets(){
@@ -3966,6 +3969,7 @@ function rechercherArrets(){
   ARRETS_DATE_FIN_FILTRE = document.getElementById('arrets-recherche-date-fin').value || '';
   ARRETS_HEURE_FILTRE = ARRETS_DATE_FIN_FILTRE ? '' : (document.getElementById('arrets-recherche-heure').value || '');
   buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
 function reinitialiserRechercheArrets(){
@@ -3976,6 +3980,7 @@ function reinitialiserRechercheArrets(){
   ARRETS_DATE_FIN_FILTRE = '';
   ARRETS_HEURE_FILTRE = '';
   buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
 // Renvoie vrai si l'heure (HH:MM) est dans les +/- 30 min de la reference
@@ -4185,18 +4190,18 @@ function peuplerCmp2RaisonsSelect(){
 }
 
 function buildComparaisonTab(){
-  peuplerCmp2RaisonsSelect();
-  var raison = document.getElementById('cmp2-raison-select') ? document.getElementById('cmp2-raison-select').value : 'all';
-  var dateDebut = document.getElementById('cmp2-date-debut') ? document.getElementById('cmp2-date-debut').value : '';
-  var dateFin = document.getElementById('cmp2-date-fin') ? document.getElementById('cmp2-date-fin').value : '';
+  var raison = ARRETS_RAISON_FILTRE;
+  var dateDebut = ARRETS_DATE_FILTRE;
+  var dateFin = ARRETS_DATE_FIN_FILTRE;
 
   var arrets = Object.values(ARRETS_DATA).filter(function(a){ return a.type === 'avec_raison'; });
-  if(CMP2_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === CMP2_LIGNE_FILTRE; });
+  if(ARRETS_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === ARRETS_LIGNE_FILTRE; });
+  if(ARRETS_EQUIPE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return getEquipe(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
   if(raison !== 'all') arrets = arrets.filter(function(a){ return a.raison === raison; });
   if(dateDebut) arrets = arrets.filter(function(a){ return a.date >= dateDebut; });
   if(dateFin) arrets = arrets.filter(function(a){ return a.date <= dateFin; });
 
-  var wrapResume = document.getElementById('cmp2-resume-wrap');
+var wrapResume = document.getElementById('cmp2-resume-wrap');
   if(wrapResume){
     if(!arrets.length){
       wrapResume.style.display = 'none';
