@@ -197,7 +197,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lastUpdate": { ".read": "auth != null", ".write": "auth != null" }<br>
 &nbsp;&nbsp;&nbsp;&nbsp;}, <br>
-&nbsp;&nbsp;&nbsp;&nbsp;"formations": { ".read": "auth != null", ".write": "auth != null &amp;&amp; (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"formations": { ".read": "auth != null", ".write": "auth != null &amp;&amp; (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"pointages": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"arrets_inpak": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"ncp_data": { ".read": "auth != null", ".write": "auth != null" }<br>
 &nbsp;&nbsp;}<br>
 }
         </div>
@@ -796,7 +799,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=21"></script>
+  <script src="js/app.js?v=22"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
