@@ -6226,7 +6226,7 @@ function genLoginInterne(nomComplet){
   }
   var p = strip(prenom), n = strip(nom);
   var email = (p||'x')+'.'+(n||'x')+'@aw3p5.local';
-  var pass = (p.charAt(0)||'x')+(p.charAt(p.length-1)||'x')+(n.charAt(0)||'x')+(n.charAt(n.length-1)||'x');
+  var pass = (p.charAt(0)||'x')+(p.charAt(p.length-1)||'x')+(n.charAt(0)||'x')+(n.charAt(n.length-1)||'x')+'2026';
   return {email: email, password: pass};
 }
 
