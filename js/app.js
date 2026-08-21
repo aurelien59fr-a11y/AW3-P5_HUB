@@ -3259,6 +3259,18 @@ function testFirebaseConnection(){
 var PT_DATA = {}; // {clé: {nom, date, type, detail, statut, commentaire, ts}}
 
 // Charger depuis Firebase au démarrage
+function pointageEcartAvantShift(a){
+if(!a || a.type !== 'pointage' || a.sousType !== 'Entrée' || !a.heure) return false;
+var p = String(a.heure).split(':');
+var mins = parseInt(p[0],10)*60 + parseInt(p[1],10);
+if(isNaN(mins)) return false;
+var starts = [5*60, 13*60, 17*60, 21*60];
+for(var i=0;i<starts.length;i++){
+var delta = starts[i] - mins;
+if(delta >= 0 && delta <= 20) return true;
+}
+return false;
+}
 function loadPointages(){
   if(!db) return;
   db.ref('pointages').on('value', function(snap){
@@ -3533,6 +3545,7 @@ function buildPT2(){
       if(filterPerson !== 'all' && a.nom !== filterPerson) return false;
       if(filterType !== 'all' && a.type !== filterType) return false;
       if(filterStatus !== 'all' && a.statut !== filterStatus) return false;
+if(pointageEcartAvantShift(a)) return false;
       return true;
     }).sort(function(a, b){
       // Trier : non traités d'abord, puis par date décroissante
@@ -3591,7 +3604,7 @@ function updPointagesBanner(){
   var banner = document.getElementById('pt-alerts-banner');
   var text = document.getElementById('pt-alerts-text');
   if(!banner || !text) return;
-  var open = Object.values(PT_DATA).filter(function(a){return a.statut === 'open';});
+  var open = Object.values(PT_DATA).filter(function(a){return a.statut === 'open' && !pointageEcartAvantShift(a);});
   var retards = open.filter(function(a){return a.type === 'retard';}).length;
   var ptgs = open.filter(function(a){return a.type === 'pointage';}).length;
   var suspects = open.filter(function(a){
@@ -4683,7 +4696,7 @@ var cible = normNomEspace(emp.n);
 var ptEntries = Object.values(PT_DATA || {}).filter(function(a){ return normNomEspace(a.nom) === cible; });
 ptEntries.sort(function(a,b){ return (b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')); });
 var retards = ptEntries.filter(function(a){ return a.type === 'retard'; });
-var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart; });
+var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart && !pointageEcartAvantShift(a); });
 
 var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
 absEntries.sort(function(a,b){
