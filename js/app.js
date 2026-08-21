@@ -920,6 +920,7 @@ function setLang(l){
   if(typeof buildPT2==='function'&&document.getElementById('pt-tbody'))buildPT2();
   if(typeof buildArretsInpak==='function'&&document.getElementById('arrets-resume-wrap'))buildArretsInpak();
   if(typeof buildComparaisonTab==='function'&&document.getElementById('cmp2EvolutionChart'))buildComparaisonTab();
+  if(typeof buildMonEspace==='function'&&document.getElementById('espace-content'))buildMonEspace();
   if(typeof buildBT==='function'&&document.getElementById('btable')&&currentUser&&currentUser.role==='admin')buildBT();
   if(typeof buildEmpTable==='function'&&document.getElementById('empTbody'))buildEmpTable();
 }
@@ -1026,6 +1027,7 @@ document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click'
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
   if(b.dataset.tab === 'recrutement' && typeof buildRecrutementTab === 'function') buildRecrutementTab();
+if(b.dataset.tab === 'espace' && typeof buildMonEspace === 'function') buildMonEspace();
 });});
 
 // ==============================================================
@@ -2103,9 +2105,10 @@ function applyRole(role){
   // Acces personnalise par onglet (defini par l'admin dans Comptes employes)
   if(!isAdmin && role !== 'subchef' && currentUser && currentUser.tabs){
     var tCfg = currentUser.tabs;
-    ['ov','br','pl','ab','formations','pt','arrets','cmp2','ncp','recrutement'].forEach(function(t){
+    ['ov','br','pl','ab','formations','pt','arrets','ncp','recrutement','espace'].forEach(function(t){
       var tBtn = document.querySelector('.tab[data-tab="'+t+'"]');
-      if(tBtn) tBtn.style.display = tCfg[t] ? 'flex' : 'none';
+      var visible = (t === 'espace') ? (tCfg[t] !== false) : !!tCfg[t];
+      if(tBtn) tBtn.style.display = visible ? 'flex' : 'none';
     });
     var badge2 = document.getElementById('role-badge');
     if(badge2){
@@ -2116,7 +2119,7 @@ function applyRole(role){
     }
     var activeTabBtn2 = document.querySelector('.tab.on');
     if(activeTabBtn2 && !tCfg[activeTabBtn2.dataset.tab]){
-      var order2 = ['pl','ov','formations','br','ab','pt','arrets','cmp2','ncp','recrutement'];
+      var order2 = ['pl','espace','ov','formations','br','ab','pt','arrets','ncp','recrutement'];
       var firstOk = null;
       for(var i2=0;i2<order2.length;i2++){ if(tCfg[order2[i2]]){ firstOk = order2[i2]; break; } }
       var firstBtn = firstOk && document.querySelector('.tab[data-tab="'+firstOk+'"]');
@@ -4564,6 +4567,139 @@ var NCP_FILTRE_FIN = '';
 var NCP_PRESET_ACTIF = 'all';
 var _ncpEvolutionChart = null, _ncpCausesChart = null, _ncpTonnageChart = null, _ncpLignesChart = null, _ncpProduitsChart = null;
 
+// ============================================================
+// MON ESPACE — vue individuelle par employe (pointages, absences,
+// NCP le concernant). Un employe normal ne voit que sa propre fiche ;
+// seul l'admin peut choisir un autre employe via le selecteur.
+// ============================================================
+function normNomEspace(s){
+  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().split(/\s+/).filter(Boolean).sort().join(' ');
+}
+
+function monEspaceTrouverEmpActuel(){
+  if(!currentUser) return null;
+  var myId = Object.keys(ACCOUNTS).find(function(id){ return ACCOUNTS[id] && ACCOUNTS[id].uid === currentUser.uid; });
+  return myId ? EMP.find(function(e){ return e.id === myId; }) : null;
+}
+
+function buildMonEspace(){
+  var wrap = document.getElementById('espace-content');
+  if(!wrap) return;
+  var isAdminView = currentUser && currentUser.role === 'admin';
+  var picker = document.getElementById('espace-picker-wrap');
+  var emp = null;
+
+  if(isAdminView){
+    if(picker) picker.style.display = 'block';
+    var sel = document.getElementById('espace-emp-select');
+    if(sel && !sel.dataset.rempli){
+      var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
+      sel.innerHTML = '<option value="">-- Choisir un employe --</option>' + options.map(function(e){
+        return '<option value="'+e.id+'">'+e.n+'</option>';
+      }).join('');
+      sel.dataset.rempli = '1';
+    }
+    var chosenId = sel ? sel.value : '';
+    emp = chosenId ? EMP.find(function(e){ return e.id === chosenId; }) : null;
+  } else {
+    if(picker) picker.style.display = 'none';
+    emp = monEspaceTrouverEmpActuel();
+  }
+
+  if(!emp){
+    wrap.innerHTML = isAdminView
+      ? '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Choisis un employe ci-dessus pour voir son espace.</div></div>'
+      : '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Aucune fiche employe associee a ton compte. Contacte ton Team Leader.</div></div>';
+    return;
+  }
+
+  var cible = normNomEspace(emp.n);
+
+  var ptEntries = Object.values(PT_DATA || {}).filter(function(a){ return normNomEspace(a.nom) === cible; });
+  ptEntries.sort(function(a,b){ return (b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')); });
+  var retards = ptEntries.filter(function(a){ return a.type === 'retard'; });
+  var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart; });
+
+  var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
+  absEntries.sort(function(a,b){
+    function key(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
+    return key(b).localeCompare(key(a));
+  });
+
+  var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
+    if(n.type_ncp !== 'Inpak' || !n.ligne) return false;
+    var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
+    if(typeof getOperateur !== 'function') return false;
+    var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
+    if(!op) return false;
+    return op.split(', ').indexOf(emp.n) !== -1;
+  });
+  ncpEntries.sort(function(a,b){ return (b.date_fichier+(b.created_heure||'')).localeCompare(a.date_fichier+(a.created_heure||'')); });
+
+  var TYPE_ABS_LABEL = {recup:'Récup', ziek:'Maladie', verlof:'Congé'};
+  var TYPE_ABS_COLOR = {recup:'#10b981', ziek:'#ef4444', verlof:'#f59e0b'};
+
+  var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">Espace de <b>'+emp.n+'</b></div>' : '';
+
+  var html = titreHtml;
+
+  html += '<div class="cc" style="margin-bottom:16px">';
+  html += '<div class="cch"><div class="cct">Retards (' + retards.length + ')</div></div>';
+  if(!retards.length){
+    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun retard enregistré.</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse">' + retards.slice(0,100).map(function(a){
+      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(a.date)+'</td>'
+        + '<td style="padding:6px 8px;font-size:13px;color:#ef4444">'+(a.detail||((a.retardMin||0)+' min'))+'</td></tr>';
+    }).join('') + '</table>';
+  }
+  html += '</div>';
+
+  html += '<div class="cc" style="margin-bottom:16px">';
+  html += '<div class="cch"><div class="cct">Écarts pointeuse / tourniquet (' + ecarts.length + ')</div></div>';
+  if(!ecarts.length){
+    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun écart enregistré.</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse">' + ecarts.slice(0,100).map(function(a){
+      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(a.date)+'</td>'
+        + '<td style="padding:6px 8px;font-size:13px;color:var(--tx1)">'+(a.detail||((a.ecart||0)+' min'))+'</td></tr>';
+    }).join('') + '</table>';
+  }
+  html += '</div>';
+
+  html += '<div class="cc" style="margin-bottom:16px">';
+  html += '<div class="cch"><div class="cct">Absences (' + absEntries.length + ')</div></div>';
+  if(!absEntries.length){
+    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune absence enregistrée.</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse">' + absEntries.slice(0,100).map(function(a){
+      var lbl = TYPE_ABS_LABEL[a.t] || a.t;
+      var coul = TYPE_ABS_COLOR[a.t] || 'var(--tx2)';
+      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? ' au '+a.b : '')+'</td>'
+        + '<td style="padding:6px 8px;font-size:13px;font-weight:600;color:'+coul+'">'+lbl+'</td>'
+        + '<td style="padding:6px 8px;font-size:12px;color:var(--tx3)">'+(a.d||'')+' jour(s)</td></tr>';
+    }).join('') + '</table>';
+  }
+  html += '</div>';
+
+  html += '<div class="cc">';
+  html += '<div class="cch"><div class="cct">NCP le concernant (' + ncpEntries.length + ')</div></div>';
+  html += '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Limité aux créneaux où l\'appartenance à l\'équipe P5 est identifiable (week-ends).</div>';
+  if(!ncpEntries.length){
+    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune NCP identifiée.</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse">' + ncpEntries.slice(0,100).map(function(n){
+      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</td>'
+        + '<td style="padding:6px 8px;font-size:12px;font-weight:600">'+(n.ligne||'-')+'</td>'
+        + '<td style="padding:6px 8px;font-size:13px;color:var(--tx1)">'+(n.description||n.code_produit||'-')+'</td>'
+        + '<td style="padding:6px 8px;font-size:12px;color:var(--tx3)">'+(n.status||'-')+'</td></tr>';
+    }).join('') + '</table>';
+  }
+  html += '</div>';
+
+  wrap.innerHTML = html;
+}
+
 function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
@@ -6226,12 +6362,12 @@ function deleteFormation(){
 
 function posteVersPermissions(poste){
   if(poste === 'Team Leader') return {role:'admin', tabs:null, editPlanning:false};
-  if(poste === 'Coordinateur') return {role:'custom', tabs:{ov:true,br:true,pl:true,ab:true,formations:true,pt:false,arrets:true,cmp2:false,ncp:true,recrutement:false}, editPlanning:true};
-  return {role:'custom', tabs:{ov:false,br:false,pl:true,ab:false,formations:true,pt:false,arrets:false,cmp2:false,ncp:false,recrutement:false}, editPlanning:false};
+  if(poste === 'Coordinateur') return {role:'custom', tabs:{ov:true,br:true,pl:true,ab:true,formations:true,pt:false,arrets:true,ncp:true,recrutement:false,espace:true}, editPlanning:true};
+  return {role:'custom', tabs:{ov:false,br:false,pl:true,ab:false,formations:true,pt:false,arrets:false,ncp:false,recrutement:false,espace:true}, editPlanning:false};
 }
 
-var ALL_TABS = ['ov','br','pl','ab','formations','pt','arrets','cmp2','ncp','recrutement'];
-var TAB_LABELS = {ov:'Vue d\'ensemble', br:'Bradford', pl:'Planning', ab:'Absences', formations:'Formations', pt:'Pointages', arrets:'Arrêts Inpak', cmp2:'CMP2', ncp:'NCP Qualité', recrutement:'Recrutement'};
+var ALL_TABS = ['ov','br','pl','ab','formations','pt','arrets','ncp','recrutement','espace'];
+var TAB_LABELS = {ov:'Vue d\'ensemble', br:'Bradford', pl:'Planning', ab:'Absences', formations:'Formations', pt:'Pointages', arrets:'Arrêts Inpak', ncp:'NCP Qualité', recrutement:'Recrutement', espace:'Mon espace'};
 
 function genLoginInterne(nomComplet){
   var parts = (nomComplet||'').trim().split(/\s+/);
