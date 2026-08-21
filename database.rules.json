@@ -12,17 +12,25 @@
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
     },
     "planning": {
-      "shifts2026": {
-        ".read": "auth != null",
-        ".write": "auth != null"
-      },
       "shifts2025": {
         ".read": "auth != null",
         ".write": "auth != null"
       },
+      "shifts2026": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "shifts2027": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
       "absences": {
-        ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "extraHistorique": {
+        ".read": "auth != null",
+        ".write": "auth != null"
       },
       "lastUpdate": {
         ".read": "auth != null",
@@ -44,6 +52,22 @@
     "ncp_data": {
       ".read": "auth != null",
       ".write": "auth != null"
+    },
+    "bradford": {
+      "comments": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "import_ts": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "recrutement": {
+      "candidats": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     }
   }
 }
