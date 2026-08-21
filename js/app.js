@@ -1491,7 +1491,7 @@ function buildPT(){
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc">'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc"'+(emp.n==='Note'?' style="cursor:pointer" onclick="toggleNotesPanelManual()" title="Cliquer pour voir toutes les notes"':'')+'>'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
       var bd=EMP.find(function(e){return e.n===emp.n;});
       if(!bd||!bd.birthday) return false;
       var parts=bd.birthday.split('-');
@@ -1529,7 +1529,17 @@ function buildPT(){
       +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span>'
       +(isBdToday?'<span style="font-size:10px;margin-left:2px" title="Anniversaire de '+emp.n.split(' ')[0]+'">⭐</span>':'')
       +'</td>';
-    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});tbl.querySelectorAll('.sp-note-dot').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openNoteEdit(p);});});renderNotesPanel(noteEntries);var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+    }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});tbl.querySelectorAll('.sp-note-dot').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openNoteEdit(p);});});window.__allNoteEntries = noteEntries;
+(function(){
+  var todayD = new Date(); todayD.setHours(0,0,0,0);
+  var upcoming = noteEntries.filter(function(en){
+    var mdd = (en.d||'').split('/'); var dd=parseInt(mdd[0],10), mm=parseInt(mdd[1],10);
+    if(isNaN(dd)||isNaN(mm)) return true;
+    var edt = new Date((parseInt(curYear,10)||new Date().getFullYear()), mm-1, dd); edt.setHours(0,0,0,0);
+    return edt >= todayD;
+  });
+  renderNotesPanel(window.__notesPanelForced ? window.__allNoteEntries : upcoming);
+})();var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
 function rowLabel(n){
   if(n==='Commentaire')return t('plan_row_extra_staff');
   if(n==='Nettoyeur externe')return t('plan_row_ext_cleaner');
@@ -6243,8 +6253,11 @@ function buildComptesEmpListe(){
       var accLabel = acc.role === 'admin' ? 'Administrateur' : (acc.role === 'subchef' ? 'Sous-chef' : 'Accès personnalisé');
       return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
         +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+accLabel+'</div></div>'
-        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; Compte actif</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span></div>'
-        +'</div>';
+        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; Compte actif</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span>'
+        +'<button onclick="toggleAccesEdit(\''+e.id+'\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:11px;cursor:pointer">Modifier l\'accès</button>'
+        +'</div>'
+        +'</div>'
+        +'<div id="acc-edit-'+e.id+'" style="display:none;margin:-4px 0 8px;padding:12px 16px;background:rgba(255,255,255,.03);border-radius:8px"></div>';
     }
     var tabsHtml = ALL_TABS.map(function(t){
       var checked = perm.tabs && perm.tabs[t] ? ' checked' : '';
@@ -6335,4 +6348,85 @@ function creerCompteEmploye(emp, role, login, tabs, editPlanning){
       return {email: login.email, password: login.password, uid: uid};
     });
   });
+}
+
+
+function toggleAccesEdit(empId){
+  var box = document.getElementById('acc-edit-'+empId);
+  if(!box) return;
+  if(box.style.display !== 'none'){ box.style.display='none'; box.innerHTML=''; return; }
+  var acc = ACCOUNTS[empId];
+  if(!acc || !acc.uid){ return; }
+  box.style.display = 'block';
+  box.innerHTML = '<div style="color:var(--tx2);font-size:12px">Chargement...</div>';
+  db.ref('users/'+acc.uid).once('value').then(function(snap){
+    var u = snap.val() || {};
+    var role = u.role || 'custom';
+    var tabs = u.tabs || {};
+    var editPlanning = !!u.editPlanning;
+    var selHtml = '<select id="acc-edit-role-'+empId+'" style="padding:6px 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--bd);color:var(--tx1);font-size:12px;margin-bottom:10px">'
+      +'<option value="custom"'+(role==='custom'?' selected':'')+'>Accès personnalisé</option>'
+      +'<option value="subchef"'+(role==='subchef'?' selected':'')+'>Sous-chef</option>'
+      +'<option value="admin"'+(role==='admin'?' selected':'')+'>Administrateur</option>'
+      +'</select>';
+    var tabsHtml = ALL_TABS.map(function(t){
+      var checked = tabs[t] ? ' checked' : '';
+      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:0 10px 6px 0"><input type="checkbox" id="acc-edit-tab-'+empId+'-'+t+'"'+checked+' style="accent-color:var(--blue)">'+TAB_LABELS[t]+'</label>';
+    }).join('');
+    var editPlanHtml = '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:8px 0"><input type="checkbox" id="acc-edit-editplanning-'+empId+'"'+(editPlanning?' checked':'')+' style="accent-color:var(--blue)"> Peut modifier le planning</label>';
+    box.innerHTML = selHtml
+      +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
+      +editPlanHtml
+      +'<div style="margin-top:8px;display:flex;gap:8px">'
+      +'<button onclick="enregistrerAccesEmploye(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-size:12px;cursor:pointer">Enregistrer</button>'
+      +'<button onclick="toggleAccesEdit(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:12px;cursor:pointer">Annuler</button>'
+      +'</div>';
+  });
+}
+
+function enregistrerAccesEmploye(empId){
+  var acc = ACCOUNTS[empId];
+  if(!acc || !acc.uid) return;
+  var roleSel = document.getElementById('acc-edit-role-'+empId);
+  if(!roleSel) return;
+  var role = roleSel.value;
+  var upd = {role: role};
+  if(role === 'custom'){
+    var tabs = {};
+    ALL_TABS.forEach(function(t){
+      var cb = document.getElementById('acc-edit-tab-'+empId+'-'+t);
+      if(cb && cb.checked) tabs[t] = true;
+    });
+    var editCb = document.getElementById('acc-edit-editplanning-'+empId);
+    upd.tabs = tabs;
+    upd.editPlanning = !!(editCb && editCb.checked);
+  } else {
+    upd.tabs = null;
+    upd.editPlanning = null;
+  }
+  db.ref('users/'+acc.uid).update(upd).then(function(){
+    alert('Accès mis à jour.');
+    var box = document.getElementById('acc-edit-'+empId);
+    if(box){ box.style.display='none'; box.innerHTML=''; }
+    acc.role = role;
+  }).catch(function(e){
+    alert('Erreur: '+e.message);
+  });
+}
+
+function toggleNotesPanelManual(){
+  window.__notesPanelForced = !window.__notesPanelForced;
+  var list;
+  if(window.__notesPanelForced){
+    list = window.__allNoteEntries||[];
+  } else {
+    var todayD = new Date(); todayD.setHours(0,0,0,0);
+    list = (window.__allNoteEntries||[]).filter(function(en){
+      var mdd = (en.d||'').split('/'); var dd=parseInt(mdd[0],10), mm=parseInt(mdd[1],10);
+      if(isNaN(dd)||isNaN(mm)) return true;
+      var edt = new Date((parseInt(curYear,10)||new Date().getFullYear()), mm-1, dd); edt.setHours(0,0,0,0);
+      return edt >= todayD;
+    });
+  }
+  renderNotesPanel(list);
 }
