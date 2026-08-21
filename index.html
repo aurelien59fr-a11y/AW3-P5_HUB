@@ -179,34 +179,43 @@
 {<br>
 &nbsp;&nbsp;"rules": {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"users": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$uid": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null &amp;&amp; (auth.uid === $uid || root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;)"<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;},<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"employees": {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child('users').child(auth.uid).child('role').val() === 'admin'"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;"<br>
 &nbsp;&nbsp;&nbsp;&nbsp;},<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"planning": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2026": { ".read": "auth != null", ".write": "auth != null" },<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2025": { ".read": "auth != null", ".write": "auth != null" },<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"absences": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null &amp;&amp; root.child('users').child(auth.uid).child('role').val() === 'admin'",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child('users').child(auth.uid).child('role').val() === 'admin'"<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2026": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2027": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"absences": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"extraHistorique": { ".read": "auth != null", ".write": "auth != null" },<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lastUpdate": { ".read": "auth != null", ".write": "auth != null" }<br>
-&nbsp;&nbsp;&nbsp;&nbsp;}, <br>
-&nbsp;&nbsp;&nbsp;&nbsp;"formations": { ".read": "auth != null", ".write": "auth != null &amp;&amp; (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"formations": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; (root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39; || root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;subchef&#39;)"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"pointages": { ".read": "auth != null", ".write": "auth != null" },<br>
 &nbsp;&nbsp;&nbsp;&nbsp;"arrets_inpak": { ".read": "auth != null", ".write": "auth != null" },<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"ncp_data": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"ncp_data": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"bradford": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"comments": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"import_ts": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"recrutement": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"candidats": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;}<br>
 }
         </div>
         <div style="font-size:11px;color:var(--tx3);margin-top:8px">
-          Ces regles garantissent que les sous-chefs ne peuvent pas lire ni ecrire les absences meme via une requete directe.
+          Toute personne authentifiee (avec un compte cree dans l'app) peut lire/ecrire le planning, les absences et l'historique extra. Seul le role admin peut gerer les comptes (users) et la liste des employes.
         </div>
       </div>
 
@@ -800,7 +809,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=24"></script>
+  <script src="js/app.js?v=25"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
