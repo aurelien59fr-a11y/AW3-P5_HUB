@@ -482,26 +482,26 @@ var I18N={
     login_email:'Email', login_password:'Mot de passe', login_btn:'Se connecter',
     login_forgot:'Mot de passe oublié ?', login_autoconnect:'Tu resteras connecté automatiquement',
     topbar_connecting:'Connexion...', topbar_logout:'Déconnexion',
-    tab_ov:'Vue d\u2019ensemble', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
+    tab_ov:'Vue d’ensemble', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
     tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
-    plan_today:'Aujourd\u2019hui', plan_print:'Imprimer', plan_no_today:'Aujourd\u2019hui n\u2019est pas un jour planifié.',
+    plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
     legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup',
     status_ok:'OK', status_wn:'A surveiller', status_al:'Preoccupant', status_cr:'Critique', legend_watch_short:'Surveiller',
-    ov_title:'Tableau de bord', ov_subtitle:'365 derniers jours \u2022 Week-ends + fériés + ponts',
+    ov_title:'Tableau de bord', ov_subtitle:'365 derniers jours • Week-ends + fériés + ponts',
     ov_kcard_team:'Equipe', ov_kmeta_okpct:'OK',
     ov_crm_urgent:'Score > 500 urgent', ov_crm_none:'Score > 500 aucun',
     ov_alert_from:' est passé de ', ov_alert_to:' à ',
     ov_chart_bradford:'Scores Bradford', ov_chart_absences_trim:'Absences par trimestre',
-    ov_chart_days_per_emp:'Jours d\u2019absence par employé',
-    ov_next30_title:'Absences \u2014 30 prochains jours', ov_next30_none:'Aucune absence prevue dans les 30 prochains jours',
-    ov_today_prefix:'Absents aujourd\u2019hui', ov_today_allpresent:'Tout le monde est present \u2705',
+    ov_chart_days_per_emp:'Jours d’absence par employé',
+    ov_next30_title:'Absences — 30 prochains jours', ov_next30_none:'Aucune absence prevue dans les 30 prochains jours',
+    ov_today_prefix:'Absents aujourd’hui', ov_today_allpresent:'Tout le monde est present ✅',
     ov_birthdays_title:'Anniversaires à venir', ov_birthday_happy:'Joyeux anniversaire !',
-    ov_birthday_turns1:' fête ses ', ov_birthday_turns2:' ans aujourd\u2019hui \ud83c\udf89',
-    ov_birthday_none:'Aucune date de naissance enregistrée \u2014 ajoutez-les dans Admin > Employés',
-    ov_birthday_celebrated:'\u2192 fêté le ', ov_birthday_years:'ans',
-    ov_birthday_today_label:'Aujourd\u2019hui !', ov_birthday_in_days:'dans ',
+    ov_birthday_turns1:' fête ses ', ov_birthday_turns2:' ans aujourd’hui 🎉',
+    ov_birthday_none:'Aucune date de naissance enregistrée — ajoutez-les dans Admin > Employés',
+    ov_birthday_celebrated:'→ fêté le ', ov_birthday_years:'ans',
+    ov_birthday_today_label:'Aujourd’hui !', ov_birthday_in_days:'dans ',
     ab_title:'Absences', ab_col_emp:'Employe', ab_col_start:'Debut', ab_col_end:'Fin',
     ab_col_days:'Jours', ab_col_intensity:'Intensite', ab_col_year:'Annee',
     ab_count_suffix:' absences 2025-2026', ab_empty:'Aucune absence maladie',
@@ -511,10 +511,10 @@ var I18N={
     pt_opt_all_status:'Tous statuts', pt_opt_open:'Non traités', pt_opt_done:'Traités',
     pt_mark_all_done:'Tout marquer comme traité',
     pt_col_person:'Personne', pt_col_date:'Date', pt_col_type:'Type', pt_col_detail:'Détail', pt_col_status:'Statut',
-    pt_type_retard:'\u23f0 Retard', pt_type_tourniquet:'\u26a0 Tourniquet',
+    pt_type_retard:'⏰ Retard', pt_type_tourniquet:'⚠ Tourniquet',
     pt_status_open:'Non traité', pt_status_done:'Traité',
-    pt_suspect_tooltip:'Suspect : heure matinale sans (J+1) \u2014 possible confusion avec le tourniquet de la veille (bug shift de nuit)',
-    pt_empty:'Aucune anomalie', pt_render_error:'Erreur d\u2019affichage : ',
+    pt_suspect_tooltip:'Suspect : heure matinale sans (J+1) — possible confusion avec le tourniquet de la veille (bug shift de nuit)',
+    pt_empty:'Aucune anomalie', pt_render_error:'Erreur d’affichage : ',
     pt_banner_open_suffix:' anomalie(s) non traitée(s)', pt_banner_retards:' retard(s)',
     pt_banner_tourniquet:' anomalie(s) tourniquet', pt_banner_suspect:' suspecte(s) (bug nuit)',
     pt_none_open_filtered:'Aucune anomalie non traitée avec ces filtres', pt_everyone:'tout le monde',
@@ -523,18 +523,18 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 \u2014 arrets avec raison et micro-arrets',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets',
     arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
     filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
     arr_search_title:'Recherche precise', arr_search_from:'Du',
-    arr_search_to:'Au (optionnel \u2014 laisse vide pour un seul jour)',
+    arr_search_to:'Au (optionnel — laisse vide pour un seul jour)',
     arr_search_hour:'Heure (optionnel, seulement si "Au" est vide)',
     btn_search:'Rechercher', btn_reset:'Reinitialiser',
     arr_search_hint:'Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".',
     arr_freq_title:'Frequence par ligne', arr_with_reason_title:'Arrets avec raison', arr_all_reasons:'Toutes les raisons',
-    arr_compare_op_hint:'Duree moyenne par operateur pour cette raison \u2014 te permet de comparer',
+    arr_compare_op_hint:'Duree moyenne par operateur pour cette raison — te permet de comparer',
     arr_micro_title:'Micro-arrets', arr_micro_show:'afficher le detail', arr_micro_hide:'masquer le detail',
-    arr_no_data:'Aucune donnee importee \u2014 utilise le bouton "Importer Grafana".',
+    arr_no_data:'Aucune donnee importee — utilise le bouton "Importer Grafana".',
     arr_col_ligne:'Ligne', arr_col_with_reason:'Avec raison', arr_col_micro:'Micro-arrets',
     arr_col_date:'Date', arr_col_heure:'Heure', arr_col_duree:'Duree', arr_col_raison:'Raison',
     arr_none_with_reason:'Aucun arret avec raison sur ce filtre.',
@@ -544,32 +544,32 @@ var I18N={
     arr_micro_col_number:'Nombre ce jour-la',
     arr_toast_no_duplicates:'Aucun doublon trouve',
     arr_confirm_delete1:'', arr_confirm_delete2:' entree(s) a supprimer (doublons + anciens micro-arrets non agreges). Continuer ? Cette action est irreversible.',
-    arr_toast_deleting1:'Suppression de ', arr_toast_deleting2:' doublon(s) en cours\u2026',
+    arr_toast_deleting1:'Suppression de ', arr_toast_deleting2:' doublon(s) en cours…',
     arr_toast_deleted_suffix:' doublon(s) supprime(s)',
     arr_toast_error_lot1:'Erreur au lot ', arr_toast_error_lot2:'/', arr_toast_error_lot3:' : ',
     arr_modal_title:'Importer les arrets Inpak',
     cmp_subtitle:'Compare les equipes (P1 a P5) et les operateurs entre eux',
     cmp_period_to:'Au', cmp_all_lines:'Toutes les lignes',
     cmp_evolution_title:'Evolution mois par mois',
-    cmp_evolution_hint:'Duree moyenne par mois, pour voir si ca s\u2019ameliore ou pas dans le temps.',
+    cmp_evolution_hint:'Duree moyenne par mois, pour voir si ca s’ameliore ou pas dans le temps.',
     cmp_team_title:'Comparaison par equipe (P1 a P5)',
-    cmp_team_hint:'Duree moyenne d\u2019arret par equipe, pour la raison et la ligne selectionnees.',
+    cmp_team_hint:'Duree moyenne d’arret par equipe, pour la raison et la ligne selectionnees.',
     cmp_op_title:'Comparaison par operateur',
     cmp_op_hint:'Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).',
     cmp_all_teams:'Toutes equipes',
-    cmp_resume_occ_suffix:' occurrence(s)', cmp_resume_of:' de "', cmp_resume_total:' \u2014 temps total : ',
+    cmp_resume_occ_suffix:' occurrence(s)', cmp_resume_of:' de "', cmp_resume_total:' — temps total : ',
     cmp_month_occurrences:' occurrence(s) ce mois-la',
-    br_title:'Score Bradford', br_subtitle:'S\u00b2 \u00d7 D \u2014 temps r\u00e9el',
+    br_title:'Score Bradford', br_subtitle:'S² × D — temps réel',
     br_col_role:'Role', br_col_periods:'Periodes', br_col_status:'Statut',
     br_tooltip_history:'Voir historique', br_tooltip_comment:'Commentaire',
-    br_comment_prefix:'Commentaire \u2014 ', br_comment_last_mod:'Derniere modif : ', br_comment_by:' par ',
+    br_comment_prefix:'Commentaire — ', br_comment_last_mod:'Derniere modif : ', br_comment_by:' par ',
     btn_save:'Enregistrer', br_comment_saved:'Commentaire enregistre', br_comment_deleted:'Commentaire supprime',
     br_days_suffix_1:' jour', br_days_suffix_n:' jours', br_episode_badge:'Episode',
     br_no_episode:'Aucun episode maladie dans les 365 derniers jours',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Jours',
     br_comment_label:'Commentaire', br_comment_placeholder:'Cliquer pour ajouter un commentaire...',
     br_history_title:'Historique episodes (365j)',
-    adm_title:'Administration', adm_subtitle:'Outils reserves a l\u2019admin',
+    adm_title:'Administration', adm_subtitle:'Outils reserves a l’admin',
     adm_fb_test_title:'Fiabilite Firebase', adm_fb_test_btn:'Tester la connexion',
     adm_fb_rules_title:'Roles utilisateurs Firebase',
     adm_migration_title:'Migration initiale Firebase', adm_migration_status_none:'Non effectuee',
@@ -588,8 +588,8 @@ var I18N={
     adm_err_name_required:'Le nom est obligatoire.', adm_err_role_required:'Le role est obligatoire.',
     adm_err_firebase_disconnected:'Firebase non connecte.', adm_saving:'Enregistrement...',
     adm_toast_saved_suffix:' enregistre !',
-    adm_confirm_remove1:'Retirer ', adm_confirm_remove2:' de l\u2019equipe ? Son historique Bradford sera conserve.',
-    adm_toast_removed_suffix:' retire de l\u2019equipe',
+    adm_confirm_remove1:'Retirer ', adm_confirm_remove2:' de l’equipe ? Son historique Bradford sera conserve.',
+    adm_toast_removed_suffix:' retire de l’equipe',
     err_generic_prefix:'Erreur: ',
     month_0:'Janvier', month_1:'Fevrier', month_2:'Mars', month_3:'Avril', month_4:'Mai', month_5:'Juin',
     month_6:'Juillet', month_7:'Aout', month_8:'Septembre', month_9:'Octobre', month_10:'Novembre', month_11:'Decembre',
@@ -604,7 +604,25 @@ var I18N={
     note_placeholder:'Ecrire une note visible sur le planning...',
     note_del_btn:'Supprimer', note_close_btn:'Annuler', note_save_btn:'Enregistrer',
     note_translate_nl:'Traduire en néerlandais', note_translate_en:'Traduire en anglais',
-    note_translate_error:'Traduction indisponible pour le moment'
+    note_translate_error:'Traduction indisponible pour le moment',
+    tab_espace:'Mon espace', espace_subtitle:'Tes pointages, tes absences et les NCP qui te concernent',
+    espace_select_placeholder:'-- Choisir un employé --', espace_choose_prompt:'Choisis un employé ci-dessus pour voir son espace.',
+    espace_no_fiche:'Aucune fiche employé associée à ton compte. Contacte ton Team Leader.', espace_of:'Espace de',
+    espace_score_bradford:'SCORE BRADFORD', espace_days_absence:'jours d’absence', espace_periods:'période(s)',
+    espace_msg_ok:'Situation excellente, merci pour ton engagement ! 👏', espace_msg_wn:'Ça reste sous contrôle, continue comme ça.',
+    espace_msg_al:'Un point à surveiller ensemble.', espace_msg_cr:'Parlons-en ensemble pour t’accompagner.',
+    espace_trend_down:'📉 En amélioration', espace_trend_up:'📈 À surveiller', espace_trend_stable:'➡️ Stable',
+    espace_sec_formations:'Formations', espace_sec_retards:'Retards', espace_sec_ecarts:'Écarts pointeuse / tourniquet',
+    espace_sec_absences:'Absences', espace_sec_ncp:'NCP le concernant',
+    espace_no_retard:'✅ Aucun retard — parfait !', espace_no_ecart:'✅ Aucun écart — parfait !',
+    espace_no_absence:'✅ Aucune absence enregistrée.', espace_no_ncp:'✅ Aucune NCP identifiée.', espace_no_formation:'Aucune formation enregistrée.',
+    espace_ncp_note:'Limité aux créneaux où l’appartenance à l’équipe P5 est identifiable (week-ends).',
+    espace_ncp_banner:'👏 {n} sur {total} détecté(s) directement par toi pendant ton poste — c’est beaucoup mieux que découvert plus tard !',
+    espace_ncp_direct:'👍 Vu directement par toi', espace_ncp_late:'🔎 Découvert après coup (labo)',
+    espace_form_upcoming:'À venir', espace_form_past:'Passée', espace_days_suffix:'jour(s)',
+    espace_type_recup:'Récup',
+    espace_type_ziek:'Maladie',
+    espace_type_verlof:'Congé'
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -617,52 +635,52 @@ var I18N={
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
     legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie',
     status_ok:'OK', status_wn:'Te volgen', status_al:'Zorgwekkend', status_cr:'Kritiek', legend_watch_short:'Te volgen',
-    ov_title:'Dashboard', ov_subtitle:'365 laatste dagen \u2022 Weekends + feestdagen + brugdagen',
+    ov_title:'Dashboard', ov_subtitle:'365 laatste dagen • Weekends + feestdagen + brugdagen',
     ov_kcard_team:'Team', ov_kmeta_okpct:'OK',
     ov_crm_urgent:'Score > 500 dringend', ov_crm_none:'Score > 500 geen',
     ov_alert_from:' ging van ', ov_alert_to:' naar ',
     ov_chart_bradford:'Bradford-scores', ov_chart_absences_trim:'Afwezigheden per kwartaal',
     ov_chart_days_per_emp:'Afwezigheidsdagen per medewerker',
-    ov_next30_title:'Afwezigheden \u2014 volgende 30 dagen', ov_next30_none:'Geen geplande afwezigheid in de volgende 30 dagen',
-    ov_today_prefix:'Afwezig vandaag', ov_today_allpresent:'Iedereen is aanwezig \u2705',
+    ov_next30_title:'Afwezigheden — volgende 30 dagen', ov_next30_none:'Geen geplande afwezigheid in de volgende 30 dagen',
+    ov_today_prefix:'Afwezig vandaag', ov_today_allpresent:'Iedereen is aanwezig ✅',
     ov_birthdays_title:'Verjaardagen binnenkort', ov_birthday_happy:'Gefeliciteerd!',
-    ov_birthday_turns1:' wordt vandaag ', ov_birthday_turns2:' jaar \ud83c\udf89',
-    ov_birthday_none:'Geen geboortedatums geregistreerd \u2014 voeg ze toe in Admin > Medewerkers',
-    ov_birthday_celebrated:'\u2192 gevierd op ', ov_birthday_years:'jaar',
+    ov_birthday_turns1:' wordt vandaag ', ov_birthday_turns2:' jaar 🎉',
+    ov_birthday_none:'Geen geboortedatums geregistreerd — voeg ze toe in Admin > Medewerkers',
+    ov_birthday_celebrated:'→ gevierd op ', ov_birthday_years:'jaar',
     ov_birthday_today_label:'Vandaag!', ov_birthday_in_days:'over ',
     ab_title:'Afwezigheden', ab_col_emp:'Medewerker', ab_col_start:'Start', ab_col_end:'Einde',
     ab_col_days:'Dagen', ab_col_intensity:'Intensiteit', ab_col_year:'Jaar',
     ab_count_suffix:' afwezigheden 2025-2026', ab_empty:'Geen ziekteafwezigheid',
     modal_cancel:'Annuleren', modal_import:'Importeren',
-    pt_subtitle:'Laattijdigheden & prikklok-anomalie\u00ebn',
-    pt_opt_all_types:'Alle types', pt_opt_retards:'Laattijdigheden', pt_opt_anomalies_tourniquet:'Prikklok-anomalie\u00ebn',
+    pt_subtitle:'Laattijdigheden & prikklok-anomalieën',
+    pt_opt_all_types:'Alle types', pt_opt_retards:'Laattijdigheden', pt_opt_anomalies_tourniquet:'Prikklok-anomalieën',
     pt_opt_all_status:'Alle statussen', pt_opt_open:'Niet verwerkt', pt_opt_done:'Verwerkt',
     pt_mark_all_done:'Alles als verwerkt markeren',
     pt_col_person:'Persoon', pt_col_date:'Datum', pt_col_type:'Type', pt_col_detail:'Detail', pt_col_status:'Status',
-    pt_type_retard:'\u23f0 Laattijdig', pt_type_tourniquet:'\u26a0 Prikklok',
+    pt_type_retard:'⏰ Laattijdig', pt_type_tourniquet:'⚠ Prikklok',
     pt_status_open:'Niet verwerkt', pt_status_done:'Verwerkt',
-    pt_suspect_tooltip:'Verdacht: vroeg tijdstip zonder (J+1) \u2014 mogelijk verward met de prikklok van de avond ervoor (nachtploeg-bug)',
+    pt_suspect_tooltip:'Verdacht: vroeg tijdstip zonder (J+1) — mogelijk verward met de prikklok van de avond ervoor (nachtploeg-bug)',
     pt_empty:'Geen anomalie', pt_render_error:'Weergavefout: ',
-    pt_banner_open_suffix:' niet-verwerkte anomalie(\u00ebn)', pt_banner_retards:' laattijdigheid(en)',
-    pt_banner_tourniquet:' prikklok-anomalie(\u00ebn)', pt_banner_suspect:' verdacht(e) (nachtbug)',
+    pt_banner_open_suffix:' niet-verwerkte anomalie(ën)', pt_banner_retards:' laattijdigheid(en)',
+    pt_banner_tourniquet:' prikklok-anomalie(ën)', pt_banner_suspect:' verdacht(e) (nachtbug)',
     pt_none_open_filtered:'Geen niet-verwerkte anomalie met deze filters', pt_everyone:'iedereen',
-    pt_confirm_mark1:'Markeer ', pt_confirm_mark2:' anomalie(\u00ebn) als verwerkt (', pt_confirm_mark3:') ?\nDeze actie gebeurt in bulk en kan achteraf regel per regel ongedaan worden gemaakt.',
+    pt_confirm_mark1:'Markeer ', pt_confirm_mark2:' anomalie(ën) als verwerkt (', pt_confirm_mark3:') ?\nDeze actie gebeurt in bulk en kan achteraf regel per regel ongedaan worden gemaakt.',
     pt_firebase_unavailable:'Firebase-verbinding niet beschikbaar',
-    pt_marked_done_suffix:' anomalie(\u00ebn) gemarkeerd als verwerkt',
+    pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 \u2014 stilstanden met reden en micro-stilstanden',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden',
     arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
     filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
     arr_search_title:'Precieze zoekopdracht', arr_search_from:'Van',
-    arr_search_to:'Tot (optioneel \u2014 laat leeg voor \u00e9\u00e9n dag)',
+    arr_search_to:'Tot (optioneel — laat leeg voor één dag)',
     arr_search_hour:'Uur (optioneel, enkel als "Tot" leeg is)',
     btn_search:'Zoeken', btn_reset:'Reset',
-    arr_search_hint:'\u00c9\u00e9n dag: vul enkel "Van" in (+ optioneel Uur, venster van 30 min). Periode (bv. meerdere weekends): vul "Van" en "Tot" in.',
+    arr_search_hint:'Één dag: vul enkel "Van" in (+ optioneel Uur, venster van 30 min). Periode (bv. meerdere weekends): vul "Van" en "Tot" in.',
     arr_freq_title:'Frequentie per lijn', arr_with_reason_title:'Stilstanden met reden', arr_all_reasons:'Alle redenen',
-    arr_compare_op_hint:'Gemiddelde duur per operator voor deze reden \u2014 laat je vergelijken',
+    arr_compare_op_hint:'Gemiddelde duur per operator voor deze reden — laat je vergelijken',
     arr_micro_title:'Micro-stilstanden', arr_micro_show:'detail tonen', arr_micro_hide:'detail verbergen',
-    arr_no_data:'Geen gegevens ge\u00efmporteerd \u2014 gebruik de knop "Grafana importeren".',
+    arr_no_data:'Geen gegevens geïmporteerd — gebruik de knop "Grafana importeren".',
     arr_col_ligne:'Lijn', arr_col_with_reason:'Met reden', arr_col_micro:'Micro-stilstanden',
     arr_col_date:'Datum', arr_col_heure:'Uur', arr_col_duree:'Duur', arr_col_raison:'Reden',
     arr_none_with_reason:'Geen stilstand met reden voor dit filter.',
@@ -672,7 +690,7 @@ var I18N={
     arr_micro_col_number:'Aantal die dag',
     arr_toast_no_duplicates:'Geen duplicaten gevonden',
     arr_confirm_delete1:'', arr_confirm_delete2:' item(s) te verwijderen (duplicaten + oude niet-geaggregeerde micro-stilstanden). Doorgaan? Deze actie is onomkeerbaar.',
-    arr_toast_deleting1:'Bezig met verwijderen van ', arr_toast_deleting2:' duplicaat(en)\u2026',
+    arr_toast_deleting1:'Bezig met verwijderen van ', arr_toast_deleting2:' duplicaat(en)…',
     arr_toast_deleted_suffix:' duplicaat(en) verwijderd',
     arr_toast_error_lot1:'Fout bij batch ', arr_toast_error_lot2:'/', arr_toast_error_lot3:' : ',
     arr_modal_title:'Inpak-stilstanden importeren',
@@ -685,12 +703,12 @@ var I18N={
     cmp_op_title:'Vergelijking per operator',
     cmp_op_hint:'Klik op een team hierboven om enkel zijn operators te vergelijken (bv. enkel P1 vs P2 doordeweeks).',
     cmp_all_teams:'Alle teams',
-    cmp_resume_occ_suffix:' voorval(len)', cmp_resume_of:' van "', cmp_resume_total:' \u2014 totale tijd: ',
+    cmp_resume_occ_suffix:' voorval(len)', cmp_resume_of:' van "', cmp_resume_total:' — totale tijd: ',
     cmp_month_occurrences:' voorval(len) die maand',
-    br_title:'Bradford-score', br_subtitle:'S\u00b2 \u00d7 D \u2014 realtime',
+    br_title:'Bradford-score', br_subtitle:'S² × D — realtime',
     br_col_role:'Rol', br_col_periods:'Periodes', br_col_status:'Status',
     br_tooltip_history:'Geschiedenis bekijken', br_tooltip_comment:'Opmerking',
-    br_comment_prefix:'Opmerking \u2014 ', br_comment_last_mod:'Laatst gewijzigd: ', br_comment_by:' door ',
+    br_comment_prefix:'Opmerking — ', br_comment_last_mod:'Laatst gewijzigd: ', br_comment_by:' door ',
     btn_save:'Opslaan', br_comment_saved:'Opmerking opgeslagen', br_comment_deleted:'Opmerking verwijderd',
     br_days_suffix_1:' dag', br_days_suffix_n:' dagen', br_episode_badge:'Episode',
     br_no_episode:'Geen ziekte-episode in de laatste 365 dagen',
@@ -700,7 +718,7 @@ var I18N={
     adm_title:'Administratie', adm_subtitle:'Tools voorbehouden aan de admin',
     adm_fb_test_title:'Firebase-betrouwbaarheid', adm_fb_test_btn:'Verbinding testen',
     adm_fb_rules_title:'Firebase-gebruikersrollen',
-    adm_migration_title:'Initi\u00eble Firebase-migratie', adm_migration_status_none:'Niet uitgevoerd',
+    adm_migration_title:'Initiële Firebase-migratie', adm_migration_status_none:'Niet uitgevoerd',
     adm_migration_btn:'Migratie starten',
     adm_session_title:'Actieve sessie', adm_session_connected_as:'Aangemeld als: ', adm_session_role:'Rol: ',
     adm_excel_report_title:'Maandelijks Excel-rapport', adm_excel_report_btn:'Excel-rapport genereren',
@@ -732,7 +750,25 @@ var I18N={
     note_placeholder:'Schrijf een notitie die zichtbaar is op de planning...',
     note_del_btn:'Verwijderen', note_close_btn:'Annuleren', note_save_btn:'Opslaan',
     note_translate_nl:'Vertalen naar Nederlands', note_translate_en:'Vertalen naar Engels',
-    note_translate_error:'Vertaling momenteel niet beschikbaar'
+    note_translate_error:'Vertaling momenteel niet beschikbaar',
+    tab_espace:'Mijn ruimte', espace_subtitle:'Je tijdsregistraties, afwezigheden en de NCP’s die jou aangaan',
+    espace_select_placeholder:'-- Kies een werknemer --', espace_choose_prompt:'Kies hierboven een werknemer om zijn/haar ruimte te bekijken.',
+    espace_no_fiche:'Geen werknemersfiche gekoppeld aan je account. Contacteer je Team Leader.', espace_of:'Ruimte van',
+    espace_score_bradford:'BRADFORD SCORE', espace_days_absence:'afwezigheidsdagen', espace_periods:'periode(s)',
+    espace_msg_ok:'Uitstekende situatie, bedankt voor je inzet! 👏', espace_msg_wn:'Dit blijft onder controle, ga zo door.',
+    espace_msg_al:'Een aandachtspunt om samen op te volgen.', espace_msg_cr:'Laten we hier samen over praten om je te begeleiden.',
+    espace_trend_down:'📉 Verbetering', espace_trend_up:'📈 Aandacht nodig', espace_trend_stable:'➡️ Stabiel',
+    espace_sec_formations:'Opleidingen', espace_sec_retards:'Laattijdigheden', espace_sec_ecarts:'Afwijkingen prikklok / tourniquet',
+    espace_sec_absences:'Afwezigheden', espace_sec_ncp:'NCP’s die jou betreffen',
+    espace_no_retard:'✅ Geen laattijdigheid — perfect!', espace_no_ecart:'✅ Geen afwijking — perfect!',
+    espace_no_absence:'✅ Geen afwezigheid geregistreerd.', espace_no_ncp:'✅ Geen NCP geïdentificeerd.', espace_no_formation:'Geen opleiding geregistreerd.',
+    espace_ncp_note:'Beperkt tot de tijdstippen waarop het behoren tot het P5-team identificeerbaar is (weekends).',
+    espace_ncp_banner:'👏 {n} van {total} rechtstreeks door jou opgemerkt tijdens je shift — dat is veel beter dan later ontdekt!',
+    espace_ncp_direct:'👍 Rechtstreeks door jou opgemerkt', espace_ncp_late:'🔎 Later ontdekt (labo)',
+    espace_form_upcoming:'Binnenkort', espace_form_past:'Voorbij', espace_days_suffix:'dag(en)',
+    espace_type_recup:'Recuperatie',
+    espace_type_ziek:'Ziekte',
+    espace_type_verlof:'Verlof'
   },
   en:{
     login_email:'Email', login_password:'Password', login_btn:'Log in',
@@ -860,7 +896,25 @@ var I18N={
     note_placeholder:'Write a note visible on the planning...',
     note_del_btn:'Delete', note_close_btn:'Cancel', note_save_btn:'Save',
     note_translate_nl:'Translate to Dutch', note_translate_en:'Translate to English',
-    note_translate_error:'Translation unavailable right now'
+    note_translate_error:'Translation unavailable right now',
+    tab_espace:'My space', espace_subtitle:'Your clock-ins, absences and the NCPs that concern you',
+    espace_select_placeholder:'-- Choose an employee --', espace_choose_prompt:'Choose an employee above to see their space.',
+    espace_no_fiche:'No employee record linked to your account. Contact your Team Leader.', espace_of:'Space of',
+    espace_score_bradford:'BRADFORD SCORE', espace_days_absence:'days absent', espace_periods:'period(s)',
+    espace_msg_ok:'Excellent situation, thanks for your commitment! 👏', espace_msg_wn:'Still under control, keep it up.',
+    espace_msg_al:'A point to watch together.', espace_msg_cr:'Let’s talk about it together to support you.',
+    espace_trend_down:'📉 Improving', espace_trend_up:'📈 Needs attention', espace_trend_stable:'➡️ Stable',
+    espace_sec_formations:'Trainings', espace_sec_retards:'Late arrivals', espace_sec_ecarts:'Clock / turnstile discrepancies',
+    espace_sec_absences:'Absences', espace_sec_ncp:'NCPs concerning you',
+    espace_no_retard:'✅ No late arrivals — perfect!', espace_no_ecart:'✅ No discrepancy — perfect!',
+    espace_no_absence:'✅ No absence recorded.', espace_no_ncp:'✅ No NCP identified.', espace_no_formation:'No training recorded.',
+    espace_ncp_note:'Limited to time slots where P5 team membership is identifiable (weekends).',
+    espace_ncp_banner:'👏 {n} of {total} detected directly by you during your shift — that’s much better than being found later!',
+    espace_ncp_direct:'👍 Spotted directly by you', espace_ncp_late:'🔎 Found later (lab)',
+    espace_form_upcoming:'Upcoming', espace_form_past:'Past', espace_days_suffix:'day(s)',
+    espace_type_recup:'Recovery leave',
+    espace_type_ziek:'Sick leave',
+    espace_type_verlof:'Leave'
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
@@ -4583,6 +4637,16 @@ function monEspaceTrouverEmpActuel(){
   return myId ? EMP.find(function(e){ return e.id === myId; }) : null;
 }
 
+function monEspaceToggle(hdr){
+var wrap2 = hdr.parentElement;
+var body = wrap2 ? wrap2.querySelector('.me-body') : null;
+var arrow = hdr.querySelector('.me-arrow');
+if(!body) return;
+var isOpen = body.style.display !== 'none';
+body.style.display = isOpen ? 'none' : 'block';
+if(arrow) arrow.textContent = isOpen ? '▸' : '▾';
+}
+
 function buildMonEspace(){
 var wrap = document.getElementById('espace-content');
 if(!wrap) return;
@@ -4595,7 +4659,7 @@ if(picker) picker.style.display = 'block';
 var sel = document.getElementById('espace-emp-select');
 if(sel && !sel.dataset.rempli){
 var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
-sel.innerHTML = '<option value="">-- Choisir un employe --</option>' + options.map(function(e){
+sel.innerHTML = '<option value="">' + t('espace_select_placeholder') + '</option>' + options.map(function(e){
 return '<option value="'+e.id+'">'+e.n+'</option>';
 }).join('');
 sel.dataset.rempli = '1';
@@ -4609,8 +4673,8 @@ emp = monEspaceTrouverEmpActuel();
 
 if(!emp){
 wrap.innerHTML = isAdminView
-? '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Choisis un employe ci-dessus pour voir son espace.</div></div>'
-: '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Aucune fiche employe associee a ton compte. Contacte ton Team Leader.</div></div>';
+? '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">' + t('espace_choose_prompt') + '</div></div>'
+: '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">' + t('espace_no_fiche') + '</div></div>';
 return;
 }
 
@@ -4623,8 +4687,8 @@ var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.eca
 
 var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
 absEntries.sort(function(a,b){
-function key(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
-return key(b).localeCompare(key(a));
+function keyAbs(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
+return keyAbs(b).localeCompare(keyAbs(a));
 });
 
 var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
@@ -4652,10 +4716,10 @@ var formSorted = formAvenir.concat(formPassees);
 
 var bd = (typeof BD !== 'undefined' ? BD : []).find(function(b){ return normNomEspace(b.n) === cible; });
 
-var TYPE_ABS_LABEL = {recup:'Récup', ziek:'Maladie', verlof:'Congé'};
+var TYPE_ABS_LABEL = {recup:t('espace_type_recup'), ziek:t('espace_type_ziek'), verlof:t('espace_type_verlof')};
 var TYPE_ABS_PILL = {recup:'ok', ziek:'cr', verlof:'wn'};
 
-var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">Espace de <b>'+emp.n+'</b></div>' : '';
+var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">' + t('espace_of') + ' <b>'+emp.n+'</b></div>' : '';
 
 var html = titreHtml;
 
@@ -4663,13 +4727,13 @@ var initiales = emp.n.split(' ').map(function(w){ return w[0]||''; }).join('').s
 var scoreVal = bd ? bd.sc : 0;
 var scCoul = typeof scColor==='function' ? scColor(scoreVal) : '#10b981';
 var scInfo = typeof scSt==='function' ? scSt(scoreVal) : {l:'OK', c:'ok'};
-var msgPositif = scoreVal<=50 ? 'Situation excellente, merci pour ton engagement ! 👏' : scoreVal<=200 ? 'Ça reste sous contrôle, continue comme ça.' : scoreVal<=500 ? 'Un point à surveiller ensemble.' : 'Parlons-en ensemble pour t\'accompagner.';
+var msgPositif = scoreVal<=50 ? t('espace_msg_ok') : scoreVal<=200 ? t('espace_msg_wn') : scoreVal<=500 ? t('espace_msg_al') : t('espace_msg_cr');
 var tendanceHtml = '';
 if(bd && bd.T && bd.T.length===4){
 var recentT = bd.T[2]+bd.T[3], ancienT = bd.T[0]+bd.T[1];
-if(recentT < ancienT) tendanceHtml = '<span class="pill ok" style="margin-left:8px">📉 En amélioration</span>';
-else if(recentT > ancienT) tendanceHtml = '<span class="pill wn" style="margin-left:8px">📈 À surveiller</span>';
-else tendanceHtml = '<span class="pill" style="margin-left:8px;background:var(--bg3);color:var(--tx2)">➡️ Stable</span>';
+if(recentT < ancienT) tendanceHtml = '<span class="pill ok" style="margin-left:8px">' + t('espace_trend_down') + '</span>';
+else if(recentT > ancienT) tendanceHtml = '<span class="pill wn" style="margin-left:8px">' + t('espace_trend_up') + '</span>';
+else tendanceHtml = '<span class="pill" style="margin-left:8px;background:var(--bg3);color:var(--tx2)">' + t('espace_trend_stable') + '</span>';
 }
 
 html += '<div class="cc" style="margin-bottom:16px;background:linear-gradient(135deg,var(--bg3),var(--bg2))">'
@@ -4680,76 +4744,95 @@ html += '<div class="cc" style="margin-bottom:16px;background:linear-gradient(13
 + '<div style="font-size:12px;color:var(--tx2);margin-top:3px">'+msgPositif+'</div>'
 + '</div>'
 + '<div style="text-align:center">'
-+ '<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">SCORE BRADFORD</div>'
++ '<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">' + t('espace_score_bradford') + '</div>'
 + '<div style="font-size:24px;font-weight:700;color:'+scCoul+'">'+scoreVal+'</div>'
 + '<span class="pill '+scInfo.c+'">'+scInfo.l+'</span>'+tendanceHtml
 + '</div>'
 + '</div>'
 + (bd ? '<div style="display:flex;gap:24px;margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">'
-+ '<div><div style="font-size:18px;font-weight:700">'+bd.D+'</div><div style="font-size:11px;color:var(--tx3)">jours d\'absence</div></div>'
-+ '<div><div style="font-size:18px;font-weight:700">'+bd.S+'</div><div style="font-size:11px;color:var(--tx3)">periode(s)</div></div>'
++ '<div><div style="font-size:18px;font-weight:700">'+bd.D+'</div><div style="font-size:11px;color:var(--tx3)">' + t('espace_days_absence') + '</div></div>'
++ '<div><div style="font-size:18px;font-weight:700">'+bd.S+'</div><div style="font-size:11px;color:var(--tx3)">' + t('espace_periods') + '</div></div>'
 + '</div>' : '')
 + '</div>';
 
-html += '<div class="cc" style="margin-bottom:16px">';
-html += '<div class="cch"><div class="cct">🕐 Retards (' + retards.length + ')</div></div>';
-if(!retards.length){
-html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucun retard — parfait !</div>';
+function meSection(icon, titre, count, bodyHtml){
+return '<div class="cc" style="margin-bottom:16px">'
++ '<div class="cch" style="cursor:pointer" onclick="monEspaceToggle(this)"><div class="cct" style="display:flex;align-items:center;justify-content:space-between"><span>'+icon+' '+titre+' (' + count + ')</span><span class="me-arrow" style="color:var(--tx3);font-size:12px">▸</span></div></div>'
++ '<div class="me-body" style="display:none;margin-top:10px">' + bodyHtml + '</div>'
++ '</div>';
+}
+
+var formBody;
+if(!formSorted.length){
+formBody = '<div style="color:var(--tx3);font-size:13px;padding:8px 0">' + t('espace_no_formation') + '</div>';
 } else {
-html += retards.slice(0,100).map(function(a){
+formBody = formSorted.slice(0,100).map(function(f){
+var estAvenir = new Date(f.date+'T00:00:00') >= todayEspace;
+var badge = estAvenir ? '<span class="pill ok">' + t('espace_form_upcoming') + '</span>' : '<span style="font-size:11px;color:var(--tx3)">' + t('espace_form_past') + '</span>';
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(f.date)+'</div>'
++ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px"><b>'+(f.titre||t('espace_sec_formations'))+'</b>'+(f.heureDebut?' · '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')+(f.lieu?' · '+f.lieu:'')+'</div>'
++ badge
++ '</div>';
+}).join('');
+}
+html += meSection('🎓', t('espace_sec_formations'), formSorted.length, formBody);
+
+var retardsBody;
+if(!retards.length){
+retardsBody = '<div style="color:var(--green);font-size:13px;padding:8px 0">' + t('espace_no_retard') + '</div>';
+} else {
+retardsBody = retards.slice(0,100).map(function(a){
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
 + '<span class="pill cr">'+(a.detail||((a.retardMin||0)+' min'))+'</span>'
 + '</div>';
 }).join('');
 }
-html += '</div>';
+html += meSection('🕐', t('espace_sec_retards'), retards.length, retardsBody);
 
-html += '<div class="cc" style="margin-bottom:16px">';
-html += '<div class="cch"><div class="cct">⏱️ Écarts pointeuse / tourniquet (' + ecarts.length + ')</div></div>';
+var ecartsBody;
 if(!ecarts.length){
-html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucun écart — parfait !</div>';
+ecartsBody = '<div style="color:var(--green);font-size:13px;padding:8px 0">' + t('espace_no_ecart') + '</div>';
 } else {
-html += ecarts.slice(0,100).map(function(a){
+ecartsBody = ecarts.slice(0,100).map(function(a){
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
 + '<div style="font-size:13px;color:var(--tx1)">'+(a.detail||((a.ecart||0)+' min'))+'</div>'
 + '</div>';
 }).join('');
 }
-html += '</div>';
+html += meSection('⏱️', t('espace_sec_ecarts'), ecarts.length, ecartsBody);
 
-html += '<div class="cc" style="margin-bottom:16px">';
-html += '<div class="cch"><div class="cct">🏥 Absences (' + absEntries.length + ')</div></div>';
+var absBody;
 if(!absEntries.length){
-html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucune absence enregistrée.</div>';
+absBody = '<div style="color:var(--green);font-size:13px;padding:8px 0">' + t('espace_no_absence') + '</div>';
 } else {
-html += absEntries.slice(0,100).map(function(a){
+absBody = absEntries.slice(0,100).map(function(a){
 var lbl = TYPE_ABS_LABEL[a.t] || a.t;
 var pillCls = TYPE_ABS_PILL[a.t] || 'wn';
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? ' au '+a.b : '')+'</div>'
 + '<span class="pill '+pillCls+'">'+lbl+'</span>'
-+ '<div style="margin-left:auto;font-size:11px;color:var(--tx3)">'+(a.d||'')+' jour(s)</div>'
++ '<div style="margin-left:auto;font-size:11px;color:var(--tx3)">'+(a.d||'')+' ' + t('espace_days_suffix') + '</div>'
 + '</div>';
 }).join('');
 }
-html += '</div>';
+html += meSection('🏥', t('espace_sec_absences'), absEntries.length, absBody);
 
-html += '<div class="cc" style="margin-bottom:16px">';
-html += '<div class="cch"><div class="cct">🔧 NCP le concernant (' + ncpEntries.length + ')</div></div>';
-html += '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Limité aux créneaux où l\'appartenance à l\'équipe P5 est identifiable (week-ends).</div>';
+var ncpBody;
+var ncpNote = '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">' + t('espace_ncp_note') + '</div>';
 if(!ncpEntries.length){
-html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucune NCP identifiée.</div>';
+ncpBody = ncpNote + '<div style="color:var(--green);font-size:13px;padding:8px 0">' + t('espace_no_ncp') + '</div>';
 } else {
-if(ncpDirectCount > 0){
-html += '<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--green)">👏 '+ncpDirectCount+' sur '+ncpEntries.length+' détecté(s) directement par toi pendant ton poste — c\'est beaucoup mieux que découvert plus tard !</div>';
-}
-html += ncpEntries.slice(0,100).map(function(n){
+var ncpBanniere = ncpDirectCount > 0
+? '<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--green)">' + t('espace_ncp_banner').replace('{n}', ncpDirectCount).replace('{total}', ncpEntries.length) + '</div>'
+: '';
+var ncpRows = ncpEntries.slice(0,100).map(function(n){
 var direct = typeof ncpHorsShift!=='function' || !ncpHorsShift(n);
 var badge = direct
-? '<span class="pill ok">👍 Vu directement par toi</span>'
-: '<span class="pill" style="background:rgba(59,130,246,.12);color:var(--blue)">🔎 Découvert après coup (labo)</span>';
+? '<span class="pill ok">' + t('espace_ncp_direct') + '</span>'
+: '<span class="pill" style="background:rgba(59,130,246,.12);color:var(--blue)">' + t('espace_ncp_late') + '</span>';
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</div>'
 + '<div style="font-size:12px;font-weight:600">'+(n.ligne||'-')+'</div>'
@@ -4757,25 +4840,9 @@ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;bo
 + badge
 + '</div>';
 }).join('');
+ncpBody = ncpNote + ncpBanniere + ncpRows;
 }
-html += '</div>';
-
-html += '<div class="cc">';
-html += '<div class="cch"><div class="cct">🎓 Formations (' + formSorted.length + ')</div></div>';
-if(!formSorted.length){
-html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune formation enregistrée.</div>';
-} else {
-html += formSorted.slice(0,100).map(function(f){
-var estAvenir = new Date(f.date+'T00:00:00') >= todayEspace;
-var badge = estAvenir ? '<span class="pill ok">À venir</span>' : '<span style="font-size:11px;color:var(--tx3)">Passée</span>';
-return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(f.date)+'</div>'
-+ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px"><b>'+(f.titre||'Formation')+'</b>'+(f.heureDebut?' · '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')+(f.lieu?' · '+f.lieu:'')+'</div>'
-+ badge
-+ '</div>';
-}).join('');
-}
-html += '</div>';
+html += meSection('🔧', t('espace_sec_ncp'), ncpEntries.length, ncpBody);
 
 wrap.innerHTML = html;
 }
