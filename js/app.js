@@ -2735,6 +2735,7 @@ function startApp(){
       buildFormationsListe();
       buildMiniCalFormations();
       checkFormationNotif();
+if(typeof buildMonEspace==='function'&&document.getElementById('espace-content'))buildMonEspace();
     });
   // Charger comptes employes depuis Firebase (admin uniquement, cote regles Firebase)
   if(currentUser && currentUser.role === 'admin'){
@@ -4583,123 +4584,201 @@ function monEspaceTrouverEmpActuel(){
 }
 
 function buildMonEspace(){
-  var wrap = document.getElementById('espace-content');
-  if(!wrap) return;
-  var isAdminView = currentUser && currentUser.role === 'admin';
-  var picker = document.getElementById('espace-picker-wrap');
-  var emp = null;
+var wrap = document.getElementById('espace-content');
+if(!wrap) return;
+var isAdminView = currentUser && currentUser.role === 'admin';
+var picker = document.getElementById('espace-picker-wrap');
+var emp = null;
 
-  if(isAdminView){
-    if(picker) picker.style.display = 'block';
-    var sel = document.getElementById('espace-emp-select');
-    if(sel && !sel.dataset.rempli){
-      var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
-      sel.innerHTML = '<option value="">-- Choisir un employe --</option>' + options.map(function(e){
-        return '<option value="'+e.id+'">'+e.n+'</option>';
-      }).join('');
-      sel.dataset.rempli = '1';
-    }
-    var chosenId = sel ? sel.value : '';
-    emp = chosenId ? EMP.find(function(e){ return e.id === chosenId; }) : null;
-  } else {
-    if(picker) picker.style.display = 'none';
-    emp = monEspaceTrouverEmpActuel();
-  }
-
-  if(!emp){
-    wrap.innerHTML = isAdminView
-      ? '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Choisis un employe ci-dessus pour voir son espace.</div></div>'
-      : '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Aucune fiche employe associee a ton compte. Contacte ton Team Leader.</div></div>';
-    return;
-  }
-
-  var cible = normNomEspace(emp.n);
-
-  var ptEntries = Object.values(PT_DATA || {}).filter(function(a){ return normNomEspace(a.nom) === cible; });
-  ptEntries.sort(function(a,b){ return (b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')); });
-  var retards = ptEntries.filter(function(a){ return a.type === 'retard'; });
-  var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart; });
-
-  var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
-  absEntries.sort(function(a,b){
-    function key(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
-    return key(b).localeCompare(key(a));
-  });
-
-  var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
-    if(n.type_ncp !== 'Inpak' || !n.ligne) return false;
-    var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
-    if(typeof getOperateur !== 'function') return false;
-    var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
-    if(!op) return false;
-    return op.split(', ').indexOf(emp.n) !== -1;
-  });
-  ncpEntries.sort(function(a,b){ return (b.date_fichier+(b.created_heure||'')).localeCompare(a.date_fichier+(a.created_heure||'')); });
-
-  var TYPE_ABS_LABEL = {recup:'Récup', ziek:'Maladie', verlof:'Congé'};
-  var TYPE_ABS_COLOR = {recup:'#10b981', ziek:'#ef4444', verlof:'#f59e0b'};
-
-  var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">Espace de <b>'+emp.n+'</b></div>' : '';
-
-  var html = titreHtml;
-
-  html += '<div class="cc" style="margin-bottom:16px">';
-  html += '<div class="cch"><div class="cct">Retards (' + retards.length + ')</div></div>';
-  if(!retards.length){
-    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun retard enregistré.</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse">' + retards.slice(0,100).map(function(a){
-      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(a.date)+'</td>'
-        + '<td style="padding:6px 8px;font-size:13px;color:#ef4444">'+(a.detail||((a.retardMin||0)+' min'))+'</td></tr>';
-    }).join('') + '</table>';
-  }
-  html += '</div>';
-
-  html += '<div class="cc" style="margin-bottom:16px">';
-  html += '<div class="cch"><div class="cct">Écarts pointeuse / tourniquet (' + ecarts.length + ')</div></div>';
-  if(!ecarts.length){
-    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun écart enregistré.</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse">' + ecarts.slice(0,100).map(function(a){
-      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(a.date)+'</td>'
-        + '<td style="padding:6px 8px;font-size:13px;color:var(--tx1)">'+(a.detail||((a.ecart||0)+' min'))+'</td></tr>';
-    }).join('') + '</table>';
-  }
-  html += '</div>';
-
-  html += '<div class="cc" style="margin-bottom:16px">';
-  html += '<div class="cch"><div class="cct">Absences (' + absEntries.length + ')</div></div>';
-  if(!absEntries.length){
-    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune absence enregistrée.</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse">' + absEntries.slice(0,100).map(function(a){
-      var lbl = TYPE_ABS_LABEL[a.t] || a.t;
-      var coul = TYPE_ABS_COLOR[a.t] || 'var(--tx2)';
-      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? ' au '+a.b : '')+'</td>'
-        + '<td style="padding:6px 8px;font-size:13px;font-weight:600;color:'+coul+'">'+lbl+'</td>'
-        + '<td style="padding:6px 8px;font-size:12px;color:var(--tx3)">'+(a.d||'')+' jour(s)</td></tr>';
-    }).join('') + '</table>';
-  }
-  html += '</div>';
-
-  html += '<div class="cc">';
-  html += '<div class="cch"><div class="cct">NCP le concernant (' + ncpEntries.length + ')</div></div>';
-  html += '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Limité aux créneaux où l\'appartenance à l\'équipe P5 est identifiable (week-ends).</div>';
-  if(!ncpEntries.length){
-    html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune NCP identifiée.</div>';
-  } else {
-    html += '<table style="width:100%;border-collapse:collapse">' + ncpEntries.slice(0,100).map(function(n){
-      return '<tr><td style="padding:6px 8px;font-family:var(--mo);font-size:12px;white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</td>'
-        + '<td style="padding:6px 8px;font-size:12px;font-weight:600">'+(n.ligne||'-')+'</td>'
-        + '<td style="padding:6px 8px;font-size:13px;color:var(--tx1)">'+(n.description||n.code_produit||'-')+'</td>'
-        + '<td style="padding:6px 8px;font-size:12px;color:var(--tx3)">'+(n.status||'-')+'</td></tr>';
-    }).join('') + '</table>';
-  }
-  html += '</div>';
-
-  wrap.innerHTML = html;
+if(isAdminView){
+if(picker) picker.style.display = 'block';
+var sel = document.getElementById('espace-emp-select');
+if(sel && !sel.dataset.rempli){
+var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
+sel.innerHTML = '<option value="">-- Choisir un employe --</option>' + options.map(function(e){
+return '<option value="'+e.id+'">'+e.n+'</option>';
+}).join('');
+sel.dataset.rempli = '1';
+}
+var chosenId = sel ? sel.value : '';
+emp = chosenId ? EMP.find(function(e){ return e.id === chosenId; }) : null;
+} else {
+if(picker) picker.style.display = 'none';
+emp = monEspaceTrouverEmpActuel();
 }
 
+if(!emp){
+wrap.innerHTML = isAdminView
+? '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Choisis un employe ci-dessus pour voir son espace.</div></div>'
+: '<div class="cc"><div style="padding:20px;color:var(--tx3);text-align:center">Aucune fiche employe associee a ton compte. Contacte ton Team Leader.</div></div>';
+return;
+}
+
+var cible = normNomEspace(emp.n);
+
+var ptEntries = Object.values(PT_DATA || {}).filter(function(a){ return normNomEspace(a.nom) === cible; });
+ptEntries.sort(function(a,b){ return (b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')); });
+var retards = ptEntries.filter(function(a){ return a.type === 'retard'; });
+var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart; });
+
+var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
+absEntries.sort(function(a,b){
+function key(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
+return key(b).localeCompare(key(a));
+});
+
+var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
+if(n.type_ncp !== 'Inpak' || !n.ligne) return false;
+var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
+if(typeof getOperateur !== 'function') return false;
+var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
+if(!op) return false;
+return op.split(', ').indexOf(emp.n) !== -1;
+});
+ncpEntries.sort(function(a,b){ return (b.date_fichier+(b.created_heure||'')).localeCompare(a.date_fichier+(a.created_heure||'')); });
+var ncpDirectCount = ncpEntries.filter(function(n){ return typeof ncpHorsShift!=='function' || !ncpHorsShift(n); }).length;
+
+var todayEspace = new Date(); todayEspace.setHours(0,0,0,0);
+var formEntries = (typeof FORMATIONS !== 'undefined' ? FORMATIONS : []).filter(function(f){
+var emps = f.employes || [];
+if(!emps.length) return true;
+return emps.some(function(idOrName){ return idOrName === emp.id || normNomEspace(idOrName) === cible; });
+});
+var formAvenir = formEntries.filter(function(f){ return new Date(f.date+'T00:00:00') >= todayEspace; });
+var formPassees = formEntries.filter(function(f){ return new Date(f.date+'T00:00:00') < todayEspace; });
+formAvenir.sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(b.date+(b.heureDebut||'')); });
+formPassees.sort(function(a,b){ return (b.date+(b.heureDebut||'')).localeCompare(a.date+(a.heureDebut||'')); });
+var formSorted = formAvenir.concat(formPassees);
+
+var bd = (typeof BD !== 'undefined' ? BD : []).find(function(b){ return normNomEspace(b.n) === cible; });
+
+var TYPE_ABS_LABEL = {recup:'Récup', ziek:'Maladie', verlof:'Congé'};
+var TYPE_ABS_PILL = {recup:'ok', ziek:'cr', verlof:'wn'};
+
+var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">Espace de <b>'+emp.n+'</b></div>' : '';
+
+var html = titreHtml;
+
+var initiales = emp.n.split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase();
+var scoreVal = bd ? bd.sc : 0;
+var scCoul = typeof scColor==='function' ? scColor(scoreVal) : '#10b981';
+var scInfo = typeof scSt==='function' ? scSt(scoreVal) : {l:'OK', c:'ok'};
+var msgPositif = scoreVal<=50 ? 'Situation excellente, merci pour ton engagement ! 👏' : scoreVal<=200 ? 'Ça reste sous contrôle, continue comme ça.' : scoreVal<=500 ? 'Un point à surveiller ensemble.' : 'Parlons-en ensemble pour t\'accompagner.';
+var tendanceHtml = '';
+if(bd && bd.T && bd.T.length===4){
+var recentT = bd.T[2]+bd.T[3], ancienT = bd.T[0]+bd.T[1];
+if(recentT < ancienT) tendanceHtml = '<span class="pill ok" style="margin-left:8px">📉 En amélioration</span>';
+else if(recentT > ancienT) tendanceHtml = '<span class="pill wn" style="margin-left:8px">📈 À surveiller</span>';
+else tendanceHtml = '<span class="pill" style="margin-left:8px;background:var(--bg3);color:var(--tx2)">➡️ Stable</span>';
+}
+
+html += '<div class="cc" style="margin-bottom:16px;background:linear-gradient(135deg,var(--bg3),var(--bg2))">'
++ '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
++ '<div style="width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex:none">'+initiales+'</div>'
++ '<div style="flex:1;min-width:200px">'
++ '<div style="font-size:17px;font-weight:700">'+emp.n+'</div>'
++ '<div style="font-size:12px;color:var(--tx2);margin-top:3px">'+msgPositif+'</div>'
++ '</div>'
++ '<div style="text-align:center">'
++ '<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">SCORE BRADFORD</div>'
++ '<div style="font-size:24px;font-weight:700;color:'+scCoul+'">'+scoreVal+'</div>'
++ '<span class="pill '+scInfo.c+'">'+scInfo.l+'</span>'+tendanceHtml
++ '</div>'
++ '</div>'
++ (bd ? '<div style="display:flex;gap:24px;margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">'
++ '<div><div style="font-size:18px;font-weight:700">'+bd.D+'</div><div style="font-size:11px;color:var(--tx3)">jours d\'absence</div></div>'
++ '<div><div style="font-size:18px;font-weight:700">'+bd.S+'</div><div style="font-size:11px;color:var(--tx3)">periode(s)</div></div>'
++ '</div>' : '')
++ '</div>';
+
+html += '<div class="cc" style="margin-bottom:16px">';
+html += '<div class="cch"><div class="cct">🕐 Retards (' + retards.length + ')</div></div>';
+if(!retards.length){
+html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucun retard — parfait !</div>';
+} else {
+html += retards.slice(0,100).map(function(a){
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
++ '<span class="pill cr">'+(a.detail||((a.retardMin||0)+' min'))+'</span>'
++ '</div>';
+}).join('');
+}
+html += '</div>';
+
+html += '<div class="cc" style="margin-bottom:16px">';
+html += '<div class="cch"><div class="cct">⏱️ Écarts pointeuse / tourniquet (' + ecarts.length + ')</div></div>';
+if(!ecarts.length){
+html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucun écart — parfait !</div>';
+} else {
+html += ecarts.slice(0,100).map(function(a){
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
++ '<div style="font-size:13px;color:var(--tx1)">'+(a.detail||((a.ecart||0)+' min'))+'</div>'
++ '</div>';
+}).join('');
+}
+html += '</div>';
+
+html += '<div class="cc" style="margin-bottom:16px">';
+html += '<div class="cch"><div class="cct">🏥 Absences (' + absEntries.length + ')</div></div>';
+if(!absEntries.length){
+html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucune absence enregistrée.</div>';
+} else {
+html += absEntries.slice(0,100).map(function(a){
+var lbl = TYPE_ABS_LABEL[a.t] || a.t;
+var pillCls = TYPE_ABS_PILL[a.t] || 'wn';
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? ' au '+a.b : '')+'</div>'
++ '<span class="pill '+pillCls+'">'+lbl+'</span>'
++ '<div style="margin-left:auto;font-size:11px;color:var(--tx3)">'+(a.d||'')+' jour(s)</div>'
++ '</div>';
+}).join('');
+}
+html += '</div>';
+
+html += '<div class="cc" style="margin-bottom:16px">';
+html += '<div class="cch"><div class="cct">🔧 NCP le concernant (' + ncpEntries.length + ')</div></div>';
+html += '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Limité aux créneaux où l\'appartenance à l\'équipe P5 est identifiable (week-ends).</div>';
+if(!ncpEntries.length){
+html += '<div style="color:var(--green);font-size:13px;padding:8px 0">✅ Aucune NCP identifiée.</div>';
+} else {
+if(ncpDirectCount > 0){
+html += '<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--green)">👏 '+ncpDirectCount+' sur '+ncpEntries.length+' détecté(s) directement par toi pendant ton poste — c\'est beaucoup mieux que découvert plus tard !</div>';
+}
+html += ncpEntries.slice(0,100).map(function(n){
+var direct = typeof ncpHorsShift!=='function' || !ncpHorsShift(n);
+var badge = direct
+? '<span class="pill ok">👍 Vu directement par toi</span>'
+: '<span class="pill" style="background:rgba(59,130,246,.12);color:var(--blue)">🔎 Découvert après coup (labo)</span>';
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</div>'
++ '<div style="font-size:12px;font-weight:600">'+(n.ligne||'-')+'</div>'
++ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+(n.description||n.code_produit||'-')+'</div>'
++ badge
++ '</div>';
+}).join('');
+}
+html += '</div>';
+
+html += '<div class="cc">';
+html += '<div class="cch"><div class="cct">🎓 Formations (' + formSorted.length + ')</div></div>';
+if(!formSorted.length){
+html += '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucune formation enregistrée.</div>';
+} else {
+html += formSorted.slice(0,100).map(function(f){
+var estAvenir = new Date(f.date+'T00:00:00') >= todayEspace;
+var badge = estAvenir ? '<span class="pill ok">À venir</span>' : '<span style="font-size:11px;color:var(--tx3)">Passée</span>';
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(f.date)+'</div>'
++ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px"><b>'+(f.titre||'Formation')+'</b>'+(f.heureDebut?' · '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')+(f.lieu?' · '+f.lieu:'')+'</div>'
++ badge
++ '</div>';
+}).join('');
+}
+html += '</div>';
+
+wrap.innerHTML = html;
+}
 function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
