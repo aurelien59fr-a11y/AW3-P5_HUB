@@ -52,7 +52,7 @@
     <button class="tab on" data-tab="ov">&#9672; <span data-i18n="tab_ov">Vue d&rsquo;ensemble</span></button>
     <button class="tab" data-tab="br">&#9673; <span data-i18n="tab_br">Bradford</span></button>
     <button class="tab" data-tab="pl">&#9638; <span data-i18n="tab_pl">Planning</span></button>
-    <button class="tab" data-tab="espace">&#128188; <span>Mon espace</span></button>
+    <button class="tab" data-tab="espace">&#128188; <span data-i18n="tab_espace">Mon espace</span></button>
     <button class="tab" data-tab="ab">&#9675; <span data-i18n="tab_ab">Absences</span></button>
     <button class="tab" id="tab-formations-btn" data-tab="formations">&#127891; <span>Formations</span></button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; <span data-i18n="tab_pt">Pointages</span></button>
@@ -141,8 +141,8 @@
     <!-- MON ESPACE -->
     <div class="pane" id="pane-espace">
     <div class="sh">
-    <div class="st">Mon espace</div>
-    <div class="ss">Tes pointages, tes absences et les NCP qui te concernent</div>
+    <div class="st" data-i18n="tab_espace">Mon espace</div>
+    <div class="ss" data-i18n="espace_subtitle">Tes pointages, tes absences et les NCP qui te concernent</div>
     </div>
 
     <div class="cc" id="espace-picker-wrap" style="display:none;margin-bottom:16px">
@@ -788,7 +788,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=30"></script>
+  <script src="js/app.js?v=31"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
