@@ -652,6 +652,7 @@ var I18N={
     ncp_equipe_label:'Équipe', ncp_equipe_moi:'P5 (moi)',
     ncp_note1:"Note : l'équipe est déduite de l'heure de la fiche quand celle-ci est fiable, sinon de l'heure du défaut écrite dans le texte (marquée ~ dans la colonne Date).",
     ncp_note2:"Ce filtre sert à explorer les données, il ne constitue pas une comparaison de performance entre équipes.",
+    ncp_couverture_text:"Couverture sur cette sélection : {att} fiches sur {tot} avec une équipe ({pct}%), dont {d} sur l'heure réelle de production, {x} sur une heure du texte ({pl} sous forme de plage) et {f} sur la seule heure d'encodage (fiabilité faible). {mu} fiches sont à cheval sur plusieurs postes : équipe principale + secondaire, au pro-rata du temps passé dans chaque poste. {n} non classées (déclarant nominatif).",
     ncp_chart_evolution:'Évolution mensuelle', ncp_chart_causes:'Top 10 des causes',
     ncp_chart_causes_hint:'Motifs les plus fréquents — la courbe orange donne le cumul en %',
     ncp_chart_tonnage:'Tonnage bloqué par client', ncp_chart_tonnage_hint:'Impact matière réel, en tonnes, par client',
@@ -858,6 +859,7 @@ var I18N={
     ncp_equipe_label:'Ploeg', ncp_equipe_moi:'P5 (ik)',
     ncp_note1:'Opmerking: het team wordt afgeleid uit het tijdstip van de fiche wanneer dat betrouwbaar is, anders uit het tijdstip van het defect in de tekst (gemarkeerd met ~ in de kolom Datum).',
     ncp_note2:'Dit filter dient om de gegevens te verkennen, het is geen prestatievergelijking tussen teams.',
+    ncp_couverture_text:'Dekking voor deze selectie: {att} fiches van {tot} met een team ({pct}%), waarvan {d} op het werkelijke productie-uur, {x} op een uur uit de tekst ({pl} in de vorm van een tijdspanne) en {f} enkel op het registratie-uur (lage betrouwbaarheid). {mu} fiches overlappen meerdere posten: hoofdteam + secundair team, naar rato van de tijd doorgebracht in elke post. {n} niet-geclassificeerd (nominatieve aangever).',
     ncp_chart_evolution:'Maandelijkse evolutie', ncp_chart_causes:'Top 10 oorzaken',
     ncp_chart_causes_hint:'Meest voorkomende oorzaken — de oranje lijn toont het cumulatief in %',
     ncp_chart_tonnage:'Geblokkeerde tonnage per klant', ncp_chart_tonnage_hint:'Reële materiaalimpact, in ton, per klant',
@@ -1064,6 +1066,7 @@ var I18N={
     ncp_equipe_label:'Team', ncp_equipe_moi:'P5 (me)',
     ncp_note1:"Note: the team is inferred from the record's timestamp when reliable, otherwise from the defect time written in the text (marked ~ in the Date column).",
     ncp_note2:'This filter is for exploring the data, not for comparing team performance.',
+    ncp_couverture_text:"Coverage for this selection: {att} records out of {tot} with a team ({pct}%), of which {d} on the actual production time, {x} on a time from the text ({pl} as a range) and {f} on the encoding time only (low reliability). {mu} records span multiple posts: primary + secondary team, prorated by time spent in each post. {n} unclassified (named declarant).",
     ncp_chart_evolution:'Monthly evolution', ncp_chart_causes:'Top 10 causes',
     ncp_chart_causes_hint:'Most frequent causes — the orange line shows the cumulative %',
     ncp_chart_tonnage:'Blocked tonnage by customer', ncp_chart_tonnage_hint:'Real material impact, in tonnes, per customer',
@@ -4168,14 +4171,14 @@ function toggleArretsOperateur(nom){
 
 function peuplerOperateursFiltre(){
   var wrap = document.getElementById('arrets-filtre-operateur');
-  if(!wrap || wrap.dataset.rempli === '1') return; // ne construire qu'une fois (liste statique)
+  if(!wrap || wrap.dataset.rempli === LANG) return; // reconstruire seulement si la langue a change
   var operateurs = EMP.filter(function(e){ return e.g === 'INPAK'; }).map(function(e){ return e.n; });
-  var html = '<button class="arrets-operateur-btn" data-operateur="all" onclick="toggleArretsOperateur(\'all\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Tous</button>';
+  var html = '<button class="arrets-operateur-btn" data-operateur="all" onclick="toggleArretsOperateur(\'all\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">' + t('ncp_tous') + '</button>';
   html += operateurs.map(function(nom){
     return '<button class="arrets-operateur-btn" data-operateur="' + nom.replace(/"/g,'&quot;') + '" onclick="toggleArretsOperateur(\'' + nom.replace(/'/g,"\\'") + '\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">' + nom + '</button>';
   }).join('');
   wrap.innerHTML = html;
-  wrap.dataset.rempli = '1';
+  wrap.dataset.rempli = LANG;
 }
 
 function peuplerRaisonsSelect(){
@@ -4187,7 +4190,7 @@ function peuplerRaisonsSelect(){
   });
   var liste = Object.keys(raisons).sort();
   var precedent = sel.value;
-  sel.innerHTML = '<option value="all">Toutes les raisons</option>' + liste.map(function(r){
+  sel.innerHTML = '<option value="all">' + t('arr_all_reasons') + '</option>' + liste.map(function(r){
     return '<option value="' + r.replace(/"/g,'&quot;') + '">' + r + '</option>';
   }).join('');
   if(liste.indexOf(precedent) !== -1) sel.value = precedent;
@@ -4441,7 +4444,7 @@ function peuplerCmp2RaisonsSelect(){
   });
   var liste = Object.keys(raisons).sort();
   var precedent = sel.value;
-  sel.innerHTML = '<option value="all">Toutes les raisons</option>' + liste.map(function(r){
+  sel.innerHTML = '<option value="all">' + t('arr_all_reasons') + '</option>' + liste.map(function(r){
     return '<option value="' + r.replace(/"/g,'&quot;') + '">' + r + '</option>';
   }).join('');
   if(liste.indexOf(precedent) !== -1) sel.value = precedent;
@@ -4857,12 +4860,12 @@ var emp = null;
 if(isAdminView){
 if(picker) picker.style.display = 'block';
 var sel = document.getElementById('espace-emp-select');
-if(sel && !sel.dataset.rempli){
+if(sel && sel.dataset.rempli !== LANG){
 var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
 sel.innerHTML = '<option value="">' + t('espace_select_placeholder') + '</option>' + options.map(function(e){
 return '<option value="'+e.id+'">'+e.n+'</option>';
 }).join('');
-sel.dataset.rempli = '1';
+sel.dataset.rempli = LANG;
 }
 var chosenId = sel ? sel.value : '';
 emp = chosenId ? EMP.find(function(e){ return e.id === chosenId; }) : null;
@@ -5541,12 +5544,11 @@ function ncpBadgeSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') re
     if(m.multi) mu++;
   });
   var tot = rows.length, att = d + f + x;
-  el.innerHTML = '<br>Couverture sur cette selection : ' + att + ' fiches sur ' + tot
-    + ' avec une equipe (' + (tot ? Math.round(att/tot*100) : 0) + '%), dont ' + d
-    + ' sur l heure reelle de production, ' + x + ' sur une heure du texte (' + pl
-    + ' sous forme de plage) et ' + f + ' sur la seule heure d encodage (fiabilite faible). '
-    + mu + ' fiches sont a cheval sur plusieurs postes : equipe principale + secondaire, '
-    + 'au pro-rata du temps passe dans chaque poste. ' + n + ' non classees (declarant nominatif).';
+  el.innerHTML = '<br>' + t('ncp_couverture_text')
+    .replace('{att}', att).replace('{tot}', tot)
+    .replace('{pct}', tot ? Math.round(att/tot*100) : 0)
+    .replace('{d}', d).replace('{x}', x).replace('{pl}', pl)
+    .replace('{f}', f).replace('{mu}', mu).replace('{n}', n);
   } function ncpGetEquipe(r){
   if(r.equipe_override) return r.equipe_override;
   if(ncpEstNonClasse(r)) return null; var _hi = ncpHeureInfo(r); if(!_hi.heure) return null;
