@@ -783,12 +783,21 @@
     </div>
 
   </main>
+  <nav class="mobile-nav" id="mobile-nav"></nav>
+  <div class="mobile-menu-sheet" id="mobile-menu-sheet">
+    <div class="mms-backdrop" onclick="closeMobileMenu()"></div>
+    <div class="mms-panel">
+      <div class="mms-handle"></div>
+      <div class="mms-title" data-i18n="nav_menu">Menu</div>
+      <div id="mobile-menu-list"></div>
+    </div>
+  </div>
 </div>
 </div>
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=33"></script>
+  <script src="js/app.js?v=34"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
