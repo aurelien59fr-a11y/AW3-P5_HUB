@@ -622,7 +622,67 @@ var I18N={
     espace_form_upcoming:'À venir', espace_form_past:'Passée', espace_days_suffix:'jour(s)',
     espace_type_recup:'Récup',
     espace_type_ziek:'Maladie',
-    espace_type_verlof:'Congé'
+    espace_type_verlof:'Congé',
+    tab_formations:'Formations', tab_ncp:'NCP Qualité', tab_recrutement:'Recrutement',
+    ov_badge_employees:'employés', ov_formations_upcoming:'Formations à venir',
+    espace_emp_label:'Employé',
+    formations_subtitle:'Planification et rappels des formations du personnel',
+    formations_btn_add:'+ Nouvelle formation', formations_upcoming:'À venir', formations_past:'Passées',
+    formations_empty_upcoming:'Aucune formation à venir.', formations_empty_past:'Aucune formation passée.',
+    formations_empty_30d:'Aucune formation dans les 30 prochains jours.', formations_all_team:"Toute l'équipe",
+    formations_notif_singular:'Formation cette semaine', formations_notif_plural:'Formations cette semaine',
+    formations_modal_title_new:'Nouvelle formation', formations_modal_title_edit:'Modifier la formation',
+    formations_field_titre:'Titre', formations_field_date:'Date', formations_field_heure_debut:'Heure début',
+    formations_field_heure_fin:'Heure fin', formations_field_lieu:'Lieu / formateur (optionnel)',
+    formations_field_employes:'Employés concernés', formations_field_notes:'Notes (optionnel)',
+    formations_placeholder_titre:'Ex: Formation sécurité incendie', formations_placeholder_lieu:'Ex: Salle de réunion, formateur externe...',
+    formations_placeholder_notes:'Détails, matériel à prévoir...', formations_btn_delete:'Supprimer', formations_btn_save:'Enregistrer',
+    formations_err_titre:'Le titre est obligatoire.', formations_err_date:'La date est obligatoire.',
+    formations_toast_saved:'Formation enregistrée', formations_toast_deleted:'Formation supprimée',
+    formations_confirm_delete:'Supprimer cette formation ?', formations_err_generic:'Erreur : ',
+    comptes_emp_title:'Comptes employés',
+    ncp_subtitle:'Non-conformités Inpak et Production — AW1, AW2, AW3', ncp_btn_import:'⇓ Importer données NCP',
+    ncp_empty_title:'Aucune donnée NCP pour le moment',
+    ncp_empty_desc:'Clique sur "Importer données NCP" ci-dessus et colle le contenu du fichier NCP_dataset_complet.json pour remplir cet onglet.',
+    ncp_kpi_total:'Total NCP', ncp_kpi_prod:'Production', ncp_kpi_tonnes:'Tonnage bloqué', ncp_kpi_tonnes_meta:'total période filtrée',
+    ncp_kpi_debloque:'NCP débloqués', ncp_kpi_sl_inpak:'NCP hors shift · Inpak', ncp_kpi_sl_prod:'NCP hors shift · Prod',
+    ncp_periode_label:'Période', ncp_preset_tout:'Tout', ncp_preset_mois:'Mois en cours', ncp_preset_30:'30 jours',
+    ncp_preset_90:'90 jours', ncp_preset_annee:'Année en cours', ncp_periode_reset_title:'Réinitialiser la période',
+    ncp_du:'Du', ncp_au:'au', ncp_unite_label:'Unité', ncp_toutes:'Toutes', ncp_type_label:'Type', ncp_tous:'Tous',
+    ncp_equipe_label:'Équipe', ncp_equipe_moi:'P5 (moi)',
+    ncp_note1:"Note : l'équipe est déduite de l'heure de la fiche quand celle-ci est fiable, sinon de l'heure du défaut écrite dans le texte (marquée ~ dans la colonne Date).",
+    ncp_note2:"Ce filtre sert à explorer les données, il ne constitue pas une comparaison de performance entre équipes.",
+    ncp_chart_evolution:'Évolution mensuelle', ncp_chart_causes:'Top 10 des causes',
+    ncp_chart_causes_hint:'Motifs les plus fréquents — la courbe orange donne le cumul en %',
+    ncp_chart_tonnage:'Tonnage bloqué par client', ncp_chart_tonnage_hint:'Impact matière réel, en tonnes, par client',
+    ncp_chart_familles:'Familles de défauts',
+    ncp_chart_familles_hint:"Les 457 motifs distincts regroupés en grandes familles — barres bleues : nombre de mentions, courbe orange : cumul en % sur l'axe de droite",
+    ncp_chart_delai:'Délai de traitement', ncp_chart_lignes:'Top 10 lignes touchées',
+    ncp_chart_lignes_hint:"Lignes véritablement en cause (NCP Inpak) — exclut les blocages en conséquence d'un problème Production",
+    ncp_chart_produits:'Top 10 codes produit touchés', ncp_chart_produits_hint:'Produits les plus souvent impliqués dans un NCP',
+    ncp_recurrences_title:'Récurrences à surveiller',
+    ncp_recurrences_hint:'Même produit et même famille de défaut revenus au moins 3 fois sur la période filtrée. Clique sur une carte pour voir les NCP concernés.',
+    ncp_declarants_title:'NCP déclarés par le personnel de semaine',
+    ncp_declarants_hint:'Fiches non classées : déclarant nominatif (labo / qualité de semaine), équipe non attribuable. Clique sur un nom pour voir ses NCP, puis sur une ligne pour le détail du PDF.',
+    ncp_liste_title:'Liste des NCP',
+    ncp_search_placeholder:'Rechercher : numéro, produit, client, ligne, déclarant, bakorder ou un mot du problème...',
+    ncp_btn_tout_afficher:'Tout afficher', ncp_btn_export_csv:'Export CSV',
+    ncp_th_numero:'Numéro NCP', ncp_th_date:'Date', ncp_th_unite:'Unité', ncp_th_equipe:'Équipe', ncp_th_type:'Type',
+    ncp_th_ligne:'Ligne', ncp_th_bakorder:'Bakorder', ncp_th_produit:'Produit', ncp_th_palettes:'Palettes',
+    ncp_th_tonnage:'Tonnage', ncp_th_statut:'Statut', ncp_th_description:'Description',
+    ncp_no_match:'Aucun NCP ne correspond à ces filtres.',
+    ncp_truncated:'Affichage limité aux {n} plus récents sur {total}',
+    rec_subtitle:'Grille d\u2019entretien mentalité — sécurité, fiabilité, motivation',
+    modal_close:'Fermer', ncp_detail_title:'Détail du NCP',
+    comptes_emp_empty:'Aucun employé Firebase trouvé.', role_admin:'Administrateur', role_subchef:'Sous-chef', role_custom:'Accès personnalisé',
+    comptes_actif:'Compte actif', comptes_btn_modif_acces:"Modifier l'accès", comptes_btn_creer:'Créer un compte',
+    comptes_edit_planning:'Peut modifier le planning', comptes_btn_enregistrer:'Enregistrer', comptes_btn_annuler:'Annuler',
+    comptes_loading:'Chargement...', comptes_confirm_creer:'Créer le compte pour ', comptes_confirm_email:'Email : ',
+    comptes_confirm_pass:'Mot de passe : ', comptes_confirm_role:'Rôle : ', comptes_confirm_onglets:'Onglets : ',
+    comptes_confirm_planning:'Modifier planning : ', comptes_oui:'Oui', comptes_non:'Non',
+    comptes_toast_cree:'Compte créé pour ', comptes_alert_cree:'Compte créé !\n\nEmail : ',
+    comptes_alert_pass:'\nMot de passe : ', comptes_alert_communique:'\n\nCommunique ces identifiants à ',
+    comptes_toast_err_creation:'Erreur création compte : ', comptes_acces_maj:'Accès mis à jour.', comptes_err_generic:'Erreur: '
   },
   nl:{
     login_email:'E-mail', login_password:'Wachtwoord', login_btn:'Aanmelden',
@@ -768,7 +828,67 @@ var I18N={
     espace_form_upcoming:'Binnenkort', espace_form_past:'Voorbij', espace_days_suffix:'dag(en)',
     espace_type_recup:'Recuperatie',
     espace_type_ziek:'Ziekte',
-    espace_type_verlof:'Verlof'
+    espace_type_verlof:'Verlof',
+    tab_formations:'Opleidingen', tab_ncp:'NCP Kwaliteit', tab_recrutement:'Werving',
+    ov_badge_employees:'medewerkers', ov_formations_upcoming:'Binnenkort opleidingen',
+    espace_emp_label:'Medewerker',
+    formations_subtitle:'Planning en herinneringen voor personeelsopleidingen',
+    formations_btn_add:'+ Nieuwe opleiding', formations_upcoming:'Binnenkort', formations_past:'Voorbij',
+    formations_empty_upcoming:'Geen geplande opleiding.', formations_empty_past:'Geen afgeronde opleiding.',
+    formations_empty_30d:'Geen opleiding in de komende 30 dagen.', formations_all_team:'Heel het team',
+    formations_notif_singular:'Opleiding deze week', formations_notif_plural:'Opleidingen deze week',
+    formations_modal_title_new:'Nieuwe opleiding', formations_modal_title_edit:'Opleiding wijzigen',
+    formations_field_titre:'Titel', formations_field_date:'Datum', formations_field_heure_debut:'Startuur',
+    formations_field_heure_fin:'Einduur', formations_field_lieu:'Locatie / lesgever (optioneel)',
+    formations_field_employes:'Betrokken medewerkers', formations_field_notes:'Notities (optioneel)',
+    formations_placeholder_titre:'Bv: Brandveiligheidsopleiding', formations_placeholder_lieu:'Bv: Vergaderzaal, externe lesgever...',
+    formations_placeholder_notes:'Details, benodigd materiaal...', formations_btn_delete:'Verwijderen', formations_btn_save:'Opslaan',
+    formations_err_titre:'De titel is verplicht.', formations_err_date:'De datum is verplicht.',
+    formations_toast_saved:'Opleiding opgeslagen', formations_toast_deleted:'Opleiding verwijderd',
+    formations_confirm_delete:'Deze opleiding verwijderen?', formations_err_generic:'Fout: ',
+    comptes_emp_title:'Medewerkersaccounts',
+    ncp_subtitle:'Non-conformiteiten Inpak en Productie — AW1, AW2, AW3', ncp_btn_import:'⇓ NCP-gegevens importeren',
+    ncp_empty_title:'Nog geen NCP-gegevens',
+    ncp_empty_desc:'Klik hierboven op "NCP-gegevens importeren" en plak de inhoud van het bestand NCP_dataset_complet.json om dit tabblad te vullen.',
+    ncp_kpi_total:'Totaal NCP', ncp_kpi_prod:'Productie', ncp_kpi_tonnes:'Geblokkeerde tonnage', ncp_kpi_tonnes_meta:'totaal gefilterde periode',
+    ncp_kpi_debloque:'Vrijgegeven NCP', ncp_kpi_sl_inpak:'NCP buiten shift · Inpak', ncp_kpi_sl_prod:'NCP buiten shift · Prod',
+    ncp_periode_label:'Periode', ncp_preset_tout:'Alles', ncp_preset_mois:'Deze maand', ncp_preset_30:'30 dagen',
+    ncp_preset_90:'90 dagen', ncp_preset_annee:'Dit jaar', ncp_periode_reset_title:'Periode resetten',
+    ncp_du:'Van', ncp_au:'tot', ncp_unite_label:'Unit', ncp_toutes:'Alle', ncp_type_label:'Type', ncp_tous:'Alle',
+    ncp_equipe_label:'Ploeg', ncp_equipe_moi:'P5 (ik)',
+    ncp_note1:'Opmerking: het team wordt afgeleid uit het tijdstip van de fiche wanneer dat betrouwbaar is, anders uit het tijdstip van het defect in de tekst (gemarkeerd met ~ in de kolom Datum).',
+    ncp_note2:'Dit filter dient om de gegevens te verkennen, het is geen prestatievergelijking tussen teams.',
+    ncp_chart_evolution:'Maandelijkse evolutie', ncp_chart_causes:'Top 10 oorzaken',
+    ncp_chart_causes_hint:'Meest voorkomende oorzaken — de oranje lijn toont het cumulatief in %',
+    ncp_chart_tonnage:'Geblokkeerde tonnage per klant', ncp_chart_tonnage_hint:'Reële materiaalimpact, in ton, per klant',
+    ncp_chart_familles:'Defectfamilies',
+    ncp_chart_familles_hint:'De 457 unieke oorzaken gegroepeerd in grote families — blauwe balken: aantal vermeldingen, oranje lijn: cumulatief in % op de rechteras',
+    ncp_chart_delai:'Verwerkingstijd', ncp_chart_lignes:'Top 10 getroffen lijnen',
+    ncp_chart_lignes_hint:'Lijnen die werkelijk oorzaak zijn (NCP Inpak) — sluit blokkades uit als gevolg van een Productieprobleem',
+    ncp_chart_produits:'Top 10 getroffen productcodes', ncp_chart_produits_hint:'Producten die het vaakst betrokken zijn bij een NCP',
+    ncp_recurrences_title:'Terugkerende gevallen om op te volgen',
+    ncp_recurrences_hint:'Zelfde product en zelfde defectfamilie minstens 3 keer teruggekomen in de gefilterde periode. Klik op een kaart om de betrokken NCP te zien.',
+    ncp_declarants_title:'NCP gemeld door het weekpersoneel',
+    ncp_declarants_hint:'Niet-toegewezen fiches: naam van de melder (labo / weekkwaliteit), team niet toewijsbaar. Klik op een naam om de NCP te zien, en op een lijn voor het PDF-detail.',
+    ncp_liste_title:'Lijst van NCP',
+    ncp_search_placeholder:'Zoeken: nummer, product, klant, lijn, melder, bakorder of een woord uit het probleem...',
+    ncp_btn_tout_afficher:'Alles tonen', ncp_btn_export_csv:'CSV exporteren',
+    ncp_th_numero:'NCP-nummer', ncp_th_date:'Datum', ncp_th_unite:'Unit', ncp_th_equipe:'Ploeg', ncp_th_type:'Type',
+    ncp_th_ligne:'Lijn', ncp_th_bakorder:'Bakorder', ncp_th_produit:'Product', ncp_th_palettes:'Pallets',
+    ncp_th_tonnage:'Tonnage', ncp_th_statut:'Status', ncp_th_description:'Beschrijving',
+    ncp_no_match:'Geen NCP komt overeen met deze filters.',
+    ncp_truncated:'Weergave beperkt tot de {n} meest recente van {total}',
+    rec_subtitle:'Beoordelingsraster mentaliteit — veiligheid, betrouwbaarheid, motivatie',
+    modal_close:'Sluiten', ncp_detail_title:'NCP-detail',
+    comptes_emp_empty:'Geen Firebase-medewerker gevonden.', role_admin:'Beheerder', role_subchef:'Onderploegbaas', role_custom:'Aangepaste toegang',
+    comptes_actif:'Account actief', comptes_btn_modif_acces:'Toegang wijzigen', comptes_btn_creer:'Account aanmaken',
+    comptes_edit_planning:'Mag de planning wijzigen', comptes_btn_enregistrer:'Opslaan', comptes_btn_annuler:'Annuleren',
+    comptes_loading:'Laden...', comptes_confirm_creer:'Account aanmaken voor ', comptes_confirm_email:'E-mail: ',
+    comptes_confirm_pass:'Wachtwoord: ', comptes_confirm_role:'Rol: ', comptes_confirm_onglets:'Tabbladen: ',
+    comptes_confirm_planning:'Planning wijzigen: ', comptes_oui:'Ja', comptes_non:'Nee',
+    comptes_toast_cree:'Account aangemaakt voor ', comptes_alert_cree:'Account aangemaakt!\n\nE-mail: ',
+    comptes_alert_pass:'\nWachtwoord: ', comptes_alert_communique:'\n\nBezorg deze gegevens aan ',
+    comptes_toast_err_creation:'Fout bij het aanmaken van het account: ', comptes_acces_maj:'Toegang bijgewerkt.', comptes_err_generic:'Fout: '
   },
   en:{
     login_email:'Email', login_password:'Password', login_btn:'Log in',
@@ -914,7 +1034,67 @@ var I18N={
     espace_form_upcoming:'Upcoming', espace_form_past:'Past', espace_days_suffix:'day(s)',
     espace_type_recup:'Recovery leave',
     espace_type_ziek:'Sick leave',
-    espace_type_verlof:'Leave'
+    espace_type_verlof:'Leave',
+    tab_formations:'Trainings', tab_ncp:'NCP Quality', tab_recrutement:'Recruitment',
+    ov_badge_employees:'employees', ov_formations_upcoming:'Upcoming trainings',
+    espace_emp_label:'Employee',
+    formations_subtitle:'Planning and reminders for staff training',
+    formations_btn_add:'+ New training', formations_upcoming:'Upcoming', formations_past:'Past',
+    formations_empty_upcoming:'No upcoming training.', formations_empty_past:'No past training.',
+    formations_empty_30d:'No training in the next 30 days.', formations_all_team:'Whole team',
+    formations_notif_singular:'Training this week', formations_notif_plural:'Trainings this week',
+    formations_modal_title_new:'New training', formations_modal_title_edit:'Edit training',
+    formations_field_titre:'Title', formations_field_date:'Date', formations_field_heure_debut:'Start time',
+    formations_field_heure_fin:'End time', formations_field_lieu:'Location / trainer (optional)',
+    formations_field_employes:'Employees involved', formations_field_notes:'Notes (optional)',
+    formations_placeholder_titre:'E.g: Fire safety training', formations_placeholder_lieu:'E.g: Meeting room, external trainer...',
+    formations_placeholder_notes:'Details, equipment needed...', formations_btn_delete:'Delete', formations_btn_save:'Save',
+    formations_err_titre:'Title is required.', formations_err_date:'Date is required.',
+    formations_toast_saved:'Training saved', formations_toast_deleted:'Training deleted',
+    formations_confirm_delete:'Delete this training?', formations_err_generic:'Error: ',
+    comptes_emp_title:'Employee accounts',
+    ncp_subtitle:'Inpak and Production non-conformities — AW1, AW2, AW3', ncp_btn_import:'⇓ Import NCP data',
+    ncp_empty_title:'No NCP data yet',
+    ncp_empty_desc:'Click "Import NCP data" above and paste the content of the NCP_dataset_complet.json file to fill this tab.',
+    ncp_kpi_total:'Total NCP', ncp_kpi_prod:'Production', ncp_kpi_tonnes:'Blocked tonnage', ncp_kpi_tonnes_meta:'total filtered period',
+    ncp_kpi_debloque:'Released NCP', ncp_kpi_sl_inpak:'NCP outside shift · Inpak', ncp_kpi_sl_prod:'NCP outside shift · Prod',
+    ncp_periode_label:'Period', ncp_preset_tout:'All', ncp_preset_mois:'Current month', ncp_preset_30:'30 days',
+    ncp_preset_90:'90 days', ncp_preset_annee:'Current year', ncp_periode_reset_title:'Reset period',
+    ncp_du:'From', ncp_au:'to', ncp_unite_label:'Unit', ncp_toutes:'All', ncp_type_label:'Type', ncp_tous:'All',
+    ncp_equipe_label:'Team', ncp_equipe_moi:'P5 (me)',
+    ncp_note1:"Note: the team is inferred from the record's timestamp when reliable, otherwise from the defect time written in the text (marked ~ in the Date column).",
+    ncp_note2:'This filter is for exploring the data, not for comparing team performance.',
+    ncp_chart_evolution:'Monthly evolution', ncp_chart_causes:'Top 10 causes',
+    ncp_chart_causes_hint:'Most frequent causes — the orange line shows the cumulative %',
+    ncp_chart_tonnage:'Blocked tonnage by customer', ncp_chart_tonnage_hint:'Real material impact, in tonnes, per customer',
+    ncp_chart_familles:'Defect families',
+    ncp_chart_familles_hint:'The 457 distinct causes grouped into major families — blue bars: number of mentions, orange line: cumulative % on the right axis',
+    ncp_chart_delai:'Processing time', ncp_chart_lignes:'Top 10 affected lines',
+    ncp_chart_lignes_hint:'Lines genuinely at fault (Inpak NCP) — excludes blocks caused by a Production issue',
+    ncp_chart_produits:'Top 10 affected product codes', ncp_chart_produits_hint:'Products most often involved in an NCP',
+    ncp_recurrences_title:'Recurrences to watch',
+    ncp_recurrences_hint:'Same product and same defect family recurring at least 3 times in the filtered period. Click a card to see the related NCP.',
+    ncp_declarants_title:'NCP reported by weekday staff',
+    ncp_declarants_hint:'Unclassified records: named reporter (lab / weekday quality), team not attributable. Click a name to see their NCP, then a row for the PDF detail.',
+    ncp_liste_title:'List of NCP',
+    ncp_search_placeholder:'Search: number, product, customer, line, reporter, bakorder or a word from the issue...',
+    ncp_btn_tout_afficher:'Show all', ncp_btn_export_csv:'Export CSV',
+    ncp_th_numero:'NCP number', ncp_th_date:'Date', ncp_th_unite:'Unit', ncp_th_equipe:'Team', ncp_th_type:'Type',
+    ncp_th_ligne:'Line', ncp_th_bakorder:'Bakorder', ncp_th_produit:'Product', ncp_th_palettes:'Pallets',
+    ncp_th_tonnage:'Tonnage', ncp_th_statut:'Status', ncp_th_description:'Description',
+    ncp_no_match:'No NCP matches these filters.',
+    ncp_truncated:'Display limited to the {n} most recent out of {total}',
+    rec_subtitle:'Mindset interview grid — safety, reliability, motivation',
+    modal_close:'Close', ncp_detail_title:'NCP detail',
+    comptes_emp_empty:'No Firebase employee found.', role_admin:'Administrator', role_subchef:'Sub-chief', role_custom:'Custom access',
+    comptes_actif:'Account active', comptes_btn_modif_acces:'Edit access', comptes_btn_creer:'Create an account',
+    comptes_edit_planning:'Can edit planning', comptes_btn_enregistrer:'Save', comptes_btn_annuler:'Cancel',
+    comptes_loading:'Loading...', comptes_confirm_creer:'Create the account for ', comptes_confirm_email:'Email: ',
+    comptes_confirm_pass:'Password: ', comptes_confirm_role:'Role: ', comptes_confirm_onglets:'Tabs: ',
+    comptes_confirm_planning:'Edit planning: ', comptes_oui:'Yes', comptes_non:'No',
+    comptes_toast_cree:'Account created for ', comptes_alert_cree:'Account created!\n\nEmail: ',
+    comptes_alert_pass:'\nPassword: ', comptes_alert_communique:'\n\nShare these credentials with ',
+    comptes_toast_err_creation:'Error creating account: ', comptes_acces_maj:'Access updated.', comptes_err_generic:'Error: '
   }
 };
 var LANG=(function(){try{return localStorage.getItem('lang')||'fr';}catch(e){return 'fr';}})();
@@ -952,6 +1132,9 @@ function applyI18n(){ try { if(window.recAppliquerLangue) window.recAppliquerLan
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
     var k=el.getAttribute('data-i18n-ph');el.placeholder=t(k);
   });
+  document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+    var k=el.getAttribute('data-i18n-title');el.title=t(k);
+  });
   var lb=document.getElementById('lang-toggle');
   if(lb){
     lb.innerHTML=(LANG_FLAG_SVG[LANG]||'')+'<span>'+LANG.toUpperCase()+'</span>';
@@ -977,6 +1160,10 @@ function setLang(l){
   if(typeof buildMonEspace==='function'&&document.getElementById('espace-content'))buildMonEspace();
   if(typeof buildBT==='function'&&document.getElementById('btable')&&currentUser&&currentUser.role==='admin')buildBT();
   if(typeof buildEmpTable==='function'&&document.getElementById('empTbody'))buildEmpTable();
+  if(typeof buildFormationsListe==='function'&&document.getElementById('form-liste-avenir'))buildFormationsListe();
+  if(typeof buildMiniCalFormations==='function'&&document.getElementById('mini-cal-formations'))buildMiniCalFormations();
+  if(typeof buildNCPTab==='function'&&document.getElementById('ncp-content-wrap')&&NCP_DATA&&NCP_DATA.length)buildNCPTab();
+  if(typeof buildComptesEmpListe==='function'&&document.getElementById('comptes-emp-liste'))buildComptesEmpListe();
 }
 function toggleLang(){setLang(LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length]);}
 var BD_PREV_STATUS={};
@@ -5408,7 +5595,7 @@ function buildNCPTab(){
     [_ncpEvolutionChart, _ncpCausesChart, _ncpTonnageChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
     _ncpEvolutionChart = _ncpCausesChart = _ncpTonnageChart = _ncpLignesChart = _ncpProduitsChart = null;
     var tbody0 = document.getElementById('ncp-tbody');
-    if(tbody0) tbody0.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">Aucun NCP ne correspond a ces filtres.</td></tr>';
+    if(tbody0) tbody0.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">'+t('ncp_no_match')+'</td></tr>';
     NCP_VUE = []; ncpBuildDeclarants([]); var countEl0 = document.getElementById('ncp-liste-count'); if(countEl0) countEl0.textContent = '(0)';
     return;
   }
@@ -5610,7 +5797,7 @@ function buildNCPTab(){
         + '</tr>';
     }).join('');
     if(tronque){
-      tbody.innerHTML += '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">Affichage limite aux ' + LIMITE + ' plus recents sur ' + tries.length + '</td></tr>';
+      tbody.innerHTML += '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">'+t('ncp_truncated').replace('{n}',LIMITE).replace('{total}',tries.length)+'</td></tr>';
     }
   }
 }
@@ -5754,8 +5941,8 @@ function supprimerCandidatFB(id){
   return db.ref('recrutement/candidats/'+id).remove();
 }
 
-var AXES_POIDS = { securite: 2.5, rigueur: 2.5, fiabilite: 1.5, equipe: 1, feedback: 1, stress: 1, hierarchie: 0.75, motivation: 1 }; var AXES_CRITIQUES = ['securite', 'rigueur']; var _recDistribChart = null, _recPredChart = null, _recFunnelChart = null, _recMoisChart = null; function recVal(id){ var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; } function recSet(id, v){ var e = document.getElementById(id); if(e) e.value = v || ''; } function recScorePondere(c){ var s = c.scores || {}; var num = 0, den = 0; Object.keys(AXES_POIDS).forEach(function(k){ if(s[k]){ num += s[k] * AXES_POIDS[k]; den += AXES_POIDS[k]; } }); return den ? (num / den) : null; } function recAlerte(c){ var s = c.scores || {}; for(var i = 0; i < AXES_CRITIQUES.length; i++){ if(s[AXES_CRITIQUES[i]] && s[AXES_CRITIQUES[i]] <= 2) return AXES_CRITIQUES[i]; } return null; } function recLibelleAxe(k){ for(var i = 0; i < AXES.length; i++){ if(AXES[i].key === k) return AXES[i].titre.replace(/^[0-9]+\. /, ''); } return k; } function recIssueLabel(v){ return v === 'non_retenu' ? 'non retenu' : v === 'embauche' ? 'embauche' : v === 'confirme' ? 'confirme apres essai' : v === 'parti' ? 'parti pendant l essai' : 'en cours'; } function recCouleurNote(n){ return n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : n === 4 ? '#34d399' : '#10b981'; } function recBarres(c){ var s = c.scores || {}; var h = '<div style="display:flex;gap:3px;margin-top:6px">'; AXES.forEach(function(a){ var n = s[a.key] || 0; h += '<div title="' + a.titre.replace(/"/g, '') + ' : ' + (n || '-') + '/5" style="width:24px;height:6px;border-radius:3px;background:' + (n ? recCouleurNote(n) : 'var(--bd2)') + '"></div>'; }); return h + '</div>'; } function recSauverBrouillon(){ try { localStorage.setItem('rec_brouillon', JSON.stringify({ id: editId, nom: recVal('rec-f-nom'), scores: currentScores, notes: currentNotes, verdict: currentVerdict, ts: Date.now() })); } catch(e){} } function recEffacerBrouillon(){ try { localStorage.removeItem('rec_brouillon'); } catch(e){} } function recRestaurerBrouillon(){ var b = null; try { b = JSON.parse(localStorage.getItem('rec_brouillon') || 'null'); } catch(e){} if(!b || !b.scores || !Object.keys(b.scores).length) return; if(!confirm('Un entretien non enregistre a ete retrouve' + (b.nom ? ' (' + b.nom + ')' : '') + '. Le reprendre ?')){ recEffacerBrouillon(); return; } editId = b.id || null; currentScores = b.scores || {}; currentNotes = b.notes || {}; currentVerdict = b.verdict || null; recSet('rec-f-nom', b.nom); syncFormulaireDepuisState(); } function recRemplirEmployes(){ var sel = document.getElementById('rec-f-empid'); if(!sel || sel.getAttribute('data-fill')) return; sel.setAttribute('data-fill', '1'); var h = '<option value="">-</option>'; (window.EMP || []).forEach(function(e){ if(e.id) h += '<option value="' + e.id + '">' + e.n + '</option>'; }); sel.innerHTML = h; } function recBradford(c){ if(!c.empId) return null; var emp = (window.EMP || []).filter(function(e){ return e.id === c.empId; })[0]; if(!emp) return null; var b = (window.BD || []).filter(function(x){ return x.n === emp.n; })[0]; return (b && typeof b.sc === 'number') ? b.sc : null; } function verdictLabel(v){
-  return v==='bon' ? 'Bon fit' : v==='creuser' ? 'À creuser' : v==='incompatible' ? 'Incompatible' : 'En cours';
+var AXES_POIDS = { securite: 2.5, rigueur: 2.5, fiabilite: 1.5, equipe: 1, feedback: 1, stress: 1, hierarchie: 0.75, motivation: 1 }; var AXES_CRITIQUES = ['securite', 'rigueur']; var _recDistribChart = null, _recPredChart = null, _recFunnelChart = null, _recMoisChart = null; function recVal(id){ var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; } function recSet(id, v){ var e = document.getElementById(id); if(e) e.value = v || ''; } function recScorePondere(c){ var s = c.scores || {}; var num = 0, den = 0; Object.keys(AXES_POIDS).forEach(function(k){ if(s[k]){ num += s[k] * AXES_POIDS[k]; den += AXES_POIDS[k]; } }); return den ? (num / den) : null; } function recAlerte(c){ var s = c.scores || {}; for(var i = 0; i < AXES_CRITIQUES.length; i++){ if(s[AXES_CRITIQUES[i]] && s[AXES_CRITIQUES[i]] <= 2) return AXES_CRITIQUES[i]; } return null; } function recLibelleAxe(k){ for(var i = 0; i < AXES.length; i++){ if(AXES[i].key === k) return AXES[i].titre.replace(/^[0-9]+\. /, ''); } return k; } function recIssueLabel(v){ return recT(v === 'non_retenu' ? 'non retenu' : v === 'embauche' ? 'embauche' : v === 'confirme' ? 'confirme apres essai' : v === 'parti' ? 'parti pendant l essai' : 'en cours'); } function recCouleurNote(n){ return n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : n === 4 ? '#34d399' : '#10b981'; } function recBarres(c){ var s = c.scores || {}; var h = '<div style="display:flex;gap:3px;margin-top:6px">'; AXES.forEach(function(a){ var n = s[a.key] || 0; h += '<div title="' + a.titre.replace(/"/g, '') + ' : ' + (n || '-') + '/5" style="width:24px;height:6px;border-radius:3px;background:' + (n ? recCouleurNote(n) : 'var(--bd2)') + '"></div>'; }); return h + '</div>'; } function recSauverBrouillon(){ try { localStorage.setItem('rec_brouillon', JSON.stringify({ id: editId, nom: recVal('rec-f-nom'), scores: currentScores, notes: currentNotes, verdict: currentVerdict, ts: Date.now() })); } catch(e){} } function recEffacerBrouillon(){ try { localStorage.removeItem('rec_brouillon'); } catch(e){} } function recRestaurerBrouillon(){ var b = null; try { b = JSON.parse(localStorage.getItem('rec_brouillon') || 'null'); } catch(e){} if(!b || !b.scores || !Object.keys(b.scores).length) return; if(!confirm(recT('Un entretien non enregistre a ete retrouve') + (b.nom ? ' (' + b.nom + ')' : '') + recT('. Le reprendre ?'))){ recEffacerBrouillon(); return; } editId = b.id || null; currentScores = b.scores || {}; currentNotes = b.notes || {}; currentVerdict = b.verdict || null; recSet('rec-f-nom', b.nom); syncFormulaireDepuisState(); } function recRemplirEmployes(){ var sel = document.getElementById('rec-f-empid'); if(!sel || sel.getAttribute('data-fill')) return; sel.setAttribute('data-fill', '1'); var h = '<option value="">-</option>'; (window.EMP || []).forEach(function(e){ if(e.id) h += '<option value="' + e.id + '">' + e.n + '</option>'; }); sel.innerHTML = h; } function recBradford(c){ if(!c.empId) return null; var emp = (window.EMP || []).filter(function(e){ return e.id === c.empId; })[0]; if(!emp) return null; var b = (window.BD || []).filter(function(x){ return x.n === emp.n; })[0]; return (b && typeof b.sc === 'number') ? b.sc : null; } function verdictLabel(v){
+  return recT(v==='bon' ? 'Bon fit' : v==='creuser' ? 'À creuser' : v==='incompatible' ? 'Incompatible' : 'En cours');
 }
 function verdictPillClass(v){
   return v==='bon' ? 'ok' : v==='creuser' ? 'wn' : v==='incompatible' ? 'cr' : 'rec-encours';
@@ -5770,9 +5957,34 @@ function goToSubnav(name){
     s.classList.toggle('on', s.id === 'rec-tab-'+name);
   });
 }
-var REC_LBL_NL = { 'Candidats': 'Kandidaten', '+ Entretien': '+ Gesprek', 'Analyse': 'Analyse', 'Candidats évalués': 'Beoordeelde kandidaten', 'Identité': 'Identiteit', 'Nom du candidat': 'Naam kandidaat', 'Date de l\'entretien': 'Datum gesprek', 'Poste vise': 'Functie', 'Unite': 'Unit', 'Regime horaire': 'Uurregeling', 'Evaluateur': 'Beoordelaar', 'Suite donnee': 'Resultaat', 'Employe lie (suivi a 12 mois)': 'Gelinkte medewerker', 'Annuler': 'Annuleren', 'Enregistrer': 'Opslaan', 'Verdict global de compatibilité': 'Algemeen besluit', 'Vérification des références — assiduité': 'Referentiecheck aanwezigheid', 'Comparer des candidats': 'Kandidaten vergelijken', 'Détail des scores': 'Detail van de scores', 'Distribution des notes par axe': 'Spreiding van de scores per as', 'Prediction contre realite': 'Voorspelling tegenover realiteit', 'Entonnoir de recrutement': 'Wervingsfunnel', 'Entretiens par mois': 'Gesprekken per maand', 'Grille d’évaluation': 'Evaluatieraster', 'Questionnaire imprimable (candidat)': 'Printbare vragenlijst (kandidaat)', 'Mode entretien (plein écran)': 'Gespreksmodus (volledig scherm)' };
-var REC_LBL_EN = { 'Candidats': 'Candidates', '+ Entretien': '+ Interview', 'Analyse': 'Analysis', 'Candidats évalués': 'Assessed candidates', 'Identité': 'Identity', 'Nom du candidat': 'Candidate name', 'Date de l\'entretien': 'Interview date', 'Poste vise': 'Target position', 'Unite': 'Unit', 'Regime horaire': 'Shift schedule', 'Evaluateur': 'Assessor', 'Suite donnee': 'Outcome', 'Employe lie (suivi a 12 mois)': 'Linked employee', 'Annuler': 'Cancel', 'Enregistrer': 'Save', 'Verdict global de compatibilité': 'Overall fit verdict', 'Vérification des références — assiduité': 'Reference check — attendance', 'Comparer des candidats': 'Compare candidates', 'Détail des scores': 'Score detail', 'Distribution des notes par axe': 'Score distribution per axis', 'Prediction contre realite': 'Prediction vs reality', 'Entonnoir de recrutement': 'Recruitment funnel', 'Entretiens par mois': 'Interviews per month', 'Grille d’évaluation': 'Assessment grid', 'Questionnaire imprimable (candidat)': 'Printable questionnaire (candidate)', 'Mode entretien (plein écran)': 'Interview mode (full screen)' };
-function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-fr', el.textContent.trim()); return el.getAttribute('data-fr'); } window.recAppliquerLangue = function(){ var pane = document.getElementById('pane-recrutement'); if(!pane) return; var l = (typeof LANG !== 'undefined' ? LANG : 'fr'); var recLbl = l === 'nl' ? REC_LBL_NL : (l === 'en' ? REC_LBL_EN : null); pane.querySelectorAll('.cct, label, .rec-subtab, #rec-btn-annuler, #rec-btn-enregistrer').forEach(function(el){ var fr = recTexteFR(el); el.textContent = (recLbl && recLbl[fr]) ? recLbl[fr] : fr; }); var qi = QUESTIONNAIRE_I18N[l] || QUESTIONNAIRE_I18N.fr; if(qi && qi.axes){ pane.querySelectorAll('.rec-axe').forEach(function(div, i){ if(!qi.axes[i]) return; var tEl = div.querySelector('.rec-axe-titre'); var qEl = div.querySelector('.rec-axe-question'); if(tEl) tEl.textContent = qi.axes[i].titre; if(qEl) qEl.textContent = qi.axes[i].q; }); } }; function initSubnav(){
+var REC_LBL_NL = { 'Candidats': 'Kandidaten', '+ Entretien': '+ Gesprek', 'Analyse': 'Analyse', 'Candidats évalués': 'Beoordeelde kandidaten', 'Identité': 'Identiteit', 'Nom du candidat': 'Naam kandidaat', 'Date de l\'entretien': 'Datum gesprek', 'Poste vise': 'Functie', 'Unite': 'Unit', 'Regime horaire': 'Uurregeling', 'Evaluateur': 'Beoordelaar', 'Suite donnee': 'Resultaat', 'Employe lie (suivi a 12 mois)': 'Gelinkte medewerker', 'Annuler': 'Annuleren', 'Enregistrer': 'Opslaan', 'Verdict global de compatibilité': 'Algemeen besluit', 'Vérification des références — assiduité': 'Referentiecheck aanwezigheid', 'Comparer des candidats': 'Kandidaten vergelijken', 'Détail des scores': 'Detail van de scores', 'Distribution des notes par axe': 'Spreiding van de scores per as', 'Prediction contre realite': 'Voorspelling tegenover realiteit', 'Entonnoir de recrutement': 'Wervingsfunnel', 'Entretiens par mois': 'Gesprekken per maand', 'Grille d’évaluation': 'Evaluatieraster', 'Questionnaire imprimable (candidat)': 'Printbare vragenlijst (kandidaat)', 'Mode entretien (plein écran)': 'Gespreksmodus (volledig scherm)' , "Voir les rep\u00e8res de notation": "Bekijk de scoringsrichtlijnen", "Masquer les rep\u00e8res": "Verberg de richtlijnen", "Alerte": "Waarschuwing", "Excellent": "Uitstekend", "Exemple concret donn\u00e9 (optionnel)": "Concreet gegeven voorbeeld (optioneel)", "Bon fit": "Goede match", "\u00c0 creuser": "Nader te bekijken", "Incompatible": "Niet compatibel", "En cours": "Lopend", "non retenu": "niet weerhouden", "embauche": "aangeworven", "confirme apres essai": "bevestigd na proefperiode", "parti pendant l essai": "vertrokken tijdens proefperiode", "en cours": "lopend", "Crit\u00e8re": "Criterium", "Pr\u00e9c\u00e9dent": "Vorige", "Ajoute au moins 2 candidats pour comparer.": "Voeg minstens 2 kandidaten toe om te vergelijken.", "Aucun candidat pour l'instant.": "Nog geen kandidaat.", "Lance un entretien pour commencer.": "Start een gesprek om te beginnen.", "Exporter PDF": "PDF exporteren", "Supprimer": "Verwijderen", "Exporter (JSON)": "Exporteren (JSON)", "Importer": "Importeren", "Point \u00e0 v\u00e9rifier en p\u00e9riode d'essai": "Aandachtspunt tijdens de proefperiode", "Statut de la v\u00e9rification": "Status van de controle", "Notes (optionnel)": "Notities (optioneel)", "Pas encore v\u00e9rifi\u00e9": "Nog niet gecontroleerd", "Contact\u00e9e \u2014 retour positif sur l'assiduit\u00e9": "Gecontacteerd — positieve feedback over aanwezigheid", "Contact\u00e9e \u2014 point d'attention signal\u00e9": "Gecontacteerd — aandachtspunt gemeld", "Ancien employeur injoignable / refus": "Vorige werkgever onbereikbaar / weigering", "Candidat supprim\u00e9": "Kandidaat verwijderd", "Fichier t\u00e9l\u00e9charg\u00e9 \u2014 ouvre-le pour imprimer": "Bestand gedownload — open het om af te drukken", "Impossible de g\u00e9n\u00e9rer le fichier": "Kan het bestand niet genereren", "Entretien enregistr\u00e9": "Gesprek opgeslagen", "Erreur lors de l\u2019enregistrement": "Fout bij het opslaan", "Ajoute un nom": "Voeg een naam toe", "Export t\u00e9l\u00e9charg\u00e9": "Export gedownload", "Erreur export": "Fout bij export", "Fichier invalide": "Ongeldig bestand", "Rien de nouveau \u00e0 importer": "Niets nieuws om te importeren", "Import r\u00e9ussi": "Import geslaagd", "Erreur import": "Importfout", "Renseigne le verdict pour terminer": "Vul het besluit in om af te ronden", "Supprimer l\u2019entretien de": "Verwijder het gesprek met", "? Cette action est irr\u00e9versible.": "? Deze actie is onomkeerbaar.", "Une fiche existe deja pour": "Er bestaat al een fiche voor", "(entretien du": "(gesprek van", "). Creer une seconde fiche quand meme ?": "). Toch een tweede fiche aanmaken?", "Note eliminatoire (1 ou 2) sur": "Uitsluitende score (1 of 2) op", ". En agroalimentaire ce critere ne se compense pas par les autres. Enregistrer quand meme en Bon fit ?": ". In de voedingsindustrie wordt dit criterium niet gecompenseerd door de andere. Toch opslaan als Goede match?", "Le verdict \u00ab Bon fit \u00bb semble en d\u00e9calage avec des scores plut\u00f4t bas sur certains crit\u00e8res. Enregistrer quand m\u00eame ?": "Het besluit \"Goede match\" lijkt niet overeen te komen met eerder lage scores op bepaalde criteria. Toch opslaan?", "Le verdict \u00ab Incompatible \u00bb semble en d\u00e9calage avec des scores plut\u00f4t hauts. Enregistrer quand m\u00eame ?": "Het besluit \"Niet compatibel\" lijkt niet overeen te komen met eerder hoge scores. Toch opslaan?", "nouveau(x) candidat(s) trouv\u00e9(s). Les ajouter ?": "nieuwe kandida(a)t(en) gevonden. Toevoegen?", "Un entretien non enregistre a ete retrouve": "Er is een niet-opgeslagen gesprek teruggevonden", ". Le reprendre ?": ". Hervatten?", "Terminer": "Voltooien", "Suivant": "Volgende", "Ce que le candidat a r\u00e9pondu concr\u00e8tement...": "Wat de kandidaat concreet heeft geantwoord...", "Note eliminatoire sur": "Uitsluitende score op", "ALERTE SECURITE": "VEILIGHEIDSWAARSCHUWING", "Point d\u2019attention assiduit\u00e9": "Aandachtspunt aanwezigheid", "Uniquement les questions, sans les rep\u00e8res de notation. T\u00e9l\u00e9charge un fichier \u00e0 ouvrir puis imprimer depuis ton navigateur.": "Alleen de vragen, zonder de scoringsrichtlijnen. Download een bestand om te openen en af te drukken vanuit je browser.", "\u00c0 renseigner apr\u00e8s contact avec l'ancien employeur, pas une question pos\u00e9e directement au candidat.": "In te vullen na contact met de vorige werkgever, geen vraag die rechtstreeks aan de kandidaat wordt gesteld.", "Sur tous les candidats evalues. Un axe ou tout le monde a la meme note ne discrimine rien et doit etre reformule.": "Over alle beoordeelde kandidaten. Een as waarop iedereen dezelfde score heeft, onderscheidt niets en moet worden herschreven.", "Evalues, juges bon fit, embauches, puis confirmes apres la periode d essai.": "Beoordeeld, als goede match beoordeeld, aangeworven, en vervolgens bevestigd na de proefperiode.", "Charge d entretiens sur les 12 derniers mois.": "Aantal gesprekken over de laatste 12 maanden." };
+var REC_LBL_EN = { 'Candidats': 'Candidates', '+ Entretien': '+ Interview', 'Analyse': 'Analysis', 'Candidats évalués': 'Assessed candidates', 'Identité': 'Identity', 'Nom du candidat': 'Candidate name', 'Date de l\'entretien': 'Interview date', 'Poste vise': 'Target position', 'Unite': 'Unit', 'Regime horaire': 'Shift schedule', 'Evaluateur': 'Assessor', 'Suite donnee': 'Outcome', 'Employe lie (suivi a 12 mois)': 'Linked employee', 'Annuler': 'Cancel', 'Enregistrer': 'Save', 'Verdict global de compatibilité': 'Overall fit verdict', 'Vérification des références — assiduité': 'Reference check — attendance', 'Comparer des candidats': 'Compare candidates', 'Détail des scores': 'Score detail', 'Distribution des notes par axe': 'Score distribution per axis', 'Prediction contre realite': 'Prediction vs reality', 'Entonnoir de recrutement': 'Recruitment funnel', 'Entretiens par mois': 'Interviews per month', 'Grille d’évaluation': 'Assessment grid', 'Questionnaire imprimable (candidat)': 'Printable questionnaire (candidate)', 'Mode entretien (plein écran)': 'Interview mode (full screen)' , "Voir les rep\u00e8res de notation": "View scoring guidelines", "Masquer les rep\u00e8res": "Hide guidelines", "Alerte": "Alert", "Excellent": "Excellent", "Exemple concret donn\u00e9 (optionnel)": "Concrete example given (optional)", "Bon fit": "Good fit", "\u00c0 creuser": "To dig into", "Incompatible": "Incompatible", "En cours": "In progress", "non retenu": "not selected", "embauche": "hired", "confirme apres essai": "confirmed after trial", "parti pendant l essai": "left during trial", "en cours": "in progress", "Crit\u00e8re": "Criterion", "Pr\u00e9c\u00e9dent": "Previous", "Ajoute au moins 2 candidats pour comparer.": "Add at least 2 candidates to compare.", "Aucun candidat pour l'instant.": "No candidate yet.", "Lance un entretien pour commencer.": "Start an interview to begin.", "Exporter PDF": "Export PDF", "Supprimer": "Delete", "Exporter (JSON)": "Export (JSON)", "Importer": "Import", "Point \u00e0 v\u00e9rifier en p\u00e9riode d'essai": "Point to verify during trial period", "Statut de la v\u00e9rification": "Verification status", "Notes (optionnel)": "Notes (optional)", "Pas encore v\u00e9rifi\u00e9": "Not yet verified", "Contact\u00e9e \u2014 retour positif sur l'assiduit\u00e9": "Contacted — positive feedback on attendance", "Contact\u00e9e \u2014 point d'attention signal\u00e9": "Contacted — concern flagged", "Ancien employeur injoignable / refus": "Previous employer unreachable / refused", "Candidat supprim\u00e9": "Candidate deleted", "Fichier t\u00e9l\u00e9charg\u00e9 \u2014 ouvre-le pour imprimer": "File downloaded — open it to print", "Impossible de g\u00e9n\u00e9rer le fichier": "Unable to generate the file", "Entretien enregistr\u00e9": "Interview saved", "Erreur lors de l\u2019enregistrement": "Error while saving", "Ajoute un nom": "Add a name", "Export t\u00e9l\u00e9charg\u00e9": "Export downloaded", "Erreur export": "Export error", "Fichier invalide": "Invalid file", "Rien de nouveau \u00e0 importer": "Nothing new to import", "Import r\u00e9ussi": "Import successful", "Erreur import": "Import error", "Renseigne le verdict pour terminer": "Fill in the verdict to finish", "Supprimer l\u2019entretien de": "Delete the interview with", "? Cette action est irr\u00e9versible.": "? This action cannot be undone.", "Une fiche existe deja pour": "A record already exists for", "(entretien du": "(interview from", "). Creer une seconde fiche quand meme ?": "). Create a second record anyway?", "Note eliminatoire (1 ou 2) sur": "Disqualifying score (1 or 2) on", ". En agroalimentaire ce critere ne se compense pas par les autres. Enregistrer quand meme en Bon fit ?": ". In food manufacturing this criterion cannot be offset by others. Save as Good fit anyway?", "Le verdict \u00ab Bon fit \u00bb semble en d\u00e9calage avec des scores plut\u00f4t bas sur certains crit\u00e8res. Enregistrer quand m\u00eame ?": "The \"Good fit\" verdict seems inconsistent with rather low scores on some criteria. Save anyway?", "Le verdict \u00ab Incompatible \u00bb semble en d\u00e9calage avec des scores plut\u00f4t hauts. Enregistrer quand m\u00eame ?": "The \"Incompatible\" verdict seems inconsistent with rather high scores. Save anyway?", "nouveau(x) candidat(s) trouv\u00e9(s). Les ajouter ?": "new candidate(s) found. Add them?", "Un entretien non enregistre a ete retrouve": "An unsaved interview was found", ". Le reprendre ?": ". Resume it?", "Terminer": "Finish", "Suivant": "Next", "Ce que le candidat a r\u00e9pondu concr\u00e8tement...": "What the candidate concretely answered...", "Note eliminatoire sur": "Disqualifying score on", "ALERTE SECURITE": "SAFETY ALERT", "Point d\u2019attention assiduit\u00e9": "Attendance concern", "Uniquement les questions, sans les rep\u00e8res de notation. T\u00e9l\u00e9charge un fichier \u00e0 ouvrir puis imprimer depuis ton navigateur.": "Questions only, without the scoring guidelines. Download a file to open and print from your browser.", "\u00c0 renseigner apr\u00e8s contact avec l'ancien employeur, pas une question pos\u00e9e directement au candidat.": "To fill in after contacting the previous employer, not a question asked directly to the candidate.", "Sur tous les candidats evalues. Un axe ou tout le monde a la meme note ne discrimine rien et doit etre reformule.": "Across all assessed candidates. An axis where everyone has the same score discriminates nothing and should be reworded.", "Evalues, juges bon fit, embauches, puis confirmes apres la periode d essai.": "Assessed, judged good fit, hired, then confirmed after the trial period.", "Charge d entretiens sur les 12 derniers mois.": "Interview load over the last 12 months." };
+function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-fr', el.textContent.trim()); return el.getAttribute('data-fr'); }
+function recT(fr){ var l = (typeof LANG !== 'undefined' ? LANG : 'fr'); var m = l === 'nl' ? REC_LBL_NL : (l === 'en' ? REC_LBL_EN : null); return (m && m[fr]) ? m[fr] : fr; }
+window.recAppliquerLangue = function(){
+  var pane = document.getElementById('pane-recrutement'); if(!pane) return;
+  var l = (typeof LANG !== 'undefined' ? LANG : 'fr');
+  var recLbl = l === 'nl' ? REC_LBL_NL : (l === 'en' ? REC_LBL_EN : null);
+  pane.querySelectorAll('.cct, label, .rec-subtab, .rec-empty-line, .rec-hint, #rec-f-ref-statut option, #rec-btn-annuler, #rec-btn-enregistrer, #rec-btn-mode-entretien, #rec-btn-pdf, #rec-btn-supprimer, #rec-btn-export-json, #rec-btn-import-json, #rec-io-prev, #rec-verdict-choix button').forEach(function(el){
+    var fr = recTexteFR(el);
+    var m2 = fr.match(/^([^\p{L}]*)(.*)$/u);
+    var prefix = m2 ? m2[1] : '', core = m2 ? m2[2] : fr;
+    var translated = (recLbl && recLbl[core]) ? recLbl[core] : core;
+    el.textContent = prefix + translated;
+  });
+  var qi = QUESTIONNAIRE_I18N[l] || QUESTIONNAIRE_I18N.fr;
+  if(qi && qi.axes){
+    pane.querySelectorAll('.rec-axe').forEach(function(div, i){
+      if(!qi.axes[i]) return;
+      var tEl = div.querySelector('.rec-axe-titre');
+      var qEl = div.querySelector('.rec-axe-question');
+      if(tEl) tEl.textContent = qi.axes[i].titre;
+      if(qEl) qEl.textContent = qi.axes[i].q;
+    });
+  }
+  if(typeof renderListe === 'function' && document.getElementById('rec-liste-items')) renderListe();
+  if(typeof renderAnalyse === 'function' && document.getElementById('rec-radar')) renderAnalyse();
+}; function initSubnav(){
   document.querySelectorAll('#pane-recrutement .rec-subtab').forEach(function(btn){
     btn.addEventListener('click', function(){ goToSubnav(btn.dataset.recsub); });
   });
@@ -5782,14 +5994,14 @@ function recTexteFR(el){ if(!el.getAttribute('data-fr')) el.setAttribute('data-f
 function buildAxes(){
   var c = $('rec-axes-container');
   if(!c) return;
-  c.innerHTML = '<div class="cch"><div class="cct">Grille d\u2019évaluation</div></div>';
+  c.innerHTML = '<div class="cch"><div class="cct">'+recT('Grille d\u2019évaluation')+'</div></div>';
   AXES.forEach(function(axe){
     var div = document.createElement('div');
     div.className = 'rec-axe';
     div.innerHTML =
       '<div class="rec-axe-titre">'+axe.titre+'</div>'+
       '<div class="rec-axe-question">'+axe.q+'</div>'+
-      '<button type="button" class="rec-toggle-reperes">Voir les repères de notation \u25be</button>'+
+      '<button type="button" class="rec-toggle-reperes">'+recT('Voir les repères de notation')+' \u25be</button>'+
       '<div class="rec-reperes rec-hidden">'+
         '<div class="rec-repere"><span class="rec-repere-n rec-s1">1</span>'+axe.a1+'</div>'+
         '<div class="rec-repere"><span class="rec-repere-n rec-s3">3</span>'+axe.a3+'</div>'+
@@ -5798,16 +6010,16 @@ function buildAxes(){
       '<div class="rec-scale" data-axe="'+axe.key+'">'+
         [1,2,3,4,5].map(function(n){ return '<button type="button" data-n="'+n+'">'+n+'</button>'; }).join('')+
       '</div>'+
-      '<div class="rec-scale-labels"><span>Alerte</span><span>Excellent</span></div>'+
-      '<div class="rec-axe-note-label">Exemple concret donné (optionnel)</div>'+
-      '<textarea class="rec-axe-note" data-axe="'+axe.key+'" placeholder="Ce que le candidat a répondu concrètement..."></textarea>';
+      '<div class="rec-scale-labels"><span>'+recT('Alerte')+'</span><span>'+recT('Excellent')+'</span></div>'+
+      '<div class="rec-axe-note-label">'+recT('Exemple concret donné (optionnel)')+'</div>'+
+      '<textarea class="rec-axe-note" data-axe="'+axe.key+'" placeholder="'+recT('Ce que le candidat a répondu concrètement...')+'"></textarea>';
     c.appendChild(div);
   });
   c.querySelectorAll('.rec-toggle-reperes').forEach(function(t){
     t.addEventListener('click', function(){
       var rep = t.nextElementSibling;
       rep.classList.toggle('rec-hidden');
-      t.textContent = rep.classList.contains('rec-hidden') ? 'Voir les repères de notation \u25be' : 'Masquer les repères \u25b4';
+      t.textContent = rep.classList.contains('rec-hidden') ? (recT('Voir les repères de notation')+' \u25be') : (recT('Masquer les repères')+' \u25b4');
     });
   });
   c.querySelectorAll('.rec-scale').forEach(function(scale){
@@ -5887,9 +6099,9 @@ function renderListe(){
     var div = document.createElement('div');
     div.className = 'rec-liste-item';
     div.innerHTML =
-      '<div style="flex:1"><div class="rec-nom">'+c.nom+(recAlerte(c) ? ' <span title="Note eliminatoire sur '+recLibelleAxe(recAlerte(c))+'" style="color:#ef4444;font-size:11px;font-weight:700">&#9888; ALERTE SECURITE</span>' : '')+'</div><div class="rec-meta">'+c.date+' &middot; pondere '+(recScorePondere(c)!==null?recScorePondere(c).toFixed(1):'-')+'/5 &middot; brut '+moyenne+'/5'+(c.poste?' &middot; '+c.poste:'')+(c.unite?' '+c.unite:'')+' &middot; '+recIssueLabel(c.issue)+'</div>'+recBarres(c)+'</div>'+
+      '<div style="flex:1"><div class="rec-nom">'+c.nom+(recAlerte(c) ? ' <span title="'+recT('Note eliminatoire sur')+' '+recLibelleAxe(recAlerte(c))+'" style="color:#ef4444;font-size:11px;font-weight:700">&#9888; '+recT('ALERTE SECURITE')+'</span>' : '')+'</div><div class="rec-meta">'+c.date+' &middot; pondere '+(recScorePondere(c)!==null?recScorePondere(c).toFixed(1):'-')+'/5 &middot; brut '+moyenne+'/5'+(c.poste?' &middot; '+c.poste:'')+(c.unite?' '+c.unite:'')+' &middot; '+recIssueLabel(c.issue)+'</div>'+recBarres(c)+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
-      (c.reference && c.reference.statut==='surveiller' ? '<span title="Point d\u2019attention assiduité" style="font-size:14px">\u26a0\ufe0f</span>' : '')+
+      (c.reference && c.reference.statut==='surveiller' ? '<span title="'+recT('Point d\u2019attention assiduité')+'" style="font-size:14px">\u26a0\ufe0f</span>' : '')+
       '<span class="pill '+verdictPillClass(c.verdict)+'">'+verdictLabel(c.verdict)+'</span>'+
       '</div>';
     div.addEventListener('click', function(){ ouvrirCandidat(c.id); });
@@ -5898,8 +6110,8 @@ function renderListe(){
     del.textContent = '\ud83d\uddd1';
     del.addEventListener('click', function(e){
       e.stopPropagation();
-      if(confirm('Supprimer l\u2019entretien de '+c.nom+' ? Cette action est irréversible.')){
-        supprimerCandidatFB(c.id).then(function(){ recToast('Candidat supprimé', '#ef4444'); });
+      if(confirm(recT('Supprimer l\u2019entretien de')+' '+c.nom+' '+recT('? Cette action est irréversible.'))){
+        supprimerCandidatFB(c.id).then(function(){ recToast(recT('Candidat supprimé'), '#ef4444'); });
       }
     });
     outer.appendChild(div);
@@ -5992,7 +6204,7 @@ function openInterviewStep(){
   body.innerHTML =
     '<div class="rec-io-question-titre">'+axe.titre+'</div>'+
     '<div class="rec-io-question-txt">'+axe.q+'</div>'+
-    '<button type="button" class="rec-toggle-reperes" id="rec-io-toggle-reperes">Voir les repères de notation \u25be</button>'+
+    '<button type="button" class="rec-toggle-reperes" id="rec-io-toggle-reperes">'+recT('Voir les repères de notation')+' \u25be</button>'+
     '<div class="rec-reperes rec-hidden" id="rec-io-reperes">'+
       '<div class="rec-repere"><span class="rec-repere-n rec-s1">1</span>'+axe.a1+'</div>'+
       '<div class="rec-repere"><span class="rec-repere-n rec-s3">3</span>'+axe.a3+'</div>'+
@@ -6001,11 +6213,11 @@ function openInterviewStep(){
     '<div class="rec-scale" data-axe="'+axe.key+'" id="rec-io-scale">'+
       [1,2,3,4,5].map(function(n){ return '<button type="button" data-n="'+n+'" class="'+(currentScores[axe.key]===n?'sel':'')+'">'+n+'</button>'; }).join('')+
     '</div>'+
-    '<div class="rec-scale-labels"><span>Alerte</span><span>Excellent</span></div>'+
-    '<label>Exemple concret donné (optionnel)</label>'+
-    '<textarea id="rec-io-note" placeholder="Ce que le candidat a répondu concrètement...">'+noteVal+'</textarea>';
+    '<div class="rec-scale-labels"><span>'+recT('Alerte')+'</span><span>'+recT('Excellent')+'</span></div>'+
+    '<label>'+recT('Exemple concret donné (optionnel)')+'</label>'+
+    '<textarea id="rec-io-note" placeholder="'+recT('Ce que le candidat a répondu concrètement...')+'">'+noteVal+'</textarea>';
   $('rec-io-progress').textContent = (interviewIndex+1)+' / '+AXES.length;
-  $('rec-io-toggle-reperes').addEventListener('click', function(){ $('rec-io-reperes').classList.toggle('rec-hidden'); });
+  $('rec-io-toggle-reperes').addEventListener('click', function(){ $('rec-io-reperes').classList.toggle('rec-hidden'); var hid = $('rec-io-reperes').classList.contains('rec-hidden'); $('rec-io-toggle-reperes').textContent = (hid?recT('Voir les repères de notation'):recT('Masquer les repères')) + ' ' + (hid?'\u25be':'\u25b4'); });
   $('rec-io-scale').querySelectorAll('button').forEach(function(b){
     b.addEventListener('click', function(){
       $('rec-io-scale').querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); });
@@ -6015,7 +6227,7 @@ function openInterviewStep(){
   });
   $('rec-io-note').addEventListener('input', function(e){ currentNotes[axe.key] = e.target.value; });
   $('rec-io-prev').disabled = (interviewIndex===0);
-  $('rec-io-next').textContent = (interviewIndex===AXES.length-1) ? 'Terminer \u2713' : 'Suivant \u25b8';
+  $('rec-io-next').textContent = (interviewIndex===AXES.length-1) ? (recT('Terminer')+' \u2713') : (recT('Suivant')+' \u25b8');
 }
 
 // ---------- Analyse (radar) ----------
@@ -6086,7 +6298,7 @@ function recBuildGraphiques(){ if(typeof Chart === 'undefined') return; var all 
   }
 
   var table = $('rec-tableau-scores');
-  var html = '<thead><tr><th>Critère</th>'+selected.map(function(c){ return '<th>'+c.nom+'</th>'; }).join('')+'</tr></thead><tbody>';
+  var html = '<thead><tr><th>'+recT('Critère')+'</th>'+selected.map(function(c){ return '<th>'+c.nom+'</th>'; }).join('')+'</tr></thead><tbody>';
   AXES.forEach(function(a){
     html += '<tr><td>'+a.titre.replace(/^[0-9]+\. /,'')+'</td>';
     selected.forEach(function(c){
@@ -6116,16 +6328,16 @@ function attachListenersOnce(){
 
   $('rec-btn-enregistrer').addEventListener('click', function(){
     var nom = $('rec-f-nom').value.trim();
-    if(!nom){ recToast('Ajoute un nom', '#ef4444'); return; }    var dbl = candidats.filter(function(x){ return x.id !== editId && String(x.nom || '').trim().toLowerCase() === nom.toLowerCase(); }); if(dbl.length && !confirm('Une fiche existe deja pour ' + nom + ' (entretien du ' + dbl[0].date + '). Creer une seconde fiche quand meme ?')) return;
+    if(!nom){ recToast(recT('Ajoute un nom'), '#ef4444'); return; }    var dbl = candidats.filter(function(x){ return x.id !== editId && String(x.nom || '').trim().toLowerCase() === nom.toLowerCase(); }); if(dbl.length && !confirm(recT('Une fiche existe deja pour') + ' ' + nom + ' ' + recT('(entretien du') + ' ' + dbl[0].date + recT('). Creer une seconde fiche quand meme ?'))) return;
 
     var scoresArr = Object.keys(currentScores).map(function(k){ return currentScores[k]; });
     var moyenne = scoresArr.length ? scoresArr.reduce(function(a,b){return a+b;},0)/scoresArr.length : null;
     var nbBas = scoresArr.filter(function(s){ return s<=2; }).length;
-    var alerteK = recAlerte({ scores: currentScores }); if(alerteK && currentVerdict === 'bon' && !confirm('Note eliminatoire (1 ou 2) sur ' + recLibelleAxe(alerteK) + '. En agroalimentaire ce critere ne se compense pas par les autres. Enregistrer quand meme en Bon fit ?')) return;    if(currentVerdict==='bon' && moyenne!==null && (moyenne<3 || nbBas>=2)){
-      if(!confirm('Le verdict \u00ab Bon fit \u00bb semble en décalage avec des scores plutôt bas sur certains critères. Enregistrer quand même ?')) return;
+    var alerteK = recAlerte({ scores: currentScores }); if(alerteK && currentVerdict === 'bon' && !confirm(recT('Note eliminatoire (1 ou 2) sur') + ' ' + recLibelleAxe(alerteK) + recT('. En agroalimentaire ce critere ne se compense pas par les autres. Enregistrer quand meme en Bon fit ?'))) return;    if(currentVerdict==='bon' && moyenne!==null && (moyenne<3 || nbBas>=2)){
+      if(!confirm(recT('Le verdict \u00ab Bon fit \u00bb semble en décalage avec des scores plutôt bas sur certains critères. Enregistrer quand même ?'))) return;
     }
     if(currentVerdict==='incompatible' && moyenne!==null && moyenne>=4){
-      if(!confirm('Le verdict \u00ab Incompatible \u00bb semble en décalage avec des scores plutôt hauts. Enregistrer quand même ?')) return;
+      if(!confirm(recT('Le verdict \u00ab Incompatible \u00bb semble en décalage avec des scores plutôt hauts. Enregistrer quand même ?'))) return;
     }
 
     var data = {
@@ -6143,12 +6355,12 @@ function attachListenersOnce(){
     };
 
     sauvegarderCandidat(data).then(function(){ recEffacerBrouillon();
-      recToast('Entretien enregistré', '#10b981');
+      recToast(recT('Entretien enregistré'), '#10b981');
       resetFormulaire();
       goToSubnav('liste');
     }).catch(function(err){
       console.error('[Recrutement] Erreur sauvegarde:', err);
-      recToast('Erreur lors de l\u2019enregistrement', '#ef4444');
+      recToast(recT('Erreur lors de l\u2019enregistrement'), '#ef4444');
     });
   });
 
@@ -6156,11 +6368,11 @@ function attachListenersOnce(){
     if(!editId) return;
     var c = candidats.filter(function(x){ return x.id===editId; })[0];
     if(!c) return;
-    if(confirm('Supprimer l\u2019entretien de '+c.nom+' ? Cette action est irréversible.')){
+    if(confirm(recT('Supprimer l\u2019entretien de')+' '+c.nom+' '+recT('? Cette action est irréversible.'))){
       supprimerCandidatFB(editId).then(function(){
         resetFormulaire();
         goToSubnav('liste');
-        recToast('Candidat supprimé', '#ef4444');
+        recToast(recT('Candidat supprimé'), '#ef4444');
       });
     }
   });
@@ -6174,9 +6386,9 @@ function attachListenersOnce(){
       a.href = url; a.download = 'candidats-recrutement-aw3.json';
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
-      recToast('Export téléchargé', '#10b981');
+      recToast(recT('Export téléchargé'), '#10b981');
     }catch(e){
-      recToast('Erreur export', '#ef4444');
+      recToast(recT('Erreur export'), '#ef4444');
     }
   });
 
@@ -6186,18 +6398,18 @@ function attachListenersOnce(){
     if(!file) return;
     file.text().then(function(text){
       var imported;
-      try{ imported = JSON.parse(text); }catch(err){ recToast('Fichier invalide', '#ef4444'); return; }
-      if(!Array.isArray(imported)){ recToast('Fichier invalide', '#ef4444'); return; }
+      try{ imported = JSON.parse(text); }catch(err){ recToast(recT('Fichier invalide'), '#ef4444'); return; }
+      if(!Array.isArray(imported)){ recToast(recT('Fichier invalide'), '#ef4444'); return; }
       var nouveaux = imported.filter(function(c){
         return c && c.id && !candidats.some(function(x){ return x.id===c.id; });
       });
-      if(!nouveaux.length){ recToast('Rien de nouveau à importer', '#f59e0b'); return; }
-      if(confirm(nouveaux.length+' nouveau(x) candidat(s) trouvé(s). Les ajouter ?')){
+      if(!nouveaux.length){ recToast(recT('Rien de nouveau à importer'), '#f59e0b'); return; }
+      if(confirm(nouveaux.length+' '+recT('nouveau(x) candidat(s) trouvé(s). Les ajouter ?'))){
         var updates = {};
         nouveaux.forEach(function(c){ updates[c.id] = c; });
         db.ref('recrutement/candidats').update(updates).then(function(){
-          recToast('Import réussi', '#10b981');
-        }).catch(function(){ recToast('Erreur import', '#ef4444'); });
+          recToast(recT('Import réussi'), '#10b981');
+        }).catch(function(){ recToast(recT('Erreur import'), '#ef4444'); });
       }
     });
     e.target.value = '';
@@ -6226,7 +6438,7 @@ function attachListenersOnce(){
     } else {
       $('rec-io-overlay').classList.add('rec-hidden');
       syncFormulaireDepuisState();
-      recToast('Renseigne le verdict pour terminer', '#f59e0b');
+      recToast(recT('Renseigne le verdict pour terminer'), '#f59e0b');
       var vc = $('rec-verdict-choix');
       if(vc) vc.scrollIntoView({behavior:'smooth', block:'center'});
     }
@@ -6389,7 +6601,7 @@ function fmtDateFormation(iso){
 }
 function formationEmployesLabel(f){
   var ids = f.employes || [];
-  if(!ids.length) return "Toute l'equipe";
+  if(!ids.length) return t('formations_all_team');
   return ids.map(function(idOrName){
     var e = EMP.find(function(x){ return x.id===idOrName || x.n===idOrName; });
     return e ? e.n : idOrName;
@@ -6419,12 +6631,12 @@ function buildFormationsListe(){
       +'<div class="note-card-txt"><b>'+(f.titre||'Formation')+'</b>'
       +(f.heureDebut?' &middot; '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')
       +(f.lieu?' &middot; '+f.lieu:'')
-      +'<div style="margin-top:6px">'+(badges||"<span style='color:var(--tx3)'>Toute l'equipe</span>")+'</div>'
+      +'<div style="margin-top:6px">'+(badges||"<span style='color:var(--tx3)'>"+t('formations_all_team')+"</span>")+'</div>'
       +(f.notes?'<div style="margin-top:6px;color:var(--tx2);font-size:12px">'+f.notes+'</div>':'')
       +'</div></div></div>';
   }
-  elAvenir.innerHTML = avenir.length ? avenir.map(carte).join('') : '<div class="empty">Aucune formation a venir.</div>';
-  elPassees.innerHTML = passees.length ? passees.map(carte).join('') : '<div class="empty">Aucune formation passee.</div>';
+  elAvenir.innerHTML = avenir.length ? avenir.map(carte).join('') : '<div class="empty">'+t('formations_empty_upcoming')+'</div>';
+  elPassees.innerHTML = passees.length ? passees.map(carte).join('') : '<div class="empty">'+t('formations_empty_past')+'</div>';
 }
 function buildMiniCalFormations(){
   var el = document.getElementById('mini-cal-formations');
@@ -6435,7 +6647,7 @@ function buildMiniCalFormations(){
     var d = new Date(f.date+'T00:00:00');
     return d>=today && d<=limite;
   }).sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(b.date+(b.heureDebut||'')); });
-  if(!upcoming.length){ el.innerHTML = '<div class="empty">Aucune formation dans les 30 prochains jours.</div>'; return; }
+  if(!upcoming.length){ el.innerHTML = '<div class="empty">'+t('formations_empty_30d')+'</div>'; return; }
   el.innerHTML = upcoming.map(function(f){
     var noms = formationEmployesLabel(f);
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--bd)">'
@@ -6456,7 +6668,7 @@ function checkFormationNotif(){
   });
   if(!proches.length){ el.style.display='none'; el.innerHTML=''; return; }
   el.style.display='flex';
-  el.innerHTML = '<div style="font-size:22px">&#127891;</div><div style="flex:1"><div style="font-weight:600;margin-bottom:4px">Formation'+(proches.length>1?'s':'')+' cette semaine</div><div style="font-size:12px;color:var(--tx2)">'
+  el.innerHTML = '<div style="font-size:22px">&#127891;</div><div style="flex:1"><div style="font-weight:600;margin-bottom:4px">'+(proches.length>1?t('formations_notif_plural'):t('formations_notif_singular'))+'</div><div style="font-size:12px;color:var(--tx2)">'
     + proches.map(function(f){ return fmtDateFormation(f.date)+' : '+(f.titre||'Formation')+' &mdash; '+formationEmployesLabel(f); }).join('<br>')
     + '</div></div>';
 }
@@ -6465,7 +6677,7 @@ function openFormationModal(id){
   if(!modal) return;
   formationEditId = id || null;
   var f = id ? FORMATIONS.find(function(x){ return x.id===id; }) : null;
-  document.getElementById('formation-modal-title').textContent = f ? 'Modifier la formation' : 'Nouvelle formation';
+  document.getElementById('formation-modal-title').textContent = f ? t('formations_modal_title_edit') : t('formations_modal_title_new');
   document.getElementById('form-f-titre').value = f ? (f.titre||'') : '';
   document.getElementById('form-f-date').value = f ? (f.date||'') : '';
   document.getElementById('form-f-heure-debut').value = f ? (f.heureDebut||'') : '';
@@ -6497,23 +6709,23 @@ function saveFormation(){
   var lieu = document.getElementById('form-f-lieu').value.trim();
   var notes = document.getElementById('form-f-notes').value.trim();
   var errEl = document.getElementById('formation-modal-err');
-  if(!titre){ errEl.textContent = 'Le titre est obligatoire.'; return; }
-  if(!date){ errEl.textContent = 'La date est obligatoire.'; return; }
+  if(!titre){ errEl.textContent = t('formations_err_titre'); return; }
+  if(!date){ errEl.textContent = t('formations_err_date'); return; }
   var employes = Array.prototype.slice.call(document.querySelectorAll('.form-f-emp-cb:checked')).map(function(cb){ return cb.value; });
   var payload = { titre:titre, date:date, heureDebut:heureDebut||'', heureFin:heureFin||'', lieu:lieu||'', notes:notes||'', employes:employes, statut:'planifiee', creeLe:new Date().toISOString() };
   var ref = formationEditId ? db.ref('formations/'+formationEditId) : db.ref('formations').push();
   ref.update(payload).then(function(){
-    toast('Formation enregistree', '#3b82f6');
+    toast(t('formations_toast_saved'), '#3b82f6');
     closeFormationModal();
   }).catch(function(e){
-    errEl.textContent = 'Erreur : ' + e.message;
+    errEl.textContent = t('formations_err_generic') + e.message;
   });
 }
 function deleteFormation(){
   if(!formationEditId) return;
-  if(!confirm('Supprimer cette formation ?')) return;
+  if(!confirm(t('formations_confirm_delete'))) return;
   db.ref('formations/'+formationEditId).remove().then(function(){
-    toast('Formation supprimee', '#ef4444');
+    toast(t('formations_toast_deleted'), '#ef4444');
     closeFormationModal();
   });
 }
@@ -6545,39 +6757,39 @@ function buildComptesEmpListe(){
   var cont = document.getElementById('comptes-emp-liste');
   if(!cont) return;
   var items = EMP.filter(function(e){ return e.id; });
-  if(!items.length){ cont.innerHTML = '<div style="color:var(--tx2);padding:12px">Aucun employé Firebase trouvé.</div>'; return; }
+  if(!items.length){ cont.innerHTML = '<div style="color:var(--tx2);padding:12px">'+t('comptes_emp_empty')+'</div>'; return; }
   cont.innerHTML = items.map(function(e){
     var acc = ACCOUNTS[e.id];
     var perm = posteVersPermissions(e.r);
     var rowId = 'cpt-'+e.id;
     if(acc){
-      var accLabel = acc.role === 'admin' ? 'Administrateur' : (acc.role === 'subchef' ? 'Sous-chef' : 'Accès personnalisé');
+      var accLabel = acc.role === 'admin' ? t('role_admin') : (acc.role === 'subchef' ? t('role_subchef') : t('role_custom'));
       return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
         +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+accLabel+'</div></div>'
-        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; Compte actif</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span>'
-        +'<button onclick="toggleAccesEdit(\''+e.id+'\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:11px;cursor:pointer">Modifier l\'accès</button>'
+        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; '+t('comptes_actif')+'</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span>'
+        +'<button onclick="toggleAccesEdit(\''+e.id+'\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:11px;cursor:pointer">'+t('comptes_btn_modif_acces')+'</button>'
         +'</div>'
         +'</div>'
         +'<div id="acc-edit-'+e.id+'" style="display:none;margin:-4px 0 8px;padding:12px 16px;background:rgba(255,255,255,.03);border-radius:8px"></div>';
     }
-    var tabsHtml = ALL_TABS.map(function(t){
-      var checked = perm.tabs && perm.tabs[t] ? ' checked' : '';
-      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2);margin-right:10px;margin-bottom:4px"><input type="checkbox" id="'+rowId+'-tab-'+t+'"'+checked+' style="accent-color:var(--blue)">'+TAB_LABELS[t]+'</label>';
+    var tabsHtml = ALL_TABS.map(function(tk){
+      var checked = perm.tabs && perm.tabs[tk] ? ' checked' : '';
+      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2);margin-right:10px;margin-bottom:4px"><input type="checkbox" id="'+rowId+'-tab-'+tk+'"'+checked+' style="accent-color:var(--blue)">'+t('tab_'+tk)+'</label>';
     }).join('');
     return '<div class="cc" style="margin-bottom:8px;padding:12px 16px" id="'+rowId+'">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">'
       +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
       +'<select id="'+rowId+'-role" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
-      +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>Accès personnalisé</option>'
-      +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>Sous-chef</option>'
-      +'<option value="admin"'+(perm.role==='admin'?' selected':'')+'>Administrateur</option>'
+      +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
+      +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
+      +'<option value="admin"'+(perm.role==='admin'?' selected':'')+'>'+t('role_admin')+'</option>'
       +'</select>'
-      +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:12px;cursor:pointer">Créer un compte</button>'
+      +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-size:12px;cursor:pointer">'+t('comptes_btn_creer')+'</button>'
       +'</div></div>'
       +'<div id="'+rowId+'-permpanel" style="display:'+(perm.role==='custom'?'block':'none')+';padding-top:8px;border-top:1px solid var(--bd)">'
       +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
-      +'<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)"><input type="checkbox" id="'+rowId+'-editplanning"'+(perm.editPlanning?' checked':'')+' style="accent-color:var(--blue)">Peut modifier le planning</label>'
+      +'<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)"><input type="checkbox" id="'+rowId+'-editplanning"'+(perm.editPlanning?' checked':'')+' style="accent-color:var(--blue)">'+t('comptes_edit_planning')+'</label>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -6607,18 +6819,18 @@ function creerCompteEmployeUI(empId){
     editPlanning = !!(epCb && epCb.checked);
   }
   var login = genLoginInterne(emp.n);
-  var recap = 'Créer le compte pour '+emp.n+' ?\n\nEmail : '+login.email+'\nMot de passe : '+login.password+'\nRôle : '+(role==='admin'?'Administrateur':(role==='subchef'?'Sous-chef':'Accès personnalisé'));
+  var recap = t('comptes_confirm_creer')+emp.n+' ?\n\n'+t('comptes_confirm_email')+login.email+'\n'+t('comptes_confirm_pass')+login.password+'\n'+t('comptes_confirm_role')+(role==='admin'?t('role_admin'):(role==='subchef'?t('role_subchef'):t('role_custom')));
   if(role === 'custom'){
-    recap += '\nOnglets : '+ALL_TABS.filter(function(t){return tabs[t];}).map(function(t){return TAB_LABELS[t];}).join(', ');
-    recap += '\nModifier planning : '+(editPlanning?'Oui':'Non');
+    recap += '\n'+t('comptes_confirm_onglets')+ALL_TABS.filter(function(tt){return tabs[tt];}).map(function(tt){return t('tab_'+tt);}).join(', ');
+    recap += '\n'+t('comptes_confirm_planning')+(editPlanning?t('comptes_oui'):t('comptes_non'));
   }
   if(!confirm(recap)) return;
   creerCompteEmploye(emp, role, login, tabs, editPlanning).then(function(res){
-    toast('Compte créé pour '+emp.n, '#10b981');
-    alert('Compte créé !\n\nEmail : '+res.email+'\nMot de passe : '+res.password+'\n\nCommunique ces identifiants à '+emp.n+'.');
+    toast(t('comptes_toast_cree')+emp.n, '#10b981');
+    alert(t('comptes_alert_cree')+res.email+t('comptes_alert_pass')+res.password+t('comptes_alert_communique')+emp.n+'.');
   }).catch(function(err){
     console.error('[COMPTES] Erreur creation compte :', err);
-    toast('Erreur création compte : '+(err && err.message ? err.message : err), '#ef4444');
+    toast(t('comptes_toast_err_creation')+(err && err.message ? err.message : err), '#ef4444');
   });
 }
 
@@ -6666,15 +6878,15 @@ function toggleAccesEdit(empId){
     var tabs = u.tabs || {};
     var editPlanning = !!u.editPlanning;
     var selHtml = '<select id="acc-edit-role-'+empId+'" style="padding:6px 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--bd);color:var(--tx1);font-size:12px;margin-bottom:10px">'
-      +'<option value="custom"'+(role==='custom'?' selected':'')+'>Accès personnalisé</option>'
-      +'<option value="subchef"'+(role==='subchef'?' selected':'')+'>Sous-chef</option>'
-      +'<option value="admin"'+(role==='admin'?' selected':'')+'>Administrateur</option>'
+      +'<option value="custom"'+(role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
+      +'<option value="subchef"'+(role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
+      +'<option value="admin"'+(role==='admin'?' selected':'')+'>'+t('role_admin')+'</option>'
       +'</select>';
-    var tabsHtml = ALL_TABS.map(function(t){
-      var checked = tabs[t] ? ' checked' : '';
-      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:0 10px 6px 0"><input type="checkbox" id="acc-edit-tab-'+empId+'-'+t+'"'+checked+' style="accent-color:var(--blue)">'+TAB_LABELS[t]+'</label>';
+    var tabsHtml = ALL_TABS.map(function(tk){
+      var checked = tabs[tk] ? ' checked' : '';
+      return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:0 10px 6px 0"><input type="checkbox" id="acc-edit-tab-'+empId+'-'+tk+'"'+checked+' style="accent-color:var(--blue)">'+t('tab_'+tk)+'</label>';
     }).join('');
-    var editPlanHtml = '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:8px 0"><input type="checkbox" id="acc-edit-editplanning-'+empId+'"'+(editPlanning?' checked':'')+' style="accent-color:var(--blue)"> Peut modifier le planning</label>';
+    var editPlanHtml = '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:8px 0"><input type="checkbox" id="acc-edit-editplanning-'+empId+'"'+(editPlanning?' checked':'')+' style="accent-color:var(--blue)"> '+t('comptes_edit_planning')+'</label>';
     box.innerHTML = selHtml
       +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
       +editPlanHtml
