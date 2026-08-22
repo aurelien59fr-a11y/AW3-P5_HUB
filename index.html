@@ -29,6 +29,33 @@
     <div class="splash-txt" data-i18n="splash_loading">Chargement...</div>
   </div>
 </div>
+<script>
+/* Filet de securite INDEPENDANT de app.js : garantit que le splash
+   disparait toujours, meme si app.js plante completement pour une
+   raison quelconque (Firebase indisponible, erreur JS, reseau...).
+   Place ici, tout en haut, pour ne jamais dependre du reste du script. */
+(function(){
+  var DELAI_MAX_MS = 6000;
+  var dejaTraite = false;
+  function afficherErreurChargement(){
+    if(dejaTraite) return; dejaTraite = true;
+    var el = document.getElementById('splash-screen');
+    if(!el) return;
+    el.innerHTML = '<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px">'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:8px">Le chargement prend plus de temps que prevu</div>'
+      + '<div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion, ou reessaie.</div>'
+      + '<button onclick="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button>'
+      + '</div>';
+  }
+  // Si l'app a demarre normalement, app.js retire lui-meme #splash-screen
+  // du DOM (voir plus bas dans app.js) -- on le detecte pour ne PAS
+  // afficher le message d'erreur dans ce cas.
+  setTimeout(function(){
+    var el = document.getElementById('splash-screen');
+    if(el) afficherErreurChargement(); // encore present -> ca a bloque quelque part
+  }, DELAI_MAX_MS);
+})();
+</script>
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo"><img class="dot" src="icons/icon-192.png" alt="Logo AW3 Ploeg 5"><div><div class="login-title">Bradford Dashboard</div><div class="login-sub">AW3 &middot; Ploeg 5</div></div></div>
@@ -885,4 +912,4 @@
 </div>
 </div>
 </body>
-</html>7
+</html>7s
