@@ -307,6 +307,52 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 .rec-io-body label{display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-top:18px;margin-bottom:6px}
 .rec-io-body textarea{width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);resize:vertical;min-height:56px}
 
+/* ===== Navigation mobile (barre du bas) ===== */
+.mobile-nav{display:none}
+.mobile-menu-sheet{display:none}
+@media (max-width:768px){
+  .content{padding-bottom:90px!important}
+  .mobile-nav{
+    display:flex; position:fixed; left:0; right:0; bottom:0; z-index:500;
+    padding:6px 4px calc(14px + env(safe-area-inset-bottom,0px)); gap:2px;
+    background:rgba(23,27,37,.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-top:1px solid var(--bd);
+  }
+  .mnav-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 2px 2px; color:var(--tx3); background:none; border:none; font-family:var(--fn);
+    position:relative; cursor:pointer;
+  }
+  .mnav-item svg{width:19px;height:19px}
+  .mnav-item .mnav-lbl{font-size:9.5px;font-weight:600;letter-spacing:-.005em}
+  .mnav-item.on{color:var(--blue)}
+  .mnav-item .mnav-bar{position:absolute;top:-6px;width:22px;height:3px;border-radius:99px;background:var(--blue);opacity:0}
+  .mnav-item.on .mnav-bar{opacity:1}
+  .mnav-item .mnav-dot{position:absolute;top:2px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg2)}
+
+  .mobile-menu-sheet{position:fixed;inset:0;z-index:600;display:none}
+  .mobile-menu-sheet.on{display:block}
+  .mms-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+  .mms-panel{
+    position:absolute; left:0; right:0; bottom:0; max-height:72vh; overflow-y:auto;
+    background:var(--bg2); border-top:1px solid var(--bd); border-radius:20px 20px 0 0;
+    padding:10px 8px calc(18px + env(safe-area-inset-bottom,0px));
+  }
+  .mms-handle{width:36px;height:4px;border-radius:99px;background:var(--bd2);margin:6px auto 14px}
+  .mms-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);padding:0 12px 8px}
+  .mms-item{
+    display:flex; align-items:center; gap:12px; width:100%; padding:12px; border:none; background:none;
+    color:var(--tx); font-family:var(--fn); font-size:14px; font-weight:600; text-align:left; border-radius:12px; cursor:pointer;
+  }
+  .mms-item:active{background:var(--bg3)}
+  .mms-item.on{background:rgba(59,130,246,.12);color:var(--blue)}
+  .mms-item svg{width:19px;height:19px;flex-shrink:0;color:var(--tx2)}
+  .mms-item.on svg{color:var(--blue)}
+}
+@media (min-width:769px){
+  .mobile-nav, .mobile-menu-sheet{display:none!important}
+}
+
 `;
   document.head.appendChild(style);
 })();
@@ -484,6 +530,8 @@ var I18N={
     topbar_connecting:'Connexion...', topbar_logout:'Déconnexion',
     tab_ov:'Vue d’ensemble', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
     tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin',
+    nav_ov:'Accueil', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Espace', nav_ab:'Absences',
+    nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
     plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
@@ -710,6 +758,8 @@ var I18N={
     topbar_connecting:'Verbinden...', topbar_logout:'Afmelden',
     tab_ov:'Overzicht', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Afwezigheden',
     tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin',
+    nav_ov:'Start', nav_br:'Prest.', nav_pl:'Planning', nav_espace:'Ruimte', nav_ab:'Afwez.',
+    nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
     plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -936,6 +986,8 @@ var I18N={
     topbar_connecting:'Connecting...', topbar_logout:'Log out',
     tab_ov:'Overview', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
     tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin',
+    nav_ov:'Home', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Space', nav_ab:'Absences',
+    nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
     plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
     legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -7024,3 +7076,128 @@ function applyOverviewAccess(){
   var alertsBox = document.getElementById('k-alerts');
   if(alertsBox && !canSeeBradford) alertsBox.innerHTML = '';
 }
+
+/* ============================================================
+   NAVIGATION MOBILE — barre du bas + menu "Tout voir"
+   Ne duplique aucune logique : reutilise les vrais boutons .tab
+   (et donc les vraies regles de visibilite par role/acces perso
+   deja appliquees par applyRole()) en simulant un vrai clic dessus.
+============================================================ */
+var MNAV_ICONS = {
+  ov: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg>',
+  br: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  pl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  espace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  ab: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  formations: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>',
+  pt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6.5V12l4 2.2"/></svg>',
+  arrets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>',
+  ncp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  recrutement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  admin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>'
+};
+var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','formations','pt','recrutement','admin'];
+
+function mnavVisibleTabs(){
+  return [].slice.call(document.querySelectorAll('.tab[data-tab]')).filter(function(b){
+    return b.offsetParent !== null;
+  });
+}
+
+function buildMobileNav(){
+  var nav = document.getElementById('mobile-nav');
+  var menuList = document.getElementById('mobile-menu-list');
+  if(!nav || !menuList) return;
+
+  var visibles = mnavVisibleTabs();
+  var visibleIds = visibles.map(function(b){ return b.dataset.tab; });
+  if(!visibleIds.length) return; // rien a construire (avant login / app-screen cache)
+
+  // 4 emplacements principaux, choisis par ordre de priorite parmi les onglets
+  // reellement visibles pour le compte connecte (memes regles que applyRole()).
+  var primary = MNAV_PRIORITY.filter(function(id){ return visibleIds.indexOf(id) !== -1; }).slice(0, 4);
+  // Si moins de 4 onglets prioritaires visibles, on complete avec les autres
+  // onglets visibles (cas des acces personnalises tres restreints).
+  if(primary.length < 4){
+    visibleIds.forEach(function(id){
+      if(primary.length < 4 && primary.indexOf(id) === -1) primary.push(id);
+    });
+  }
+
+  var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+
+  var activeInPrimary = primary.indexOf(activeId) !== -1;
+  var navHtml = primary.map(function(id){
+    var on = id === activeId ? ' on' : '';
+    return '<button class="mnav-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+      + '<span class="mnav-bar"></span>'
+      + (MNAV_ICONS[id] || '')
+      + '<span class="mnav-lbl">'+t('nav_'+id)+'</span>'
+      + '</button>';
+  }).join('');
+  // 5e emplacement : Menu, toujours present, ouvre la liste complete des
+  // onglets visibles (y compris ceux deja epingles au-dessus). S'affiche
+  // comme actif quand l'onglet courant n'est pas l'un des 4 epingles, pour
+  // qu'il y ait toujours un repere visuel meme depuis un onglet du menu.
+  navHtml += '<button class="mnav-item'+(!activeInPrimary && activeId ? ' on' : '')+'" data-mnav="menu" onclick="openMobileMenu()">'
+    + '<span class="mnav-bar"></span>' + MNAV_ICONS.menu + '<span class="mnav-lbl">'+t('nav_menu')+'</span></button>';
+  nav.innerHTML = navHtml;
+
+  menuList.innerHTML = visibles.map(function(b){
+    var id = b.dataset.tab;
+    var on = id === activeId ? ' on' : '';
+    var lbl = b.querySelector('span[data-i18n]');
+    var texte = lbl ? lbl.textContent : (t('tab_'+id) || id);
+    return '<button class="mms-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+      + (MNAV_ICONS[id] || '') + '<span>'+texte+'</span></button>';
+  }).join('');
+}
+
+function mnavGo(id){
+  var btn = document.querySelector('.tab[data-tab="'+id+'"]');
+  if(btn) btn.click();
+  closeMobileMenu();
+}
+function openMobileMenu(){
+  var sheet = document.getElementById('mobile-menu-sheet');
+  if(sheet) sheet.classList.add('on');
+}
+function closeMobileMenu(){
+  var sheet = document.getElementById('mobile-menu-sheet');
+  if(sheet) sheet.classList.remove('on');
+}
+function updateMobileNavActive(id){
+  var matchedPrimary = false;
+  document.querySelectorAll('.mnav-item[data-mnav]').forEach(function(el){
+    var match = el.dataset.mnav === id;
+    if(match) matchedPrimary = true;
+    el.classList.toggle('on', match);
+  });
+  if(!matchedPrimary){
+    var menuBtn = document.querySelector('.mnav-item[data-mnav="menu"]');
+    if(menuBtn) menuBtn.classList.add('on');
+  }
+  document.querySelectorAll('.mms-item[data-mnav]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.mnav === id);
+  });
+}
+// Ecoute additionnelle sur les vrais boutons d onglets (n interfere pas avec
+// le gestionnaire de clic existant) pour garder la barre mobile synchronisee,
+// y compris quand un changement d onglet est declenche depuis le code
+// (ex: .click() programmatique dans applyRole()).
+document.querySelectorAll('.tab[data-tab]').forEach(function(b){
+  b.addEventListener('click', function(){ updateMobileNavActive(b.dataset.tab); });
+});
+// Reconstruit la barre mobile a chaque application des regles de role/acces
+// (login, changement de langue via setLang, edition d acces personnalise) —
+// donc toujours a jour avec les vraies permissions du compte connecte.
+(function(){
+  var _applyRoleMnav = applyRole;
+  applyRole = function(role){
+    var out = _applyRoleMnav.apply(this, arguments);
+    try { buildMobileNav(); } catch(e){ console.warn('mobile nav', e); }
+    return out;
+  };
+})();
+buildMobileNav();
