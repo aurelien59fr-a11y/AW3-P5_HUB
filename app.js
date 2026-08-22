@@ -644,7 +644,7 @@ var I18N={
     br_no_episode:'Aucun episode maladie dans les 365 derniers jours',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Jours',
     br_comment_label:'Commentaire', br_comment_placeholder:'Cliquer pour ajouter un commentaire...',
-    br_history_title:'Historique episodes (365j)',
+    br_history_title:'Historique episodes (365j)', br_perso_introuvable:'Impossible de retrouver ton score Bradford (nom non reconnu). Contacte ton administrateur.',
     adm_title:'Administration', adm_subtitle:'Outils reserves a l’admin',
     adm_fb_test_title:'Fiabilite Firebase', adm_fb_test_btn:'Tester la connexion',
     adm_fb_rules_title:'Roles utilisateurs Firebase',
@@ -872,7 +872,7 @@ var I18N={
     br_no_episode:'Geen ziekte-episode in de laatste 365 dagen',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Dagen',
     br_comment_label:'Opmerking', br_comment_placeholder:'Klik om een opmerking toe te voegen...',
-    br_history_title:'Geschiedenis episodes (365d)',
+    br_history_title:'Geschiedenis episodes (365d)', br_perso_introuvable:'Kan je Bradford-score niet vinden (naam niet herkend). Neem contact op met je beheerder.',
     adm_title:'Administratie', adm_subtitle:'Tools voorbehouden aan de admin',
     adm_fb_test_title:'Firebase-betrouwbaarheid', adm_fb_test_btn:'Verbinding testen',
     adm_fb_rules_title:'Firebase-gebruikersrollen',
@@ -1100,7 +1100,7 @@ var I18N={
     br_no_episode:'No sick episode in the last 365 days',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Days',
     br_comment_label:'Comment', br_comment_placeholder:'Click to add a comment...',
-    br_history_title:'Episode history (365d)',
+    br_history_title:'Episode history (365d)', br_perso_introuvable:'Could not find your Bradford score (name not recognized). Contact your admin.',
     adm_title:'Administration', adm_subtitle:'Tools reserved for admin',
     adm_fb_test_title:'Firebase reliability', adm_fb_test_btn:'Test connection',
     adm_fb_rules_title:'Firebase user roles',
@@ -1630,8 +1630,28 @@ var chB,chT,chJ;
 function initCharts(){var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB=new Chart(document.getElementById('cBrad'),{type:'bar',data:{labels:s.map(function(e){return e.n.split(' ')[0];}),datasets:[{data:s.map(function(e){return e.sc;}),backgroundColor:s.map(function(e){return scColor(e.sc)+'bb';}),borderColor:s.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var tr={'Q1 2025':0,'Q2 2025':0,'Q3 2025':0,'Q4 2025':0,'Q1 2026':0,'Q2 2026':0};ABS.forEach(function(a){var p=a.a.split('/');var k='Q'+Math.ceil(Number(p[1])/3)+' '+p[2];if(tr[k]!==undefined)tr[k]+=a.d;});chT=new Chart(document.getElementById('cTrim'),{type:'line',data:{labels:Object.keys(tr),datasets:[{data:Object.values(tr),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',borderWidth:2,pointBackgroundColor:'#3b82f6',pointRadius:5,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ=new Chart(document.getElementById('cJour'),{type:'bar',data:{labels:jj.map(function(e){return e.n.split(' ').pop();}),datasets:[{data:jj.map(function(e){return e.D;}),backgroundColor:jj.map(function(e){return scColor(e.sc)+'99';}),borderColor:jj.map(function(e){return scColor(e.sc);}),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555c72',font:{size:11}},beginAtZero:true}}}});}
 function refreshCharts(){if(!chB||!chT||!chJ)return;var s=[].concat(BD).sort(function(a,b){return b.sc-a.sc;});chB.data.labels=s.map(function(e){return e.n.split(' ')[0];});chB.data.datasets[0].data=s.map(function(e){return e.sc;});chB.data.datasets[0].backgroundColor=s.map(function(e){return scColor(e.sc)+'bb';});chB.data.datasets[0].borderColor=s.map(function(e){return scColor(e.sc);});chB.update();var jj=[].concat(BD).filter(function(e){return e.D>0;}).sort(function(a,b){return b.D-a.D;});chJ.data.labels=jj.map(function(e){return e.n.split(' ').pop();});chJ.data.datasets[0].data=jj.map(function(e){return e.D;});chJ.data.datasets[0].backgroundColor=jj.map(function(e){return scColor(e.sc)+'99';});chJ.data.datasets[0].borderColor=jj.map(function(e){return scColor(e.sc);});chJ.update();}
 function buildBT(){
-  if(currentUser && currentUser.role !== 'admin') return;
   var tbl=document.getElementById('btable');
+  // Compte personnel (role "custom", onglet Bradford autorise) : on ne montre
+  // JAMAIS le tableau complet de l'equipe (donnees de sante d'autrui), seulement
+  // sa propre ligne, si on arrive a la retrouver via le nom enregistre sur le compte.
+  if(currentUser && currentUser.role !== 'admin'){
+    var estAccesPerso = currentUser.role === 'custom' && currentUser.tabs && currentUser.tabs.br;
+    if(!estAccesPerso || !currentUser.nom){ if(tbl) tbl.innerHTML=''; return; }
+    var moi=BD.find(function(e){return e.n===currentUser.nom;});
+    if(!moi){ if(tbl) tbl.innerHTML='<tbody><tr><td style="padding:16px;color:var(--tx3)">'+t('br_perso_introuvable')+'</td></tr></tbody>'; return; }
+    var mxP=Math.max.apply(null,BD.map(function(e){return e.sc;}));if(mxP<1)mxP=1;
+    var empP=EMP.find(function(x){return x.n===moi.n;});
+    var stP=scSt(moi.sc),colP=scColor(moi.sc),pctP=Math.round(moi.sc/mxP*100);
+    var hP='<thead><tr><th>'+t('ab_col_emp')+'</th><th>'+t('br_col_role')+'</th><th>'+t('ab_col_days')+'</th><th>'+t('br_col_periods')+'</th><th>Score</th><th>'+t('br_col_status')+'</th></tr></thead><tbody>';
+    hP+='<tr><td><b style="font-size:13px">'+moi.n+'</b></td>';
+    hP+='<td style="color:var(--tx3);font-size:12px">'+(empP?empP.r:'')+'</td>';
+    hP+='<td><span style="font-family:var(--mo)">'+moi.D+'</span></td>';
+    hP+='<td><span style="font-family:var(--mo)">'+moi.S+'</span></td>';
+    hP+='<td><div class="sbw"><div class="sbt"><div class="sbf" style="width:'+pctP+'%;background:'+colP+'"></div></div><span class="sv" style="color:'+colP+'">'+moi.sc+'</span></div></td>';
+    hP+='<td><span class="pill '+stP.c+'">'+stP.l+'</span></td></tr>';
+    if(tbl) tbl.innerHTML=hP+'</tbody>';
+    return;
+  }
   var mx=Math.max.apply(null,BD.map(function(e){return e.sc;}));if(mx<1)mx=1;
   var h='<thead><tr><th>'+t('ab_col_emp')+'</th><th>'+t('br_col_role')+'</th><th>'+t('ab_col_days')+'</th><th>'+t('br_col_periods')+'</th><th>Score</th><th>'+t('br_col_status')+'</th><th style="width:36px"></th></tr></thead><tbody>';
   ['TL','INPAK','Prod','Unit'].forEach(function(g){
@@ -2730,7 +2750,7 @@ window.addEventListener('load',function(){
   }
   try{app=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(cfg);}catch(e){app=firebase.app();}
   firebase.auth(app).onAuthStateChanged(function(user){
-    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid).once('value').then(function(snap){var uRec=snap.val()||{};var role=uRec.role||'subchef';console.log('[DIAGNOSTIC] UID connecte :', user.uid, '| donnees lues depuis Firebase :', JSON.stringify(uRec), '| role applique :', role);currentUser.role=role;currentUser.tabs=uRec.tabs||null;currentUser.editPlanning=!!uRec.editPlanning;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
+    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid).once('value').then(function(snap){var uRec=snap.val()||{};var role=uRec.role||'subchef';console.log('[DIAGNOSTIC] UID connecte :', user.uid, '| donnees lues depuis Firebase :', JSON.stringify(uRec), '| role applique :', role);currentUser.role=role;currentUser.tabs=uRec.tabs||null;currentUser.editPlanning=!!uRec.editPlanning;currentUser.nom=uRec.nom||null;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
     else{document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
   });
 });
