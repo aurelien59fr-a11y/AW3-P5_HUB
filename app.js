@@ -7260,7 +7260,7 @@ buildMobileNav();
    le login si quelque chose se passe mal.
 ============================================================ */
 (function(){
-  var SPLASH_MIN_MS = 1100;
+  var SPLASH_MIN_MS = 400;
   var start = new Date().getTime();
   function hideSplash(){
     var el = document.getElementById('splash-screen');
