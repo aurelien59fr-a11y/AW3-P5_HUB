@@ -49,7 +49,8 @@
    raison quelconque (Firebase indisponible, erreur JS, reseau...).
    Place ici, tout en haut, pour ne jamais dependre du reste du script. */
 (function(){
-  var DELAI_MAX_MS = 6000;
+  var DELAI_MAX_MS = 10000;
+  var DELAI_VERIF_2 = 13000; // 2e verif si le dismissal etait en cours mais pas fini
   var dejaTraite = false;
   function afficherErreurChargement(){
     if(dejaTraite) return; dejaTraite = true;
@@ -62,11 +63,23 @@
       + '</div>';
   }
   // Si l'app a demarre normalement, app.js retire lui-meme #splash-screen
-  // du DOM (voir plus bas dans app.js) -- on le detecte pour ne PAS
-  // afficher le message d'erreur dans ce cas.
+  // du DOM (voir plus bas dans app.js). On verifie aussi el.dataset.hidden,
+  // pose par app.js DES qu'il commence a fermer le splash (avant meme
+  // l'animation de fondu) -- si c'est deja pose, app.js a bien reussi,
+  // on lui laisse juste un peu plus de temps pour finir l'animation,
+  // plutot que d'afficher une fausse alerte pendant qu'il termine.
   setTimeout(function(){
     var el = document.getElementById('splash-screen');
-    if(el) afficherErreurChargement(); // encore present -> ca a bloque quelque part
+    if(!el) return; // deja retire -> tout est ok
+    if(el.dataset.hidden){
+      // app.js a bien demarre la fermeture, on lui laisse un peu plus de temps
+      setTimeout(function(){
+        var el2 = document.getElementById('splash-screen');
+        if(el2) afficherErreurChargement(); // toujours la apres le delai supplementaire -> vrai probleme
+      }, DELAI_VERIF_2 - DELAI_MAX_MS);
+    } else {
+      afficherErreurChargement(); // rien n'a demarre du tout -> vrai probleme
+    }
   }, DELAI_MAX_MS);
 })();
 </script>
