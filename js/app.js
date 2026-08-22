@@ -653,6 +653,19 @@ var I18N={
     ncp_note1:"Note : l'équipe est déduite de l'heure de la fiche quand celle-ci est fiable, sinon de l'heure du défaut écrite dans le texte (marquée ~ dans la colonne Date).",
     ncp_note2:"Ce filtre sert à explorer les données, il ne constitue pas une comparaison de performance entre équipes.",
     ncp_couverture_text:"Couverture sur cette sélection : {att} fiches sur {tot} avec une équipe ({pct}%), dont {d} sur l'heure réelle de production, {x} sur une heure du texte ({pl} sous forme de plage) et {f} sur la seule heure d'encodage (fiabilité faible). {mu} fiches sont à cheval sur plusieurs postes : équipe principale + secondaire, au pro-rata du temps passé dans chaque poste. {n} non classées (déclarant nominatif).",
+    ncp_pct_cloture:"{pct}% du total, à attribuer", ncp_debloque_meta:"{t} t libérées - {pct}% des fiches",
+    ncp_pct_total:"{pct}% du total", ncp_pct_sanslabo:"{pct}% du total - à contrôler",
+    ncp_tooltip_liste:"Cliquer pour voir la liste", date_range_sep:" au ",
+    ncp_tooltip_ncp_concernes:"Cliquer pour voir les NCP concernés", tooltip_voir_notes:"Cliquer pour voir toutes les notes",
+    ncp_decl_count:"{n} personnes, {tot} NCP, dont {rat} rattachables à une équipe via un bakorder partagé",
+    ncp_decl_aucun:"Aucun NCP non classé sur cette période.", ncp_decl_unite_inconnue:"unité inconnue", ncp_decl_semaine:"semaine {s} / weekend {w}",
+    ncp_liste_vide:"Aucun NCP", ncp_col_numero:"Numéro", ncp_col_date:"Date", ncp_col_unite:"Unité", ncp_col_ligne:"Ligne",
+    ncp_col_type:"Type", ncp_col_declarant:"Déclarant", ncp_col_client:"Client", ncp_col_palettes:"Palettes", ncp_col_tonnage:"Tonnage", ncp_col_description:"Description",
+    ncp_titre_total:"Total NCP", ncp_titre_inpak:"NCP Inpak", ncp_titre_prod:"NCP Production", ncp_titre_nonclasse:"NCP non classées",
+    ncp_titre_tonnage:"NCP avec tonnage bloqué", ncp_titre_debloque:"NCP débloquées (libérées par la qualité)", ncp_titre_declare_par:"NCP déclarées par {n}",
+    ncp_titre_debloques2:"NCP débloquées", ncp_titre_inpak_shift:"NCP Inpak (dans le shift)", ncp_titre_prod_shift:"NCP Production (dans le shift)",
+    ncp_titre_hors_shift_inpak:"NCP hors shift - Inpak", ncp_titre_hors_shift_prod:"NCP hors shift - Production",
+    badge_role_admin:'Admin', role_visiteur:'Visiteur (lecture seule)', role_employe:'Employé', role_souschef:'Sous-chef', role_acces_perso:'Accès personnalisé',
     ncp_chart_evolution:'Évolution mensuelle', ncp_chart_causes:'Top 10 des causes',
     ncp_chart_causes_hint:'Motifs les plus fréquents — la courbe orange donne le cumul en %',
     ncp_chart_tonnage:'Tonnage bloqué par client', ncp_chart_tonnage_hint:'Impact matière réel, en tonnes, par client',
@@ -860,6 +873,19 @@ var I18N={
     ncp_note1:'Opmerking: het team wordt afgeleid uit het tijdstip van de fiche wanneer dat betrouwbaar is, anders uit het tijdstip van het defect in de tekst (gemarkeerd met ~ in de kolom Datum).',
     ncp_note2:'Dit filter dient om de gegevens te verkennen, het is geen prestatievergelijking tussen teams.',
     ncp_couverture_text:'Dekking voor deze selectie: {att} fiches van {tot} met een team ({pct}%), waarvan {d} op het werkelijke productie-uur, {x} op een uur uit de tekst ({pl} in de vorm van een tijdspanne) en {f} enkel op het registratie-uur (lage betrouwbaarheid). {mu} fiches overlappen meerdere posten: hoofdteam + secundair team, naar rato van de tijd doorgebracht in elke post. {n} niet-geclassificeerd (nominatieve aangever).',
+    ncp_pct_cloture:'{pct}% van totaal, toe te wijzen', ncp_debloque_meta:'{t} t vrijgegeven - {pct}% van de fiches',
+    ncp_pct_total:'{pct}% van totaal', ncp_pct_sanslabo:'{pct}% van totaal - te controleren',
+    ncp_tooltip_liste:'Klikken om de lijst te zien', date_range_sep:' tot ',
+    ncp_tooltip_ncp_concernes:'Klikken om de bijbehorende NCP te zien', tooltip_voir_notes:'Klikken om alle notities te zien',
+    ncp_decl_count:'{n} personen, {tot} NCP, waarvan {rat} toewijsbaar aan een team via een gedeelde bakorder',
+    ncp_decl_aucun:'Geen niet-geclassificeerde NCP voor deze periode.', ncp_decl_unite_inconnue:'onbekende eenheid', ncp_decl_semaine:'week {s} / weekend {w}',
+    ncp_liste_vide:'Geen NCP', ncp_col_numero:'Nummer', ncp_col_date:'Datum', ncp_col_unite:'Eenheid', ncp_col_ligne:'Lijn',
+    ncp_col_type:'Type', ncp_col_declarant:'Aangever', ncp_col_client:'Klant', ncp_col_palettes:'Pallets', ncp_col_tonnage:'Tonnage', ncp_col_description:'Beschrijving',
+    ncp_titre_total:'Totaal NCP', ncp_titre_inpak:'NCP Inpak', ncp_titre_prod:'NCP Productie', ncp_titre_nonclasse:'Niet-geclassificeerde NCP',
+    ncp_titre_tonnage:'NCP met geblokkeerde tonnage', ncp_titre_debloque:'Vrijgegeven NCP (vrijgegeven door kwaliteit)', ncp_titre_declare_par:'NCP aangegeven door {n}',
+    ncp_titre_debloques2:'Vrijgegeven NCP', ncp_titre_inpak_shift:'NCP Inpak (binnen de shift)', ncp_titre_prod_shift:'NCP Productie (binnen de shift)',
+    ncp_titre_hors_shift_inpak:'NCP buiten shift - Inpak', ncp_titre_hors_shift_prod:'NCP buiten shift - Productie',
+    badge_role_admin:'Admin', role_visiteur:'Bezoeker (alleen lezen)', role_employe:'Werknemer', role_souschef:'Onderploegbaas', role_acces_perso:'Aangepaste toegang',
     ncp_chart_evolution:'Maandelijkse evolutie', ncp_chart_causes:'Top 10 oorzaken',
     ncp_chart_causes_hint:'Meest voorkomende oorzaken — de oranje lijn toont het cumulatief in %',
     ncp_chart_tonnage:'Geblokkeerde tonnage per klant', ncp_chart_tonnage_hint:'Reële materiaalimpact, in ton, per klant',
@@ -1067,6 +1093,19 @@ var I18N={
     ncp_note1:"Note: the team is inferred from the record's timestamp when reliable, otherwise from the defect time written in the text (marked ~ in the Date column).",
     ncp_note2:'This filter is for exploring the data, not for comparing team performance.',
     ncp_couverture_text:"Coverage for this selection: {att} records out of {tot} with a team ({pct}%), of which {d} on the actual production time, {x} on a time from the text ({pl} as a range) and {f} on the encoding time only (low reliability). {mu} records span multiple posts: primary + secondary team, prorated by time spent in each post. {n} unclassified (named declarant).",
+    ncp_pct_cloture:"{pct}% of total, to be assigned", ncp_debloque_meta:"{t} t released - {pct}% of records",
+    ncp_pct_total:"{pct}% of total", ncp_pct_sanslabo:"{pct}% of total - to check",
+    ncp_tooltip_liste:"Click to see the list", date_range_sep:" to ",
+    ncp_tooltip_ncp_concernes:"Click to see the related NCP", tooltip_voir_notes:"Click to see all notes",
+    ncp_decl_count:"{n} people, {tot} NCP, of which {rat} attributable to a team via a shared bakorder",
+    ncp_decl_aucun:"No unclassified NCP for this period.", ncp_decl_unite_inconnue:"unknown unit", ncp_decl_semaine:"weekday {s} / weekend {w}",
+    ncp_liste_vide:"No NCP", ncp_col_numero:"Number", ncp_col_date:"Date", ncp_col_unite:"Unit", ncp_col_ligne:"Line",
+    ncp_col_type:"Type", ncp_col_declarant:"Declarant", ncp_col_client:"Client", ncp_col_palettes:"Pallets", ncp_col_tonnage:"Tonnage", ncp_col_description:"Description",
+    ncp_titre_total:"Total NCP", ncp_titre_inpak:"NCP Inpak", ncp_titre_prod:"NCP Production", ncp_titre_nonclasse:"Unclassified NCP",
+    ncp_titre_tonnage:"NCP with blocked tonnage", ncp_titre_debloque:"Released NCP (released by quality)", ncp_titre_declare_par:"NCP reported by {n}",
+    ncp_titre_debloques2:"Released NCP", ncp_titre_inpak_shift:"NCP Inpak (within shift)", ncp_titre_prod_shift:"NCP Production (within shift)",
+    ncp_titre_hors_shift_inpak:"NCP outside shift - Inpak", ncp_titre_hors_shift_prod:"NCP outside shift - Production",
+    badge_role_admin:'Admin', role_visiteur:'Visitor (read-only)', role_employe:'Employee', role_souschef:'Assistant supervisor', role_acces_perso:'Custom access',
     ncp_chart_evolution:'Monthly evolution', ncp_chart_causes:'Top 10 causes',
     ncp_chart_causes_hint:'Most frequent causes — the orange line shows the cumulative %',
     ncp_chart_tonnage:'Blocked tonnage by customer', ncp_chart_tonnage_hint:'Real material impact, in tonnes, per customer',
@@ -1167,6 +1206,7 @@ function setLang(l){
   if(typeof buildMiniCalFormations==='function'&&document.getElementById('mini-cal-formations'))buildMiniCalFormations();
   if(typeof buildNCPTab==='function'&&document.getElementById('ncp-content-wrap')&&NCP_DATA&&NCP_DATA.length)buildNCPTab();
   if(typeof buildComptesEmpListe==='function'&&document.getElementById('comptes-emp-liste'))buildComptesEmpListe();
+  if(typeof applyRole==='function'&&currentUser&&currentUser.role)applyRole(currentUser.role);
 }
 function toggleLang(){setLang(LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length]);}
 var BD_PREV_STATUS={};
@@ -1738,7 +1778,7 @@ function buildPT(){
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc"'+(emp.n==='Note'?' style="cursor:pointer" onclick="toggleNotesPanelManual()" title="Cliquer pour voir toutes les notes"':'')+'>'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc"'+(emp.n==='Note'?' style="cursor:pointer" onclick="toggleNotesPanelManual()" title="'+t('tooltip_voir_notes')+'"':'')+'>'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
       var bd=EMP.find(function(e){return e.n===emp.n;});
       if(!bd||!bd.birthday) return false;
       var parts=bd.birthday.split('-');
@@ -2306,22 +2346,22 @@ function applyRole(role){
   var badge = document.getElementById('role-badge');
   if(badge){
     if(isAdmin){
-      badge.textContent='Admin';
+      badge.textContent=t('badge_role_admin');
       badge.style.background='rgba(16,185,129,.15)';
       badge.style.color='var(--green)';
       badge.style.borderColor='rgba(16,185,129,.3)';
     } else if(isVisiteur){
-      badge.textContent='Visiteur (lecture seule)';
+      badge.textContent=t('role_visiteur');
       badge.style.background='rgba(139,146,164,.15)';
       badge.style.color='var(--tx2)';
       badge.style.borderColor='rgba(139,146,164,.3)';
     } else if(isEmploye){
-      badge.textContent='Employé';
+      badge.textContent=t('role_employe');
       badge.style.background='rgba(249,115,22,.15)';
       badge.style.color='var(--orange)';
       badge.style.borderColor='rgba(249,115,22,.3)';
     } else {
-      badge.textContent='Sous-chef';
+      badge.textContent=t('role_souschef');
       badge.style.background='rgba(59,130,246,.15)';
       badge.style.color='var(--blue)';
       badge.style.borderColor='rgba(59,130,246,.3)';
@@ -2356,7 +2396,7 @@ function applyRole(role){
     });
     var badge2 = document.getElementById('role-badge');
     if(badge2){
-      badge2.textContent='Accès personnalisé';
+      badge2.textContent=t('role_acces_perso');
       badge2.style.background='rgba(249,115,22,.15)';
       badge2.style.color='var(--orange)';
       badge2.style.borderColor='rgba(249,115,22,.3)';
@@ -5015,7 +5055,7 @@ absBody = absEntries.slice(0,100).map(function(a){
 var lbl = TYPE_ABS_LABEL[a.t] || a.t;
 var pillCls = TYPE_ABS_PILL[a.t] || 'wn';
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? ' au '+a.b : '')+'</div>'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+a.a+(a.b && a.b!==a.a ? t('date_range_sep')+a.b : '')+'</div>'
 + '<span class="pill '+pillCls+'">'+lbl+'</span>'
 + '<div style="margin-left:auto;font-size:11px;color:var(--tx3)">'+(a.d||'')+' ' + t('espace_days_suffix') + '</div>'
 + '</div>';
@@ -5060,13 +5100,13 @@ function loadNCPData(){
   });
 }
 
-function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12]; if(u === 'AW2') return [21,22,23,24,25,26]; if(u === 'AW3') return [31,32,33,34,35,36]; return [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; } function ncpLignesCitees(r){ if(r.type_ncp === 'Production') return []; var V = ncpLignesValides(r.unite || ''); var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, m, vus = []; while((m = rex.exec(String(r.description || ''))) !== null){ var v = parseInt(m[1],10); if(V.indexOf(v) !== -1 && vus.indexOf(v) === -1) vus.push(v); } return vus.map(function(v){ return 'L' + ('0' + v).slice(-2); }); } function ncpEclaterLignes(list){ var out = []; list.forEach(function(r){ var lg = r.lignes_multiples || []; if(lg.length < 2){ out.push(r); return; } lg.forEach(function(l){ var c = {}; for(var k in r){ c[k] = r[k]; } c.ligne = l; c.ligne_type = 'cause_directe'; c.ligne_source = 'multi_lignes'; c.ncp_partage = lg.length; c.total_pallets = (Number(r.total_pallets) || 0) / lg.length; c.total_tonnes = (Number(r.total_tonnes) || 0) / lg.length; c.total_kg = (Number(r.total_kg) || 0) / lg.length; out.push(c); }); }); return out; } var NCP_VUE = []; function ncpNomCle(w){ return String(w||'').trim().toLowerCase().replace(/\s+/g,' '); } function ncpNomAff(w){ return ncpNomCle(w).replace(/(^|[- ])([a-zà-ÿ])/g, function(m,a,b){ return a + b.toUpperCase(); }); } function closeNCPList(){ var m = document.getElementById('ncp-list-modal'); if(m) m.style.display = 'none'; } function ncpRendreListe(titre, rows){ var h = ''; if(!rows.length){ h = '<div style="font-size:12px;color:var(--tx3)">Aucun NCP</div>'; } else { h = '<table class="bt" style="width:100%"><thead><tr><th>Numero</th><th>Date</th><th>Unite</th><th>Ligne</th><th>Type</th><th>Declarant</th><th>Client</th><th>Palettes</th><th>Tonnage</th><th>Description</th></tr></thead><tbody>'; rows.forEach(function(r){ h += '<tr style="cursor:pointer" onclick="ncpDetail(\'' + r.notification + '\')"><td style="color:#fff;font-weight:600">' + ncpEsc(r.notification) + '</td><td>' + ncpEsc(r.created_on || r.created_date_iso || '-') + '</td><td>' + ncpEsc(r.unite || '-') + '</td><td>' + ncpEsc(r.ligne || '-') + '</td><td>' + ncpEsc(r.type_ncp || '-') + '</td><td>' + ncpEsc(ncpNomAff(r.reporter)) + '</td><td>' + ncpEsc(r.famille_produit || '-') + '</td><td>' + (Number(r.total_pallets) || 0).toFixed(1) + '</td><td>' + (Number(r.total_tonnes) || 0).toFixed(2) + '</td><td style="max-width:320px;font-size:11px;color:var(--tx3)">' + ncpEsc(String(r.description || '').slice(0, 110)) + '</td></tr>'; }); h += '</tbody></table>'; } var tEl = document.getElementById('ncp-list-title'); if(tEl) tEl.textContent = titre + ' (' + rows.length + ')'; var bEl = document.getElementById('ncp-list-body'); if(bEl) bEl.innerHTML = h; var mEl = document.getElementById('ncp-list-modal'); if(mEl) mEl.style.display = 'flex'; } function ncpListeDeclarant(cle){ var rows = (NCP_VUE || []).filter(function(r){ return ncpNomCle(r.reporter) === cle; }); ncpRendreListe('NCP declares par ' + ncpNomAff(cle), rows); } function ncpKpiListe(k){ var rows = (NCP_VUE || []).slice(); var t = 'Total NCP'; if(k === 'inpak'){ rows = rows.filter(function(r){ return r.type_ncp === 'Inpak'; }); t = 'NCP Inpak'; } else if(k === 'prod'){ rows = rows.filter(function(r){ return r.type_ncp === 'Production'; }); t = 'NCP Production'; } else if(k === 'nonclasse'){ rows = rows.filter(ncpEstNonClasse); t = 'NCP non classes'; } else if(k === 'tonnes'){ rows = rows.filter(function(r){ return (Number(r.total_tonnes) || 0) > 0; }).sort(function(a, b){ return (Number(b.total_tonnes) || 0) - (Number(a.total_tonnes) || 0); }); t = 'NCP avec tonnage bloque'; } else if(k === 'debloque'){
+function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12]; if(u === 'AW2') return [21,22,23,24,25,26]; if(u === 'AW3') return [31,32,33,34,35,36]; return [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; } function ncpLignesCitees(r){ if(r.type_ncp === 'Production') return []; var V = ncpLignesValides(r.unite || ''); var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, m, vus = []; while((m = rex.exec(String(r.description || ''))) !== null){ var v = parseInt(m[1],10); if(V.indexOf(v) !== -1 && vus.indexOf(v) === -1) vus.push(v); } return vus.map(function(v){ return 'L' + ('0' + v).slice(-2); }); } function ncpEclaterLignes(list){ var out = []; list.forEach(function(r){ var lg = r.lignes_multiples || []; if(lg.length < 2){ out.push(r); return; } lg.forEach(function(l){ var c = {}; for(var k in r){ c[k] = r[k]; } c.ligne = l; c.ligne_type = 'cause_directe'; c.ligne_source = 'multi_lignes'; c.ncp_partage = lg.length; c.total_pallets = (Number(r.total_pallets) || 0) / lg.length; c.total_tonnes = (Number(r.total_tonnes) || 0) / lg.length; c.total_kg = (Number(r.total_kg) || 0) / lg.length; out.push(c); }); }); return out; } var NCP_VUE = []; function ncpNomCle(w){ return String(w||'').trim().toLowerCase().replace(/\s+/g,' '); } function ncpNomAff(w){ return ncpNomCle(w).replace(/(^|[- ])([a-zà-ÿ])/g, function(m,a,b){ return a + b.toUpperCase(); }); } function closeNCPList(){ var m = document.getElementById('ncp-list-modal'); if(m) m.style.display = 'none'; } function ncpRendreListe(titre, rows){ var h = ''; if(!rows.length){ h = '<div style="font-size:12px;color:var(--tx3)">' + t('ncp_liste_vide') + '</div>'; } else { h = '<table class="bt" style="width:100%"><thead><tr><th>'+t('ncp_col_numero')+'</th><th>'+t('ncp_col_date')+'</th><th>'+t('ncp_col_unite')+'</th><th>'+t('ncp_col_ligne')+'</th><th>'+t('ncp_col_type')+'</th><th>'+t('ncp_col_declarant')+'</th><th>'+t('ncp_col_client')+'</th><th>'+t('ncp_col_palettes')+'</th><th>'+t('ncp_col_tonnage')+'</th><th>'+t('ncp_col_description')+'</th></tr></thead><tbody>'; rows.forEach(function(r){ h += '<tr style="cursor:pointer" onclick="ncpDetail(\'' + r.notification + '\')"><td style="color:#fff;font-weight:600">' + ncpEsc(r.notification) + '</td><td>' + ncpEsc(r.created_on || r.created_date_iso || '-') + '</td><td>' + ncpEsc(r.unite || '-') + '</td><td>' + ncpEsc(r.ligne || '-') + '</td><td>' + ncpEsc(r.type_ncp || '-') + '</td><td>' + ncpEsc(ncpNomAff(r.reporter)) + '</td><td>' + ncpEsc(r.famille_produit || '-') + '</td><td>' + (Number(r.total_pallets) || 0).toFixed(1) + '</td><td>' + (Number(r.total_tonnes) || 0).toFixed(2) + '</td><td style="max-width:320px;font-size:11px;color:var(--tx3)">' + ncpEsc(String(r.description || '').slice(0, 110)) + '</td></tr>'; }); h += '</tbody></table>'; } var tEl = document.getElementById('ncp-list-title'); if(tEl) tEl.textContent = titre + ' (' + rows.length + ')'; var bEl = document.getElementById('ncp-list-body'); if(bEl) bEl.innerHTML = h; var mEl = document.getElementById('ncp-list-modal'); if(mEl) mEl.style.display = 'flex'; } function ncpListeDeclarant(cle){ var rows = (NCP_VUE || []).filter(function(r){ return ncpNomCle(r.reporter) === cle; }); ncpRendreListe(t('ncp_titre_declare_par').replace('{n}', ncpNomAff(cle)), rows); } function ncpKpiListe(k){ var rows = (NCP_VUE || []).slice(); var titre = t('ncp_titre_total'); if(k === 'inpak'){ rows = rows.filter(function(r){ return r.type_ncp === 'Inpak'; }); titre = t('ncp_titre_inpak'); } else if(k === 'prod'){ rows = rows.filter(function(r){ return r.type_ncp === 'Production'; }); titre = t('ncp_titre_prod'); } else if(k === 'nonclasse'){ rows = rows.filter(ncpEstNonClasse); titre = t('ncp_titre_nonclasse'); } else if(k === 'tonnes'){ rows = rows.filter(function(r){ return (Number(r.total_tonnes) || 0) > 0; }).sort(function(a, b){ return (Number(b.total_tonnes) || 0) - (Number(a.total_tonnes) || 0); }); titre = t('ncp_titre_tonnage'); } else if(k === 'debloque'){
     rows = rows.filter(ncpEstDebloquee).sort(function(x, y){
       return (Number(y.total_tonnes) || 0) - (Number(x.total_tonnes) || 0);
     });
-    t = 'NCP debloques (liberes par la qualite)';
-  } ncpRendreListe(t, rows); } function ncpBindKpi(){ var p = [['ncp-k-total','total'],['ncp-k-inpak','inpak'],['ncp-k-prod','prod'],
-         ['ncp-k-tonnes','tonnes'],['ncp-k-debloque','debloque']]; p.forEach(function(x){ var el = document.getElementById(x[0]); var c = el ? el.parentNode : null; if(!c || c.getAttribute('data-kpibound')) return; c.setAttribute('data-kpibound','1'); c.style.cursor = 'pointer'; c.title = 'Cliquer pour voir les NCP concernes'; c.addEventListener('click', function(){ ncpKpiListe(x[1]); }); }); } function ncpBuildDeclarants(rows){ ncpBindKpi(); var box = document.getElementById('ncp-declarants'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!ncpEstNonClasse(r)) return; var k = ncpNomCle(r.reporter); if(!m[k]) m[k] = { n: 0, t: 0, u: {}, sem: 0, we: 0 }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); if(r.unite) m[k].u[r.unite] = 1; if(r.created_date_iso){ var j = new Date(r.created_date_iso + 'T12:00:00').getDay(); if(j === 0 || j === 6) m[k].we++; else m[k].sem++; } }); var a = Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(x, y){ return y[1].n - x[1].n; }); var tot = 0; a.forEach(function(x){ tot += x[1].n; }); var cnt = document.getElementById('ncp-decl-count'); var rat = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r) && ncpBakorderLien(r)) rat++; }); if(cnt) cnt.textContent = '(' + a.length + ' personnes, ' + tot + ' NCP, dont ' + rat + ' rattachables a une equipe via un bakorder partage)'; if(!a.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">Aucun NCP non classe sur cette periode.</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">'; a.forEach(function(x){ var v = x[1]; var un = Object.keys(v.u).sort().join(' '); h += '<div onclick="ncpListeDeclarant(\'' + x[0] + '\')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:13px;font-weight:600;color:#fff">' + ncpEsc(ncpNomAff(x[0])) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + (un || 'unite inconnue') + ' - ' + v.t.toFixed(1) + ' t - semaine ' + v.sem + ' / weekend ' + v.we + '</div></div><div style="font-size:18px;font-weight:700;color:#a78bfa">' + v.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
+    titre = t('ncp_titre_debloque');
+  } ncpRendreListe(titre, rows); } function ncpBindKpi(){ var p = [['ncp-k-total','total'],['ncp-k-inpak','inpak'],['ncp-k-prod','prod'],
+         ['ncp-k-tonnes','tonnes'],['ncp-k-debloque','debloque']]; p.forEach(function(x){ var el = document.getElementById(x[0]); var c = el ? el.parentNode : null; if(!c || c.getAttribute('data-kpibound')) return; c.setAttribute('data-kpibound','1'); c.style.cursor = 'pointer'; c.title = t('ncp_tooltip_ncp_concernes'); c.addEventListener('click', function(){ ncpKpiListe(x[1]); }); }); } function ncpBuildDeclarants(rows){ ncpBindKpi(); var box = document.getElementById('ncp-declarants'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!ncpEstNonClasse(r)) return; var k = ncpNomCle(r.reporter); if(!m[k]) m[k] = { n: 0, t: 0, u: {}, sem: 0, we: 0 }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); if(r.unite) m[k].u[r.unite] = 1; if(r.created_date_iso){ var j = new Date(r.created_date_iso + 'T12:00:00').getDay(); if(j === 0 || j === 6) m[k].we++; else m[k].sem++; } }); var a = Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(x, y){ return y[1].n - x[1].n; }); var tot = 0; a.forEach(function(x){ tot += x[1].n; }); var cnt = document.getElementById('ncp-decl-count'); var rat = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r) && ncpBakorderLien(r)) rat++; }); if(cnt) cnt.textContent = '(' + t('ncp_decl_count').replace('{n}', a.length).replace('{tot}', tot).replace('{rat}', rat) + ')'; if(!a.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">' + t('ncp_decl_aucun') + '</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">'; a.forEach(function(x){ var v = x[1]; var un = Object.keys(v.u).sort().join(' '); h += '<div onclick="ncpListeDeclarant(\'' + x[0] + '\')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:13px;font-weight:600;color:#fff">' + ncpEsc(ncpNomAff(x[0])) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + (un || t('ncp_decl_unite_inconnue')) + ' - ' + v.t.toFixed(1) + ' t - ' + t('ncp_decl_semaine').replace('{s}', v.sem).replace('{w}', v.we) + '</div></div><div style="font-size:18px;font-weight:700;color:#a78bfa">' + v.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
 // la meme logique que les Arrets Inpak (SHIFTS + groupes de lignes).
 // Uniquement pertinent pour les NCP de type "Inpak" (lignes 31 a 36).
 function ncpOperateurs(r){
@@ -5621,18 +5661,19 @@ function buildNCPTab(){
   var nOuvertes = nNonClasses;
   var elOuv = document.getElementById('ncp-k-ouvertes'); if(elOuv) elOuv.textContent = nOuvertes;
   var elClo = document.getElementById('ncp-k-cloture-pct');
-  if(elClo) elClo.textContent = total ? (Math.round(nNonClasses / total * 100) + '% du total, a attribuer') : '-';
+  if(elClo) elClo.textContent = total ? t('ncp_pct_cloture').replace('{pct}', Math.round(nNonClasses / total * 100)) : '-';
   var nDebloque = filtresKPI.filter(ncpEstDebloquee);
   var tDebloque = nDebloque.reduce(function(s, r){ return s + (Number(r.total_tonnes) || 0); }, 0);
   var elDeb = document.getElementById('ncp-k-debloque');
   if(elDeb) elDeb.textContent = nDebloque.length;
   var elDebM = document.getElementById('ncp-k-debloque-meta');
-  if(elDebM) elDebM.textContent = Math.round(tDebloque) + ' t liberees - '
-    + (total ? Math.round(nDebloque.length / total * 100) : 0) + '% des fiches';
+  if(elDebM) elDebM.textContent = t('ncp_debloque_meta')
+    .replace('{t}', Math.round(tDebloque))
+    .replace('{pct}', total ? Math.round(nDebloque.length / total * 100) : 0);
   var elPeriode = document.getElementById('ncp-k-periode');
   if(elPeriode && filtresKPI.length){
     var dates = filtresKPI.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
-    if(dates.length) elPeriode.textContent = dFR(dates[0]) + ' au ' + dFR(dates[dates.length-1]);
+    if(dates.length) elPeriode.textContent = dFR(dates[0]) + t('date_range_sep') + dFR(dates[dates.length-1]);
   }
 
   // --- Evolution mensuelle ---
@@ -6553,7 +6594,7 @@ function ncpBindTuiles(){
   }
   Array.prototype.forEach.call(g.querySelectorAll('.kcard'), function(c){
     var v = c.querySelector('.kval');
-    if(v && NCP_KPI_MAP[v.id]){ c.style.cursor = 'pointer'; c.title = 'Cliquer pour voir la liste'; }
+    if(v && NCP_KPI_MAP[v.id]){ c.style.cursor = 'pointer'; c.title = t('ncp_tooltip_liste'); }
   });
 }
 
@@ -6567,12 +6608,13 @@ function ncpMajTuilesExtra(){
     if(ncpSansLabo(r)){ if(t === 'Inpak') si++; else if(t === 'Production') sp++; }
     else              { if(t === 'Inpak') i++;  else if(t === 'Production') p++;  }
   });
-  function pct(n){ return tot ? Math.round(n / tot * 100) + '% du total' : '-'; }
+  function pct(n){ return tot ? t('ncp_pct_total').replace('{pct}', Math.round(n / tot * 100)) : '-'; }
+  function pctSl(n){ return tot ? t('ncp_pct_sanslabo').replace('{pct}', Math.round(n / tot * 100)) : '-'; }
   set('ncp-k-inpak', i);      set('ncp-k-inpak-pct', pct(i));
   set('ncp-k-prod', p);       set('ncp-k-prod-pct', pct(p));
   set('ncp-k-debloque', deb); set('ncp-k-debloque-pct', pct(deb));
-  set('ncp-k-sl-inpak', si);  set('ncp-k-sl-inpak-pct', pct(si) + ' - a controler');
-  set('ncp-k-sl-prod', sp);   set('ncp-k-sl-prod-pct', pct(sp) + ' - a controler');
+  set('ncp-k-sl-inpak', si);  set('ncp-k-sl-inpak-pct', pctSl(si));
+  set('ncp-k-sl-prod', sp);   set('ncp-k-sl-prod-pct', pctSl(sp));
   ncpBindTuiles();
 }
 
@@ -6580,11 +6622,11 @@ function ncpMajTuilesExtra(){
   var _kpi = ncpKpiListe;
   ncpKpiListe = function(k){
     var b = ncpBaseKPI();
-    if(k === 'debloque') return ncpRendreListe('NCP debloques', b.filter(ncpEstDebloque));
-    if(k === 'inpak')    return ncpRendreListe('NCP Inpak (dans le shift)', b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
-    if(k === 'prod')     return ncpRendreListe('NCP Production (dans le shift)', b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
-    if(k === 'slinpak')  return ncpRendreListe('NCP hors shift - Inpak', b.filter(ncpSansLaboInpak));
-    if(k === 'slprod')   return ncpRendreListe('NCP hors shift - Production', b.filter(ncpSansLaboProd));
+    if(k === 'debloque') return ncpRendreListe(t('ncp_titre_debloques2'), b.filter(ncpEstDebloque));
+    if(k === 'inpak')    return ncpRendreListe(t('ncp_titre_inpak_shift'), b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
+    if(k === 'prod')     return ncpRendreListe(t('ncp_titre_prod_shift'), b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
+    if(k === 'slinpak')  return ncpRendreListe(t('ncp_titre_hors_shift_inpak'), b.filter(ncpSansLaboInpak));
+    if(k === 'slprod')   return ncpRendreListe(t('ncp_titre_hors_shift_prod'), b.filter(ncpSansLaboProd));
     return _kpi.call(this, k);
   };
   var _build = buildNCPTab;
