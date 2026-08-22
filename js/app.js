@@ -4997,8 +4997,14 @@ function normNomEspace(s){
 
 function monEspaceTrouverEmpActuel(){
   if(!currentUser) return null;
+  // Admin : peut identifier n'importe quel compte via ACCOUNTS (uid -> employeId).
   var myId = Object.keys(ACCOUNTS).find(function(id){ return ACCOUNTS[id] && ACCOUNTS[id].uid === currentUser.uid; });
-  return myId ? EMP.find(function(e){ return e.id === myId; }) : null;
+  if(myId){ var eAcc = EMP.find(function(e){ return e.id === myId; }); if(eAcc) return eAcc; }
+  // Compte personnel (non-admin) : ACCOUNTS n'est jamais charge pour eux (regles
+  // Firebase, ils ne peuvent pas lire la liste de tous les comptes) -- on retombe
+  // sur le nom deja lu sur leur propre fiche a la connexion (currentUser.nom).
+  if(currentUser.nom){ return EMP.find(function(e){ return e.n === currentUser.nom; }) || null; }
+  return null;
 }
 
 function monEspaceToggle(hdr){
