@@ -310,13 +310,14 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh
 /* ===== Ecran de demarrage (splash) ===== */
 #splash-screen{
   position:fixed; inset:0; z-index:99999; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
-  padding:0 0 48px; background:#05070c no-repeat center/cover;
+  padding:0 0 48px; background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;
   transition:opacity .5s ease; opacity:1;
 }
 #splash-screen::before{
   content:''; position:absolute; inset:0;
   background:linear-gradient(180deg, rgba(5,7,12,.15) 0%, rgba(5,7,12,.35) 55%, rgba(5,7,12,.82) 100%);
 }
+@media (max-width:768px){ #splash-screen{background-image:url('icons/splash-mobile.jpg?v=1')} }
 #splash-screen.splash-hide{opacity:0; pointer-events:none}
 .splash-badge{
   position:absolute; top:22px; left:22px; z-index:1; display:flex; align-items:center; gap:9px;
