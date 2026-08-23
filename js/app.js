@@ -5062,12 +5062,19 @@ return keyAbs(b).localeCompare(keyAbs(a));
 });
 
 var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
-if(n.type_ncp !== 'Inpak' || !n.ligne) return false;
+if(n.type_ncp === 'Inpak' && n.ligne){
 var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
 if(typeof getOperateur !== 'function') return false;
 var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
 if(!op) return false;
 return op.split(', ').indexOf(emp.n) !== -1;
+}
+// NCP Production AW3 : rattachees a tous les membres de l'equipe Production
+// (pas de planning ligne-par-ligne comme l'Inpak, donc rattachement par equipe)
+if(n.type_ncp === 'Production' && n.unite === 'AW3' && emp.g === 'Prod'){
+return true;
+}
+return false;
 });
 ncpEntries.sort(function(a,b){ return (b.date_fichier+(b.created_heure||'')).localeCompare(a.date_fichier+(a.created_heure||'')); });
 var ncpDirectCount = ncpEntries.filter(function(n){ return typeof ncpHorsShift!=='function' || !ncpHorsShift(n); }).length;
@@ -5203,7 +5210,7 @@ var direct = typeof ncpHorsShift!=='function' || !ncpHorsShift(n);
 var badge = direct
 ? '<span class="pill ok">' + t('espace_ncp_direct') + '</span>'
 : '<span class="pill" style="background:rgba(59,130,246,.12);color:var(--blue)">' + t('espace_ncp_late') + '</span>';
-return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap">'
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" onclick="ncpDetail(\'' + n.notification + '\')">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</div>'
 + '<div style="font-size:12px;font-weight:600">'+(n.ligne||'-')+'</div>'
 + '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+(n.description||n.code_produit||'-')+'</div>'
