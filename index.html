@@ -23,7 +23,8 @@
   <style>
     /* CSS critique du splash, en ligne pour eviter tout flash non-style
        avant que js/app.js (charge en fin de page) n'injecte le reste. */
-    #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c no-repeat center/cover;transition:opacity .5s ease;opacity:1}
+    #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
+    @media (max-width:768px){ #splash-screen{background-image:url('icons/splash-mobile.jpg?v=1')} }
     #splash-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,12,.15) 0%,rgba(5,7,12,.35) 55%,rgba(5,7,12,.82) 100%)}
     #splash-screen.splash-hide{opacity:0;pointer-events:none}
     .splash-badge{position:absolute;top:22px;left:22px;z-index:1;display:flex;align-items:center;gap:9px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.02em}
