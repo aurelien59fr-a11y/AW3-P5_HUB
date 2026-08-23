@@ -8,11 +8,11 @@
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v40';
+const CACHE_VERSION = 'bradford-v41';
 const APP_SHELL = [
   './',
   './index.html',
-  './js/app.js?v=37',
+  './js/app.js?v=38',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
