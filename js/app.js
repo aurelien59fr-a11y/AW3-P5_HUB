@@ -5069,10 +5069,13 @@ var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
 if(!op) return false;
 return op.split(', ').indexOf(emp.n) !== -1;
 }
-// NCP Production AW3 : rattachees a tous les membres de l'equipe Production
-// (pas de planning ligne-par-ligne comme l'Inpak, donc rattachement par equipe)
+// NCP Production AW3 : rattachees aux membres de l'equipe Production,
+// mais seulement si le creneau appartient bien a l'equipe P5 (comme pour
+// l'Inpak, cette dashboard ne suit que P5, pas P1-P4)
 if(n.type_ncp === 'Production' && n.unite === 'AW3' && emp.g === 'Prod'){
-return true;
+if(!n.date_fichier || !n.created_heure) return false;
+if(typeof getEquipe !== 'function') return false;
+return getEquipe(n.date_fichier, n.created_heure) === 'P5';
 }
 return false;
 });
