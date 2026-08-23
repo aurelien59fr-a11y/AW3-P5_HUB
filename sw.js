@@ -1,16 +1,18 @@
 /* ============================================================
    Service Worker — Bradford Dashboard AW3 Ploeg 5
    Stratégie :
-   - App shell (html/js/icônes) → cache-first avec mise à jour en fond
+   - Navigation (HTML) → réseau en priorité, cache seulement si hors-ligne
+     (garantit que chaque visite récupère la dernière version du site)
+   - App shell (js/icônes) → cache-first avec mise à jour en fond
    - Firebase / API externes → toujours réseau (jamais de cache)
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v37';
+const CACHE_VERSION = 'bradford-v38';
 const APP_SHELL = [
   './',
   './index.html',
-  './js/app.js?v=16',
+  './js/app.js?v=35',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
@@ -66,6 +68,31 @@ self.addEventListener('fetch', function(event){
 
   // Seulement GET
   if(event.request.method !== 'GET') return;
+
+  // Navigation (chargement de la page HTML elle-même) : réseau en priorité.
+  // Sans ça, un onglet/PWA déjà ouvert peut rester bloqué indéfiniment sur
+  // une ancienne version en cache tant qu'aucune vraie mise à jour réseau
+  // n'est tentée en premier (le cache-first classique ne le garantit pas).
+  var isNavigation = event.request.mode === 'navigate' ||
+    (event.request.destination === 'document');
+
+  if(isNavigation){
+    event.respondWith(
+      fetch(event.request).then(function(networkResp){
+        if(networkResp && networkResp.status === 200){
+          var respClone = networkResp.clone();
+          caches.open(CACHE_VERSION).then(function(cache){
+            cache.put(event.request, respClone);
+          });
+        }
+        return networkResp;
+      }).catch(function(){
+        // Hors-ligne : on retombe sur le cache si dispo
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(function(cached){
