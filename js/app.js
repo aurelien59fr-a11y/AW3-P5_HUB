@@ -10,7 +10,9 @@
 :root{--bg:#0f1117;--bg2:#171b25;--bg3:#1e2436;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);--tx:#e8eaf0;--tx2:#8b90a4;--tx3:#555c72;--blue:#3b82f6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--orange:#f97316;--fn:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--r:8px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:hidden;max-width:100vw}
-body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh;line-height:1.5;font-size:14px}
+body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.85),rgba(5,7,12,.85)),url('icons/splash-pc.jpg?v=1');background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;color:var(--tx);font-family:var(--fn);min-height:100vh;line-height:1.5;font-size:14px}
+@media (max-width:768px){body{background-image:linear-gradient(rgba(5,7,12,.85),rgba(5,7,12,.85)),url('icons/splash-mobile.jpg?v=1');background-attachment:scroll,scroll}}
+
 .topbar{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;letter-spacing:-.02em}
 .logo-dot{width:28px;height:28px;border-radius:8px;object-fit:cover;display:block}
