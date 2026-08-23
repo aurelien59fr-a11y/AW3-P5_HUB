@@ -5409,9 +5409,10 @@ if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bot
   // la plus complete (le plus de versions/historique), pas juste la derniere.
   var parNotif = {};
   var doublonsTrouves = 0;
+  var sansNotification = 0;
   arr.forEach(function(r){
     var notif = r.notification;
-    if(!notif) return;
+    if(!notif){ sansNotification++; return; }
     if(parNotif[notif]){
       doublonsTrouves++;
       var existant = parNotif[notif];
@@ -5422,20 +5423,54 @@ if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bot
       parNotif[notif] = r;
     }
   });
+
+  // GARDE-FOU 1 : ce fichier n'a pas l'air d'etre des notifications NCP du
+  // tout (aucune entree n'a de champ "notification", ex: fichier degustations
+  // Mendix colle par erreur ici). On bloque plutot que d'ecraser avec du vide.
+  if(Object.keys(parNotif).length === 0){
+    errEl.textContent = 'Aucune entree valide trouvee (champ "notification" absent partout, ' + sansNotification + ' ligne(s) ignoree(s)). Ce n\'est probablement pas le bon fichier pour cet import -- rien n\'a ete modifie.';
+    return;
+  }
+
   var obj = {};
   Object.keys(parNotif).forEach(function(notif){
     var key = notif.toString().replace(/[.#$/\[\]]/g, '_');
     obj[key] = parNotif[notif];
   });
   if(!db){ errEl.textContent = 'Pas de connexion Firebase.'; return; }
-  db.ref('ncp_data').set(obj).then(function(){
-    document.getElementById('ncp-import-modal').style.display = 'none';
-    document.getElementById('ncp-import-txt').value = '';
-    var msg = Object.keys(obj).length + ' NCP importes';
-    if(doublonsTrouves > 0) msg += ' (' + doublonsTrouves + ' doublons fusionnes)';
-    toast(msg, '#10b981');
-  }).catch(function(err){
-    errEl.textContent = 'Erreur Firebase : ' + err.message;
+
+  function faireImport(){
+    db.ref('ncp_data').set(obj).then(function(){
+      document.getElementById('ncp-import-modal').style.display = 'none';
+      document.getElementById('ncp-import-txt').value = '';
+      var msg = Object.keys(obj).length + ' NCP importes';
+      if(doublonsTrouves > 0) msg += ' (' + doublonsTrouves + ' doublons fusionnes)';
+      if(sansNotification > 0) msg += ' (' + sansNotification + ' ligne(s) ignoree(s), sans numero de notification)';
+      toast(msg, '#10b981');
+    }).catch(function(err){
+      errEl.textContent = 'Erreur Firebase : ' + err.message;
+    });
+  }
+
+  // GARDE-FOU 2 : cet import REMPLACE entierement les donnees existantes.
+  // Si le nouveau total est nettement plus petit que ce qui est deja en
+  // place, on demande une confirmation explicite avant d'ecraser quoi
+  // que ce soit -- ca evite de perdre des donnees par erreur de fichier.
+  db.ref('ncp_data').once('value').then(function(snap){
+    var actuel = snap.exists() ? Object.keys(snap.val() || {}).length : 0;
+    var nouveau = Object.keys(obj).length;
+    if(actuel > 0 && nouveau < actuel * 0.5){
+      var ok = confirm(
+        'ATTENTION : il y a actuellement ' + actuel + ' notifications NCP enregistrees.\n'
+        + 'Ce fichier n\'en contient que ' + nouveau + ' (' + sansNotification + ' ligne(s) ignoree(s) sans numero).\n\n'
+        + 'Importer maintenant va REMPLACER completement les ' + actuel + ' notifications actuelles par ces ' + nouveau + ' -- tu perdras les autres.\n\n'
+        + 'Es-tu sur que c\'est le bon fichier et que tu veux vraiment continuer ?'
+      );
+      if(!ok){ errEl.textContent = 'Import annule -- aucune donnee modifiee.'; return; }
+    }
+    faireImport();
+  }).catch(function(){
+    faireImport(); // si la lecture de verification echoue, on importe quand meme (pas bloquant)
   });
 }
 
