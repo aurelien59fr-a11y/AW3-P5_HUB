@@ -692,9 +692,9 @@ var I18N={
     espace_sec_absences:'Absences', espace_sec_ncp:'NCP le concernant',
     espace_no_retard:'✅ Aucun retard — parfait !', espace_no_ecart:'✅ Aucun écart — parfait !',
     espace_no_absence:'✅ Aucune absence enregistrée.', espace_no_ncp:'✅ Aucune NCP identifiée.', espace_no_formation:'Aucune formation enregistrée.',
-    espace_ncp_note:'Limité aux créneaux où l’appartenance à l’équipe P5 est identifiable (week-ends).',
+    espace_ncp_note:'Opérateur précis affiché uniquement quand le planning ligne par ligne existe pour ce jour (week-ends/fériés) ; sinon, seule l’équipe P5 est indiquée. Limité à l’unité AW3.',
     espace_ncp_banner:'👏 {n} sur {total} détecté(s) directement par toi pendant ton poste — c’est beaucoup mieux que découvert plus tard !',
-    espace_ncp_direct:'👍 Vu directement par toi', espace_ncp_late:'🔎 Découvert après coup (labo)',
+    espace_ncp_direct:'👍 Vu directement par toi', espace_ncp_late:'🔎 Découvert après coup (labo)', espace_ncp_equipe:'🤝 Équipe P5 (opérateur non précisé)',
     espace_form_upcoming:'À venir', espace_form_past:'Passée', espace_days_suffix:'jour(s)',
     espace_type_recup:'Récup',
     espace_type_ziek:'Maladie',
@@ -920,9 +920,9 @@ var I18N={
     espace_sec_absences:'Afwezigheden', espace_sec_ncp:'NCP’s die jou betreffen',
     espace_no_retard:'✅ Geen laattijdigheid — perfect!', espace_no_ecart:'✅ Geen afwijking — perfect!',
     espace_no_absence:'✅ Geen afwezigheid geregistreerd.', espace_no_ncp:'✅ Geen NCP geïdentificeerd.', espace_no_formation:'Geen opleiding geregistreerd.',
-    espace_ncp_note:'Beperkt tot de tijdstippen waarop het behoren tot het P5-team identificeerbaar is (weekends).',
+    espace_ncp_note:'Exacte operator enkel getoond als de planning per lijn voor die dag bestaat (weekends/feestdagen); anders enkel het P5-team. Beperkt tot AW3.',
     espace_ncp_banner:'👏 {n} van {total} rechtstreeks door jou opgemerkt tijdens je shift — dat is veel beter dan later ontdekt!',
-    espace_ncp_direct:'👍 Rechtstreeks door jou opgemerkt', espace_ncp_late:'🔎 Later ontdekt (labo)',
+    espace_ncp_direct:'👍 Rechtstreeks door jou opgemerkt', espace_ncp_late:'🔎 Later ontdekt (labo)', espace_ncp_equipe:'🤝 P5-team (operator niet gespecificeerd)',
     espace_form_upcoming:'Binnenkort', espace_form_past:'Voorbij', espace_days_suffix:'dag(en)',
     espace_type_recup:'Recuperatie',
     espace_type_ziek:'Ziekte',
@@ -1148,9 +1148,9 @@ var I18N={
     espace_sec_absences:'Absences', espace_sec_ncp:'NCPs concerning you',
     espace_no_retard:'✅ No late arrivals — perfect!', espace_no_ecart:'✅ No discrepancy — perfect!',
     espace_no_absence:'✅ No absence recorded.', espace_no_ncp:'✅ No NCP identified.', espace_no_formation:'No training recorded.',
-    espace_ncp_note:'Limited to time slots where P5 team membership is identifiable (weekends).',
+    espace_ncp_note:'Exact operator shown only when the line-by-line schedule exists for that day (weekends/holidays); otherwise only the P5 team is shown. Limited to AW3.',
     espace_ncp_banner:'👏 {n} of {total} detected directly by you during your shift — that’s much better than being found later!',
-    espace_ncp_direct:'👍 Spotted directly by you', espace_ncp_late:'🔎 Found later (lab)',
+    espace_ncp_direct:'👍 Spotted directly by you', espace_ncp_late:'🔎 Found later (lab)', espace_ncp_equipe:'🤝 P5 team (operator not specified)',
     espace_form_upcoming:'Upcoming', espace_form_past:'Past', espace_days_suffix:'day(s)',
     espace_type_recup:'Recovery leave',
     espace_type_ziek:'Sick leave',
@@ -5065,12 +5065,18 @@ return keyAbs(b).localeCompare(keyAbs(a));
 });
 
 var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
-if(n.type_ncp === 'Inpak' && n.ligne){
+if(n.type_ncp === 'Inpak' && n.ligne && n.unite === 'AW3'){
 var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
 if(typeof getOperateur !== 'function') return false;
 var op = getOperateur(n.created_date_iso, n.created_heure, ligneNum);
-if(!op) return false;
-return op.split(', ').indexOf(emp.n) !== -1;
+if(op) return op.split(', ').indexOf(emp.n) !== -1;
+// Pas de planning individuel ligne par ligne pour ce jour (frequent en semaine :
+// seul le planning week-end/ferie liste qui est precisement sur quelle ligne).
+// On ne fait plus disparaitre le NCP : on le montre a l'equipe Inpak P5 concernee,
+// sans pouvoir preciser qui exactement (badge "equipe" affiche au rendu).
+if(emp.g !== 'INPAK' && !(emp.g === 'Unit' && emp.r === 'Inpak')) return false;
+if(typeof ncpConcerneEquipe !== 'function') return false;
+return ncpConcerneEquipe(n, 'P5');
 }
 // NCP Production AW3 : rattachees aux membres de l'equipe Production,
 // mais seulement si le creneau appartient bien a l'equipe P5 (comme pour
@@ -5081,7 +5087,7 @@ return ncpConcerneEquipe(n, 'P5');
 }
 return false;
 });
-ncpEntries.sort(function(a,b){ return (b.date_fichier+(b.created_heure||'')).localeCompare(a.date_fichier+(a.created_heure||'')); });
+ncpEntries.sort(function(a,b){ return (b.created_date_iso+(b.created_heure||'')).localeCompare(a.created_date_iso+(a.created_heure||'')); });
 var ncpDirectCount = ncpEntries.filter(function(n){ return typeof ncpHorsShift!=='function' || !ncpHorsShift(n); }).length;
 
 var todayEspace = new Date(); todayEspace.setHours(0,0,0,0);
@@ -5215,11 +5221,19 @@ var direct = typeof ncpHorsShift!=='function' || !ncpHorsShift(n);
 var badge = direct
 ? '<span class="pill ok">' + t('espace_ncp_direct') + '</span>'
 : '<span class="pill" style="background:rgba(59,130,246,.12);color:var(--blue)">' + t('espace_ncp_late') + '</span>';
+var opPrecis = null;
+if(n.type_ncp === 'Inpak' && n.ligne && typeof getOperateur === 'function'){
+var ln = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
+opPrecis = getOperateur(n.created_date_iso, n.created_heure, ln);
+}
+var badgeEquipe = (n.type_ncp === 'Inpak' && !opPrecis)
+? '<span class="pill" style="background:rgba(139,92,246,.12);color:#8b5cf6">' + t('espace_ncp_equipe') + '</span>'
+: '';
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" onclick="ncpDetail(\'' + n.notification + '\')">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.date_fichier)+' '+(n.created_heure||'')+'</div>'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.created_date_iso)+' '+(n.created_heure||'')+'</div>'
 + '<div style="font-size:12px;font-weight:600">'+(n.ligne||'-')+'</div>'
 + '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+(n.description||n.code_produit||'-')+'</div>'
-+ badge
++ badge + badgeEquipe
 + '</div>';
 }).join('');
 ncpBody = ncpNote + ncpBanniere + ncpRows;
