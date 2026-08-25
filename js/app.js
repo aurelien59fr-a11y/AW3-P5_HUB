@@ -5246,7 +5246,7 @@ function loadNCPData(){
   if(!db) return;
   db.ref('ncp_data').on('value', function(snap){
     var data = snap.val() || {};
-    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } r.lignes_multiples = ncpLignesCitees(r); }); NCP_DATA = ncpEclaterLignes(NCP_DATA);
+    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; /* Unite erronee dans la source : on ne corrige QUE si deux indices independants -- le declarant (INPAK_WB<n> / PLOEGCH_WB<n>) et le numero de ligne -- designent tous les deux la MEME autre unite. Un seul indice ne suffit pas : un chef de poste peut declarer un NCP concernant une autre unite (93% de concordance seulement). */ var _mRep = String(r.reporter || '').match(/WB\s*([123])\b/i); var _uRep = _mRep ? ('AW' + _mRep[1]) : null; var _mLig = String(r.ligne || '').match(/(\d{1,3})/); var _nLig = _mLig ? parseInt(_mLig[1], 10) : null; var _uLig = null; if(_nLig !== null){ if(_nLig >= 1 && _nLig <= 12) _uLig = 'AW1'; else if(_nLig >= 21 && _nLig <= 26) _uLig = 'AW2'; else if(_nLig >= 31 && _nLig <= 36) _uLig = 'AW3'; } if(r.unite && _uRep && _uLig && _uRep === _uLig && _uRep !== r.unite){ r.unite_corrigee_depuis = r.unite; r.unite = _uRep; } var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } r.lignes_multiples = ncpLignesCitees(r); }); NCP_DATA = ncpEclaterLignes(NCP_DATA);
     buildNCPTab();
   }, function(error){
     console.warn('[NCP] Erreur chargement:', error);
@@ -5494,7 +5494,18 @@ if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bot
         nouveauxNotifs++;
         return;
       }
-      var fusion = Object.assign({}, existant, importe);
+      // Fusion NON destructive : l'import complete, il n'efface jamais. Une valeur
+      // vide / nulle / tableau vide dans le fichier importe ne peut pas ecraser une
+      // valeur deja presente en base (ex: unite ou ligne vides dans un export brut).
+      // Les champs absents de l'import (equipe_override, de_cote, degustationsLiees...)
+      // sont conserves d'office puisquon part d'une copie de l'existant.
+      var fusion = Object.assign({}, existant);
+      Object.keys(importe).forEach(function(champ){
+        var v = importe[champ];
+        if(v === undefined || v === null || v === '') return;
+        if(Array.isArray(v) && v.length === 0) return;
+        fusion[champ] = v;
+      });
       if(existant.type_ncp && importe.type_ncp && existant.type_ncp !== importe.type_ncp){
         fusion.type_ncp = existant.type_ncp; // on garde la valeur corrigee/existante en base
         conflitsTypeNcp.push(importe.notification + ' (garde "' + existant.type_ncp + '", import proposait "' + importe.type_ncp + '")');
