@@ -5451,40 +5451,72 @@ if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bot
   });
   if(!db){ errEl.textContent = 'Pas de connexion Firebase.'; return; }
 
-  function faireImport(){
-    db.ref('ncp_data').set(obj).then(function(){
-      document.getElementById('ncp-import-modal').style.display = 'none';
-      document.getElementById('ncp-import-txt').value = '';
-      var msg = Object.keys(obj).length + ' NCP importes';
-      if(doublonsTrouves > 0) msg += ' (' + doublonsTrouves + ' doublons fusionnes)';
-      if(sansNotification > 0) msg += ' (' + sansNotification + ' ligne(s) ignoree(s), sans numero de notification)';
-      toast(msg, '#10b981');
-    }).catch(function(err){
-      errEl.textContent = 'Erreur Firebase : ' + err.message;
-    });
-  }
-
-  // GARDE-FOU 2 : cet import REMPLACE entierement les donnees existantes.
-  // Si le nouveau total est nettement plus petit que ce qui est deja en
-  // place, on demande une confirmation explicite avant d'ecraser quoi
-  // que ce soit -- ca evite de perdre des donnees par erreur de fichier.
+  // IMPORT FUSIONNE (non destructeur) : on ne remplace plus jamais tout le
+  // noeud ncp_data d'un coup. On relit l'existant, on fusionne champ par
+  // champ par-dessus chaque fiche deja en base, et les NCP absents de ce
+  // fichier restent totalement intouches (equipe_override, corrections
+  // manuelles, etc. sont preserves). Le champ type_ncp (deja corrige
+  // manuellement par le passe sur plusieurs centaines de fiches) n'est
+  // jamais ecrase silencieusement s'il differe : on le protege et on
+  // liste les conflits pour verification avant d'ecrire.
   db.ref('ncp_data').once('value').then(function(snap){
-    var actuel = snap.exists() ? Object.keys(snap.val() || {}).length : 0;
-    var nouveau = Object.keys(obj).length;
-    if(actuel > 0 && nouveau < actuel * 0.5){
+    var actuel = snap.val() || {};
+    var delta = {};
+    var conflitsTypeNcp = [];
+    var nouveauxNotifs = 0;
+    var majNotifs = 0;
+    Object.keys(obj).forEach(function(key){
+      var existant = actuel[key];
+      var importe = obj[key];
+      if(!existant){
+        delta[key] = importe;
+        nouveauxNotifs++;
+        return;
+      }
+      var fusion = Object.assign({}, existant, importe);
+      if(existant.type_ncp && importe.type_ncp && existant.type_ncp !== importe.type_ncp){
+        fusion.type_ncp = existant.type_ncp; // on garde la valeur corrigee/existante en base
+        conflitsTypeNcp.push(importe.notification + ' (garde "' + existant.type_ncp + '", import proposait "' + importe.type_ncp + '")');
+      }
+      delta[key] = fusion;
+      majNotifs++;
+    });
+
+    function ecrire(){
+      var updates = {};
+      Object.keys(delta).forEach(function(key){ updates['ncp_data/' + key] = delta[key]; });
+      db.ref().update(updates).then(function(){
+        document.getElementById('ncp-import-modal').style.display = 'none';
+        document.getElementById('ncp-import-txt').value = '';
+        var msg = nouveauxNotifs + ' nouveau(x), ' + majNotifs + ' mis a jour';
+        if(doublonsTrouves > 0) msg += ' (' + doublonsTrouves + ' doublons fusionnes)';
+        if(sansNotification > 0) msg += ' (' + sansNotification + ' ligne(s) ignoree(s), sans numero de notification)';
+        if(conflitsTypeNcp.length > 0) msg += ' -- ' + conflitsTypeNcp.length + ' conflit(s) type_ncp conserve(s) tel quel';
+        toast(msg, '#10b981');
+        if(conflitsTypeNcp.length > 0){
+          console.warn('Conflits type_ncp non ecrases lors de l\'import :', conflitsTypeNcp);
+        }
+      }).catch(function(err){
+        errEl.textContent = 'Erreur Firebase : ' + err.message;
+      });
+    }
+
+    if(conflitsTypeNcp.length > 0){
       var ok = confirm(
-        'ATTENTION : il y a actuellement ' + actuel + ' notifications NCP enregistrees.\n'
-        + 'Ce fichier n\'en contient que ' + nouveau + ' (' + sansNotification + ' ligne(s) ignoree(s) sans numero).\n\n'
-        + 'Importer maintenant va REMPLACER completement les ' + actuel + ' notifications actuelles par ces ' + nouveau + ' -- tu perdras les autres.\n\n'
-        + 'Es-tu sur que c\'est le bon fichier et que tu veux vraiment continuer ?'
+        conflitsTypeNcp.length + ' NCP ont un type_ncp different entre la base actuelle et ce fichier importe.\n'
+        + 'La valeur DEJA EN BASE sera conservee pour ces fiches (pas d\'ecrasement automatique) :\n\n'
+        + conflitsTypeNcp.slice(0, 15).join('\n')
+        + (conflitsTypeNcp.length > 15 ? '\n... (' + (conflitsTypeNcp.length - 15) + ' de plus, voir la console)' : '')
+        + '\n\nContinuer l\'import (le reste des champs sera quand meme mis a jour) ?'
       );
       if(!ok){ errEl.textContent = 'Import annule -- aucune donnee modifiee.'; return; }
     }
-    faireImport();
-  }).catch(function(){
-    faireImport(); // si la lecture de verification echoue, on importe quand meme (pas bloquant)
+    ecrire();
+  }).catch(function(err){
+    errEl.textContent = 'Erreur lecture Firebase : ' + err.message;
   });
 }
+
 
 function filtrerNCPUnite(u){
   NCP_FILTRE_UNITE = u;
