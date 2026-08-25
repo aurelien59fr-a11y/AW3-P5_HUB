@@ -75,7 +75,7 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 .ytabs{display:flex;gap:4px}
 .ytab{padding:5px 14px;border-radius:var(--r);border:1px solid var(--bd);background:none;font-size:12px;font-family:var(--fn);color:var(--tx2);cursor:pointer;font-weight:500;transition:all .15s}
 .ytab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-.pscroll{overflow-x:auto;border-radius:12px;border:1px solid var(--bd)}
+.pscroll{overflow-x:auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .ptable{border-collapse:collapse;font-size:12px;min-width:900px;width:100%}
 .ptable th{padding:8px 10px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx3);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd);white-space:nowrap;text-align:center}
 .ptable th.nc{text-align:left;min-width:160px}
