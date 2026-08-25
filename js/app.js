@@ -5076,9 +5076,8 @@ return op.split(', ').indexOf(emp.n) !== -1;
 // mais seulement si le creneau appartient bien a l'equipe P5 (comme pour
 // l'Inpak, cette dashboard ne suit que P5, pas P1-P4)
 if(n.type_ncp === 'Production' && n.unite === 'AW3' && emp.g === 'Prod'){
-if(!n.date_fichier || !n.created_heure) return false;
-if(typeof getEquipe !== 'function') return false;
-return getEquipe(n.date_fichier, n.created_heure) === 'P5';
+if(typeof ncpGetEquipe !== 'function') return false;
+return ncpGetEquipe(n) === 'P5';
 }
 return false;
 });
