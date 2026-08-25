@@ -5264,13 +5264,20 @@ function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12
 // Uniquement pertinent pour les NCP de type "Inpak" (lignes 31 a 36).
 function ncpOperateurs(r){
   if(r.type_ncp !== 'Inpak') return null;
+  // On s'aligne sur la meme base horaire que l'equipe affichee (ncpEquipesMulti
+  // -> ncpFenetre). Avant, si ncpHeureInfo ne rendait pas d'heure (cas
+  // heure_fiable === false, ex: PDF exporte plusieurs jours apres le defaut),
+  // on abandonnait ici -- alors que la fenetre du defaut, elle, suffisait deja
+  // a deduire l'equipe. Resultat : une equipe P5 affichee sans jamais pouvoir
+  // nommer l'operateur, alors que le planning du jour le donne.
   var _hi = ncpHeureInfo(r);
-  if(!_hi.heure) return null;
-  var dateISO = _hi.date_iso || r.created_date_iso;
-  if(!dateISO) return null;
+  var dateISO = null, heure = null;
+  if(_hi.heure){ dateISO = _hi.date_iso || r.created_date_iso; heure = _hi.heure; }
+  else { var f = ncpFenetre(r); if(f){ dateISO = f.dateDebut; heure = f.heureDebut; } }
+  if(!dateISO || !heure) return null;
   var ligneNum = String(r.ligne || '').replace(/[^0-9]/g, '');
   if(!ligneNum) return null;
-  return getOperateur(dateISO, _hi.heure, ligneNum);
+  return getOperateur(dateISO, heure, ligneNum);
 }
 function ncpEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function ncpToggleDeCote(notif){
