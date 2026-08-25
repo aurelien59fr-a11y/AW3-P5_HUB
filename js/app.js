@@ -5076,8 +5076,8 @@ return op.split(', ').indexOf(emp.n) !== -1;
 // mais seulement si le creneau appartient bien a l'equipe P5 (comme pour
 // l'Inpak, cette dashboard ne suit que P5, pas P1-P4)
 if(n.type_ncp === 'Production' && n.unite === 'AW3' && emp.g === 'Prod'){
-if(typeof ncpGetEquipe !== 'function') return false;
-return ncpGetEquipe(n) === 'P5';
+if(typeof ncpConcerneEquipe !== 'function') return false;
+return ncpConcerneEquipe(n, 'P5');
 }
 return false;
 });
@@ -5999,7 +5999,7 @@ function buildNCPTab(){
     LIMITE = NCP_TOUT ? 999999 : 200; var tronque = tries.length > LIMITE;
     var affiches = tries.slice(0, LIMITE);
     tbody.innerHTML = affiches.map(function(r){
-      var eq = ncpGetEquipe(r);
+      var eq = ncpEquipesMulti(r).principale;
       var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
       var autreDeclarant = ncpEstNonClasse(r);
       return '<tr>'
