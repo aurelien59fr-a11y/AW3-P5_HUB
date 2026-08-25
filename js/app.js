@@ -5068,7 +5068,7 @@ var ncpEntries = Object.values(NCP_DATA || {}).filter(function(n){
 if(n.type_ncp === 'Inpak' && n.ligne){
 var ligneNum = String(n.ligne).replace(/^L0*/,'').replace(/^L/,'');
 if(typeof getOperateur !== 'function') return false;
-var op = getOperateur(n.date_fichier, n.created_heure, ligneNum);
+var op = getOperateur(n.created_date_iso, n.created_heure, ligneNum);
 if(!op) return false;
 return op.split(', ').indexOf(emp.n) !== -1;
 }
