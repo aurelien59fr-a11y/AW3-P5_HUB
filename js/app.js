@@ -7475,7 +7475,7 @@ function ncpInjecterTuileACompleter(){
   var g = document.querySelector('#ncp-content-wrap .kgrid');
   if(!g) return;
   var c = document.createElement('div');
-  c.className = 'kcard am';
+  c.className = 'kcard rd';
   c.innerHTML = '<div class="klbl">Fiches a completer</div>'
     + '<div class="kval" id="ncp-k-acompleter">-</div>'
     + '<div class="kmeta" id="ncp-k-acompleter-pct">-</div>';
@@ -7503,6 +7503,68 @@ function ncpInjecterTuileACompleter(){
       if(p) p.textContent = b.length ? (Math.round(n / b.length * 100) + '% du total') : '-';
       if(typeof ncpBindTuiles === 'function') ncpBindTuiles();
     } catch(err){ console.warn('tuile a completer', err); }
+    return out;
+  };
+})();
+
+
+/* ==================== NCP : tri des listes ====================
+   ncpRendreListe affichait les fiches dans l'ordre brut de NCP_DATA, donc
+   pele-mele. On enrobe la fonction pour trier AVANT rendu, sans toucher a son
+   code : par defaut les plus RECENTES en haut, et un bouton dans l'entete du
+   modal bascule sur un tri par PRIORITE (1-Immediate, 2-Urgent, 3-Normal,
+   4-Low ; a priorite egale, la plus recente d'abord). Le tri s'applique a
+   toutes les listes du dashboard, pas seulement a la tuile "a completer".
+   ============================================================== */
+var NCP_LISTE_TRI = 'date';
+var NCP_LISTE_COURANTE = null;
+var NCP_LISTE_TITRE = '';
+
+function ncpPrioriteRang(r){
+  var m = String(r.priority || '').match(/^\s*(\d)/);
+  return m ? parseInt(m[1], 10) : 9;
+}
+function ncpCleDate(r){
+  return String(r.created_date_iso || '') + ' ' + String(r.created_heure || '');
+}
+function ncpTrierListe(rows){
+  var c = rows.slice();
+  if(NCP_LISTE_TRI === 'priorite'){
+    c.sort(function(a, b){
+      var d = ncpPrioriteRang(a) - ncpPrioriteRang(b);
+      if(d) return d;
+      return ncpCleDate(b).localeCompare(ncpCleDate(a));
+    });
+  } else {
+    c.sort(function(a, b){ return ncpCleDate(b).localeCompare(ncpCleDate(a)); });
+  }
+  return c;
+}
+function ncpBasculerTriListe(){
+  NCP_LISTE_TRI = (NCP_LISTE_TRI === 'date') ? 'priorite' : 'date';
+  if(NCP_LISTE_COURANTE) ncpRendreListe(NCP_LISTE_TITRE, NCP_LISTE_COURANTE);
+}
+function ncpInjecterBoutonTri(){
+  var tEl = document.getElementById('ncp-list-title');
+  if(!tEl || !tEl.parentNode) return;
+  var b = document.getElementById('ncp-btn-tri');
+  if(!b){
+    b = document.createElement('button');
+    b.id = 'ncp-btn-tri';
+    b.onclick = ncpBasculerTriListe;
+    b.style.cssText = 'margin-right:auto;margin-left:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer;white-space:nowrap';
+    tEl.parentNode.insertBefore(b, tEl.nextSibling);
+  }
+  b.textContent = (NCP_LISTE_TRI === 'date') ? '\u2193 Plus recentes d abord' : '\u2193 Priorite d abord';
+}
+
+(function(){
+  var _rendreTri = ncpRendreListe;
+  ncpRendreListe = function(titre, rows){
+    NCP_LISTE_TITRE = titre;
+    NCP_LISTE_COURANTE = rows;
+    var out = _rendreTri.call(this, titre, ncpTrierListe(rows));
+    try { ncpInjecterBoutonTri(); } catch(e){ console.warn('bouton tri', e); }
     return out;
   };
 })();
