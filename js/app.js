@@ -7475,7 +7475,7 @@ function ncpInjecterTuileACompleter(){
   var g = document.querySelector('#ncp-content-wrap .kgrid');
   if(!g) return;
   var c = document.createElement('div');
-  c.className = 'kcard rd';
+  c.className = 'kcard pu';
   c.innerHTML = '<div class="klbl">Fiches a completer</div>'
     + '<div class="kval" id="ncp-k-acompleter">-</div>'
     + '<div class="kmeta" id="ncp-k-acompleter-pct">-</div>';
@@ -7565,6 +7565,59 @@ function ncpInjecterBoutonTri(){
     NCP_LISTE_COURANTE = rows;
     var out = _rendreTri.call(this, titre, ncpTrierListe(rows));
     try { ncpInjecterBoutonTri(); } catch(e){ console.warn('bouton tri', e); }
+    return out;
+  };
+})();
+
+
+/* ==================== NCP : filtre par unite sur les listes ====================
+   Ajoute une zone de recherche/filtre (select AW1/AW2/AW3/Toutes) a cote du
+   bouton de tri, sur TOUTES les listes NCP (declarant, KPI, tuile a completer,
+   etc.). Enrobe ncpRendreListe une nouvelle fois, par dessus le tri deja en
+   place, sans toucher a son code. Le filtre repart sur "Toutes" des qu'un titre
+   de liste different est ouvert ; il est conserve si on rechange juste le
+   filtre sur la meme liste.
+   =================================================================================== */
+var NCP_LISTE_FILTRE_UNITE = 'toutes';
+var NCP_LISTE_BASE = [];
+var NCP_LISTE_TITRE_PREC = null;
+
+function ncpAppliquerFiltreUnite(rows){
+  if(NCP_LISTE_FILTRE_UNITE === 'toutes') return rows;
+  return rows.filter(function(r){ return r.unite === NCP_LISTE_FILTRE_UNITE; });
+}
+function ncpChangerFiltreUnite(v){
+  NCP_LISTE_FILTRE_UNITE = v;
+  if(NCP_LISTE_TITRE_PREC !== null) ncpRendreListe(NCP_LISTE_TITRE_PREC, NCP_LISTE_BASE);
+}
+function ncpInjecterFiltreUnite(){
+  var tEl = document.getElementById('ncp-list-title');
+  if(!tEl || !tEl.parentNode) return;
+  var s = document.getElementById('ncp-sel-filtre-unite');
+  if(!s){
+    s = document.createElement('select');
+    s.id = 'ncp-sel-filtre-unite';
+    s.onchange = function(){ ncpChangerFiltreUnite(this.value); };
+    s.style.cssText = 'margin-left:8px;padding:4px 10px;border-radius:8px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px;cursor:pointer';
+    ['toutes','AW1','AW2','AW3'].forEach(function(u){
+      var o = document.createElement('option');
+      o.value = u;
+      o.textContent = (u === 'toutes') ? 'Toutes les unites' : u;
+      s.appendChild(o);
+    });
+    var ref = document.getElementById('ncp-btn-tri');
+    tEl.parentNode.insertBefore(s, ref ? ref.nextSibling : tEl.nextSibling);
+  }
+  s.value = NCP_LISTE_FILTRE_UNITE;
+}
+
+(function(){
+  var _rendreFiltre = ncpRendreListe;
+  ncpRendreListe = function(titre, rows){
+    if(titre !== NCP_LISTE_TITRE_PREC){ NCP_LISTE_FILTRE_UNITE = 'toutes'; NCP_LISTE_TITRE_PREC = titre; }
+    NCP_LISTE_BASE = rows;
+    var out = _rendreFiltre.call(this, titre, ncpAppliquerFiltreUnite(rows));
+    try { ncpInjecterFiltreUnite(); } catch(e){ console.warn('filtre unite', e); }
     return out;
   };
 })();
