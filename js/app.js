@@ -2439,7 +2439,7 @@ function applyRole(role){
   // Toujours repartir d'un etat "tout visible" avant d'appliquer les
   // restrictions du role courant — indispensable si on change de compte
   // (ex: visiteur -> admin) sans recharger completement la page.
-  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"]').forEach(function(el){
+  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
     el.style.display = '';
   });
   ['ov','br','ab'].forEach(function(tab){
@@ -2541,7 +2541,7 @@ function applyRole(role){
     document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
 
     // Masquer les boutons d'action principaux, pour une experience propre
-    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"]').forEach(function(el){
+    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
       el.style.display = 'none';
     });
 
@@ -7077,7 +7077,7 @@ function buildComptesEmpListe(){
     var perm = posteVersPermissions(e.r);
     var rowId = 'cpt-'+e.id;
     if(acc){
-      var accLabel = acc.role === 'admin' ? t('role_admin') : (acc.role === 'subchef' ? t('role_subchef') : t('role_custom'));
+      var accLabel = acc.role === 'admin' ? t('role_admin') : (acc.role === 'subchef' ? t('role_subchef') : (acc.role === 'visiteur' ? t('role_visiteur') : t('role_custom')));
       return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
         +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+accLabel+'</div></div>'
         +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; '+t('comptes_actif')+'</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span>'
@@ -7097,6 +7097,7 @@ function buildComptesEmpListe(){
       +'<select id="'+rowId+'-role" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
       +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
       +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
+      +'<option value="visiteur"'+(perm.role==='visiteur'?' selected':'')+'>'+t('role_visiteur')+'</option>'
       +'<option value="admin"'+(perm.role==='admin'?' selected':'')+'>'+t('role_admin')+'</option>'
       +'</select>'
       +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);font-size:12px;cursor:pointer">'+t('comptes_btn_creer')+'</button>'
@@ -7133,7 +7134,7 @@ function creerCompteEmployeUI(empId){
     editPlanning = !!(epCb && epCb.checked);
   }
   var login = genLoginInterne(emp.n);
-  var recap = t('comptes_confirm_creer')+emp.n+' ?\n\n'+t('comptes_confirm_email')+login.email+'\n'+t('comptes_confirm_pass')+login.password+'\n'+t('comptes_confirm_role')+(role==='admin'?t('role_admin'):(role==='subchef'?t('role_subchef'):t('role_custom')));
+  var recap = t('comptes_confirm_creer')+emp.n+' ?\n\n'+t('comptes_confirm_email')+login.email+'\n'+t('comptes_confirm_pass')+login.password+'\n'+t('comptes_confirm_role')+(role==='admin'?t('role_admin'):(role==='subchef'?t('role_subchef'):(role==='visiteur'?t('role_visiteur'):t('role_custom'))));
   if(role === 'custom'){
     recap += '\n'+t('comptes_confirm_onglets')+ALL_TABS.filter(function(tt){return tabs[tt];}).map(function(tt){return t('tab_'+tt);}).join(', ');
     recap += '\n'+t('comptes_confirm_planning')+(editPlanning?t('comptes_oui'):t('comptes_non'));
@@ -7618,6 +7619,47 @@ function ncpInjecterFiltreUnite(){
     NCP_LISTE_BASE = rows;
     var out = _rendreFiltre.call(this, titre, ncpAppliquerFiltreUnite(rows));
     try { ncpInjecterFiltreUnite(); } catch(e){ console.warn('filtre unite', e); }
+    return out;
+  };
+})();
+
+
+/* ==================== NCP : verrouillage ecriture pour les visiteurs ====================
+   Le role "visiteur" (lecture seule) cachait deja les boutons d'import et
+   l'onglet Admin, mais pas les actions ecrites depuis l'intérieur d'une fiche
+   NCP (Mis de cote, Commenter, Marquer controle, et les corrections manuelles
+   unite/ligne/operateur/equipe qu'on a ajoutees). On enrobe ncpDetail : une
+   fois la fiche rendue, si le compte connecte est visiteur, on desactive
+   uniquement les elements qui declenchent une ecriture Firebase — tout le
+   reste (traduire, fermer, degustations liees, historique...) reste
+   consultable normalement. Rien n'est modifie dans ncpDetail lui-meme. */
+(function(){
+  var _ncpDetailVisiteur = ncpDetail;
+  ncpDetail = function(notif){
+    var out = _ncpDetailVisiteur.call(this, notif);
+    try {
+      if(currentUser && currentUser.role === 'visiteur'){
+        var body = document.getElementById('ncp-detail-body');
+        if(body){
+          var sel = [
+            'button[onclick^="ncpOpenComment"]',
+            'button[onclick^="ncpSetOperateurOverride"]',
+            'button[onclick^="ncpToggleControle"]',
+            'button[onclick^="ncpToggleDeCote"]',
+            'select[onchange^="ncpSetEquipeOverride"]',
+            'select[onchange^="ncpSetLigneOverride"]',
+            'select[onchange^="ncpSetUniteOverride"]',
+            '#ncp-op-input'
+          ].join(',');
+          body.querySelectorAll(sel).forEach(function(el){
+            el.disabled = true;
+            el.style.opacity = '.45';
+            el.style.cursor = 'not-allowed';
+            el.title = 'Lecture seule (compte visiteur)';
+          });
+        }
+      }
+    } catch(e){ console.warn('ncpDetail verrou visiteur', e); }
     return out;
   };
 })();
