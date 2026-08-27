@@ -2609,8 +2609,8 @@ var editingEmpId = null;
 function buildEmpTable(){
   var tbody = document.getElementById('empTbody');
   if(!tbody) return;
-  var grpColors = {TL:'rgba(99,102,241,.2)',INPAK:'rgba(59,130,246,.15)',Prod:'rgba(249,115,22,.15)',Unit:'rgba(16,185,129,.15)'};
-  var grpText = {TL:'#a5b4fc',INPAK:'#7eb3ff',Prod:'#fda96a',Unit:'#5eddb7'};
+  var grpColors = {TL:'rgba(99,102,241,.2)',INPAK:'rgba(59,130,246,.15)',Prod:'rgba(249,115,22,.15)',Unit:'rgba(16,185,129,.15)',Manager:'rgba(168,85,247,.15)',RH:'rgba(236,72,153,.15)'};
+  var grpText = {TL:'#a5b4fc',INPAK:'#7eb3ff',Prod:'#fda96a',Unit:'#5eddb7',Manager:'#c4b5fd',RH:'#f9a8d4'};
   tbody.innerHTML = EMP.map(function(e,i){
     var bg = grpColors[e.g]||'rgba(255,255,255,.05)';
     var col = grpText[e.g]||'var(--tx2)';
