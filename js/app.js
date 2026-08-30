@@ -599,7 +599,7 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_bulk_title:'Bulkopvang + Bijlijn (surproduction)', arr_bulk_unit_note:'kg (a confirmer)', arr_bulk_hint:'Volumes de surproduction envoyes en bulk (standard + urgence) et emballes via la bij-ligne, par jour.', arr_bulk_empty:'Aucune donnee bulk importee pour le moment.', arr_bulk_modal_title:'Importer Bulkopvang + Bijlijn', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1',
     arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
     filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
     arr_search_title:'Recherche precise', arr_search_from:'Du',
@@ -827,7 +827,7 @@ var I18N={
     pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_bulk_title:'Bulkopvang + Bijlijn (overproductie)', arr_bulk_unit_note:'kg (te bevestigen)', arr_bulk_hint:'Volumes overproductie verstuurd als bulk (standaard + nood) en verpakt via de bijlijn, per dag.', arr_bulk_empty:'Nog geen bulkgegevens geimporteerd.', arr_bulk_modal_title:'Bulkopvang + Bijlijn importeren', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1',
     arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
     filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
     arr_search_title:'Precieze zoekopdracht', arr_search_from:'Van',
@@ -1055,7 +1055,7 @@ var I18N={
     pt_marked_done_suffix:' anomaly(ies) marked as processed',
     pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
     pt_modal_title:'Import Protime time records',
-    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_bulk_title:'Bulkopvang + Bijlijn (overproduction)', arr_bulk_unit_note:'kg (to confirm)', arr_bulk_hint:'Overproduction volumes sent to bulk (standard + emergency) and packed via the bij-line, per day.', arr_bulk_empty:'No bulk data imported yet.', arr_bulk_modal_title:'Import Bulkopvang + Bijlijn', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1',
     arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana',
     filter_all_fem:'All', arr_p5_moi:'P5 (me)', col_operator:'Operator',
     arr_search_title:'Precise search', arr_search_from:'From',
@@ -3097,7 +3097,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadNCPData();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();
         buildEmpTable();
       }
     }
@@ -3201,7 +3201,7 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadNCPData();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();
   }
 }
 
@@ -4210,7 +4210,110 @@ function getEquipe(dateStr, heureStr){
 }
 
 var ARRETS_DATA = {};
+var BULK_DATA = null; // {periode, standaard:[], noodafvoer:[], bijlijn1:[]}
 var _arretsComparOpChart = null;
+var _arretsBulkChart = null;
+
+function loadBulkData(){
+  if(!db) return;
+  db.ref('bulk_data').on('value', function(snap){
+    BULK_DATA = snap.val() || null;
+    if(typeof buildArretsBulkChart === 'function') buildArretsBulkChart();
+  }, function(error){
+    console.error('[Bulk] Erreur de lecture Firebase :', error);
+  });
+}
+
+function openImportBulkModal(){
+  document.getElementById('bulk-import-modal').style.display = 'flex';
+  document.getElementById('bulk-import-err').textContent = '';
+}
+
+function importerBulk(){
+  var err = document.getElementById('bulk-import-err');
+  err.textContent = '';
+  var raw = document.getElementById('bulk-import-txt').value.trim();
+  if(!raw){ err.textContent = 'Colle le JSON genere par le script.'; return; }
+
+  var parsed;
+  try { parsed = JSON.parse(raw); }
+  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+
+  if(!parsed.standaard && !parsed.noodafvoer && !parsed.bijlijn1){
+    err.textContent = 'Format inattendu (cles "standaard"/"noodafvoer"/"bijlijn1" manquantes).';
+    return;
+  }
+  if(!db){ err.textContent = 'Connexion Firebase non disponible.'; return; }
+
+  err.style.color = '#3b82f6';
+  err.textContent = 'Import en cours...';
+  db.ref('bulk_data').set(parsed).then(function(){
+    document.getElementById('bulk-import-modal').style.display = 'none';
+    document.getElementById('bulk-import-txt').value = '';
+    err.style.color = '#ef4444';
+    err.textContent = '';
+    var n = (parsed.standaard||[]).length + (parsed.noodafvoer||[]).length + (parsed.bijlijn1||[]).length;
+    toast(n + ' points importes (Bulkopvang + Bijlijn)', '#10b981');
+  }).catch(function(e){
+    err.textContent = 'Erreur Firebase : ' + e.message;
+  });
+}
+
+function buildArretsBulkChart(){
+  var ctx = document.getElementById('arretsBulkChart');
+  var emptyEl = document.getElementById('arrets-bulk-empty');
+  if(!ctx || typeof Chart === 'undefined') return;
+
+  if(_arretsBulkChart){ _arretsBulkChart.destroy(); _arretsBulkChart = null; }
+
+  if(!BULK_DATA || (!(BULK_DATA.standaard||[]).length && !(BULK_DATA.noodafvoer||[]).length && !(BULK_DATA.bijlijn1||[]).length)){
+    ctx.style.display = 'none';
+    if(emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  ctx.style.display = 'block';
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  // Agregation par jour (les donnees brutes sont horaires -- illisibles en graphique telles quelles)
+  function parJour(serie){
+    var out = {};
+    (serie||[]).forEach(function(p){
+      var jour = (p.heure || '').slice(0,10);
+      if(!jour) return;
+      out[jour] = (out[jour] || 0) + (p.valeur || 0);
+    });
+    return out;
+  }
+  var std = parJour(BULK_DATA.standaard);
+  var noo = parJour(BULK_DATA.noodafvoer);
+  var bij = parJour(BULK_DATA.bijlijn1);
+
+  var tousLesJours = {};
+  [std, noo, bij].forEach(function(o){ Object.keys(o).forEach(function(j){ tousLesJours[j] = true; }); });
+  var joursTries = Object.keys(tousLesJours).sort();
+
+  var labels = joursTries.map(function(j){ return dFR(j); });
+
+  _arretsBulkChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: t('arr_bulk_standaard') || 'Standaard', data: joursTries.map(function(j){ return Math.round(std[j]||0); }), borderColor: '#3b82f6', backgroundColor: '#3b82f6', fill: false, tension: 0.2, pointRadius: 2 },
+        { label: t('arr_bulk_noodafvoer') || 'Noodafvoer', data: joursTries.map(function(j){ return Math.round(noo[j]||0); }), borderColor: '#ef4444', backgroundColor: '#ef4444', fill: false, tension: 0.2, pointRadius: 2 },
+        { label: t('arr_bulk_bijlijn1') || 'Bijlijn1', data: joursTries.map(function(j){ return Math.round(bij[j]||0); }), borderColor: '#10b981', backgroundColor: '#10b981', fill: false, tension: 0.2, pointRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels: { color: '#8b90a4' } } },
+      scales: {
+        x: { ticks: { color: '#8b90a4', maxRotation: 60, minRotation: 60, autoSkip: true, maxTicksLimit: 40 }, grid: { color: 'rgba(255,255,255,.05)' } },
+        y: { ticks: { color: '#8b90a4' }, grid: { color: 'rgba(255,255,255,.05)' }, title: { display: true, text: 'kg (a confirmer)', color: '#8b90a4' } }
+      }
+    }
+  });
+}
 var ARRETS_LIGNE_FILTRE = 'all';
 var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
 var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
@@ -4776,6 +4879,7 @@ var wrapResume = document.getElementById('cmp2-resume-wrap');
 }
 
 function buildArretsInpak(){
+  if(typeof buildArretsBulkChart === 'function') buildArretsBulkChart();
   var tousLesArrets = Object.values(ARRETS_DATA);
   var filtre = ARRETS_LIGNE_FILTRE;
   var arrets = tousLesArrets.filter(function(a){ return filtre === 'all' || a.ligne === filtre; });
