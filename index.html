@@ -587,50 +587,107 @@
       </div>
 
 
-      <!-- Bulkopvang + Bijlijn (surproduction) -->
+      <!-- Surproduction : bulk + bijlijn -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="cct" data-i18n="arr_bulk_title">Bulkopvang + Bijlijn (surproduction)</div>
-          <button onclick="openImportBulkModal()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#8659; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
-          <button onclick="bulkExportCSV()" style="padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128190; <span data-i18n="arr_bulk_export">Export CSV</span></button>
+          <div class="cct" data-i18n="arr_bulk_title">Surproduction : bulk &amp; bijlijn</div>
+          <span style="font-size:11px;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:2px 9px" data-i18n="arr_bulk_unit_note">valeurs en tonnes</span>
+          <button onclick="openImportBulkModal()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128229; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
+          <button onclick="bulkExportCSV()" style="padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128190; <span data-i18n="arr_bulk_export">Exporter CSV</span></button>
         </div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="arr_bulk_hint">Volumes de surproduction envoyes en bulk (standard + urgence) et emballes via la bij-ligne, par jour.</div>
-
-        <!-- Unite editable -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="font-size:11px;color:var(--tx3)" data-i18n="arr_bulk_unite_label">Unite :</span>
-          <input type="text" id="bulk-unite-input" value="kg (a confirmer)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px;width:160px">
-          <button onclick="bulkSauverUnite()" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer" data-i18n="btn_save">Enregistrer</button>
-          <span id="bulk-unite-confirm" style="font-size:11px;color:#10b981;display:none">&#10003;</span>
-        </div>
-
-        <!-- Filtre de periode -->
-        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:70ch" data-i18n="arr_bulk_hint">Volumes envoyes en bulk faute de place sur ligne (standard + urgence), et volumes remballes via la bijlijn. Le filtre equipe en haut de l'onglet s'applique aussi a cette section.</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
           <div class="li-field">
             <label class="li-label" data-i18n="arr_search_from">Du</label>
-            <input type="date" id="bulk-date-debut" class="li-input">
+            <input type="date" id="bulk-date-debut" class="li-input" onchange="bulkFiltrerPeriode()">
           </div>
           <div class="li-field">
-            <label class="li-label" data-i18n="bulk_date_to">Au</label>
-            <input type="date" id="bulk-date-fin" class="li-input">
+            <label class="li-label" data-i18n="arr_search_to">Au</label>
+            <input type="date" id="bulk-date-fin" class="li-input" onchange="bulkFiltrerPeriode()">
           </div>
-          <button onclick="bulkFiltrerPeriode()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="btn_search">Filtrer</button>
-          <button onclick="bulkReinitialiserPeriode()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="btn_reset">Reinitialiser</button>
+          <div id="bulk-periode-btns" style="display:flex;gap:6px;flex-wrap:wrap;padding-bottom:1px">
+            <button class="bulk-per-btn" data-per="7" onclick="bulkPeriodeRapide(7)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p7">7 jours</button>
+            <button class="bulk-per-btn" data-per="30" onclick="bulkPeriodeRapide(30)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p30">30 jours</button>
+            <button class="bulk-per-btn" data-per="90" onclick="bulkPeriodeRapide(90)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p90">90 jours</button>
+            <button class="bulk-per-btn" data-per="all" onclick="bulkReinitialiserPeriode()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pall">Tout</button>
+          </div>
         </div>
-
-        <div style="height:280px"><canvas id="arretsBulkChart"></canvas></div>
-        <div id="arrets-bulk-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;display:none" data-i18n="arr_bulk_empty">Aucune donnee bulk importee pour le moment.</div>
-
-        <!-- Totaux sur la periode choisie -->
-        <div id="bulk-totaux-wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px"></div>
+        <div id="bulk-kpi-wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px"></div>
+        <div id="bulk-meta" style="margin-top:12px;font-size:11px;color:var(--tx3);line-height:1.7"></div>
+        <div id="bulk-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;display:none" data-i18n="arr_bulk_empty">Aucune donnee bulk importee pour le moment.</div>
       </div>
 
-      <!-- Bulkopvang + Bijlijn par equipe -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct" data-i18n="arr_bulk_equipe_title">Bulkopvang + Bijlijn par equipe</div></div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="arr_bulk_equipe_hint">Total par equipe (P1 a P5) sur la periode choisie ci-dessus.</div>
-        <div style="height:280px"><canvas id="arretsBulkEquipeChart"></canvas></div>
-        <div id="arrets-bulk-equipe-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;display:none" data-i18n="arr_bulk_empty">Aucune donnee bulk importee pour le moment.</div>
+      <div class="cc" id="bulk-card-sur" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_sur_title">Bulk de surproduction</div>
+          <span style="font-size:11px;color:var(--tx3)" data-i18n="arr_bulk_sur_hint">Standard et urgence (noodafvoer) comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne t/h de poste est la seule comparaison honnete.</span>
+        </div>
+        <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkChart"></canvas></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Standard (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Urgence (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_part">Part</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">t / h de poste</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-eq-sur"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc" id="bulk-card-bij" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_bij_title">Bijlijn / Kruiding emballe</div>
+          <span style="font-size:11px;color:var(--tx3)" data-i18n="arr_bulk_bij_hint">Volumes remballes sur la bij-ligne.</span>
+        </div>
+        <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkBijChart"></canvas></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Emballe (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_part">Part</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">t / h de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_ratio">Reabsorption</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-eq-bij"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc" id="bulk-card-detail" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_det_title">Detail jour par jour</div>
+          <button onclick="bulkImprimerDetail()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; <span data-i18n="arr_bulk_print">Imprimer</span></button>
+        </div>
+        <div style="overflow-x:auto;max-height:460px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--bg3)">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_day">Jour</th>
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eqs">Equipes</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Standard (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Urgence (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total bulk (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Emballe (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_ratio">Reabsorption</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-detail-tbody"></tbody>
+            <tfoot id="bulk-detail-tfoot"></tfoot>
+          </table>
+        </div>
       </div>
 
 <!-- Arrets avec raison -->
