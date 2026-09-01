@@ -608,6 +608,8 @@
             <button class="bulk-per-btn" data-per="7" onclick="bulkPeriodeRapide(7)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p7">7 jours</button>
             <button class="bulk-per-btn" data-per="30" onclick="bulkPeriodeRapide(30)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p30">30 jours</button>
             <button class="bulk-per-btn" data-per="90" onclick="bulkPeriodeRapide(90)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p90">90 jours</button>
+            <button class="bulk-per-btn" data-per="180" onclick="bulkPeriodeRapide(180)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p180">6 mois</button>
+            <button class="bulk-per-btn" data-per="annee" onclick="bulkPeriodeAnnee()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pannee">Annee en cours</button>
             <button class="bulk-per-btn" data-per="all" onclick="bulkReinitialiserPeriode()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pall">Tout</button>
           </div>
         </div>
@@ -619,7 +621,7 @@
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div class="cct" data-i18n="arr_bulk_sur_title">Surproduction envoyee en bulk</div>
         </div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_sur_hint">Produit AW3 envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes.</div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_sur_hint">Produit envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes. Les journees vont de 05h a 05h, comme les postes.</div>
         <div id="bulk-kpi-sur" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px"></div>
         <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkChart"></canvas></div>
         <div style="overflow-x:auto">
@@ -960,7 +962,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=60"></script>
+  <script src="js/app.js?v=61"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
