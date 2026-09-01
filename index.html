@@ -119,6 +119,7 @@
     <button class="tab" id="tab-formations-btn" data-tab="formations">&#127891; <span data-i18n="tab_formations">Formations</span></button>
     <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; <span data-i18n="tab_pt">Pointages</span></button>
     <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; <span data-i18n="tab_arrets">Arrets Inpak</span></button>
+    <button class="tab" id="tab-bulk-btn" data-tab="bulk" style="display:none">&#128230; <span data-i18n="tab_bulk">Bulk &amp; Bijlijn</span></button>
     <button class="tab" id="tab-ncp-btn" data-tab="ncp" style="display:none">&#9888; <span data-i18n="tab_ncp">NCP Qualite</span></button>
     <button class="tab" id="tab-recrutement-btn" data-tab="recrutement" style="display:none">&#128100; <span data-i18n="tab_recrutement">Recrutement</span></button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; <span data-i18n="tab_admin">Admin</span></button>
@@ -602,6 +603,40 @@
       </div>
 
 
+<!-- Arrets avec raison -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        
+        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
+        <div id="arrets-raison-wrap"></div>
+      </div>
+
+      <!-- Microstops -->
+      <div class="cc">
+        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
+          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
+        </div>
+        <div id="arrets-micro-wrap" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- BULK &amp; BIJLIJN -->
+    <div class="pane" id="pane-bulk">
+      <div style="margin-bottom:20px">
+        <div class="st" data-i18n="tab_bulk">Bulk &amp; Bijlijn</div>
+        <div class="ss" data-i18n="bulk_subtitle">Surproduction envoyee en bulkopvang et volumes remballes sur la bij-ligne</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="bulk-filtre-equipe">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ov_kcard_team">Equipe</span>
+        <button class="bulk-equipe-btn on" data-equipe="all" onclick="filtrerBulkEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
+        <button class="bulk-equipe-btn" data-equipe="P1" onclick="filtrerBulkEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+        <button class="bulk-equipe-btn" data-equipe="P2" onclick="filtrerBulkEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+        <button class="bulk-equipe-btn" data-equipe="P3" onclick="filtrerBulkEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+        <button class="bulk-equipe-btn" data-equipe="P4" onclick="filtrerBulkEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+        <button class="bulk-equipe-btn" data-equipe="P5" onclick="filtrerBulkEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5</button>
+        </div>
+
       <!-- Surproduction : bulk + bijlijn -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -701,22 +736,6 @@
             <tfoot id="bulk-detail-tfoot"></tfoot>
           </table>
         </div>
-      </div>
-
-<!-- Arrets avec raison -->
-      <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
-        
-        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
-        <div id="arrets-raison-wrap"></div>
-      </div>
-
-      <!-- Microstops -->
-      <div class="cc">
-        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
-          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
-        </div>
-        <div id="arrets-micro-wrap" style="display:none"></div>
       </div>
     </div>
 
@@ -977,7 +996,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=63"></script>
+  <script src="js/app.js?v=64"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
