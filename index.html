@@ -512,6 +512,8 @@
         <button class="arrets-equipe-btn" data-equipe="P3" onclick="filtrerArretsEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
         <button class="arrets-equipe-btn" data-equipe="P4" onclick="filtrerArretsEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
         <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
+      
+        <span style="font-size:11px;color:var(--tx3);margin-left:6px" data-i18n="eq_multi_hint">clique plusieurs equipes pour les cumuler</span>
       </div>
 
       <!-- Filtre operateur (multi-selection, rempli par JS) -->
@@ -635,7 +637,9 @@
         <button class="bulk-equipe-btn" data-equipe="P3" onclick="filtrerBulkEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
         <button class="bulk-equipe-btn" data-equipe="P4" onclick="filtrerBulkEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
         <button class="bulk-equipe-btn" data-equipe="P5" onclick="filtrerBulkEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5</button>
-        </div>
+        
+        <span style="font-size:11px;color:var(--tx3);margin-left:6px" data-i18n="eq_multi_hint">clique plusieurs equipes pour les cumuler</span>
+      </div>
 
       <!-- Surproduction : bulk + bijlijn -->
       <div class="cc" style="margin-bottom:16px">
@@ -996,7 +1000,7 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/app.js?v=64"></script>
+  <script src="js/app.js?v=65"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
