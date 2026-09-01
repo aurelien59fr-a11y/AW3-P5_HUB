@@ -602,9 +602,9 @@ var I18N={
     arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_bulk_title:'Periode analysee', arr_bulk_unit_note:'volumes en tonnes, moyennes en kg/h',
     arr_bulk_empty:'Aucune donnee bulk importee pour le moment.', arr_bulk_empty_per:'Aucun releve sur la periode selectionnee.',
     arr_bulk_total:'Total', arr_bulk_export:'Exporter CSV', arr_bulk_print:'Imprimer',
-    arr_bulk_p7:'7 jours', arr_bulk_p30:'30 jours', arr_bulk_p90:'90 jours', arr_bulk_pall:'Tout',
+    arr_bulk_p7:'7 jours', arr_bulk_p30:'30 jours', arr_bulk_p90:'90 jours', arr_bulk_p180:'6 mois', arr_bulk_pannee:'Annee en cours', arr_bulk_pall:'Tout',
     arr_bulk_sur_title:'Surproduction envoyee en bulk',
-    arr_bulk_sur_hint:'Produit AW3 envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes.',
+    arr_bulk_sur_hint:'Produit envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes. Les journees vont de 05h a 05h, comme les postes.',
     arr_bulk_bij_title:'Bijlijn / Kruiding emballe',
     arr_bulk_bij_hint:'Bulk de surproduction remballe sur la bij-ligne. Ce bulk ne vient pas forcement d\'AW3 ni du jour meme : ces volumes ne se comparent pas a ceux du bloc precedent, c\'est une activite a part.',
     arr_bulk_det_title:'Detail jour par jour',
@@ -853,9 +853,9 @@ var I18N={
     arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_bulk_title:'Geanalyseerde periode', arr_bulk_unit_note:'volumes in ton, gemiddelden in kg/u',
     arr_bulk_empty:'Nog geen bulkgegevens geimporteerd.', arr_bulk_empty_per:'Geen meting in de gekozen periode.',
     arr_bulk_total:'Totaal', arr_bulk_export:'CSV exporteren', arr_bulk_print:'Afdrukken',
-    arr_bulk_p7:'7 dagen', arr_bulk_p30:'30 dagen', arr_bulk_p90:'90 dagen', arr_bulk_pall:'Alles',
+    arr_bulk_p7:'7 dagen', arr_bulk_p30:'30 dagen', arr_bulk_p90:'90 dagen', arr_bulk_p180:'6 maanden', arr_bulk_pannee:'Lopend jaar', arr_bulk_pall:'Alles',
     arr_bulk_sur_title:'Overproductie naar bulk',
-    arr_bulk_sur_hint:'AW3-product naar de bulkopvang bij plaatsgebrek op lijn. Overproductie en noodafvoer apart geteld. P1-P2-P3 draaien 40 u/week, P4-P5 24 u : de kolom kg/u dienst is de enige eerlijke vergelijking tussen ploegen.',
+    arr_bulk_sur_hint:'Product naar de bulkopvang bij plaatsgebrek op lijn. Overproductie en noodafvoer apart geteld. P1-P2-P3 draaien 40 u/week, P4-P5 24 u : de kolom kg/u dienst is de enige eerlijke vergelijking tussen ploegen. Dagen lopen van 05u tot 05u, zoals de diensten.',
     arr_bulk_bij_title:'Bijlijn / Kruiding verpakt',
     arr_bulk_bij_hint:'Bulk overproductie herverpakt op de bijlijn. Die bulk komt niet noodzakelijk van AW3 en ook niet van dezelfde dag : deze volumes zijn niet vergelijkbaar met het vorige blok, het is een aparte activiteit.',
     arr_bulk_det_title:'Detail dag per dag',
@@ -1104,9 +1104,9 @@ var I18N={
     arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_bulk_title:'Analysed period', arr_bulk_unit_note:'volumes in tonnes, averages in kg/h',
     arr_bulk_empty:'No bulk data imported yet.', arr_bulk_empty_per:'No reading in the selected period.',
     arr_bulk_total:'Total', arr_bulk_export:'Export CSV', arr_bulk_print:'Print',
-    arr_bulk_p7:'7 days', arr_bulk_p30:'30 days', arr_bulk_p90:'90 days', arr_bulk_pall:'All',
+    arr_bulk_p7:'7 days', arr_bulk_p30:'30 days', arr_bulk_p90:'90 days', arr_bulk_p180:'6 months', arr_bulk_pannee:'Year to date', arr_bulk_pall:'All',
     arr_bulk_sur_title:'Overproduction sent to bulk',
-    arr_bulk_sur_hint:'AW3 product sent to the bulkopvang for lack of room on line. Overproduction and noodafvoer counted separately. P1-P2-P3 work 40 h/week, P4-P5 24 h : the kg/shift hour column is the only fair comparison between teams.',
+    arr_bulk_sur_hint:'Product sent to the bulkopvang for lack of room on line. Overproduction and noodafvoer counted separately. P1-P2-P3 work 40 h/week, P4-P5 24 h : the kg/shift hour column is the only fair comparison between teams. Days run from 05h to 05h, like the shifts.',
     arr_bulk_bij_title:'Bijlijn / Kruiding packed',
     arr_bulk_bij_hint:'Overproduction bulk repacked on the bij-line. That bulk does not necessarily come from AW3 nor from the same day : these volumes are not comparable with the block above, it is a separate activity.',
     arr_bulk_det_title:'Day by day detail',
@@ -4341,7 +4341,8 @@ function importerBulk(){
    Le filtre equipe global de l'onglet (ARRETS_EQUIPE_FILTRE) s'applique ici.
 
    IMPORTANT : les deux sujets sont volontairement independants.
-   - standaard + noodafvoer = produit AW3 envoye en bulkopvang.
+   - standaard + noodafvoer = produit envoye en bulkopvang (perimetre exact
+     a confirmer cote Grafana : AW3 seul, ou AW1+AW2+AW3).
    - bijlijn1 = bulk remballe sur la bij-ligne, qui ne vient pas forcement
      d'AW3 ni du jour meme. On ne calcule donc AUCUN ratio entre les deux :
      il serait faux. */
@@ -4365,6 +4366,16 @@ function bulkKgH(tonnes, heures){ return heures > 0 ? (tonnes * 1000 / heures) :
 function bulkDateISO(d){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
+/* Journee de production : 05h -> 05h, comme la rotation des equipes.
+   Les heures 00h-04h59 appartiennent a la nuit demarree la veille, donc a la
+   journee precedente. Sans ca un jour calendaire peut afficher 4 equipes
+   (fin de nuit + les 3 postes), ce qui est impossible dans l'atelier. */
+function bulkJourProd(iso){
+  var j = String(iso).slice(0,10);
+  var h = parseInt(String(iso).slice(11,13), 10);
+  if(!isFinite(h) || h >= 5) return j;
+  return bulkDecalerJour(j, -1);
+}
 function bulkJourCourt(iso){
   var p = String(iso).split('-');
   return (p.length === 3) ? (p[2] + '/' + p[1]) : String(iso);
@@ -4382,7 +4393,7 @@ function bulkNbJours(d1, d2){
 }
 function bulkDansPeriode(h){
   if(!h) return false;
-  var j = String(h).slice(0,10);
+  var j = bulkJourProd(h);
   if(BULK_DATE_DEBUT && j < BULK_DATE_DEBUT) return false;
   if(BULK_DATE_FIN && j > BULK_DATE_FIN) return false;
   return true;
@@ -4393,7 +4404,7 @@ function bulkBornesDonnees(){
     var serie = (BULK_DATA && BULK_DATA[cle]) || [];
     serie.forEach(function(p){
       if(!p || !p.heure) return;
-      var j = String(p.heure).slice(0,10);
+      var j = bulkJourProd(p.heure);
       if(min === null || j < min) min = j;
       if(max === null || j > max) max = j;
     });
@@ -4416,12 +4427,15 @@ function bulkHeuresPoste(dDebut, dFin){
   var fin = new Date(String(dFin) + 'T12:00:00');
   if(isNaN(d.getTime()) || isNaN(fin.getTime())) return h;
   var garde = 0;
+  var compte = function(jourCal, i){
+    var eq = (typeof getEquipe === 'function') ? getEquipe(jourCal, (i < 10 ? '0' : '') + i + ':00') : null;
+    if(eq && h[eq] !== undefined) h[eq]++;
+  };
   while(d <= fin && garde++ < 3000){
     var jour = bulkDateISO(d);
-    for(var i = 0; i < 24; i++){
-      var eq = (typeof getEquipe === 'function') ? getEquipe(jour, (i < 10 ? '0' : '') + i + ':00') : null;
-      if(eq && h[eq] !== undefined) h[eq]++;
-    }
+    var lendemain = bulkDecalerJour(jour, 1);
+    for(var i = 5; i < 24; i++) compte(jour, i);      /* 05h -> 23h du jour */
+    for(var k = 0; k < 5; k++) compte(lendemain, k);  /* 00h -> 04h du lendemain */
     d.setDate(d.getDate() + 1);
   }
   _bulkPosteCache[cle] = h;
@@ -4451,11 +4465,12 @@ function bulkCalc(dDebut, dFin, eqFiltre){
     serie.forEach(function(p){
       if(!p || !p.heure) return;
       var brut = String(p.heure);
-      var jour = brut.slice(0,10);
+      var cal = brut.slice(0,10);
+      var jour = bulkJourProd(brut);   /* journee de production 05h -> 05h */
       if(dDebut && jour < dDebut) return;
       if(dFin && jour > dFin) return;
       var heure = brut.slice(11,16);
-      var eq = (typeof getEquipe === 'function') ? getEquipe(jour, heure) : null;
+      var eq = (typeof getEquipe === 'function') ? getEquipe(cal, heure) : null;
       if(eqFiltre && eqFiltre !== 'all' && eq !== eqFiltre) return;
       var v = bulkNum(p.valeur);
       if(!res.jours[jour]){
@@ -4468,7 +4483,7 @@ function bulkCalc(dDebut, dFin, eqFiltre){
       res.nbPoints++;
       if(eq && res.parEquipe[eq]) res.parEquipe[eq][cle] += v;
       var groupe = (cle === 'bijlijn1') ? 'bij' : 'bulk';
-      var k = jour + '|' + heure;
+      var k = cal + '|' + heure;
       if(!slots[groupe][k]){
         slots[groupe][k] = 1;
         if(groupe === 'bij'){
@@ -4763,7 +4778,13 @@ function bulkMajBoutonsPeriode(){
     actif = '';
     if(BULK_DATE_DEBUT && BULK_DATE_FIN){
       var n = bulkNbJours(BULK_DATE_DEBUT, BULK_DATE_FIN);
-      if(n === 7) actif = '7'; else if(n === 30) actif = '30'; else if(n === 90) actif = '90';
+      if(n === 7) actif = '7';
+      else if(n === 30) actif = '30';
+      else if(n === 90) actif = '90';
+      else if(n === 180) actif = '180';
+      var bornes = bulkBornesDonnees();
+      if(BULK_DATE_DEBUT === BULK_DATE_FIN.slice(0,4) + '-01-01'
+         && bornes.max && BULK_DATE_FIN === bornes.max) actif = 'annee';
     }
   }
   document.querySelectorAll('.bulk-per-btn').forEach(function(b){
@@ -4816,6 +4837,18 @@ function bulkFiltrerPeriode(){
   var i2 = document.getElementById('bulk-date-fin');
   BULK_DATE_DEBUT = i1 ? (i1.value || '') : '';
   BULK_DATE_FIN = i2 ? (i2.value || '') : '';
+  buildBulkSections();
+}
+
+/* Depuis le 1er janvier de l'annee de la derniere donnee. */
+function bulkPeriodeAnnee(){
+  var bornes = bulkBornesDonnees();
+  var fin = bornes.max || bulkDateISO(new Date());
+  BULK_DATE_FIN = fin;
+  BULK_DATE_DEBUT = fin.slice(0,4) + '-01-01';
+  if(bornes.min && BULK_DATE_DEBUT < bornes.min) BULK_DATE_DEBUT = bornes.min;
+  var i1 = document.getElementById('bulk-date-debut'); if(i1) i1.value = BULK_DATE_DEBUT;
+  var i2 = document.getElementById('bulk-date-fin'); if(i2) i2.value = BULK_DATE_FIN;
   buildBulkSections();
 }
 
