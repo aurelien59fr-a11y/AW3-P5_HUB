@@ -599,7 +599,8 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Surproduction envoyee en bulkopvang et volumes remballes sur la bij-ligne',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', eq_multi_hint:'clique plusieurs equipes pour les cumuler',
+    tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Surproduction envoyee en bulkopvang et volumes remballes sur la bij-ligne',
     arr_ca_title:'Analyse des causes',
     arr_ca_hint:'Les 10 familles d\'arrets classees par temps perdu, avec la courbe du cumule : les premieres barres montrent ou se joue l\'essentiel. Clique une ligne du tableau pour deplier le detail de ses raisons. Le classement suit les filtres ligne, equipe et periode ci-dessus.',
     arr_ca_tri_duree:'Heures perdues', arr_ca_tri_nombre:'Nombre d\'arrets',
@@ -630,7 +631,7 @@ var I18N={
     arr_bulk_m_trous:'jour(s) sans aucun releve sur la periode',
     arr_bulk_m_trous2:'un jour a zero n\'est pas forcement une bonne journee, ce peut etre un import manquant.',
     arr_bulk_m_rec:'Jour le plus charge en bulk', arr_bulk_m_eq:'Filtre equipe actif',
-    arr_bulk_m_eq2:'seuls les releves des heures ou cette equipe etait en poste sont comptes.',
+    arr_bulk_m_eq2:'seuls les releves des heures ou la selection etait en poste sont comptes.',
     arr_bulk_popup:'Autorise les fenetres pop-up pour imprimer le tableau.',
     arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
     filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
@@ -859,7 +860,8 @@ var I18N={
     pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproductie naar de bulkopvang en volumes herverpakt op de bijlijn',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', eq_multi_hint:'klik meerdere ploegen om ze samen te tellen',
+    tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproductie naar de bulkopvang en volumes herverpakt op de bijlijn',
     arr_ca_title:'Oorzakenanalyse',
     arr_ca_hint:'De 10 stilstandfamilies gerangschikt op verloren tijd, met de cumulatieve curve : de eerste balken tonen waar het echt om draait. Klik op een rij om de detailredenen open te vouwen. De rangschikking volgt de filters lijn, ploeg en periode hierboven.',
     arr_ca_tri_duree:'Verloren uren', arr_ca_tri_nombre:'Aantal stilstanden',
@@ -890,7 +892,7 @@ var I18N={
     arr_bulk_m_trous:'dag(en) zonder enige meting in de periode',
     arr_bulk_m_trous2:'een dag op nul is niet noodzakelijk een goede dag, het kan ook een ontbrekende import zijn.',
     arr_bulk_m_rec:'Zwaarste bulkdag', arr_bulk_m_eq:'Actieve ploegfilter',
-    arr_bulk_m_eq2:'enkel de metingen van de uren waarop deze ploeg aan het werk was worden geteld.',
+    arr_bulk_m_eq2:'enkel de metingen van de uren waarop de selectie aan het werk was worden geteld.',
     arr_bulk_popup:'Sta pop-upvensters toe om de tabel af te drukken.',
     arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
     filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
@@ -1119,7 +1121,8 @@ var I18N={
     pt_marked_done_suffix:' anomaly(ies) marked as processed',
     pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
     pt_modal_title:'Import Protime time records',
-    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproduction sent to the bulkopvang and volumes repacked on the bij-line',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', eq_multi_hint:'click several teams to combine them',
+    tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproduction sent to the bulkopvang and volumes repacked on the bij-line',
     arr_ca_title:'Root cause analysis',
     arr_ca_hint:'The 10 stop families ranked by time lost, with the cumulative curve : the first bars show where it really matters. Click a row to unfold the detail of its reasons. The ranking follows the line, team and period filters above.',
     arr_ca_tri_duree:'Hours lost', arr_ca_tri_nombre:'Number of stops',
@@ -1150,7 +1153,7 @@ var I18N={
     arr_bulk_m_trous:'day(s) with no reading at all in the period',
     arr_bulk_m_trous2:'a day at zero is not necessarily a good day, it may simply be a missing import.',
     arr_bulk_m_rec:'Busiest bulk day', arr_bulk_m_eq:'Active team filter',
-    arr_bulk_m_eq2:'only readings from hours when this team was on shift are counted.',
+    arr_bulk_m_eq2:'only readings from hours when the selection was on shift are counted.',
     arr_bulk_popup:'Allow pop-up windows to print the table.',
     arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana',
     filter_all_fem:'All', arr_p5_moi:'P5 (me)', col_operator:'Operator',
@@ -4418,19 +4421,11 @@ var BULK_EQ = ['P1','P2','P3','P4','P5'];
 /* Filtre equipe propre a l'onglet Bulk : il etait auparavant partage avec
    l'onglet Arrets, ou vivaient les pastilles. Les deux onglets sont
    maintenant independants. */
-var BULK_EQUIPE_FILTRE = 'all';
+var BULK_EQUIPE_FILTRE = [];   /* [] = toutes les equipes */
 
 function filtrerBulkEquipe(equipe){
-  BULK_EQUIPE_FILTRE = equipe;
-  document.querySelectorAll('.bulk-equipe-btn').forEach(function(b){
-    var actif = b.dataset.equipe === equipe;
-    var coul = (b.dataset.equipe === 'all') ? 'var(--blue)'
-             : ((typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[b.dataset.equipe]) || 'var(--blue)');
-    b.classList.toggle('on', actif);
-    b.style.background = actif ? coul : 'none';
-    b.style.color = actif ? '#fff' : coul;
-    b.style.borderColor = coul;
-  });
+  BULK_EQUIPE_FILTRE = basculerEquipe(BULK_EQUIPE_FILTRE, equipe);
+  majPastillesEquipe('.bulk-equipe-btn', BULK_EQUIPE_FILTRE);
   buildBulkSections();
 }
 var BULK_COUL = { standaard:'#3b82f6', noodafvoer:'#ef4444', bijlijn1:'#10b981' };
@@ -4541,7 +4536,7 @@ function bulkCalc(dDebut, dFin, eqFiltre){
   var poste = bulkHeuresPoste(dDebut, dFin);
   BULK_EQ.forEach(function(e){
     res.parEquipe[e].hPoste = poste[e] || 0;
-    if(!eqFiltre || eqFiltre === 'all' || eqFiltre === e) res.heuresPoste += (poste[e] || 0);
+    if(equipeDansSel(eqFiltre, e)) res.heuresPoste += (poste[e] || 0);
   });
   if(!BULK_DATA) return res;
   var slots = { bulk:{}, bij:{} };
@@ -4556,7 +4551,7 @@ function bulkCalc(dDebut, dFin, eqFiltre){
       if(dFin && jour > dFin) return;
       var heure = brut.slice(11,16);
       var eq = (typeof equipeReelle === 'function') ? equipeReelle(cal, heure) : null;
-      if(eqFiltre && eqFiltre !== 'all' && eq !== eqFiltre) return;
+      if(!equipeDansSel(eqFiltre, eq)) return;
       var v = bulkNum(p.valeur);
       if(!res.jours[jour]){
         res.jours[jour] = { standaard:0, noodafvoer:0, bijlijn1:0, equipes:{} };
@@ -4666,7 +4661,7 @@ function bulkRendreMeta(cur, d1, d2, nbJours, eqFiltre, pDeb, pFin){
     + bulkTxt('arr_bulk_m_prec','periode de comparaison') + ' : ' + pDeb + ' &rarr; ' + pFin);
 
   var manquants = nbJours - cur.ordreJours.length;
-  if(eqFiltre === 'all' && manquants > 0){
+  if(!(eqFiltre && eqFiltre.length) && manquants > 0){
     lignes.push('&#9888;&#65039; <span style="color:#f59e0b">' + manquants + ' '
       + bulkTxt('arr_bulk_m_trous','jour(s) sans aucun releve sur la periode') + '</span> &mdash; '
       + bulkTxt('arr_bulk_m_trous2','un jour a zero n\'est pas forcement une bonne journee, ce peut etre un import manquant.'));
@@ -4682,10 +4677,13 @@ function bulkRendreMeta(cur, d1, d2, nbJours, eqFiltre, pDeb, pFin){
       + bulkFmt(bulkTon(record.v),1) + ' t</b>' + (record.eq ? ' (' + bulkTxt('arr_bulk_equipes','equipes') + ' ' + record.eq + ')' : ''));
   }
 
-  if(eqFiltre && eqFiltre !== 'all'){
-    var coul = (typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[eqFiltre]) ? COULEURS_EQUIPE[eqFiltre] : 'var(--tx2)';
-    lignes.push('&#128269; ' + bulkTxt('arr_bulk_m_eq','Filtre equipe actif') + ' : <b style="color:' + coul + '">'
-      + eqFiltre + '</b> &mdash; ' + bulkTxt('arr_bulk_m_eq2','seuls les releves des heures ou cette equipe etait en poste sont comptes.'));
+  if(eqFiltre && eqFiltre.length){
+    var pastilles = eqFiltre.slice().sort().map(function(e){
+      var c = (typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[e]) ? COULEURS_EQUIPE[e] : 'var(--tx2)';
+      return '<b style="color:' + c + '">' + e + '</b>';
+    }).join(', ');
+    lignes.push('&#128269; ' + bulkTxt('arr_bulk_m_eq','Filtre equipe actif') + ' : ' + pastilles
+      + ' &mdash; ' + bulkTxt('arr_bulk_m_eq2','seuls les releves des heures ou la selection etait en poste sont comptes.'));
   }
   el.innerHTML = lignes.join('<br>');
 }
@@ -4731,7 +4729,7 @@ function bulkRendreEquipes(cur, eqFiltre){
   var sumPoste = 0, sumHB = 0, sumHJ = 0;
   BULK_EQ.forEach(function(eq){
     var e = cur.parEquipe[eq];
-    var actif = (!eqFiltre || eqFiltre === 'all' || eqFiltre === eq);
+    var actif = equipeDansSel(eqFiltre, eq);
     var sur = bulkTon(e.standaard), nood = bulkTon(e.noodafvoer), bij = bulkTon(e.bijlijn1);
     var tot = sur + nood;
     /* moyenne rapportee aux heures de poste : 40 h contre 24 h, donc c'est la
@@ -4895,7 +4893,7 @@ function buildBulkSections(){
   cartes.forEach(function(id){ var el = document.getElementById(id); if(el) el.style.display = aucune ? 'none' : ''; });
   if(aucune){ if(meta) meta.innerHTML = ''; return; }
 
-  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : [];
   var d1 = BULK_DATE_DEBUT || bornes.min;
   var d2 = BULK_DATE_FIN || bornes.max;
   if(d1 > d2){ var tmp = d1; d1 = d2; d2 = tmp; }
@@ -4959,7 +4957,7 @@ function bulkExportCSV(){
   if(!BULK_DATA){ alert(bulkTxt('arr_bulk_empty','Aucune donnee bulk importee pour le moment.')); return; }
   var bornes = bulkBornesDonnees();
   if(!bornes.min) return;
-  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : [];
   var d1 = BULK_DATE_DEBUT || bornes.min;
   var d2 = BULK_DATE_FIN || bornes.max;
   var cur = bulkCalc(d1, d2, eqFiltre);
@@ -4991,7 +4989,7 @@ function bulkExportCSV(){
   var blob = new Blob(['﻿' + lignes.join('\r\n')], { type:'text/csv;charset=utf-8;' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Bulk_bijlijn_' + d1 + '_' + d2 + (eqFiltre !== 'all' ? '_' + eqFiltre : '') + '.csv';
+  a.download = 'Bulk_bijlijn_' + d1 + '_' + d2 + (eqFiltre.length ? '_' + eqFiltre.slice().sort().join('-') : '') + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -5001,7 +4999,7 @@ function bulkImprimerDetail(){
   var carte = document.getElementById('bulk-card-detail');
   var table = carte ? carte.querySelector('table') : null;
   if(!table) return;
-  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : [];
   var bornes = bulkBornesDonnees();
   var d1 = BULK_DATE_DEBUT || bornes.min || '';
   var d2 = BULK_DATE_FIN || bornes.max || '';
@@ -5017,7 +5015,7 @@ function bulkImprimerDetail(){
     + '@page{size:A4;margin:12mm}</style></head><body>'
     + '<h1>Bulk et bijlijn &mdash; detail jour par jour</h1>'
     + '<p class="sub">Periode ' + d1 + ' &rarr; ' + d2
-    + (eqFiltre !== 'all' ? ' &middot; equipe ' + eqFiltre : ' &middot; toutes equipes')
+    + (eqFiltre.length ? ' &middot; equipes ' + selEquipeTexte(eqFiltre) : ' &middot; toutes equipes')
     + ' &middot; volumes en tonnes &middot; edite le ' + bulkDateISO(new Date()) + '</p>'
     + table.outerHTML + '</body></html>');
   w.document.close();
@@ -5031,7 +5029,7 @@ function buildArretsBulkEquipeChart(){ buildBulkSections(); }
 function bulkSauverUnite(){ buildBulkSections(); }
 
 var ARRETS_LIGNE_FILTRE = 'all';
-var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
+var ARRETS_EQUIPE_FILTRE = [];    // [] = toutes ; sinon ['P1','P4'] par exemple
 var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
 var ARRETS_DATE_FIN_FILTRE = '';  // '' ou 'YYYY-MM-DD' (fourchette)
 var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
@@ -5498,18 +5496,41 @@ function filtrerArretsLigne(ligne){
   if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
 
-var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', P5:'#10b981' };
-
-function filtrerArretsEquipe(equipe){
-  ARRETS_EQUIPE_FILTRE = equipe;
-  document.querySelectorAll('.arrets-equipe-btn').forEach(function(b){
-    var actif = b.dataset.equipe === equipe;
-    var coul = COULEURS_EQUIPE[b.dataset.equipe] || 'var(--blue)';
+/* ---- Selection multiple d'equipes (onglets Arrets et Bulk) ----
+   La selection est un tableau : [] signifie "toutes les equipes".
+   Cliquer une pastille l'ajoute ou la retire, "Toutes" remet a zero. */
+function equipeDansSel(sel, eq){
+  if(!sel || !sel.length) return true;
+  return sel.indexOf(eq) !== -1;
+}
+function basculerEquipe(sel, eq){
+  if(eq === 'all') return [];
+  var s = (sel || []).slice();
+  var i = s.indexOf(eq);
+  if(i === -1) s.push(eq); else s.splice(i, 1);
+  return s;
+}
+function selEquipeTexte(sel){
+  return (!sel || !sel.length) ? '' : sel.slice().sort().join(', ');
+}
+function majPastillesEquipe(selecteur, sel){
+  document.querySelectorAll(selecteur).forEach(function(b){
+    var e = b.dataset.equipe;
+    var actif = (e === 'all') ? !(sel && sel.length) : (sel && sel.indexOf(e) !== -1);
+    var coul = (e === 'all') ? 'var(--blue)'
+             : ((typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[e]) || 'var(--blue)');
     b.classList.toggle('on', actif);
     b.style.background = actif ? coul : 'none';
     b.style.color = actif ? '#fff' : coul;
     b.style.borderColor = coul;
   });
+}
+
+var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', P5:'#10b981' };
+
+function filtrerArretsEquipe(equipe){
+  ARRETS_EQUIPE_FILTRE = basculerEquipe(ARRETS_EQUIPE_FILTRE, equipe);
+  majPastillesEquipe('.arrets-equipe-btn', ARRETS_EQUIPE_FILTRE);
   buildArretsInpak();
   if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
 }
@@ -5746,7 +5767,7 @@ function buildComparaisonTab(){
 
   var arrets = Object.values(ARRETS_DATA).filter(function(a){ return a.type === 'avec_raison'; });
   if(ARRETS_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === ARRETS_LIGNE_FILTRE; });
-  if(ARRETS_EQUIPE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return equipeReelle(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
+  if(ARRETS_EQUIPE_FILTRE.length) arrets = arrets.filter(function(a){ return equipeDansSel(ARRETS_EQUIPE_FILTRE, equipeReelle(a.date, a.heure)); });
   if(raison !== 'all') arrets = arrets.filter(function(a){ return a.raison === raison; });
   if(dateDebut) arrets = arrets.filter(function(a){ return a.date >= dateDebut; });
   if(dateFin) arrets = arrets.filter(function(a){ return a.date <= dateFin; });
@@ -5910,8 +5931,8 @@ function buildArretsInpak(){
 
   // Filtre equipe — uniquement sur "avec raison" (les microstops sont
   // agreges par jour et n'ont pas d'heure precise, donc pas d'equipe possible)
-  if(ARRETS_EQUIPE_FILTRE !== 'all'){
-    avecRaison = avecRaison.filter(function(a){ return equipeReelle(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
+  if(ARRETS_EQUIPE_FILTRE.length){
+    avecRaison = avecRaison.filter(function(a){ return equipeDansSel(ARRETS_EQUIPE_FILTRE, equipeReelle(a.date, a.heure)); });
   }
 
   // Recherche precise date/heure, ou fourchette de dates
