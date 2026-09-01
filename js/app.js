@@ -599,7 +599,30 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_bulk_title:'Bulkopvang + Bijlijn (surproduction)', arr_bulk_unit_note:'kg (a confirmer)', arr_bulk_hint:'Volumes de surproduction envoyes en bulk (standard + urgence) et emballes via la bij-ligne, par jour.', arr_bulk_empty:'Aucune donnee bulk importee pour le moment.', arr_bulk_modal_title:'Importer Bulkopvang + Bijlijn', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1', arr_bulk_export:'Export CSV', arr_bulk_unite_label:'Unite :', bulk_date_to:'Au', arr_bulk_empty_periode:'Aucune donnee sur cette periode.', arr_bulk_total:'Total', arr_bulk_equipe_title:'Bulkopvang + Bijlijn par equipe', arr_bulk_equipe_hint:'Total par equipe (P1 a P5) sur la periode choisie ci-dessus.',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_bulk_title:'Surproduction : bulk & bijlijn', arr_bulk_unit_note:'valeurs en tonnes',
+    arr_bulk_hint:'Volumes envoyes en bulk faute de place sur ligne (standard + urgence), et volumes remballes via la bijlijn. Le filtre equipe en haut de l\'onglet s\'applique aussi a cette section.',
+    arr_bulk_empty:'Aucune donnee bulk importee pour le moment.', arr_bulk_empty_per:'Aucun releve sur la periode selectionnee.',
+    arr_bulk_total:'Total', arr_bulk_export:'Exporter CSV', arr_bulk_print:'Imprimer',
+    arr_bulk_p7:'7 jours', arr_bulk_p30:'30 jours', arr_bulk_p90:'90 jours', arr_bulk_pall:'Tout',
+    arr_bulk_sur_title:'Bulk de surproduction', arr_bulk_sur_hint:'Standard et urgence (noodafvoer) comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne t/h de poste est la seule comparaison honnete.',
+    arr_bulk_bij_title:'Bijlijn / Kruiding emballe', arr_bulk_bij_hint:'Volumes remballes sur la bij-ligne.',
+    arr_bulk_det_title:'Detail jour par jour',
+    arr_bulk_th_eq:'Equipe', arr_bulk_th_std:'Standard (t)', arr_bulk_th_urg:'Urgence (t)', arr_bulk_th_tot:'Total (t)',
+    arr_bulk_th_h:'Heures', arr_bulk_th_moy:'t / h de poste', arr_bulk_th_part:'Part', arr_bulk_th_bij:'Emballe (t)',
+    arr_bulk_th_ratio:'Reabsorption', arr_bulk_th_day:'Jour', arr_bulk_th_eqs:'Equipes',
+    arr_bulk_k_std:'Bulk standard', arr_bulk_k_urg:'Bulk urgence', arr_bulk_k_tot:'Total surproduction',
+    arr_bulk_k_bij:'Bijlijn emballe', arr_bulk_k_taux:'Taux de reabsorption', arr_bulk_k_heures:'Heures couvertes',
+    arr_bulk_s_std:'Standard', arr_bulk_s_urg:'Urgence (noodafvoer)', arr_bulk_s_bij:'Bijlijn emballe',
+    arr_bulk_vs_prec:'vs periode precedente', arr_bulk_par_jour:'par jour avec releve', arr_bulk_releves:'releves',
+    arr_bulk_jours:'jours', arr_bulk_equipes:'equipes',
+    arr_bulk_m_per:'Periode analysee', arr_bulk_m_prec:'periode de comparaison',
+    arr_bulk_m_trous:'jour(s) sans aucun releve sur la periode',
+    arr_bulk_m_trous2:'un jour a zero n\'est pas forcement une bonne journee, ce peut etre un import manquant.',
+    arr_bulk_m_rec:'Jour le plus charge', arr_bulk_m_eq:'Filtre equipe actif',
+    arr_bulk_m_eq2:'seuls les releves des heures ou cette equipe etait en poste sont comptes.',
+    arr_bulk_popup:'Autorise les fenetres pop-up pour imprimer le tableau.',
+    arr_bulk_th_poste:'H. de poste', arr_bulk_th_act:'Activite', arr_bulk_k_activite:'Activite bulk',
+    arr_bulk_h_sur:'h sur', arr_bulk_h_poste:'h de poste',
     arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
     filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
     arr_search_title:'Recherche precise', arr_search_from:'Du',
@@ -827,7 +850,30 @@ var I18N={
     pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_bulk_title:'Bulkopvang + Bijlijn (overproductie)', arr_bulk_unit_note:'kg (te bevestigen)', arr_bulk_hint:'Volumes overproductie verstuurd als bulk (standaard + nood) en verpakt via de bijlijn, per dag.', arr_bulk_empty:'Nog geen bulkgegevens geimporteerd.', arr_bulk_modal_title:'Bulkopvang + Bijlijn importeren', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1', arr_bulk_export:'Exporteer CSV', arr_bulk_unite_label:'Eenheid :', bulk_date_to:'Tot', arr_bulk_empty_periode:'Geen gegevens in deze periode.', arr_bulk_total:'Totaal', arr_bulk_equipe_title:'Bulkopvang + Bijlijn per team', arr_bulk_equipe_hint:'Totaal per team (P1 tot P5) over de hierboven gekozen periode.',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_bulk_title:'Overproductie : bulk & bijlijn', arr_bulk_unit_note:'waarden in ton',
+    arr_bulk_hint:'Volumes overproductie verstuurd als bulk (standaard + nood) en verpakt via de bijlijn. De ploegfilter bovenaan het tabblad geldt ook voor deze sectie.',
+    arr_bulk_empty:'Nog geen bulkgegevens geimporteerd.', arr_bulk_empty_per:'Geen meting in de gekozen periode.',
+    arr_bulk_total:'Totaal', arr_bulk_export:'CSV exporteren', arr_bulk_print:'Afdrukken',
+    arr_bulk_p7:'7 dagen', arr_bulk_p30:'30 dagen', arr_bulk_p90:'90 dagen', arr_bulk_pall:'Alles',
+    arr_bulk_sur_title:'Bulkopvang overproductie', arr_bulk_sur_hint:'Standaard en nood (noodafvoer) apart geteld. P1-P2-P3 draaien 40 u/week, P4-P5 24 u : de kolom t/u dienst is de enige eerlijke vergelijking.',
+    arr_bulk_bij_title:'Bijlijn / Kruiding verpakt', arr_bulk_bij_hint:'Volumes herverpakt op de bijlijn.',
+    arr_bulk_det_title:'Detail dag per dag',
+    arr_bulk_th_eq:'Ploeg', arr_bulk_th_std:'Standaard (t)', arr_bulk_th_urg:'Nood (t)', arr_bulk_th_tot:'Totaal (t)',
+    arr_bulk_th_h:'Uren', arr_bulk_th_moy:'t / u dienst', arr_bulk_th_part:'Aandeel', arr_bulk_th_bij:'Verpakt (t)',
+    arr_bulk_th_ratio:'Heropname', arr_bulk_th_day:'Dag', arr_bulk_th_eqs:'Ploegen',
+    arr_bulk_k_std:'Bulk standaard', arr_bulk_k_urg:'Bulk nood', arr_bulk_k_tot:'Totaal overproductie',
+    arr_bulk_k_bij:'Bijlijn verpakt', arr_bulk_k_taux:'Heropnamegraad', arr_bulk_k_heures:'Gedekte uren',
+    arr_bulk_s_std:'Standaard', arr_bulk_s_urg:'Nood (noodafvoer)', arr_bulk_s_bij:'Bijlijn verpakt',
+    arr_bulk_vs_prec:'t.o.v. vorige periode', arr_bulk_par_jour:'per dag met meting', arr_bulk_releves:'metingen',
+    arr_bulk_jours:'dagen', arr_bulk_equipes:'ploegen',
+    arr_bulk_m_per:'Geanalyseerde periode', arr_bulk_m_prec:'vergelijkingsperiode',
+    arr_bulk_m_trous:'dag(en) zonder enige meting in de periode',
+    arr_bulk_m_trous2:'een dag op nul is niet noodzakelijk een goede dag, het kan ook een ontbrekende import zijn.',
+    arr_bulk_m_rec:'Zwaarste dag', arr_bulk_m_eq:'Actieve ploegfilter',
+    arr_bulk_m_eq2:'enkel de metingen van de uren waarop deze ploeg aan het werk was worden geteld.',
+    arr_bulk_popup:'Sta pop-upvensters toe om de tabel af te drukken.',
+    arr_bulk_th_poste:'Uren dienst', arr_bulk_th_act:'Activiteit', arr_bulk_k_activite:'Bulkactiviteit',
+    arr_bulk_h_sur:'u van', arr_bulk_h_poste:'u dienst',
     arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
     filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
     arr_search_title:'Precieze zoekopdracht', arr_search_from:'Van',
@@ -1055,7 +1101,30 @@ var I18N={
     pt_marked_done_suffix:' anomaly(ies) marked as processed',
     pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
     pt_modal_title:'Import Protime time records',
-    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_bulk_title:'Bulkopvang + Bijlijn (overproduction)', arr_bulk_unit_note:'kg (to confirm)', arr_bulk_hint:'Overproduction volumes sent to bulk (standard + emergency) and packed via the bij-line, per day.', arr_bulk_empty:'No bulk data imported yet.', arr_bulk_modal_title:'Import Bulkopvang + Bijlijn', arr_bulk_standaard:'Standaard', arr_bulk_noodafvoer:'Noodafvoer', arr_bulk_bijlijn1:'Bijlijn1', arr_bulk_export:'Export CSV', arr_bulk_unite_label:'Unit:', bulk_date_to:'To', arr_bulk_empty_periode:'No data in this period.', arr_bulk_total:'Total', arr_bulk_equipe_title:'Bulkopvang + Bijlijn by team', arr_bulk_equipe_hint:'Total per team (P1 to P5) for the period chosen above.',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_bulk_title:'Overproduction : bulk & bijlijn', arr_bulk_unit_note:'values in tonnes',
+    arr_bulk_hint:'Overproduction volumes sent to bulk (standard + emergency) and packed via the bijlijn. The team filter at the top of the tab also applies to this section.',
+    arr_bulk_empty:'No bulk data imported yet.', arr_bulk_empty_per:'No reading in the selected period.',
+    arr_bulk_total:'Total', arr_bulk_export:'Export CSV', arr_bulk_print:'Print',
+    arr_bulk_p7:'7 days', arr_bulk_p30:'30 days', arr_bulk_p90:'90 days', arr_bulk_pall:'All',
+    arr_bulk_sur_title:'Overproduction bulk', arr_bulk_sur_hint:'Standard and emergency (noodafvoer) counted separately. P1-P2-P3 work 40 h/week, P4-P5 24 h : the t/shift hour column is the only fair comparison.',
+    arr_bulk_bij_title:'Bijlijn / Kruiding packed', arr_bulk_bij_hint:'Volumes repacked on the bij-line.',
+    arr_bulk_det_title:'Day by day detail',
+    arr_bulk_th_eq:'Team', arr_bulk_th_std:'Standard (t)', arr_bulk_th_urg:'Emergency (t)', arr_bulk_th_tot:'Total (t)',
+    arr_bulk_th_h:'Hours', arr_bulk_th_moy:'t / shift hour', arr_bulk_th_part:'Share', arr_bulk_th_bij:'Packed (t)',
+    arr_bulk_th_ratio:'Recovery', arr_bulk_th_day:'Day', arr_bulk_th_eqs:'Teams',
+    arr_bulk_k_std:'Bulk standard', arr_bulk_k_urg:'Bulk emergency', arr_bulk_k_tot:'Total overproduction',
+    arr_bulk_k_bij:'Bijlijn packed', arr_bulk_k_taux:'Recovery rate', arr_bulk_k_heures:'Hours covered',
+    arr_bulk_s_std:'Standard', arr_bulk_s_urg:'Emergency (noodafvoer)', arr_bulk_s_bij:'Bijlijn packed',
+    arr_bulk_vs_prec:'vs previous period', arr_bulk_par_jour:'per day with readings', arr_bulk_releves:'readings',
+    arr_bulk_jours:'days', arr_bulk_equipes:'teams',
+    arr_bulk_m_per:'Analysed period', arr_bulk_m_prec:'comparison period',
+    arr_bulk_m_trous:'day(s) with no reading at all in the period',
+    arr_bulk_m_trous2:'a day at zero is not necessarily a good day, it may simply be a missing import.',
+    arr_bulk_m_rec:'Busiest day', arr_bulk_m_eq:'Active team filter',
+    arr_bulk_m_eq2:'only readings from hours when this team was on shift are counted.',
+    arr_bulk_popup:'Allow pop-up windows to print the table.',
+    arr_bulk_th_poste:'Shift hours', arr_bulk_th_act:'Activity', arr_bulk_k_activite:'Bulk activity',
+    arr_bulk_h_sur:'h out of', arr_bulk_h_poste:'shift hours',
     arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana',
     filter_all_fem:'All', arr_p5_moi:'P5 (me)', col_operator:'Operator',
     arr_search_title:'Precise search', arr_search_from:'From',
@@ -4221,9 +4290,7 @@ function loadBulkData(){
   if(!db) return;
   db.ref('bulk_data').on('value', function(snap){
     BULK_DATA = snap.val() || null;
-    var uInput = document.getElementById('bulk-unite-input');
-    if(uInput && BULK_DATA && BULK_DATA.unite) uInput.value = BULK_DATA.unite;
-    if(typeof buildArretsBulkChart === 'function') buildArretsBulkChart();
+    buildBulkSections();
   }, function(error){
     console.error('[Bulk] Erreur de lecture Firebase :', error);
   });
@@ -4267,225 +4334,580 @@ function importerBulk(){
   });
 }
 
-function bulkSauverUnite(){
-  var input = document.getElementById('bulk-unite-input');
-  if(!input || !db) return;
-  var valeur = input.value.trim() || 'kg (a confirmer)';
-  db.ref('bulk_data/unite').set(valeur).then(function(){
-    if(BULK_DATA) BULK_DATA.unite = valeur;
-    var conf = document.getElementById('bulk-unite-confirm');
-    if(conf){ conf.style.display = 'inline'; setTimeout(function(){ conf.style.display = 'none'; }, 2000); }
-    if(typeof buildArretsBulkChart === 'function') buildArretsBulkChart();
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
+/* ================= Surproduction : bulk + bijlijn ================= */
+/* Donnees source : bulk_data/{standaard,noodafvoer,bijlijn1} en kg,
+   relevees a l'heure. Affichage converti en tonnes.
+   La repartition par equipe reutilise getEquipe(jour, heure).
+   Le filtre equipe global de l'onglet (ARRETS_EQUIPE_FILTRE) s'applique ici. */
+
+var BULK_EQ = ['P1','P2','P3','P4','P5'];
+var BULK_COUL = { standaard:'#3b82f6', noodafvoer:'#ef4444', bijlijn1:'#10b981' };
+
+function bulkTxt(cle, defaut){
+  try { if(typeof t === 'function'){ var v = t(cle); if(v && v !== cle) return v; } } catch(e){}
+  return defaut;
 }
+function bulkNum(v){ var n = (typeof v === 'number') ? v : parseFloat(v); return isFinite(n) ? n : 0; }
+function bulkTon(kg){ return bulkNum(kg) / 1000; }
+function bulkFmt(v, dec){
+  if(dec === undefined) dec = 1;
+  if(v === null || v === undefined || !isFinite(v)) return '-';
+  return Number(v).toLocaleString('fr-FR', { minimumFractionDigits:dec, maximumFractionDigits:dec });
+}
+function bulkDateISO(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function bulkJourCourt(iso){
+  var p = String(iso).split('-');
+  return (p.length === 3) ? (p[2] + '/' + p[1]) : String(iso);
+}
+function bulkDecalerJour(iso, n){
+  var d = new Date(String(iso) + 'T12:00:00');
+  if(isNaN(d.getTime())) return iso;
+  d.setDate(d.getDate() + n);
+  return bulkDateISO(d);
+}
+function bulkNbJours(d1, d2){
+  var a = new Date(String(d1) + 'T12:00:00'), b = new Date(String(d2) + 'T12:00:00');
+  if(isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  return Math.round((b - a) / 86400000) + 1;
+}
+function bulkDansPeriode(h){
+  if(!h) return false;
+  var j = String(h).slice(0,10);
+  if(BULK_DATE_DEBUT && j < BULK_DATE_DEBUT) return false;
+  if(BULK_DATE_FIN && j > BULK_DATE_FIN) return false;
+  return true;
+}
+function bulkBornesDonnees(){
+  var min = null, max = null;
+  ['standaard','noodafvoer','bijlijn1'].forEach(function(cle){
+    var serie = (BULK_DATA && BULK_DATA[cle]) || [];
+    serie.forEach(function(p){
+      if(!p || !p.heure) return;
+      var j = String(p.heure).slice(0,10);
+      if(min === null || j < min) min = j;
+      if(max === null || j > max) max = j;
+    });
+  });
+  return { min:min, max:max };
+}
+
+/* Heures de poste theoriques : on parcourt chaque heure de la plage et on
+   demande a getEquipe qui etait en poste. Donne exactement 40 h/semaine pour
+   P1-P2-P3 et 24 h/semaine pour P4-P5, sans rien coder en dur, et suit
+   automatiquement la rotation reelle (semaine / week-end). */
+var _bulkPosteCache = {};
+function bulkHeuresPoste(dDebut, dFin){
+  var cle = dDebut + '>' + dFin;
+  if(_bulkPosteCache[cle]) return _bulkPosteCache[cle];
+  var h = {};
+  BULK_EQ.forEach(function(e){ h[e] = 0; });
+  if(!dDebut || !dFin) return h;
+  var d = new Date(String(dDebut) + 'T12:00:00');
+  var fin = new Date(String(dFin) + 'T12:00:00');
+  if(isNaN(d.getTime()) || isNaN(fin.getTime())) return h;
+  var garde = 0;
+  while(d <= fin && garde++ < 3000){
+    var jour = bulkDateISO(d);
+    for(var i = 0; i < 24; i++){
+      var eq = (typeof getEquipe === 'function') ? getEquipe(jour, (i < 10 ? '0' : '') + i + ':00') : null;
+      if(eq && h[eq] !== undefined) h[eq]++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  _bulkPosteCache[cle] = h;
+  return h;
+}
+
+/* Agregation : par jour, par equipe, sur une plage et un filtre equipe donnes.
+   hBulk / hBij = heures ou l'equipe a effectivement envoye du bulk / emballe.
+   hPoste = heures ou elle etait en poste. Le rapport des deux donne le taux
+   d'activite, qui rend les 5 equipes comparables malgre 40 h contre 24 h. */
+function bulkCalc(dDebut, dFin, eqFiltre){
+  var res = {
+    jours:{}, ordreJours:[], parEquipe:{},
+    totaux:{ standaard:0, noodafvoer:0, bijlijn1:0 },
+    heuresBulk:0, heuresBij:0, heuresPoste:0, nbPoints:0
+  };
+  BULK_EQ.forEach(function(e){ res.parEquipe[e] = { standaard:0, noodafvoer:0, bijlijn1:0, hBulk:0, hBij:0, hPoste:0 }; });
+  var poste = bulkHeuresPoste(dDebut, dFin);
+  BULK_EQ.forEach(function(e){
+    res.parEquipe[e].hPoste = poste[e] || 0;
+    if(!eqFiltre || eqFiltre === 'all' || eqFiltre === e) res.heuresPoste += (poste[e] || 0);
+  });
+  if(!BULK_DATA) return res;
+  var slots = { bulk:{}, bij:{} };
+  ['standaard','noodafvoer','bijlijn1'].forEach(function(cle){
+    var serie = BULK_DATA[cle] || [];
+    serie.forEach(function(p){
+      if(!p || !p.heure) return;
+      var brut = String(p.heure);
+      var jour = brut.slice(0,10);
+      if(dDebut && jour < dDebut) return;
+      if(dFin && jour > dFin) return;
+      var heure = brut.slice(11,16);
+      var eq = (typeof getEquipe === 'function') ? getEquipe(jour, heure) : null;
+      if(eqFiltre && eqFiltre !== 'all' && eq !== eqFiltre) return;
+      var v = bulkNum(p.valeur);
+      if(!res.jours[jour]){
+        res.jours[jour] = { standaard:0, noodafvoer:0, bijlijn1:0, equipes:{} };
+        res.ordreJours.push(jour);
+      }
+      res.jours[jour][cle] += v;
+      if(eq) res.jours[jour].equipes[eq] = true;
+      res.totaux[cle] += v;
+      res.nbPoints++;
+      if(eq && res.parEquipe[eq]) res.parEquipe[eq][cle] += v;
+      var groupe = (cle === 'bijlijn1') ? 'bij' : 'bulk';
+      var k = jour + '|' + heure;
+      if(!slots[groupe][k]){
+        slots[groupe][k] = 1;
+        if(groupe === 'bij'){
+          res.heuresBij++;
+          if(eq && res.parEquipe[eq]) res.parEquipe[eq].hBij++;
+        } else {
+          res.heuresBulk++;
+          if(eq && res.parEquipe[eq]) res.parEquipe[eq].hBulk++;
+        }
+      }
+    });
+  });
+  res.ordreJours.sort();
+  return res;
+}
+
+/* ---------- Rendu ---------- */
+
+function bulkCarteKpi(label, valeur, sousTitre, couleur){
+  return '<div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px">'
+    + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:6px">' + label + '</div>'
+    + '<div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (couleur || 'var(--tx)') + '">' + valeur + '</div>'
+    + (sousTitre ? '<div style="font-size:11px;color:var(--tx3);margin-top:5px">' + sousTitre + '</div>' : '')
+    + '</div>';
+}
+
+/* hausseEstBonne : true pour la bijlijn (plus on remballe, mieux c'est),
+   false pour le bulk (plus on envoie en bulk, moins c'est bon). */
+function bulkDelta(courant, precedent, hausseEstBonne){
+  if(!precedent) return '';
+  var d = ((courant - precedent) / precedent) * 100;
+  if(!isFinite(d)) return '';
+  var bon = hausseEstBonne ? (d >= 0) : (d < 0);
+  var coul = bon ? '#10b981' : '#ef4444';
+  var signe = d >= 0 ? '+' : '';
+  return '<span style="color:' + coul + ';font-weight:600">' + signe + bulkFmt(d,1) + '&nbsp;%</span> '
+    + bulkTxt('arr_bulk_vs_prec','vs periode precedente');
+}
+
+function bulkRendreKpi(cur, prec){
+  var wrap = document.getElementById('bulk-kpi-wrap');
+  if(!wrap) return;
+  var std = bulkTon(cur.totaux.standaard);
+  var urg = bulkTon(cur.totaux.noodafvoer);
+  var bij = bulkTon(cur.totaux.bijlijn1);
+  var totBulk = std + urg;
+  var pStd = bulkTon(prec.totaux.standaard);
+  var pUrg = bulkTon(prec.totaux.noodafvoer);
+  var pBij = bulkTon(prec.totaux.bijlijn1);
+  var taux = totBulk > 0 ? (bij / totBulk) * 100 : null;
+  var tauxPrec = (pStd + pUrg) > 0 ? (pBij / (pStd + pUrg)) * 100 : 0;
+  var nbJoursAvec = cur.ordreJours.length;
+  var moyJour = nbJoursAvec > 0 ? (totBulk / nbJoursAvec) : 0;
+
+  var html = '';
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_std','Bulk standard'), bulkFmt(std,1) + ' t',
+            bulkDelta(std, pStd, false), BULK_COUL.standaard);
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_urg','Bulk urgence'), bulkFmt(urg,1) + ' t',
+            bulkDelta(urg, pUrg, false), BULK_COUL.noodafvoer);
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_tot','Total surproduction'), bulkFmt(totBulk,1) + ' t',
+            bulkFmt(moyJour,1) + ' t ' + bulkTxt('arr_bulk_par_jour','par jour avec releve'), 'var(--tx)');
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_bij','Bijlijn emballe'), bulkFmt(bij,1) + ' t',
+            bulkDelta(bij, pBij, true), BULK_COUL.bijlijn1);
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_taux','Taux de reabsorption'),
+            (taux === null ? '-' : bulkFmt(taux,1) + ' %'),
+            (taux === null ? '' : bulkDelta(taux, tauxPrec, true)),
+            (taux !== null && taux >= 60) ? '#10b981' : '#f59e0b');
+  var actif = cur.heuresPoste > 0 ? (cur.heuresBulk / cur.heuresPoste) * 100 : null;
+  html += bulkCarteKpi(bulkTxt('arr_bulk_k_activite','Activite bulk'),
+            (actif === null ? '-' : bulkFmt(actif,1) + ' %'),
+            bulkFmt(cur.heuresBulk,0) + ' ' + bulkTxt('arr_bulk_h_sur','h sur') + ' '
+              + bulkFmt(cur.heuresPoste,0) + ' ' + bulkTxt('arr_bulk_h_poste','h de poste'), 'var(--tx)');
+  wrap.innerHTML = html;
+}
+
+function bulkRendreMeta(cur, d1, d2, nbJours, eqFiltre, pDeb, pFin){
+  var el = document.getElementById('bulk-meta');
+  if(!el) return;
+  var lignes = [];
+  lignes.push('&#128197; ' + bulkTxt('arr_bulk_m_per','Periode analysee') + ' : <b>' + d1 + '</b> &rarr; <b>' + d2 + '</b> ('
+    + nbJours + ' ' + bulkTxt('arr_bulk_jours','jours') + ') &nbsp;&middot;&nbsp; '
+    + bulkTxt('arr_bulk_m_prec','periode de comparaison') + ' : ' + pDeb + ' &rarr; ' + pFin);
+
+  var manquants = nbJours - cur.ordreJours.length;
+  if(eqFiltre === 'all' && manquants > 0){
+    lignes.push('&#9888;&#65039; <span style="color:#f59e0b">' + manquants + ' '
+      + bulkTxt('arr_bulk_m_trous','jour(s) sans aucun releve sur la periode') + '</span> &mdash; '
+      + bulkTxt('arr_bulk_m_trous2','un jour a zero n\'est pas forcement une bonne journee, ce peut etre un import manquant.'));
+  }
+
+  var record = null;
+  cur.ordreJours.forEach(function(j){
+    var v = cur.jours[j].standaard + cur.jours[j].noodafvoer;
+    if(!record || v > record.v) record = { j:j, v:v, eq:Object.keys(cur.jours[j].equipes).sort().join(', ') };
+  });
+  if(record && record.v > 0){
+    lignes.push('&#127942; ' + bulkTxt('arr_bulk_m_rec','Jour le plus charge') + ' : <b>' + record.j + '</b> avec <b>'
+      + bulkFmt(bulkTon(record.v),1) + ' t</b>' + (record.eq ? ' (' + bulkTxt('arr_bulk_equipes','equipes') + ' ' + record.eq + ')' : ''));
+  }
+
+  if(eqFiltre && eqFiltre !== 'all'){
+    var coul = (typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[eqFiltre]) ? COULEURS_EQUIPE[eqFiltre] : 'var(--tx2)';
+    lignes.push('&#128269; ' + bulkTxt('arr_bulk_m_eq','Filtre equipe actif') + ' : <b style="color:' + coul + '">'
+      + eqFiltre + '</b> &mdash; ' + bulkTxt('arr_bulk_m_eq2','seuls les releves des heures ou cette equipe etait en poste sont comptes.'));
+  }
+  el.innerHTML = lignes.join('<br>');
+}
+
+function bulkLigneEquipe(eq, cellules, actif){
+  var coul = (typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[eq]) ? COULEURS_EQUIPE[eq] : 'var(--tx2)';
+  var html = '<tr style="border-bottom:1px solid var(--bd2);opacity:' + (actif ? '1' : '.32') + '">'
+    + '<td style="padding:8px 6px;white-space:nowrap">'
+    + '<span style="display:inline-block;width:9px;height:9px;border-radius:99px;background:' + coul + ';margin-right:7px"></span>'
+    + '<b style="color:' + coul + '">' + eq + '</b></td>';
+  cellules.forEach(function(c){
+    html += '<td style="padding:8px 6px;text-align:right' + (c.fort ? ';font-weight:700' : '') + '">' + c.v + '</td>';
+  });
+  return html + '</tr>';
+}
+
+function bulkLigneTotal(cellules){
+  var html = '<tr style="border-top:2px solid var(--bd2)">'
+    + '<td style="padding:9px 6px;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.05em">'
+    + bulkTxt('arr_bulk_total','Total') + '</td>';
+  cellules.forEach(function(c){
+    html += '<td style="padding:9px 6px;text-align:right;font-weight:700">' + c + '</td>';
+  });
+  return html + '</tr>';
+}
+
+/* Cellule "activite" : part du temps de poste ou l'equipe a reellement
+   envoye du bulk / emballe. C'est ce qui montre quand ca tourne ou pas. */
+function bulkCelluleActivite(hFait, hPoste){
+  if(!hPoste) return '-';
+  var p = (hFait / hPoste) * 100;
+  var coul = p >= 50 ? '#10b981' : (p >= 20 ? '#f59e0b' : '#ef4444');
+  return '<span style="color:' + coul + ';font-weight:600">' + bulkFmt(p,1) + ' %</span>'
+    + '<span style="color:var(--tx3);font-size:11px"> (' + bulkFmt(hFait,0) + ' h)</span>';
+}
+
+function bulkRendreEquipes(cur, eqFiltre){
+  var tbS = document.getElementById('bulk-eq-sur');
+  var tbB = document.getElementById('bulk-eq-bij');
+  var totSur = bulkTon(cur.totaux.standaard + cur.totaux.noodafvoer);
+  var totBij = bulkTon(cur.totaux.bijlijn1);
+  var hS = '', hB = '';
+  var sumPoste = 0, sumHB = 0, sumHJ = 0;
+  BULK_EQ.forEach(function(eq){
+    var e = cur.parEquipe[eq];
+    var actif = (!eqFiltre || eqFiltre === 'all' || eqFiltre === eq);
+    var std = bulkTon(e.standaard), urg = bulkTon(e.noodafvoer), bij = bulkTon(e.bijlijn1);
+    var sur = std + urg;
+    /* moyenne rapportee aux heures de poste : 40 h contre 24 h, donc c'est la
+       seule facon de comparer honnetement les 5 equipes entre elles. */
+    var moySur = e.hPoste > 0 ? (sur / e.hPoste) : null;
+    var moyBij = e.hPoste > 0 ? (bij / e.hPoste) : null;
+    var partS = totSur > 0 ? (sur / totSur) * 100 : null;
+    var partB = totBij > 0 ? (bij / totBij) * 100 : null;
+    var reab = sur > 0 ? (bij / sur) * 100 : null;
+    if(actif){ sumPoste += e.hPoste; sumHB += e.hBulk; sumHJ += e.hBij; }
+    hS += bulkLigneEquipe(eq, [
+      { v: bulkFmt(std,1) }, { v: bulkFmt(urg,1) }, { v: bulkFmt(sur,1), fort:true },
+      { v: partS === null ? '-' : bulkFmt(partS,1) + ' %' },
+      { v: bulkFmt(e.hPoste,0) },
+      { v: bulkCelluleActivite(e.hBulk, e.hPoste) },
+      { v: moySur === null ? '-' : bulkFmt(moySur,3) }
+    ], actif);
+    hB += bulkLigneEquipe(eq, [
+      { v: bulkFmt(bij,1), fort:true },
+      { v: partB === null ? '-' : bulkFmt(partB,1) + ' %' },
+      { v: bulkFmt(e.hPoste,0) },
+      { v: bulkCelluleActivite(e.hBij, e.hPoste) },
+      { v: moyBij === null ? '-' : bulkFmt(moyBij,3) },
+      { v: reab === null ? '-' : bulkFmt(reab,1) + ' %' }
+    ], actif);
+  });
+  var moySurT = sumPoste > 0 ? (totSur / sumPoste) : null;
+  var moyBijT = sumPoste > 0 ? (totBij / sumPoste) : null;
+  var reabT = totSur > 0 ? (totBij / totSur) * 100 : null;
+  hS += bulkLigneTotal([
+    bulkFmt(bulkTon(cur.totaux.standaard),1), bulkFmt(bulkTon(cur.totaux.noodafvoer),1),
+    bulkFmt(totSur,1), '100,0 %', bulkFmt(sumPoste,0),
+    bulkCelluleActivite(sumHB, sumPoste),
+    moySurT === null ? '-' : bulkFmt(moySurT,3)
+  ]);
+  hB += bulkLigneTotal([
+    bulkFmt(totBij,1), '100,0 %', bulkFmt(sumPoste,0),
+    bulkCelluleActivite(sumHJ, sumPoste),
+    moyBijT === null ? '-' : bulkFmt(moyBijT,3),
+    reabT === null ? '-' : bulkFmt(reabT,1) + ' %'
+  ]);
+  if(tbS) tbS.innerHTML = hS;
+  if(tbB) tbB.innerHTML = hB;
+}
+
+function bulkRendreDetail(cur){
+  var tb = document.getElementById('bulk-detail-tbody');
+  var tf = document.getElementById('bulk-detail-tfoot');
+  if(!tb) return;
+  var jours = cur.ordreJours.slice().sort().reverse();
+  var html = '';
+  jours.forEach(function(j){
+    var o = cur.jours[j];
+    var std = bulkTon(o.standaard), urg = bulkTon(o.noodafvoer), bij = bulkTon(o.bijlijn1);
+    var sur = std + urg;
+    var reab = sur > 0 ? (bij / sur) * 100 : null;
+    var eqs = Object.keys(o.equipes).sort().map(function(e){
+      var c = (typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[e]) ? COULEURS_EQUIPE[e] : 'var(--tx2)';
+      return '<span style="display:inline-block;border:1px solid ' + c + ';color:' + c
+        + ';border-radius:99px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px">' + e + '</span>';
+    }).join('');
+    html += '<tr style="border-bottom:1px solid var(--bd2)">'
+      + '<td style="padding:7px 6px;white-space:nowrap">' + j + '</td>'
+      + '<td style="padding:7px 6px;white-space:nowrap">' + (eqs || '-') + '</td>'
+      + '<td style="padding:7px 6px;text-align:right">' + bulkFmt(std,1) + '</td>'
+      + '<td style="padding:7px 6px;text-align:right">' + bulkFmt(urg,1) + '</td>'
+      + '<td style="padding:7px 6px;text-align:right;font-weight:600">' + bulkFmt(sur,1) + '</td>'
+      + '<td style="padding:7px 6px;text-align:right;color:' + BULK_COUL.bijlijn1 + '">' + bulkFmt(bij,1) + '</td>'
+      + '<td style="padding:7px 6px;text-align:right">' + (reab === null ? '-' : bulkFmt(reab,0) + ' %') + '</td>'
+      + '</tr>';
+  });
+  if(!html) html = '<tr><td colspan="7" style="padding:22px;text-align:center;color:var(--tx3)">'
+    + bulkTxt('arr_bulk_empty_per','Aucun releve sur la periode selectionnee.') + '</td></tr>';
+  tb.innerHTML = html;
+  if(tf){
+    var tStd = bulkTon(cur.totaux.standaard), tUrg = bulkTon(cur.totaux.noodafvoer), tBij = bulkTon(cur.totaux.bijlijn1);
+    var tSur = tStd + tUrg;
+    var tReab = tSur > 0 ? (tBij / tSur) * 100 : null;
+    tf.innerHTML = '<tr style="border-top:2px solid var(--bd2);font-weight:700">'
+      + '<td style="padding:9px 6px">' + bulkTxt('arr_bulk_total','Total') + '</td>'
+      + '<td style="padding:9px 6px">' + jours.length + ' ' + bulkTxt('arr_bulk_jours','jours') + '</td>'
+      + '<td style="padding:9px 6px;text-align:right">' + bulkFmt(tStd,1) + '</td>'
+      + '<td style="padding:9px 6px;text-align:right">' + bulkFmt(tUrg,1) + '</td>'
+      + '<td style="padding:9px 6px;text-align:right">' + bulkFmt(tSur,1) + '</td>'
+      + '<td style="padding:9px 6px;text-align:right">' + bulkFmt(tBij,1) + '</td>'
+      + '<td style="padding:9px 6px;text-align:right">' + (tReab === null ? '-' : bulkFmt(tReab,0) + ' %') + '</td>'
+      + '</tr>';
+  }
+}
+
+function bulkChartOpts(empile){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ display:true, position:'top', labels:{ boxWidth:10, boxHeight:10, usePointStyle:true, font:{ size:11 } } },
+      tooltip:{ callbacks:{ label:function(c){ return c.dataset.label + ' : ' + bulkFmt(c.parsed.y,2) + ' t'; } } }
+    },
+    scales:{
+      x:{ stacked:!!empile, grid:{ display:false }, ticks:{ font:{ size:10 }, maxRotation:0, autoSkip:true, maxTicksLimit:14 } },
+      y:{ stacked:!!empile, beginAtZero:true, grid:{ color:'rgba(128,128,128,.12)' },
+          ticks:{ font:{ size:10 }, callback:function(v){ return bulkFmt(v,0) + ' t'; } } }
+    }
+  };
+}
+
+function bulkRendreCharts(cur){
+  if(typeof Chart === 'undefined') return;
+  var labels = cur.ordreJours.map(bulkJourCourt);
+  var cA = document.getElementById('arretsBulkChart');
+  if(cA){
+    if(_arretsBulkChart){ try { _arretsBulkChart.destroy(); } catch(e){} _arretsBulkChart = null; }
+    _arretsBulkChart = new Chart(cA, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        { label:bulkTxt('arr_bulk_s_std','Standard'), backgroundColor:BULK_COUL.standaard, borderRadius:3,
+          data:cur.ordreJours.map(function(j){ return bulkTon(cur.jours[j].standaard); }) },
+        { label:bulkTxt('arr_bulk_s_urg','Urgence (noodafvoer)'), backgroundColor:BULK_COUL.noodafvoer, borderRadius:3,
+          data:cur.ordreJours.map(function(j){ return bulkTon(cur.jours[j].noodafvoer); }) }
+      ]},
+      options:bulkChartOpts(true)
+    });
+  }
+  var cB = document.getElementById('arretsBulkBijChart');
+  if(cB){
+    if(_arretsBulkEquipeChart){ try { _arretsBulkEquipeChart.destroy(); } catch(e){} _arretsBulkEquipeChart = null; }
+    _arretsBulkEquipeChart = new Chart(cB, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        { label:bulkTxt('arr_bulk_s_bij','Bijlijn emballe'), backgroundColor:BULK_COUL.bijlijn1, borderRadius:3,
+          data:cur.ordreJours.map(function(j){ return bulkTon(cur.jours[j].bijlijn1); }) }
+      ]},
+      options:bulkChartOpts(false)
+    });
+  }
+}
+
+function bulkMajBoutonsPeriode(){
+  var actif = 'all';
+  if(BULK_DATE_DEBUT || BULK_DATE_FIN){
+    actif = '';
+    if(BULK_DATE_DEBUT && BULK_DATE_FIN){
+      var n = bulkNbJours(BULK_DATE_DEBUT, BULK_DATE_FIN);
+      if(n === 7) actif = '7'; else if(n === 30) actif = '30'; else if(n === 90) actif = '90';
+    }
+  }
+  document.querySelectorAll('.bulk-per-btn').forEach(function(b){
+    var on = (b.getAttribute('data-per') === actif);
+    b.style.background = on ? 'var(--blue)' : 'none';
+    b.style.color = on ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--bd2)';
+  });
+}
+
+/* Rendu maitre : appele au chargement Firebase, au changement de periode
+   et au changement du filtre equipe global. */
+function buildBulkSections(){
+  var wrap = document.getElementById('bulk-kpi-wrap');
+  if(!wrap) return;
+  var vide = document.getElementById('bulk-empty');
+  var meta = document.getElementById('bulk-meta');
+  var cartes = ['bulk-card-sur','bulk-card-bij','bulk-card-detail'];
+  var bornes = bulkBornesDonnees();
+  var aucune = !BULK_DATA || !bornes.min;
+
+  if(vide) vide.style.display = aucune ? 'block' : 'none';
+  wrap.style.display = aucune ? 'none' : 'grid';
+  cartes.forEach(function(id){ var el = document.getElementById(id); if(el) el.style.display = aucune ? 'none' : ''; });
+  if(aucune){ if(meta) meta.innerHTML = ''; return; }
+
+  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var d1 = BULK_DATE_DEBUT || bornes.min;
+  var d2 = BULK_DATE_FIN || bornes.max;
+  if(d1 > d2){ var tmp = d1; d1 = d2; d2 = tmp; }
+
+  var cur = bulkCalc(d1, d2, eqFiltre);
+  var nbJours = bulkNbJours(d1, d2);
+  var pFin = bulkDecalerJour(d1, -1);
+  var pDeb = bulkDecalerJour(pFin, -(nbJours - 1));
+  var prec = bulkCalc(pDeb, pFin, eqFiltre);
+
+  bulkRendreKpi(cur, prec);
+  bulkRendreMeta(cur, d1, d2, nbJours, eqFiltre, pDeb, pFin);
+  bulkRendreEquipes(cur, eqFiltre);
+  bulkRendreDetail(cur);
+  bulkRendreCharts(cur);
+  bulkMajBoutonsPeriode();
+}
+
+/* ---------- Actions ---------- */
 
 function bulkFiltrerPeriode(){
-  BULK_DATE_DEBUT = document.getElementById('bulk-date-debut').value || '';
-  BULK_DATE_FIN = document.getElementById('bulk-date-fin').value || '';
-  buildArretsBulkChart();
-}
-function bulkReinitialiserPeriode(){
-  BULK_DATE_DEBUT = ''; BULK_DATE_FIN = '';
-  document.getElementById('bulk-date-debut').value = '';
-  document.getElementById('bulk-date-fin').value = '';
-  buildArretsBulkChart();
+  var i1 = document.getElementById('bulk-date-debut');
+  var i2 = document.getElementById('bulk-date-fin');
+  BULK_DATE_DEBUT = i1 ? (i1.value || '') : '';
+  BULK_DATE_FIN = i2 ? (i2.value || '') : '';
+  buildBulkSections();
 }
 
-// Filtre un point {heure:'YYYY-MM-DDTHH:mm:ss...'} selon la periode choisie
-function bulkDansPeriode(heureIso){
-  var jour = (heureIso || '').slice(0, 10);
-  if(!jour) return false;
-  if(BULK_DATE_DEBUT && jour < BULK_DATE_DEBUT) return false;
-  if(BULK_DATE_FIN && jour > BULK_DATE_FIN) return false;
-  return true;
+function bulkPeriodeRapide(n){
+  var bornes = bulkBornesDonnees();
+  var fin = bornes.max || bulkDateISO(new Date());
+  BULK_DATE_FIN = fin;
+  BULK_DATE_DEBUT = bulkDecalerJour(fin, -(n - 1));
+  var i1 = document.getElementById('bulk-date-debut'); if(i1) i1.value = BULK_DATE_DEBUT;
+  var i2 = document.getElementById('bulk-date-fin'); if(i2) i2.value = BULK_DATE_FIN;
+  buildBulkSections();
+}
+
+function bulkReinitialiserPeriode(){
+  BULK_DATE_DEBUT = '';
+  BULK_DATE_FIN = '';
+  var i1 = document.getElementById('bulk-date-debut'); if(i1) i1.value = '';
+  var i2 = document.getElementById('bulk-date-fin'); if(i2) i2.value = '';
+  buildBulkSections();
 }
 
 function bulkExportCSV(){
-  if(!BULK_DATA){ toast('Aucune donnee a exporter', '#ef4444'); return; }
-  var NL = String.fromCharCode(13, 10);
-  var q = function(v){ return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
-  var lignes = [['Serie', 'Date', 'Heure', 'Valeur', 'Unite', 'Equipe'].map(q).join(';')];
-  var unite = (BULK_DATA.unite) || 'kg (a confirmer)';
-  function ajouterSerie(nom, serie){
-    (serie || []).forEach(function(p){
-      if(!bulkDansPeriode(p.heure)) return;
-      var jour = p.heure.slice(0, 10);
-      var heure = p.heure.slice(11, 16);
-      var eq = getEquipe(jour, heure);
-      lignes.push([nom, jour, heure, p.valeur, unite, eq || ''].map(q).join(';'));
-    });
-  }
-  ajouterSerie('Standaard', BULK_DATA.standaard);
-  ajouterSerie('Noodafvoer', BULK_DATA.noodafvoer);
-  ajouterSerie('Bijlijn1', BULK_DATA.bijlijn1);
-  if(lignes.length === 1){ toast('Aucune donnee dans la periode selectionnee', '#ef4444'); return; }
-  var blob = new Blob([String.fromCharCode(65279) + lignes.join(NL)], { type: 'text/csv;charset=utf-8' });
+  if(!BULK_DATA){ alert(bulkTxt('arr_bulk_empty','Aucune donnee bulk importee pour le moment.')); return; }
+  var bornes = bulkBornesDonnees();
+  if(!bornes.min) return;
+  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var d1 = BULK_DATE_DEBUT || bornes.min;
+  var d2 = BULK_DATE_FIN || bornes.max;
+  var cur = bulkCalc(d1, d2, eqFiltre);
+  var sep = ';';
+  var lignes = [['Jour','Equipes','Bulk standard (t)','Bulk urgence (t)','Total surproduction (t)','Bijlijn emballe (t)','Reabsorption (%)'].join(sep)];
+  cur.ordreJours.slice().sort().forEach(function(j){
+    var o = cur.jours[j];
+    var std = bulkTon(o.standaard), urg = bulkTon(o.noodafvoer), bij = bulkTon(o.bijlijn1);
+    var sur = std + urg;
+    var reab = sur > 0 ? (bij / sur) * 100 : '';
+    lignes.push([
+      j, Object.keys(o.equipes).sort().join(' '),
+      std.toFixed(2).replace('.', ','), urg.toFixed(2).replace('.', ','),
+      sur.toFixed(2).replace('.', ','), bij.toFixed(2).replace('.', ','),
+      reab === '' ? '' : reab.toFixed(1).replace('.', ',')
+    ].join(sep));
+  });
+  lignes.push('');
+  lignes.push(['Equipe','Bulk standard (t)','Bulk urgence (t)','Total surproduction (t)','Bijlijn emballe (t)','Heures de poste','Heures avec bulk','Activite bulk (%)','Heures avec bijlijn','Activite bijlijn (%)','Moyenne t/h de poste'].join(sep));
+  BULK_EQ.forEach(function(eq){
+    var e = cur.parEquipe[eq];
+    var std = bulkTon(e.standaard), urg = bulkTon(e.noodafvoer), bij = bulkTon(e.bijlijn1);
+    var sur = std + urg;
+    lignes.push([
+      eq, std.toFixed(2).replace('.', ','), urg.toFixed(2).replace('.', ','),
+      sur.toFixed(2).replace('.', ','), bij.toFixed(2).replace('.', ','),
+      e.hPoste, e.hBulk, (e.hPoste > 0 ? (e.hBulk / e.hPoste * 100).toFixed(1).replace('.', ',') : ''),
+      e.hBij, (e.hPoste > 0 ? (e.hBij / e.hPoste * 100).toFixed(1).replace('.', ',') : ''),
+      (e.hPoste > 0 ? (sur / e.hPoste).toFixed(3).replace('.', ',') : '')
+    ].join(sep));
+  });
+  var blob = new Blob(['﻿' + lignes.join('\r\n')], { type:'text/csv;charset=utf-8;' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Bulkopvang_Bijlijn_' + new Date().toISOString().slice(0, 10) + '.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  a.download = 'Surproduction_bulk_bijlijn_' + d1 + '_' + d2 + (eqFiltre !== 'all' ? '_' + eqFiltre : '') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
-function buildArretsBulkChart(){
-  var ctx = document.getElementById('arretsBulkChart');
-  var emptyEl = document.getElementById('arrets-bulk-empty');
-  var totauxWrap = document.getElementById('bulk-totaux-wrap');
-  if(!ctx || typeof Chart === 'undefined') return;
-
-  if(_arretsBulkChart){ _arretsBulkChart.destroy(); _arretsBulkChart = null; }
-
-  if(!BULK_DATA || (!(BULK_DATA.standaard||[]).length && !(BULK_DATA.noodafvoer||[]).length && !(BULK_DATA.bijlijn1||[]).length)){
-    ctx.style.display = 'none';
-    if(emptyEl) emptyEl.style.display = 'block';
-    if(totauxWrap) totauxWrap.innerHTML = '';
-    if(typeof buildArretsBulkEquipeChart === 'function') buildArretsBulkEquipeChart();
-    return;
-  }
-  ctx.style.display = 'block';
-  if(emptyEl) emptyEl.style.display = 'none';
-
-  var unite = (BULK_DATA.unite) || 'kg (a confirmer)';
-
-  // Agregation par jour (les donnees brutes sont horaires -- illisibles en graphique telles quelles),
-  // en respectant le filtre de periode choisi.
-  function parJour(serie){
-    var out = {};
-    (serie||[]).forEach(function(p){
-      if(!bulkDansPeriode(p.heure)) return;
-      var jour = (p.heure || '').slice(0,10);
-      if(!jour) return;
-      out[jour] = (out[jour] || 0) + (p.valeur || 0);
-    });
-    return out;
-  }
-  var std = parJour(BULK_DATA.standaard);
-  var noo = parJour(BULK_DATA.noodafvoer);
-  var bij = parJour(BULK_DATA.bijlijn1);
-
-  // --- Totaux sur la periode choisie (KPI au-dessus/en dessous du graphique) ---
-  if(totauxWrap){
-    var totStd = Object.values(std).reduce(function(s,v){ return s+v; }, 0);
-    var totNoo = Object.values(noo).reduce(function(s,v){ return s+v; }, 0);
-    var totBij = Object.values(bij).reduce(function(s,v){ return s+v; }, 0);
-    var totGlobal = totStd + totNoo + totBij;
-    function carte(label, val, coul){
-      return '<div style="background:var(--bg3);border-radius:10px;padding:12px 14px"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">' + label + '</div><div style="font-size:20px;font-weight:700;color:' + coul + '">' + Math.round(val).toLocaleString('fr-BE') + '</div><div style="font-size:10px;color:var(--tx3)">' + unite + '</div></div>';
-    }
-    totauxWrap.innerHTML =
-      carte(t('arr_bulk_standaard') || 'Standaard', totStd, '#ef4444') +
-      carte(t('arr_bulk_noodafvoer') || 'Noodafvoer', totNoo, '#3b82f6') +
-      carte(t('arr_bulk_bijlijn1') || 'Bijlijn1', totBij, '#10b981') +
-      carte(t('arr_bulk_total') || 'Total', totGlobal, 'var(--tx1)');
-  }
-
-  var tousLesJours = {};
-  [std, noo, bij].forEach(function(o){ Object.keys(o).forEach(function(j){ tousLesJours[j] = true; }); });
-  var joursTries = Object.keys(tousLesJours).sort();
-
-  if(!joursTries.length){
-    ctx.style.display = 'none';
-    if(emptyEl){ emptyEl.style.display = 'block'; emptyEl.textContent = t('arr_bulk_empty_periode') || 'Aucune donnee sur cette periode.'; }
-    if(typeof buildArretsBulkEquipeChart === 'function') buildArretsBulkEquipeChart();
-    return;
-  }
-
-  var labels = joursTries.map(function(j){ return dFR(j); });
-
-  _arretsBulkChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        // Couleurs inversees par rapport a la version precedente, sur demande :
-        // Standaard en rouge, Noodafvoer en bleu.
-        { label: t('arr_bulk_standaard') || 'Standaard', data: joursTries.map(function(j){ return Math.round(std[j]||0); }), borderColor: '#ef4444', backgroundColor: '#ef4444', fill: false, tension: 0.2, pointRadius: 2 },
-        { label: t('arr_bulk_noodafvoer') || 'Noodafvoer', data: joursTries.map(function(j){ return Math.round(noo[j]||0); }), borderColor: '#3b82f6', backgroundColor: '#3b82f6', fill: false, tension: 0.2, pointRadius: 2 },
-        { label: t('arr_bulk_bijlijn1') || 'Bijlijn1', data: joursTries.map(function(j){ return Math.round(bij[j]||0); }), borderColor: '#10b981', backgroundColor: '#10b981', fill: false, tension: 0.2, pointRadius: 2 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: true, labels: { color: '#8b90a4' } } },
-      scales: {
-        x: { ticks: { color: '#8b90a4', maxRotation: 60, minRotation: 60, autoSkip: true, maxTicksLimit: 40 }, grid: { color: 'rgba(255,255,255,.05)' } },
-        y: { ticks: { color: '#8b90a4' }, grid: { color: 'rgba(255,255,255,.05)' }, title: { display: true, text: unite, color: '#8b90a4' } }
-      }
-    }
-  });
-
-  if(typeof buildArretsBulkEquipeChart === 'function') buildArretsBulkEquipeChart();
+function bulkImprimerDetail(){
+  var tbl = document.getElementById('bulk-detail-tbody');
+  if(!tbl) return;
+  var carte = document.getElementById('bulk-card-detail');
+  var table = carte ? carte.querySelector('table') : null;
+  if(!table) return;
+  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var bornes = bulkBornesDonnees();
+  var d1 = BULK_DATE_DEBUT || bornes.min || '';
+  var d2 = BULK_DATE_FIN || bornes.max || '';
+  var w = window.open('', '_blank');
+  if(!w){ alert(bulkTxt('arr_bulk_popup','Autorise les fenetres pop-up pour imprimer le tableau.')); return; }
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Surproduction bulk & bijlijn</title>'
+    + '<style>body{font-family:Arial,Helvetica,sans-serif;margin:22px;color:#111}'
+    + 'h1{font-size:17px;margin:0 0 4px}p.sub{font-size:12px;color:#555;margin:0 0 16px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:11px}'
+    + 'th,td{border:1px solid #ccc;padding:4px 6px}th{background:#f0f0f0;text-align:left}'
+    + 'td:nth-child(n+3),th:nth-child(n+3){text-align:right}'
+    + 'tfoot td{font-weight:bold;background:#f7f7f7}span{border:none !important;padding:0 !important;margin-right:3px}'
+    + '@page{size:A4;margin:12mm}</style></head><body>'
+    + '<h1>Surproduction : bulk &amp; bijlijn</h1>'
+    + '<p class="sub">Periode ' + d1 + ' &rarr; ' + d2
+    + (eqFiltre !== 'all' ? ' &middot; equipe ' + eqFiltre : ' &middot; toutes equipes')
+    + ' &middot; valeurs en tonnes &middot; edite le ' + bulkDateISO(new Date()) + '</p>'
+    + table.outerHTML + '</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ try { w.print(); } catch(e){} }, 400);
 }
 
-// Deuxieme graphique : total par equipe (P1 a P5) sur la periode choisie.
-// Reutilise le meme filtre de periode (BULK_DATE_DEBUT/FIN) que le graphique
-// journalier ci-dessus -- pas de controle separe, les deux restent synchronises.
-function buildArretsBulkEquipeChart(){
-  var ctx = document.getElementById('arretsBulkEquipeChart');
-  var emptyEl = document.getElementById('arrets-bulk-equipe-empty');
-  if(!ctx || typeof Chart === 'undefined') return;
-
-  if(_arretsBulkEquipeChart){ _arretsBulkEquipeChart.destroy(); _arretsBulkEquipeChart = null; }
-
-  if(!BULK_DATA || (!(BULK_DATA.standaard||[]).length && !(BULK_DATA.noodafvoer||[]).length && !(BULK_DATA.bijlijn1||[]).length)){
-    ctx.style.display = 'none';
-    if(emptyEl) emptyEl.style.display = 'block';
-    return;
-  }
-
-  var equipes = ['P1','P2','P3','P4','P5'];
-  var totaux = { standaard: {}, noodafvoer: {}, bijlijn1: {} };
-  equipes.forEach(function(eq){ totaux.standaard[eq] = 0; totaux.noodafvoer[eq] = 0; totaux.bijlijn1[eq] = 0; });
-
-  function cumulerParEquipe(serie, cle){
-    (serie||[]).forEach(function(p){
-      if(!bulkDansPeriode(p.heure)) return;
-      var jour = p.heure.slice(0,10), heure = p.heure.slice(11,16);
-      var eq = getEquipe(jour, heure);
-      if(eq && totaux[cle][eq] !== undefined) totaux[cle][eq] += (p.valeur || 0);
-    });
-  }
-  cumulerParEquipe(BULK_DATA.standaard, 'standaard');
-  cumulerParEquipe(BULK_DATA.noodafvoer, 'noodafvoer');
-  cumulerParEquipe(BULK_DATA.bijlijn1, 'bijlijn1');
-
-  var totalGeneral = equipes.reduce(function(s, eq){ return s + totaux.standaard[eq] + totaux.noodafvoer[eq] + totaux.bijlijn1[eq]; }, 0);
-  if(totalGeneral === 0){
-    ctx.style.display = 'none';
-    if(emptyEl){ emptyEl.style.display = 'block'; emptyEl.textContent = t('arr_bulk_empty_periode') || 'Aucune donnee sur cette periode.'; }
-    return;
-  }
-  ctx.style.display = 'block';
-  if(emptyEl) emptyEl.style.display = 'none';
-
-  var unite = (BULK_DATA.unite) || 'kg (a confirmer)';
-  var labels = equipes.map(function(eq){ return eq === 'P5' ? (t('arr_p5_moi') || 'P5 (moi)') : eq; });
-
-  _arretsBulkEquipeChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        { label: t('arr_bulk_standaard') || 'Standaard', data: equipes.map(function(eq){ return Math.round(totaux.standaard[eq]); }), backgroundColor: '#ef4444' },
-        { label: t('arr_bulk_noodafvoer') || 'Noodafvoer', data: equipes.map(function(eq){ return Math.round(totaux.noodafvoer[eq]); }), backgroundColor: '#3b82f6' },
-        { label: t('arr_bulk_bijlijn1') || 'Bijlijn1', data: equipes.map(function(eq){ return Math.round(totaux.bijlijn1[eq]); }), backgroundColor: '#10b981' }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: true, labels: { color: '#8b90a4' } } },
-      scales: {
-        x: { stacked: false, ticks: { color: '#8b90a4' }, grid: { display: false } },
-        y: { stacked: false, ticks: { color: '#8b90a4' }, grid: { color: 'rgba(255,255,255,.05)' }, title: { display: true, text: unite, color: '#8b90a4' } }
-      }
-    }
-  });
-}
-var ARRETS_LIGNE_FILTRE = 'all';
-var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
-var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
-var ARRETS_DATE_FIN_FILTRE = '';  // '' ou 'YYYY-MM-DD' (fourchette)
-var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
-var ARRETS_RAISON_FILTRE = 'all'; // 'all' ou une raison precise
+/* Compatibilite : anciens points d'entree. */
+function buildArretsBulkChart(){ buildBulkSections(); }
+function buildArretsBulkEquipeChart(){ buildBulkSections(); }
+function bulkSauverUnite(){ buildBulkSections(); }
 
 function loadArretsInpak(){
   if(!db) return;
