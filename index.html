@@ -590,13 +590,12 @@
       <!-- Surproduction : bulk + bijlijn -->
       <div class="cc" style="margin-bottom:16px">
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="cct" data-i18n="arr_bulk_title">Surproduction : bulk &amp; bijlijn</div>
-          <span style="font-size:11px;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:2px 9px" data-i18n="arr_bulk_unit_note">valeurs en tonnes</span>
+          <div class="cct" data-i18n="arr_bulk_title">Periode analysee</div>
+          <span style="font-size:11px;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:2px 9px" data-i18n="arr_bulk_unit_note">volumes en tonnes, moyennes en kg/h</span>
           <button onclick="openImportBulkModal()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128229; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
           <button onclick="bulkExportCSV()" style="padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128190; <span data-i18n="arr_bulk_export">Exporter CSV</span></button>
         </div>
-        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:70ch" data-i18n="arr_bulk_hint">Volumes envoyes en bulk faute de place sur ligne (standard + urgence), et volumes remballes via la bijlijn. Le filtre equipe en haut de l'onglet s'applique aussi a cette section.</div>
-        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
           <div class="li-field">
             <label class="li-label" data-i18n="arr_search_from">Du</label>
             <input type="date" id="bulk-date-debut" class="li-input" onchange="bulkFiltrerPeriode()">
@@ -612,29 +611,28 @@
             <button class="bulk-per-btn" data-per="all" onclick="bulkReinitialiserPeriode()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pall">Tout</button>
           </div>
         </div>
-        <div id="bulk-kpi-wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px"></div>
-        <div id="bulk-meta" style="margin-top:12px;font-size:11px;color:var(--tx3);line-height:1.7"></div>
+        <div id="bulk-meta" style="font-size:11px;color:var(--tx3);line-height:1.7"></div>
         <div id="bulk-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;display:none" data-i18n="arr_bulk_empty">Aucune donnee bulk importee pour le moment.</div>
       </div>
 
       <div class="cc" id="bulk-card-sur" style="margin-bottom:16px">
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="cct" data-i18n="arr_bulk_sur_title">Bulk de surproduction</div>
-          <span style="font-size:11px;color:var(--tx3)" data-i18n="arr_bulk_sur_hint">Standard et urgence (noodafvoer) comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne t/h de poste est la seule comparaison honnete.</span>
+          <div class="cct" data-i18n="arr_bulk_sur_title">Surproduction envoyee en bulk</div>
         </div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_sur_hint">Produit AW3 envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes.</div>
+        <div id="bulk-kpi-sur" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px"></div>
         <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkChart"></canvas></div>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
             <thead>
               <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
                 <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Standard (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Urgence (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_part">Part</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Surproduction (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Noodafvoer (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total bulk (t)</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">t / h de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">kg / h de poste</th>
               </tr>
             </thead>
             <tbody id="bulk-eq-sur"></tbody>
@@ -645,8 +643,9 @@
       <div class="cc" id="bulk-card-bij" style="margin-bottom:16px">
         <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div class="cct" data-i18n="arr_bulk_bij_title">Bijlijn / Kruiding emballe</div>
-          <span style="font-size:11px;color:var(--tx3)" data-i18n="arr_bulk_bij_hint">Volumes remballes sur la bij-ligne.</span>
         </div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_bij_hint">Bulk de surproduction remballe sur la bij-ligne. Ce bulk ne vient pas forcement d'AW3 ni du jour meme : ces volumes ne se comparent pas a ceux du bloc precedent, c'est une activite a part.</div>
+        <div id="bulk-kpi-bij" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px"></div>
         <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkBijChart"></canvas></div>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
@@ -654,11 +653,9 @@
               <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
                 <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Emballe (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_part">Part</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">t / h de poste</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_ratio">Reabsorption</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">kg / h de poste</th>
               </tr>
             </thead>
             <tbody id="bulk-eq-bij"></tbody>
@@ -677,11 +674,10 @@
               <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--bg3)">
                 <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_day">Jour</th>
                 <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eqs">Equipes</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Standard (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Urgence (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Surproduction (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Noodafvoer (t)</th>
                 <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total bulk (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Emballe (t)</th>
-                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_ratio">Reabsorption</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Bijlijn emballe (t)</th>
               </tr>
             </thead>
             <tbody id="bulk-detail-tbody"></tbody>
