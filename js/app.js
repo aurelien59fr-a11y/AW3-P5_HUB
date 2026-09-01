@@ -599,7 +599,15 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_bulk_title:'Periode analysee', arr_bulk_unit_note:'volumes en tonnes, moyennes en kg/h',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_ca_title:'Analyse des causes',
+    arr_ca_hint:'Les 10 familles d\'arrets classees par temps perdu, avec la courbe du cumule : les premieres barres montrent ou se joue l\'essentiel. Clique une ligne du tableau pour deplier le detail de ses raisons. Le classement suit les filtres ligne, equipe et periode ci-dessus.',
+    arr_ca_tri_duree:'Heures perdues', arr_ca_tri_nombre:'Nombre d\'arrets',
+    arr_ca_th_cat:'Famille', arr_ca_th_raison:'Raison', arr_ca_th_duree:'Temps perdu',
+    arr_ca_th_part:'Part', arr_ca_th_cumul:'Cumule', arr_ca_th_nb:'Arrets', arr_ca_th_moy:'Duree moy.',
+    arr_ca_clic:'Clique une famille dans le tableau pour voir le detail de ses raisons.',
+    arr_ca_filtrer:'Filtrer', arr_ca_heures:'Heures perdues', arr_ca_nombre:'Nombre d\'arrets',
+    arr_ca_cumule:'Cumule',
+    arr_bulk_title:'Periode analysee', arr_bulk_unit_note:'volumes en tonnes, moyennes en kg/h',
     arr_bulk_empty:'Aucune donnee bulk importee pour le moment.', arr_bulk_empty_per:'Aucun releve sur la periode selectionnee.',
     arr_bulk_total:'Total', arr_bulk_export:'Exporter CSV', arr_bulk_print:'Imprimer',
     arr_bulk_p7:'7 jours', arr_bulk_p30:'30 jours', arr_bulk_p90:'90 jours', arr_bulk_p180:'6 mois', arr_bulk_pannee:'Annee en cours', arr_bulk_pall:'Tout',
@@ -850,7 +858,15 @@ var I18N={
     pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_bulk_title:'Geanalyseerde periode', arr_bulk_unit_note:'volumes in ton, gemiddelden in kg/u',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_ca_title:'Oorzakenanalyse',
+    arr_ca_hint:'De 10 stilstandfamilies gerangschikt op verloren tijd, met de cumulatieve curve : de eerste balken tonen waar het echt om draait. Klik op een rij om de detailredenen open te vouwen. De rangschikking volgt de filters lijn, ploeg en periode hierboven.',
+    arr_ca_tri_duree:'Verloren uren', arr_ca_tri_nombre:'Aantal stilstanden',
+    arr_ca_th_cat:'Familie', arr_ca_th_raison:'Reden', arr_ca_th_duree:'Verloren tijd',
+    arr_ca_th_part:'Aandeel', arr_ca_th_cumul:'Cumulatief', arr_ca_th_nb:'Stilstanden', arr_ca_th_moy:'Gem. duur',
+    arr_ca_clic:'Klik op een familie in de tabel om de detailredenen te zien.',
+    arr_ca_filtrer:'Filteren', arr_ca_heures:'Verloren uren', arr_ca_nombre:'Aantal stilstanden',
+    arr_ca_cumule:'Cumulatief',
+    arr_bulk_title:'Geanalyseerde periode', arr_bulk_unit_note:'volumes in ton, gemiddelden in kg/u',
     arr_bulk_empty:'Nog geen bulkgegevens geimporteerd.', arr_bulk_empty_per:'Geen meting in de gekozen periode.',
     arr_bulk_total:'Totaal', arr_bulk_export:'CSV exporteren', arr_bulk_print:'Afdrukken',
     arr_bulk_p7:'7 dagen', arr_bulk_p30:'30 dagen', arr_bulk_p90:'90 dagen', arr_bulk_p180:'6 maanden', arr_bulk_pannee:'Lopend jaar', arr_bulk_pall:'Alles',
@@ -1101,7 +1117,15 @@ var I18N={
     pt_marked_done_suffix:' anomaly(ies) marked as processed',
     pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
     pt_modal_title:'Import Protime time records',
-    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_bulk_title:'Analysed period', arr_bulk_unit_note:'volumes in tonnes, averages in kg/h',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_ca_title:'Root cause analysis',
+    arr_ca_hint:'The 10 stop families ranked by time lost, with the cumulative curve : the first bars show where it really matters. Click a row to unfold the detail of its reasons. The ranking follows the line, team and period filters above.',
+    arr_ca_tri_duree:'Hours lost', arr_ca_tri_nombre:'Number of stops',
+    arr_ca_th_cat:'Family', arr_ca_th_raison:'Reason', arr_ca_th_duree:'Time lost',
+    arr_ca_th_part:'Share', arr_ca_th_cumul:'Cumulative', arr_ca_th_nb:'Stops', arr_ca_th_moy:'Avg duration',
+    arr_ca_clic:'Click a family in the table to see the detail of its reasons.',
+    arr_ca_filtrer:'Filter', arr_ca_heures:'Hours lost', arr_ca_nombre:'Number of stops',
+    arr_ca_cumule:'Cumulative',
+    arr_bulk_title:'Analysed period', arr_bulk_unit_note:'volumes in tonnes, averages in kg/h',
     arr_bulk_empty:'No bulk data imported yet.', arr_bulk_empty_per:'No reading in the selected period.',
     arr_bulk_total:'Total', arr_bulk_export:'Export CSV', arr_bulk_print:'Print',
     arr_bulk_p7:'7 days', arr_bulk_p30:'30 days', arr_bulk_p90:'90 days', arr_bulk_p180:'6 months', arr_bulk_pannee:'Year to date', arr_bulk_pall:'All',
@@ -5116,19 +5140,325 @@ function peuplerOperateursFiltre(){
   wrap.dataset.rempli = LANG;
 }
 
+/* ================= Arrets Inpak : referentiel des raisons =================
+   Transcrit des feuilles affichees en ligne (10 categories, 43 codes) et
+   complete par 3 codes reellement encodes mais absents de la feuille :
+   00.03, 04.09 et 06.12.
+
+   Les arrets sont stockes sous la forme "(02.01) Inpak sneller dan aanvoer".
+   Le CODE fait foi : c'est lui qui sert de cle de traduction, jamais le
+   texte. Les donnees historiques ne sont donc jamais modifiees, et un code
+   inconnu retombe proprement sur le libelle neerlandais d'origine.
+   Ordre des libelles : [NL, FR, EN]. */
+
+var ARRETS_REF_CAT = {
+  '00': ['Reinigen', 'Nettoyage', 'Cleaning'],
+  '01': ['Wissel', 'Changement', 'Change'],
+  '02': ['Aanvoer product', 'Arrivee du produit', 'Flow product'],
+  '03': ['Ishida', 'Ishida', 'Ishida'],
+  '04': ['GEA', 'GEA', 'GEA'],
+  '05': ['Smartdate', 'Smartdate', 'Smartdate'],
+  '06': ['CPS / Blueprint', 'CPS / Blueprint', 'CPS / Blueprint'],
+  '07': ['Weber doos labelaar', 'Etiqueteuse de boite', 'Box labeler'],
+  '08': ['Afvoer', 'Sortie boites et palettes', 'Exit product'],
+  '10': ['Niet actief', 'Non actif', 'Inactive']
+};
+
+var ARRETS_REF_RAISON = {
+  '00.01': ['Grote reiniging', 'Grand nettoyage', 'Extensive cleaning'],
+  '00.02': ['Reiniging na technische interventie', 'Nettoyage apres intervention technique', 'Cleaning after technical intervention'],
+  '00.03': ['Reiniging na batter', 'Nettoyage apres batter', 'Cleaning after batter'],
+  '01.01': ['Ombouw', 'Changement d\'article', 'Change of article'],
+  '02.01': ['Onvoldoende product (inpak sneller dan aanvoer)', 'Produit insuffisant (emballage plus rapide que l\'alimentation)', 'Insufficient product (packing faster than production)'],
+  '02.02': ['Stilstand in productie', 'Temps d\'arret dans la production', 'Stand still in production'],
+  '02.05': ['Ombouw in productie', 'Changement dans la production', 'Product change in production'],
+  '02.06': ['Opvang klantenbulken', 'Production vers bulks clients', 'Filling client bulks'],
+  '02.07': ['Wachten op bulkaanvoer', 'En attente de bulks', 'Waiting on bulk transport'],
+  '03.01': ['Fouten PH, WH en DTH-fout, overgewicht', 'Fautes PH, WH, DTH et trop de poids', 'Errors PH, WH and DTH, overweight'],
+  '03.02': ['Reinigen', 'Nettoyage de l\'Ishida', 'Cleaning Ishida'],
+  '03.03': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '03.04': ['Andere (+ omschrijving)', 'Autre (+ description)', 'Other (+ description)'],
+  '04.01': ['Folie uit fotocel', 'Hors cellule photo', 'Foil fotocel out of position'],
+  '04.02': ['Foliewissel', 'Changement de bobine', 'Foil change'],
+  '04.03': ['Bekkenfout', 'Faute machoires', 'Jaws error'],
+  '04.04': ['Folie niet aanwezig', 'Film pas present', 'Foil not present'],
+  '04.05': ['Mesbekken wisselen', 'Changement du couteau / contre-couteau', 'Jaws knife block change'],
+  '04.06': ['Verstopping vulpijp', 'Bourrage de la pipe', 'Bag fill pipe blockage'],
+  '04.07': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '04.08': ['Andere (+ omschrijving)', 'Autre (+ description)', 'Other (+ description)'],
+  '04.09': ['Langs of dwarsnaad problemen', 'Probleme de soudure longitudinale ou transversale', 'Longitudinal or cross seam problem'],
+  '05.01': ['Lintwissel', 'Changement de ruban', 'Ribbon change'],
+  '05.02': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '05.03': ['Andere (+ omschrijving)', 'Autre (+ description)', 'Other (+ description)'],
+  '06.01': ['Bak metaal vol', 'Bac de metal plein', 'Metal reject box full'],
+  '06.02': ['Metaal test', 'Test de metal', 'Metal test'],
+  '06.03': ['Bak gewicht vol', 'Bac de poids plein', 'Weight reject box full'],
+  '06.04': ['Kartontoevoer', 'Approvisionnement de carton', 'Cardboard supply'],
+  '06.07': ['Taper', 'Scotcheuse', 'Taper'],
+  '06.08': ['Doosweger reject', 'Rejet du peseur de caisse', 'Box weigher reject'],
+  '06.10': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '06.11': ['Andere (+ omschrijving)', 'Autre (+ description)', 'Other (+ description)'],
+  '06.12': ['Thermische storing', 'Defaut thermique', 'Thermal fault'],
+  '07.01': ['Storing', 'Erreur', 'Error'],
+  '07.02': ['Rolwissel', 'Changement de rouleau d\'etiquette', 'Label roll change'],
+  '07.03': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '08.02': ['Storing afvoer buffertafel', 'Dysfonctionnement sortie de table d\'accumulation', 'Buffer table exit error'],
+  '08.03': ['Storing afvoer paletiser', 'Dysfonctionnement sortie du palettiseur', 'Palletizer exit error'],
+  '08.04': ['Technische dienst', 'Intervention service technique', 'Technical service'],
+  '10.01': ['Lijn niet beschikbaar - (investerings)werken', 'Ligne non disponible - travaux (investissement)', 'Line not available - (investment) works'],
+  '10.02': ['Preventief onderhoud', 'Entretien preventif', 'Preventive maintenance'],
+  '10.03': ['Sluiting', 'Fermeture', 'Closure'],
+  '10.04': ['Geen werk', 'Pas de travail', 'No work'],
+  '10.05': ['Andere (+ omschrijving)', 'Autre (+ description)', 'Other (+ description)'],
+  '10.06': ['Geen personeel', 'Pas de personnel', 'No staff']
+};
+
+var ARRETS_CAT_COUL = {
+  '00': '#06b6d4', '01': '#8b5cf6', '02': '#3b82f6', '03': '#f59e0b', '04': '#ef4444',
+  '05': '#ec4899', '06': '#10b981', '07': '#f97316', '08': '#84cc16', '10': '#64748b'
+};
+
+function arretsLangIdx(){
+  var l = (typeof LANG !== 'undefined') ? LANG : 'fr';
+  return l === 'nl' ? 0 : (l === 'en' ? 2 : 1);
+}
+/* "(02.01) Inpak sneller dan aanvoer" -> "02.01" */
+function arretCode(raison){
+  var m = /^\((\d{2}\.\d{2})\)/.exec(String(raison || '').trim());
+  return m ? m[1] : null;
+}
+function arretCat(raison){
+  var c = arretCode(raison);
+  return c ? c.slice(0, 2) : null;
+}
+function arretCatLibelle(cat){
+  var e = ARRETS_REF_CAT[cat];
+  return e ? e[arretsLangIdx()] : (cat || '?');
+}
+/* Libelle traduit, sans le code. Code inconnu : on garde le texte stocke. */
+function arretRaisonTexte(raison){
+  var c = arretCode(raison);
+  var e = c ? ARRETS_REF_RAISON[c] : null;
+  if(e) return e[arretsLangIdx()];
+  return String(raison || '').replace(/^\(\d{2}\.\d{2}\)\s*/, '') || '-';
+}
+/* Libelle complet affiche : "02.01 - Produit insuffisant ..." */
+function arretLibelle(raison){
+  var c = arretCode(raison);
+  return (c ? c + ' - ' : '') + arretRaisonTexte(raison);
+}
+function arretsFmtH(minutes){
+  var m = Math.round(minutes || 0);
+  return Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0');
+}
+
+/* ---------- Analyse des causes : Pareto par categorie, detail au clic ---------- */
+var ARRETS_CAUSES_TRI = 'duree';   /* 'duree' ou 'nombre' */
+var ARRETS_CAUSES_CAT = null;      /* categorie depliee */
+var _arretsParetoChart = null;
+var _arretsCausesData = [];
+
+function arretsCausesTri(mode){
+  ARRETS_CAUSES_TRI = mode;
+  if(typeof buildArretsInpak === 'function') buildArretsInpak();
+}
+function arretsCausesOuvrir(cat){
+  ARRETS_CAUSES_CAT = (ARRETS_CAUSES_CAT === cat) ? null : cat;
+  if(typeof buildArretsInpak === 'function') buildArretsInpak();
+}
+
+/* liste = arrets "avec raison" deja filtres par ligne / equipe / date,
+   mais PAS par raison : le Pareto doit toujours montrer toutes les causes. */
+function buildArretsCauses(liste){
+  var wrap = document.getElementById('arrets-causes-cat');
+  if(!wrap) return;
+  var parCat = {}, parRaison = {};
+  (liste || []).forEach(function(a){
+    if(!a || !a.raison) return;
+    var cat = arretCat(a.raison) || '??';
+    var d = a.duree || 0;
+    if(!parCat[cat]) parCat[cat] = { cat: cat, duree: 0, nombre: 0 };
+    parCat[cat].duree += d; parCat[cat].nombre++;
+    var cle = cat + '|' + a.raison;
+    if(!parRaison[cle]) parRaison[cle] = { cat: cat, raison: a.raison, duree: 0, nombre: 0 };
+    parRaison[cle].duree += d; parRaison[cle].nombre++;
+  });
+  var champ = ARRETS_CAUSES_TRI;
+  var cats = Object.keys(parCat).map(function(k){ return parCat[k]; })
+                   .sort(function(x, y){ return y[champ] - x[champ]; });
+  _arretsCausesData = cats;
+  var total = cats.reduce(function(s, c){ return s + c[champ]; }, 0);
+
+  /* boutons de tri */
+  ['duree','nombre'].forEach(function(m){
+    var b = document.getElementById('arrets-tri-' + m);
+    if(!b) return;
+    var on = (ARRETS_CAUSES_TRI === m);
+    b.style.background = on ? 'var(--blue)' : 'none';
+    b.style.color = on ? '#fff' : 'var(--tx2)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--bd2)';
+  });
+
+  if(!cats.length){
+    wrap.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:14px">' + t('arr_no_data') + '</div>';
+    var dv = document.getElementById('arrets-causes-detail'); if(dv) dv.innerHTML = '';
+    if(_arretsParetoChart){ try { _arretsParetoChart.destroy(); } catch(e){} _arretsParetoChart = null; }
+    return;
+  }
+
+  /* tableau des categories, cliquable */
+  var cumul = 0;
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">'
+    + '<thead><tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">'
+    + '<th style="text-align:left;padding:8px 6px">' + t('arr_ca_th_cat') + '</th>'
+    + '<th style="text-align:right;padding:8px 6px">' + t('arr_ca_th_duree') + '</th>'
+    + '<th style="text-align:right;padding:8px 6px">' + t('arr_ca_th_part') + '</th>'
+    + '<th style="text-align:right;padding:8px 6px">' + t('arr_ca_th_cumul') + '</th>'
+    + '<th style="text-align:right;padding:8px 6px">' + t('arr_ca_th_nb') + '</th>'
+    + '<th style="text-align:right;padding:8px 6px">' + t('arr_ca_th_moy') + '</th>'
+    + '</tr></thead><tbody>';
+  cats.forEach(function(c){
+    cumul += c[champ];
+    var coul = ARRETS_CAT_COUL[c.cat] || 'var(--tx2)';
+    var ouvert = (ARRETS_CAUSES_CAT === c.cat);
+    html += '<tr onclick="arretsCausesOuvrir(\'' + c.cat + '\')" style="border-bottom:1px solid var(--bd2);cursor:pointer'
+      + (ouvert ? ';background:var(--bg3)' : '') + '">'
+      + '<td style="padding:8px 6px;white-space:nowrap">'
+      + '<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + coul + ';margin-right:8px"></span>'
+      + '<b style="color:' + coul + '">' + c.cat + '</b> ' + arretCatLibelle(c.cat)
+      + '<span style="color:var(--tx3);margin-left:6px">' + (ouvert ? '&#9662;' : '&#9656;') + '</span></td>'
+      + '<td style="padding:8px 6px;text-align:right;font-weight:700">' + arretsFmtH(c.duree) + '</td>'
+      + '<td style="padding:8px 6px;text-align:right">' + (total ? (c[champ] / total * 100).toFixed(1) : '-') + ' %</td>'
+      + '<td style="padding:8px 6px;text-align:right;color:var(--tx3)">' + (total ? (cumul / total * 100).toFixed(0) : '-') + ' %</td>'
+      + '<td style="padding:8px 6px;text-align:right">' + c.nombre + '</td>'
+      + '<td style="padding:8px 6px;text-align:right;color:var(--tx3)">' + (c.nombre ? Math.round(c.duree / c.nombre) : 0) + ' min</td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  /* detail de la categorie depliee */
+  var det = document.getElementById('arrets-causes-detail');
+  if(det){
+    if(!ARRETS_CAUSES_CAT){
+      det.innerHTML = '<div style="font-size:12px;color:var(--tx3);padding:10px 2px">' + t('arr_ca_clic') + '</div>';
+    } else {
+      var lignes = Object.keys(parRaison).map(function(k){ return parRaison[k]; })
+        .filter(function(r){ return r.cat === ARRETS_CAUSES_CAT; })
+        .sort(function(x, y){ return y[champ] - x[champ]; });
+      var totCat = lignes.reduce(function(s, r){ return s + r[champ]; }, 0);
+      var coul = ARRETS_CAT_COUL[ARRETS_CAUSES_CAT] || 'var(--tx2)';
+      var h = '<div style="margin-top:14px;border-left:3px solid ' + coul + ';padding-left:12px">'
+        + '<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:' + coul + '">'
+        + ARRETS_CAUSES_CAT + ' - ' + arretCatLibelle(ARRETS_CAUSES_CAT) + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">'
+        + '<thead><tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">'
+        + '<th style="text-align:left;padding:7px 6px">' + t('arr_ca_th_raison') + '</th>'
+        + '<th style="text-align:right;padding:7px 6px">' + t('arr_ca_th_duree') + '</th>'
+        + '<th style="text-align:right;padding:7px 6px">' + t('arr_ca_th_part') + '</th>'
+        + '<th style="text-align:right;padding:7px 6px">' + t('arr_ca_th_nb') + '</th>'
+        + '<th style="text-align:right;padding:7px 6px">' + t('arr_ca_th_moy') + '</th>'
+        + '<th style="text-align:right;padding:7px 6px"></th></tr></thead><tbody>';
+      lignes.forEach(function(r){
+        h += '<tr style="border-bottom:1px solid var(--bd2)">'
+          + '<td style="padding:7px 6px">' + arretLibelle(r.raison) + '</td>'
+          + '<td style="padding:7px 6px;text-align:right;font-weight:600">' + arretsFmtH(r.duree) + '</td>'
+          + '<td style="padding:7px 6px;text-align:right">' + (totCat ? (r[champ] / totCat * 100).toFixed(1) : '-') + ' %</td>'
+          + '<td style="padding:7px 6px;text-align:right">' + r.nombre + '</td>'
+          + '<td style="padding:7px 6px;text-align:right;color:var(--tx3)">' + (r.nombre ? Math.round(r.duree / r.nombre) : 0) + ' min</td>'
+          + '<td style="padding:7px 6px;text-align:right"><button onclick="arretsFiltrerRaison(\'' + String(r.raison).replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')" '
+          + 'style="padding:3px 9px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer">'
+          + t('arr_ca_filtrer') + '</button></td>'
+          + '</tr>';
+      });
+      h += '</tbody></table></div>';
+      det.innerHTML = h;
+    }
+  }
+
+  /* Pareto : barres par categorie + courbe du cumule */
+  var ctx = document.getElementById('arretsParetoChart');
+  if(!ctx || typeof Chart === 'undefined') return;
+  if(_arretsParetoChart){ try { _arretsParetoChart.destroy(); } catch(e){} _arretsParetoChart = null; }
+  var cum = 0;
+  var cumuls = cats.map(function(c){ cum += c[champ]; return total ? +(cum / total * 100).toFixed(1) : 0; });
+  var valeurs = cats.map(function(c){ return champ === 'duree' ? +(c.duree / 60).toFixed(1) : c.nombre; });
+  var unite = (champ === 'duree') ? ' h' : '';
+  _arretsParetoChart = new Chart(ctx, {
+    data: {
+      labels: cats.map(function(c){ return c.cat + ' ' + arretCatLibelle(c.cat); }),
+      datasets: [
+        { type: 'bar', label: t(champ === 'duree' ? 'arr_ca_heures' : 'arr_ca_nombre'), data: valeurs,
+          backgroundColor: cats.map(function(c){ return ARRETS_CAT_COUL[c.cat] || '#64748b'; }),
+          borderRadius: 3, yAxisID: 'y', order: 2 },
+        { type: 'line', label: t('arr_ca_cumule'), data: cumuls, yAxisID: 'y2', order: 1,
+          borderColor: '#e8eaf0', backgroundColor: '#e8eaf0', borderWidth: 2,
+          pointRadius: 3, pointBackgroundColor: '#e8eaf0', tension: .25, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 11 }, color: '#8b90a4' } },
+        tooltip: { callbacks: { label: function(c){
+          return c.dataset.yAxisID === 'y2'
+            ? t('arr_ca_cumule') + ' : ' + c.parsed.y + ' %'
+            : c.dataset.label + ' : ' + c.parsed.y + unite;
+        } } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#8b90a4', maxRotation: 30, minRotation: 0 } },
+        y: { beginAtZero: true, position: 'left', grid: { color: 'rgba(128,128,128,.12)' },
+             ticks: { font: { size: 10 }, color: '#8b90a4', callback: function(v){ return v + unite; } } },
+        y2: { beginAtZero: true, max: 100, position: 'right', grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#8b90a4', callback: function(v){ return v + ' %'; } } }
+      }
+    }
+  });
+}
+
+/* Depuis le detail : applique le filtre raison global de l'onglet. */
+function arretsFiltrerRaison(raison){
+  ARRETS_RAISON_FILTRE = raison;
+  var sel = document.getElementById('arrets-raison-select');
+  if(sel) sel.value = raison;
+  if(typeof buildArretsInpak === 'function') buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
+  var anc = document.getElementById('arrets-raison-select');
+  if(anc && anc.scrollIntoView) anc.scrollIntoView({ block: 'center' });
+}
+
 function peuplerRaisonsSelect(){
   var sel = document.getElementById('arrets-raison-select');
   if(!sel) return;
-  var raisons = {};
+  var stats = {};
   Object.values(ARRETS_DATA).forEach(function(a){
-    if(a.type === 'avec_raison' && a.raison) raisons[a.raison] = true;
+    if(a.type !== 'avec_raison' || !a.raison) return;
+    if(!stats[a.raison]) stats[a.raison] = { n: 0, d: 0 };
+    stats[a.raison].n++; stats[a.raison].d += (a.duree || 0);
   });
-  var liste = Object.keys(raisons).sort();
+  /* regroupe par famille (00, 01, 02 ...) et trie chaque famille par temps perdu */
+  var parCat = {};
+  Object.keys(stats).forEach(function(r){
+    var c = arretCat(r) || '99';
+    if(!parCat[c]) parCat[c] = [];
+    parCat[c].push(r);
+  });
   var precedent = sel.value;
-  sel.innerHTML = '<option value="all">' + t('arr_all_reasons') + '</option>' + liste.map(function(r){
-    return '<option value="' + r.replace(/"/g,'&quot;') + '">' + r + '</option>';
-  }).join('');
-  if(liste.indexOf(precedent) !== -1) sel.value = precedent;
+  var html = '<option value="all">' + t('arr_all_reasons') + '</option>';
+  Object.keys(parCat).sort().forEach(function(c){
+    var titre = (ARRETS_REF_CAT[c] ? c + ' - ' + arretCatLibelle(c) : t('arr_ca_th_cat'));
+    html += '<optgroup label="' + titre.replace(/"/g, '&quot;') + '">';
+    parCat[c].sort(function(x, y){ return stats[y].d - stats[x].d; }).forEach(function(r){
+      html += '<option value="' + r.replace(/"/g, '&quot;') + '">'
+            + arretLibelle(r).replace(/</g, '&lt;')
+            + '  (' + Math.round(stats[r].d / 60) + ' h)</option>';
+    });
+    html += '</optgroup>';
+  });
+  sel.innerHTML = html;
+  if(stats[precedent]) sel.value = precedent;
 }
 
 function filtrerArretsLigne(ligne){
@@ -5581,6 +5911,10 @@ function buildArretsInpak(){
   // Filtre par raison precise (ex: "combien de temps a pris le grand
   // nettoyage sur toute l'annee ?") — applique AVANT le filtre operateur,
   // pour que la comparaison par operateur montre toujours tout le monde.
+  /* le Pareto doit montrer TOUTES les causes : on le construit avant
+     d'appliquer le filtre raison, sinon il ne resterait qu'une barre. */
+  if(typeof buildArretsCauses === 'function') buildArretsCauses(avecRaison);
+
   if(ARRETS_RAISON_FILTRE !== 'all'){
     avecRaison = avecRaison.filter(function(a){ return a.raison === ARRETS_RAISON_FILTRE; });
   }
@@ -5593,7 +5927,7 @@ function buildArretsInpak(){
       var totalMin = avecRaison.reduce(function(s, a){ return s + (a.duree || 0); }, 0);
       var h = Math.floor(totalMin / 60), m = totalMin % 60;
       wrapRaisonResume.style.display = 'block';
-      wrapRaisonResume.innerHTML = '<b>' + avecRaison.length + '</b> ' + t('arr_occurrences_de').replace('{raison}', ARRETS_RAISON_FILTRE) + ' <b>' + h + 'h' + String(m).padStart(2,'0') + '</b> (' + totalMin + ' ' + t('arr_min_suffix') + ')';
+      wrapRaisonResume.innerHTML = '<b>' + avecRaison.length + '</b> ' + t('arr_occurrences_de').replace('{raison}', arretLibelle(ARRETS_RAISON_FILTRE)) + ' <b>' + h + 'h' + String(m).padStart(2,'0') + '</b> (' + totalMin + ' ' + t('arr_min_suffix') + ')';
     }
   }
 
@@ -5707,7 +6041,7 @@ function buildArretsInpak(){
           + '<td style="padding:8px;font-size:12px;font-weight:600">Line ' + a.ligne + '</td>'
           + '<td style="padding:8px;font-size:12px;font-weight:600;color:' + coul + '">' + eq + '</td>'
           + '<td style="padding:8px;font-size:12px;color:var(--tx1)">' + operateur + '</td>'
-          + '<td style="padding:8px;font-size:13px;color:#ef4444">' + a.raison + '</td>'
+          + '<td style="padding:8px;font-size:13px;color:#ef4444">' + arretLibelle(a.raison) + '</td>'
           + '</tr>';
       }).join('');
       html += '</tbody></table>';
