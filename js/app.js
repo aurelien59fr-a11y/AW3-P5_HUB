@@ -4909,6 +4909,13 @@ function buildArretsBulkChart(){ buildBulkSections(); }
 function buildArretsBulkEquipeChart(){ buildBulkSections(); }
 function bulkSauverUnite(){ buildBulkSections(); }
 
+var ARRETS_LIGNE_FILTRE = 'all';
+var ARRETS_EQUIPE_FILTRE = 'all'; // 'all' ou 'P1'..'P5'
+var ARRETS_DATE_FILTRE = '';      // '' ou 'YYYY-MM-DD'
+var ARRETS_DATE_FIN_FILTRE = '';  // '' ou 'YYYY-MM-DD' (fourchette)
+var ARRETS_HEURE_FILTRE = '';     // '' ou 'HH:MM'
+var ARRETS_RAISON_FILTRE = 'all'; // 'all' ou une raison precise
+
 function loadArretsInpak(){
   if(!db) return;
   db.ref('arrets_inpak').on('value', function(snap){
