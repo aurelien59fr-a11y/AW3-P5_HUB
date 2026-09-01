@@ -599,7 +599,8 @@ var I18N={
     pt_marked_done_suffix:' anomalie(s) marquée(s) comme traitée(s)',
     pt_firebase_error_prefix:'Erreur Firebase : ', pt_generic_error_prefix:'Erreur : ',
     pt_modal_title:'Importer pointages Protime',
-    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', arr_ca_title:'Analyse des causes',
+    arr_subtitle:'Lignes 31 a 36 — arrets avec raison et micro-arrets', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Surproduction envoyee en bulkopvang et volumes remballes sur la bij-ligne',
+    arr_ca_title:'Analyse des causes',
     arr_ca_hint:'Les 10 familles d\'arrets classees par temps perdu, avec la courbe du cumule : les premieres barres montrent ou se joue l\'essentiel. Clique une ligne du tableau pour deplier le detail de ses raisons. Le classement suit les filtres ligne, equipe et periode ci-dessus.',
     arr_ca_tri_duree:'Heures perdues', arr_ca_tri_nombre:'Nombre d\'arrets',
     arr_ca_th_cat:'Famille', arr_ca_th_raison:'Raison', arr_ca_th_duree:'Temps perdu',
@@ -858,7 +859,8 @@ var I18N={
     pt_marked_done_suffix:' anomalie(ën) gemarkeerd als verwerkt',
     pt_firebase_error_prefix:'Firebase-fout: ', pt_generic_error_prefix:'Fout: ',
     pt_modal_title:'Protime-tijdsregistraties importeren',
-    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', arr_ca_title:'Oorzakenanalyse',
+    arr_subtitle:'Lijnen 31 tot 36 — stilstanden met reden en micro-stilstanden', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproductie naar de bulkopvang en volumes herverpakt op de bijlijn',
+    arr_ca_title:'Oorzakenanalyse',
     arr_ca_hint:'De 10 stilstandfamilies gerangschikt op verloren tijd, met de cumulatieve curve : de eerste balken tonen waar het echt om draait. Klik op een rij om de detailredenen open te vouwen. De rangschikking volgt de filters lijn, ploeg en periode hierboven.',
     arr_ca_tri_duree:'Verloren uren', arr_ca_tri_nombre:'Aantal stilstanden',
     arr_ca_th_cat:'Familie', arr_ca_th_raison:'Reden', arr_ca_th_duree:'Verloren tijd',
@@ -1117,7 +1119,8 @@ var I18N={
     pt_marked_done_suffix:' anomaly(ies) marked as processed',
     pt_firebase_error_prefix:'Firebase error: ', pt_generic_error_prefix:'Error: ',
     pt_modal_title:'Import Protime time records',
-    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', arr_ca_title:'Root cause analysis',
+    arr_subtitle:'Lines 31 to 36 — stops with reason and micro-stops', tab_bulk:'Bulk & Bijlijn', bulk_subtitle:'Overproduction sent to the bulkopvang and volumes repacked on the bij-line',
+    arr_ca_title:'Root cause analysis',
     arr_ca_hint:'The 10 stop families ranked by time lost, with the cumulative curve : the first bars show where it really matters. Click a row to unfold the detail of its reasons. The ranking follows the line, team and period filters above.',
     arr_ca_tri_duree:'Hours lost', arr_ca_tri_nombre:'Number of stops',
     arr_ca_th_cat:'Family', arr_ca_th_raison:'Reason', arr_ca_th_duree:'Time lost',
@@ -1500,6 +1503,7 @@ function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEE
 function toast(msg,col){var t=document.createElement('div');t.className='toast';t.innerHTML='<div class="tdot" style="background:'+col+'"></div>'+msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2500);}
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
+  if(b.dataset.tab === 'bulk' && typeof buildBulkSections === 'function') buildBulkSections();
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
   if(b.dataset.tab === 'recrutement' && typeof buildRecrutementTab === 'function') buildRecrutementTab();
 if(b.dataset.tab === 'espace' && typeof buildMonEspace === 'function') buildMonEspace();
@@ -2587,6 +2591,8 @@ function applyRole(role){
   if(ptTab) ptTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var arretsTab = document.getElementById('tab-arrets-btn');
   if(arretsTab) arretsTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
+  var bulkTab = document.getElementById('tab-bulk-btn');
+  if(bulkTab) bulkTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var cmp2Tab = document.getElementById('tab-cmp2-btn');
   if(cmp2Tab) cmp2Tab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
   var ncpTab = document.getElementById('tab-ncp-btn');
@@ -2600,7 +2606,7 @@ function applyRole(role){
   // Acces personnalise par onglet (defini par l'admin dans Comptes employes)
   if(!isAdmin && role !== 'subchef' && currentUser && currentUser.tabs){
     var tCfg = currentUser.tabs;
-    ['ov','br','pl','ab','formations','pt','arrets','ncp','recrutement','espace'].forEach(function(t){
+    ['ov','br','pl','ab','formations','pt','arrets','bulk','ncp','recrutement','espace'].forEach(function(t){
       var tBtn = document.querySelector('.tab[data-tab="'+t+'"]');
       var visible = (t === 'espace') ? (tCfg[t] !== false) : !!tCfg[t];
       if(tBtn) tBtn.style.display = visible ? 'flex' : 'none';
@@ -2614,7 +2620,7 @@ function applyRole(role){
     }
     var activeTabBtn2 = document.querySelector('.tab.on');
     if(activeTabBtn2 && !tCfg[activeTabBtn2.dataset.tab]){
-      var order2 = ['pl','espace','ov','formations','br','ab','pt','arrets','ncp','recrutement'];
+      var order2 = ['pl','espace','ov','formations','br','ab','pt','arrets','bulk','ncp','recrutement'];
       var firstOk = null;
       for(var i2=0;i2<order2.length;i2++){ if(tCfg[order2[i2]]){ firstOk = order2[i2]; break; } }
       var firstBtn = firstOk && document.querySelector('.tab[data-tab="'+firstOk+'"]');
@@ -4399,7 +4405,7 @@ function importerBulk(){
 /* Donnees source : bulk_data/{standaard,noodafvoer,bijlijn1} en kg,
    relevees a l'heure. Volumes affiches en tonnes, moyennes en kg/h.
    La repartition par equipe reutilise equipeReelle(jour, heure).
-   Le filtre equipe global de l'onglet (ARRETS_EQUIPE_FILTRE) s'applique ici.
+   Le filtre equipe de l'onglet (BULK_EQUIPE_FILTRE) s'applique ici.
 
    IMPORTANT : les deux sujets sont volontairement independants.
    - standaard + noodafvoer = produit envoye en bulkopvang (perimetre exact
@@ -4409,6 +4415,24 @@ function importerBulk(){
      il serait faux. */
 
 var BULK_EQ = ['P1','P2','P3','P4','P5'];
+/* Filtre equipe propre a l'onglet Bulk : il etait auparavant partage avec
+   l'onglet Arrets, ou vivaient les pastilles. Les deux onglets sont
+   maintenant independants. */
+var BULK_EQUIPE_FILTRE = 'all';
+
+function filtrerBulkEquipe(equipe){
+  BULK_EQUIPE_FILTRE = equipe;
+  document.querySelectorAll('.bulk-equipe-btn').forEach(function(b){
+    var actif = b.dataset.equipe === equipe;
+    var coul = (b.dataset.equipe === 'all') ? 'var(--blue)'
+             : ((typeof COULEURS_EQUIPE !== 'undefined' && COULEURS_EQUIPE[b.dataset.equipe]) || 'var(--blue)');
+    b.classList.toggle('on', actif);
+    b.style.background = actif ? coul : 'none';
+    b.style.color = actif ? '#fff' : coul;
+    b.style.borderColor = coul;
+  });
+  buildBulkSections();
+}
 var BULK_COUL = { standaard:'#3b82f6', noodafvoer:'#ef4444', bijlijn1:'#10b981' };
 
 function bulkTxt(cle, defaut){
@@ -4871,7 +4895,7 @@ function buildBulkSections(){
   cartes.forEach(function(id){ var el = document.getElementById(id); if(el) el.style.display = aucune ? 'none' : ''; });
   if(aucune){ if(meta) meta.innerHTML = ''; return; }
 
-  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
   var d1 = BULK_DATE_DEBUT || bornes.min;
   var d2 = BULK_DATE_FIN || bornes.max;
   if(d1 > d2){ var tmp = d1; d1 = d2; d2 = tmp; }
@@ -4935,7 +4959,7 @@ function bulkExportCSV(){
   if(!BULK_DATA){ alert(bulkTxt('arr_bulk_empty','Aucune donnee bulk importee pour le moment.')); return; }
   var bornes = bulkBornesDonnees();
   if(!bornes.min) return;
-  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
   var d1 = BULK_DATE_DEBUT || bornes.min;
   var d2 = BULK_DATE_FIN || bornes.max;
   var cur = bulkCalc(d1, d2, eqFiltre);
@@ -4977,7 +5001,7 @@ function bulkImprimerDetail(){
   var carte = document.getElementById('bulk-card-detail');
   var table = carte ? carte.querySelector('table') : null;
   if(!table) return;
-  var eqFiltre = (typeof ARRETS_EQUIPE_FILTRE !== 'undefined') ? ARRETS_EQUIPE_FILTRE : 'all';
+  var eqFiltre = (typeof BULK_EQUIPE_FILTRE !== 'undefined') ? BULK_EQUIPE_FILTRE : 'all';
   var bornes = bulkBornesDonnees();
   var d1 = BULK_DATE_DEBUT || bornes.min || '';
   var d2 = BULK_DATE_FIN || bornes.max || '';
@@ -5877,7 +5901,6 @@ var wrapResume = document.getElementById('cmp2-resume-wrap');
 }
 
 function buildArretsInpak(){
-  if(typeof buildArretsBulkChart === 'function') buildArretsBulkChart();
   var tousLesArrets = Object.values(ARRETS_DATA);
   var filtre = ARRETS_LIGNE_FILTRE;
   var arrets = tousLesArrets.filter(function(a){ return filtre === 'all' || a.ligne === filtre; });
