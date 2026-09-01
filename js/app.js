@@ -4240,7 +4240,7 @@ function getOperateur(dateISO, heureISO, ligne){
   var dow = d.getDay();
   var estWeekend = (dow === 0 || dow === 6);
   if(estWeekend && heureISO){
-    var equipeArret = getEquipe(dateISO, heureISO);
+    var equipeArret = equipeReelle(dateISO, heureISO);
     if(equipeArret !== 'P5') return null;
   }
 
@@ -4276,6 +4276,43 @@ function getEquipe(dateStr, heureStr){
   var veilleEstWeekend = (veilleDow === 0 || veilleDow === 6);
   if(veilleEstWeekend) return equipeWeekend(veilleStr, '17h-05h');
   return equipeSemaine(veilleStr, '21h-05h');
+}
+
+/* --- Jours en horaire week-end : samedis, dimanches, mais aussi feries et ponts ---
+   Ces jours-la l'atelier tourne en 2 postes (05h-17h / 17h-05h) tenus par P4 et P5.
+   La liste de reference existe deja dans H2025/H2026/H2027, les tables du planning,
+   ou la valeur indique le bloc tenu par P5.
+
+   getEquipe() ne connait que samedi et dimanche : il reste volontairement inchange,
+   toute l'application passe desormais par equipeReelle(), qui l'enveloppe et ne
+   corrige que les feries et les ponts. Sur tous les autres jours elle renvoie
+   exactement ce que renvoie getEquipe(). */
+function horaireWeekendJour(dateStr){
+  var p = String(dateStr).split('-');
+  if(p.length !== 3) return undefined;
+  var m = null;
+  if(p[0] === '2027') m = (typeof H2027 !== 'undefined') ? H2027 : null;
+  else if(p[0] === '2026') m = (typeof H2026 !== 'undefined') ? H2026 : null;
+  else if(p[0] === '2025') m = (typeof H2025 !== 'undefined') ? H2025 : null;
+  return m ? m[p[2] + '/' + p[1]] : undefined;
+}
+
+function equipeReelle(dateStr, heureStr){
+  if(!dateStr || !heureStr) return getEquipe(dateStr, heureStr);
+  var hh = parseInt(String(heureStr).split(':')[0], 10);
+  if(!isFinite(hh)) return getEquipe(dateStr, heureStr);
+  /* avant 05h on appartient a la nuit demarree la veille */
+  var ref = String(dateStr).slice(0,10);
+  if(hh < 5){
+    var d = new Date(ref + 'T12:00:00');
+    if(isNaN(d.getTime())) return getEquipe(dateStr, heureStr);
+    d.setDate(d.getDate() - 1);
+    ref = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  var hor = horaireWeekendJour(ref);
+  if(!hor) return getEquipe(dateStr, heureStr);   /* jour ordinaire : inchange */
+  var bloc = (hh >= 5 && hh < 17) ? '05h-17h' : '17h-05h';
+  return (bloc === hor) ? 'P5' : 'P4';
 }
 
 var ARRETS_DATA = {};
@@ -4337,7 +4374,7 @@ function importerBulk(){
 /* ================= Surproduction : bulk + bijlijn ================= */
 /* Donnees source : bulk_data/{standaard,noodafvoer,bijlijn1} en kg,
    relevees a l'heure. Volumes affiches en tonnes, moyennes en kg/h.
-   La repartition par equipe reutilise getEquipe(jour, heure).
+   La repartition par equipe reutilise equipeReelle(jour, heure).
    Le filtre equipe global de l'onglet (ARRETS_EQUIPE_FILTRE) s'applique ici.
 
    IMPORTANT : les deux sujets sont volontairement independants.
@@ -4428,7 +4465,7 @@ function bulkHeuresPoste(dDebut, dFin){
   if(isNaN(d.getTime()) || isNaN(fin.getTime())) return h;
   var garde = 0;
   var compte = function(jourCal, i){
-    var eq = (typeof getEquipe === 'function') ? getEquipe(jourCal, (i < 10 ? '0' : '') + i + ':00') : null;
+    var eq = (typeof equipeReelle === 'function') ? equipeReelle(jourCal, (i < 10 ? '0' : '') + i + ':00') : null;
     if(eq && h[eq] !== undefined) h[eq]++;
   };
   while(d <= fin && garde++ < 3000){
@@ -4470,7 +4507,7 @@ function bulkCalc(dDebut, dFin, eqFiltre){
       if(dDebut && jour < dDebut) return;
       if(dFin && jour > dFin) return;
       var heure = brut.slice(11,16);
-      var eq = (typeof getEquipe === 'function') ? getEquipe(cal, heure) : null;
+      var eq = (typeof equipeReelle === 'function') ? equipeReelle(cal, heure) : null;
       if(eqFiltre && eqFiltre !== 'all' && eq !== eqFiltre) return;
       var v = bulkNum(p.valeur);
       if(!res.jours[jour]){
@@ -5355,7 +5392,7 @@ function buildComparaisonTab(){
 
   var arrets = Object.values(ARRETS_DATA).filter(function(a){ return a.type === 'avec_raison'; });
   if(ARRETS_LIGNE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return a.ligne === ARRETS_LIGNE_FILTRE; });
-  if(ARRETS_EQUIPE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return getEquipe(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
+  if(ARRETS_EQUIPE_FILTRE !== 'all') arrets = arrets.filter(function(a){ return equipeReelle(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
   if(raison !== 'all') arrets = arrets.filter(function(a){ return a.raison === raison; });
   if(dateDebut) arrets = arrets.filter(function(a){ return a.date >= dateDebut; });
   if(dateFin) arrets = arrets.filter(function(a){ return a.date <= dateFin; });
@@ -5381,7 +5418,7 @@ var wrapResume = document.getElementById('cmp2-resume-wrap');
     arrets.forEach(function(a){
       var mois = a.date.slice(0, 7); // YYYY-MM
       tousLesMois[mois] = true;
-      var eq = getEquipe(a.date, a.heure);
+      var eq = equipeReelle(a.date, a.heure);
       if(!parMoisEquipe[mois]) parMoisEquipe[mois] = {};
       if(!parMoisEquipe[mois][eq]) parMoisEquipe[mois][eq] = { total: 0, n: 0 };
       parMoisEquipe[mois][eq].total += (a.duree || 0);
@@ -5446,7 +5483,7 @@ var wrapResume = document.getElementById('cmp2-resume-wrap');
   if(ctxEq && typeof Chart !== 'undefined'){
     var parEquipe = { P1: {total:0,n:0}, P2: {total:0,n:0}, P3: {total:0,n:0}, P4: {total:0,n:0}, P5: {total:0,n:0} };
     arrets.forEach(function(a){
-      var eq = getEquipe(a.date, a.heure);
+      var eq = equipeReelle(a.date, a.heure);
       if(!parEquipe[eq]) return;
       parEquipe[eq].total += (a.duree || 0);
       parEquipe[eq].n++;
@@ -5476,7 +5513,7 @@ var wrapResume = document.getElementById('cmp2-resume-wrap');
   if(ctxOp && typeof Chart !== 'undefined'){
     var arretsOp = arrets;
     if(CMP2_EQUIPE_OP_FILTRE !== 'all'){
-      arretsOp = arretsOp.filter(function(a){ return getEquipe(a.date, a.heure) === CMP2_EQUIPE_OP_FILTRE; });
+      arretsOp = arretsOp.filter(function(a){ return equipeReelle(a.date, a.heure) === CMP2_EQUIPE_OP_FILTRE; });
     }
     var parOp2 = {};
     arretsOp.forEach(function(a){
@@ -5521,7 +5558,7 @@ function buildArretsInpak(){
   // Filtre equipe — uniquement sur "avec raison" (les microstops sont
   // agreges par jour et n'ont pas d'heure precise, donc pas d'equipe possible)
   if(ARRETS_EQUIPE_FILTRE !== 'all'){
-    avecRaison = avecRaison.filter(function(a){ return getEquipe(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
+    avecRaison = avecRaison.filter(function(a){ return equipeReelle(a.date, a.heure) === ARRETS_EQUIPE_FILTRE; });
   }
 
   // Recherche precise date/heure, ou fourchette de dates
@@ -5659,7 +5696,7 @@ function buildArretsInpak(){
         + '<thead><tr style="text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em">'
         + '<th style="padding:8px">'+t('arr_col_date')+'</th><th style="padding:8px">'+t('arr_col_heure')+'</th><th style="padding:8px">'+t('arr_col_duree')+'</th><th style="padding:8px">'+t('arr_col_ligne')+'</th><th style="padding:8px">'+t('ov_kcard_team')+'</th><th style="padding:8px">'+t('col_operator')+'</th><th style="padding:8px">'+t('arr_col_raison')+'</th></tr></thead><tbody>';
       html += affiches.map(function(a){
-        var eq = getEquipe(a.date, a.heure);
+        var eq = equipeReelle(a.date, a.heure);
         var coul = COULEURS_EQUIPE[eq] || 'var(--tx2)';
         var dureeTxt = (a.duree != null) ? a.duree + ' min' : '-';
         var operateur = getOperateur(a.date, a.heure, a.ligne) || '-';
@@ -6544,7 +6581,7 @@ function ncpEquipesMulti(r){        // { principale, equipes:[{equipe,minutes,pa
         var cur = new Date(start.getTime()+m*60000);
         var iso = cur.getFullYear()+'-'+('0'+(cur.getMonth()+1)).slice(-2)+'-'+('0'+cur.getDate()).slice(-2);
         var hh  = ('0'+cur.getHours()).slice(-2)+':'+('0'+cur.getMinutes()).slice(-2);
-        var eq  = getEquipe(iso, hh);
+        var eq  = equipeReelle(iso, hh);
         if(eq){ acc[eq] = (acc[eq] || 0) + pas; tot += pas; }
         if(span === 0) break;
       }
@@ -6597,7 +6634,7 @@ function ncpBadgeSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') re
   } function ncpGetEquipe(r){
   if(r.equipe_override) return r.equipe_override;
   if(ncpEstNonClasse(r)) return null; var _hi = ncpHeureInfo(r); if(!_hi.heure) return null;
-  return getEquipe(_hi.date_iso || r.created_date_iso, _hi.heure);
+  return equipeReelle(_hi.date_iso || r.created_date_iso, _hi.heure);
 }
 function ncpSetEquipeOverride(notif, valeur){
   if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
