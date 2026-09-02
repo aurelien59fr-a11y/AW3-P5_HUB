@@ -1,72 +1,160 @@
 {
+  // =====================================================================
+  //  AW3-P5 HUB — Regles de securite Realtime Database
+  //  Principe :  admin = tout ;  sous-chef = le planning ;  les autres = lecture seule.
+  //  Rappel Firebase : un droit accorde sur un noeud est herite par tous ses
+  //  enfants et ne peut PAS etre repris plus bas. On part donc du plus
+  //  restrictif (la racine) et on ouvre ensuite noeud par noeud.
+  // =====================================================================
   "rules": {
+
+    // -----------------------------------------------------------------
+    // RACINE — l'admin, et lui seul, lit et ecrit partout.
+    // Cette seule ligne remplace toutes les autorisations "admin" du
+    // fichier : inutile de les repeter en dessous. Elle couvre aussi les
+    // noeuds futurs que tu ajouterais sans penser aux regles.
+    // Pour tous les autres roles (subchef, visiteur, custom, employe) la
+    // racine repond "non" : ils n'ont que ce qui est explicitement ouvert
+    // plus bas.
+    // -----------------------------------------------------------------
+    ".read":  "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+    ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+
+    // -----------------------------------------------------------------
+    // COMPTES — chaque utilisateur doit pouvoir lire SA propre fiche au
+    // moment de la connexion (c'est la que l'app va chercher son role).
+    // Il ne voit que la sienne ; la liste complete reste reservee a l'admin
+    // par la regle de racine. L'ecriture (creation / modification de compte)
+    // reste admin uniquement.
+    // -----------------------------------------------------------------
     "users": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".read": "auth != null && auth.uid === $uid"
       }
     },
+
+    // -----------------------------------------------------------------
+    // EMPLOYES — lecture pour tout compte connecte (noms, groupes, roles
+    // affiches partout dans l'app). Ecriture : admin seul (racine).
+    // -----------------------------------------------------------------
     "employees": {
-      ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".read": "auth != null"
     },
+
+    // -----------------------------------------------------------------
+    // PLANNING — le seul endroit ou le sous-chef peut ecrire.
+    //
+    // ATTENTION, point technique non negociable : la fonction save() de
+    // l'app envoie shifts2026 + shifts2025 + absences + extraHistorique +
+    // lastUpdate dans UN SEUL update() atomique. Firebase applique tout ou
+    // rien : s'il manque le droit sur une seule de ces cles, la sauvegarde
+    // entiere echoue. Les six noeuds doivent donc porter exactement le meme
+    // droit d'ecriture.
+    //
+    // Troisieme cas autorise : les comptes "custom" portant le drapeau
+    // editPlanning (les Coordinateurs). La regle reprend exactement la
+    // condition de canEdit() dans l'app : admin, subchef, ou editPlanning.
+    // Ce drapeau ne peut etre pose que par l'admin dans /users, il n'est
+    // donc pas falsifiable par l'utilisateur lui-meme.
+    // -----------------------------------------------------------------
     "planning": {
       "shifts2025": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       },
       "shifts2026": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       },
       "shifts2027": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       },
       "absences": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       },
       "extraHistorique": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       },
       "lastUpdate": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read":  "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
       }
     },
+
+    // -----------------------------------------------------------------
+    // FORMATIONS — inchange par rapport a l'existant : admin + sous-chef.
+    // -----------------------------------------------------------------
     "formations": {
-      ".read": "auth != null",
+      ".read":  "auth != null",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')"
     },
+
+    // -----------------------------------------------------------------
+    // POINTAGES — lecture pour tous, ecriture admin seule (racine).
+    // Seule exception : le noeud jetable _test_connexion, ecrit puis efface
+    // par le bouton "Tester la connexion Firebase". Sans cette ligne, le
+    // diagnostic afficherait une erreur rouge chez les non-admins alors que
+    // tout va bien. Il ne contient qu'un horodatage et un email.
+    // -----------------------------------------------------------------
     "pointages": {
       ".read": "auth != null",
-      ".write": "auth != null"
-    },
-    "arrets_inpak": {
-      ".read": "auth != null",
-      ".write": "auth != null"
-    },
-    "ncp_data": {
-      ".read": "auth != null",
-      ".write": "auth != null"
-    },
-    "bradford": {
-      "comments": {
-        ".read": "auth != null",
-        ".write": "auth != null"
-      },
-      "import_ts": {
-        ".read": "auth != null",
+      "_test_connexion": {
         ".write": "auth != null"
       }
     },
+
+    // -----------------------------------------------------------------
+    // ARRETS INPAK — 51 000 releves importes par script. Lecture seule pour
+    // tout le monde dans l'app ; l'import passe par ton compte admin.
+    // -----------------------------------------------------------------
+    "arrets_inpak": {
+      ".read": "auth != null"
+    },
+
+    // -----------------------------------------------------------------
+    // NCP QUALITE — l'onglet contient des boutons d'ecriture (mise de cote,
+    // commentaire, controle, override equipe). Avec ces regles ils ne
+    // fonctionnent que pour toi : les autres verront une erreur s'ils
+    // essaient. C'est le comportement demande.
+    // -----------------------------------------------------------------
+    "ncp_data": {
+      ".read": "auth != null"
+    },
+
+    // -----------------------------------------------------------------
+    // BULK / BIJLIJN — noeud ABSENT du fichier de regles jusqu'ici alors
+    // qu'il existe en base : il tournait donc sur des regles deployees a la
+    // main, jamais versionnees. Il est desormais declare.
+    // -----------------------------------------------------------------
+    "bulk_data": {
+      ".read": "auth != null"
+    },
+
+    // -----------------------------------------------------------------
+    // BRADFORD — commentaires et horodatage du dernier import.
+    // -----------------------------------------------------------------
+    "bradford": {
+      "comments": {
+        ".read": "auth != null"
+      },
+      "import_ts": {
+        ".read": "auth != null"
+      }
+    },
+
+    // -----------------------------------------------------------------
+    // RECRUTEMENT — donnees de candidats. Lecture laissee ouverte aux
+    // comptes connectes pour ne rien casser, mais l'onglet n'est de toute
+    // facon affiche qu'a l'admin. Si tu veux fermer aussi la lecture,
+    // supprime simplement les trois lignes ci-dessous : la regle de racine
+    // reservera alors tout le noeud a l'admin.
+    // -----------------------------------------------------------------
     "recrutement": {
       "candidats": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null"
       }
     }
   }
