@@ -2636,9 +2636,11 @@ function applyRole(role){
   var ae = document.getElementById('admin-email-display');
   if(ae && currentUser) ae.textContent = currentUser.email;
 
-  // Visiteur : acces en lecture a tout (sauf Admin), aucune ecriture possible
-  // (bloque aussi cote regles Firebase, donc double securite — meme si un
-  // bouton d'ecriture restait visible quelque part, Firebase refuserait).
+  // Visiteur : acces en lecture a tout (sauf Admin), aucune ecriture possible.
+  // Depuis la publication des regles Firebase du 02/09/2026, le blocage est
+  // aussi applique cote serveur : meme si un bouton d'ecriture restait visible
+  // quelque part, la base refuserait l'ecriture. Double securite reelle — avant
+  // cette date, seule l'interface bloquait et la base acceptait tout.
   if(isVisiteur){
     document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
 
