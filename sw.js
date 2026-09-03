@@ -6,13 +6,14 @@
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v50';
+const CACHE_VERSION = 'bradford-v51';
 const APP_SHELL = [
   './',
   './index.html',
   './js/core/format.js?v=1',
   './js/core/ui.js?v=1',
-  './js/app.js?v=67',
+  './js/core/firebase.js?v=1',
+  './js/app.js?v=68',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
