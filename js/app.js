@@ -2384,7 +2384,7 @@ popup.style.top=top+'px';
 popup.querySelectorAll('.popt').forEach(function(o){o.addEventListener('click',function(){applyShift(o.dataset.v);});});popup.querySelector('.pcancel').addEventListener('click',closePopup);}
 function closePopup(){if(popup)popup.style.display='none';activePill=null;}
 document.addEventListener('click',function(e){if(popup&&!popup.contains(e.target))closePopup();});
-function canEdit(){if(!currentUser){toast('Non connecte','#ef4444');return false;}if(currentUser.role==='admin'||currentUser.role==='subchef'||currentUser.editPlanning){return true;}toast('Acces non autorise','#ef4444');return false;}
+
 function applyShift(nv){
   if(!activePill)return;
   if(!canEdit())return;
@@ -2530,182 +2530,11 @@ function doPrint(fromIdx,toIdx){var all=allDates();if(fromIdx===undefined)fromId
   });
   var nb=selDates.length;var fs=nb<=6?18:nb<=8?17:nb<=10?15:nb<=14?13:nb<=18?12:11;var nameFs=15;var tb='';var rowIdx=0;['TL','INPAK','Prod','Unit'].forEach(function(g){var em=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25).filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});if(!em.length)return;tb+='<tr style="background:#1e293b"><td colspan="'+(selDates.length+1)+'" style="color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;padding:4px 6px">'+g+'</td></tr>';em.forEach(function(emp){var impaire=(rowIdx++ % 2 === 1);var nameBg=impaire?'#eef1f5':'#fafafa';tb+='<tr><td style="text-align:left;padding-left:8px;font-weight:700;font-size:'+nameFs+'px;border-right:2px solid #d1d5db;background:'+nameBg+';width:150px">'+emp.n+'</td>';selDates.forEach(function(d,i){var si=fromIdx+i;var s=emp.s[si]||'';var c=SC[s]||{bg:'#f9fafb',c:'#6b7280',b:'#e5e7eb'};var wkBg=infoJour[i].weekend?(impaire?'#dbeafe':'#eff6ff'):(impaire?'#f4f6f8':'#fff');tb+='<td style="padding:4px 2px;text-align:center;border:.5px solid #e5e7eb;background:'+wkBg+'">'+(s?'<span style="display:inline-block;background:'+c.bg+';color:'+c.c+';border:1.5px solid '+c.b+';padding:5px 10px;border-radius:4px;font-size:'+fs+'px;font-weight:700;white-space:nowrap">'+sLbl(s)+'</span>':'')+'</td>';});tb+='</tr>';});});var w=window.open('','_blank');w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Planning '+curYear+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,Arial,sans-serif;font-size:'+fs+'px;color:#111;background:#fff;padding:6mm}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#f3f4f6;font-size:'+fs+'px;font-weight:700;padding:6px 2px;text-align:center;border:.5px solid #e5e7eb}th.wk{background:#bfdbfe}th .h{display:block;font-size:'+(fs-3)+'px;font-weight:600;color:#1e40af;margin-top:2px}.pbtn{position:fixed;top:14px;right:14px;background:#1e293b;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer}@media print{.pbtn{display:none}@page{size:A4 landscape;margin:6mm}}</style></head><body>');w.document.write('<button class="pbtn" onclick="window.print()">Imprimer</button>');w.document.write('<div style="text-align:center;font-size:34px;font-weight:800;letter-spacing:3px;color:#111;margin-bottom:6px">AW3 P5</div>');
 w.document.write('<div style="display:flex;justify-content:space-between;border-bottom:1.5px solid #111;padding-bottom:8px;margin-bottom:10px"><div><div style="font-size:16px;font-weight:700">Planning '+curYear+' - AW3 Ploeg 5</div><div style="font-size:10px;color:#555">Week-ends, feries et ponts — bande bleue = weekend, horaire indique sous la date</div></div><div style="font-size:10px;color:#555">'+new Date().toLocaleDateString('fr-BE',{day:'2-digit',month:'long',year:'numeric'})+'</div></div>');w.document.write('<table><thead><tr><th style="text-align:left;padding-left:8px;width:150px">Operateur</th>'+selDates.map(function(d,i){return '<th'+(infoJour[i].weekend?' class="wk"':'')+'>'+d+(infoJour[i].horaire?'<span class="h">'+infoJour[i].horaire+'</span>':'')+'</th>';}).join('')+'</tr></thead><tbody>'+tb+'</tbody></table>');w.document.write('</body></html>');w.document.close();w.focus();}
-function applyRole(role){
-  var isAdmin = role === 'admin';
-  var isSubchef = role === 'subchef';
-  var isVisiteur = role === 'visiteur';
-  var isEmploye = role === 'employe';
-
-  // Toujours repartir d'un etat "tout visible" avant d'appliquer les
-  // restrictions du role courant — indispensable si on change de compte
-  // (ex: visiteur -> admin) sans recharger completement la page.
-  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
-    el.style.display = '';
-  });
-  ['ov','br','ab'].forEach(function(tab){
-    var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
-    if(btn) btn.style.display = 'flex';
-  });
-
-  // Employe — acces limite a Planning + Formations
-  if(isEmploye){
-    ['ov','br','ab'].forEach(function(tab){
-      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
-      if(btn) btn.style.display = 'none';
-    });
-    var activeTabBtn = document.querySelector('.tab.on');
-    if(activeTabBtn && activeTabBtn.dataset.tab !== 'pl' && activeTabBtn.dataset.tab !== 'formations'){
-      var plBtn = document.querySelector('.tab[data-tab="pl"]');
-      if(plBtn) plBtn.click();
-    }
-  }
-
-  // Badge role
-  var badge = document.getElementById('role-badge');
-  if(badge){
-    if(isAdmin){
-      badge.textContent=t('badge_role_admin');
-      badge.style.background='rgba(16,185,129,.15)';
-      badge.style.color='var(--green)';
-      badge.style.borderColor='rgba(16,185,129,.3)';
-    } else if(isVisiteur){
-      badge.textContent=t('role_visiteur');
-      badge.style.background='rgba(139,146,164,.15)';
-      badge.style.color='var(--tx2)';
-      badge.style.borderColor='rgba(139,146,164,.3)';
-    } else if(isEmploye){
-      badge.textContent=t('role_employe');
-      badge.style.background='rgba(249,115,22,.15)';
-      badge.style.color='var(--orange)';
-      badge.style.borderColor='rgba(249,115,22,.3)';
-    } else {
-      badge.textContent=t('role_souschef');
-      badge.style.background='rgba(59,130,246,.15)';
-      badge.style.color='var(--blue)';
-      badge.style.borderColor='rgba(59,130,246,.3)';
-    }
-  }
-
-  // Onglet Admin — admin seulement (jamais visiteur ni sous-chef)
-  var adminTab = document.getElementById('tab-admin-btn');
-  if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
-  // Pointages et Arrets Inpak — admin ET visiteur (lecture), pas sous-chef
-  var ptTab = document.getElementById('tab-pt-btn');
-  if(ptTab) ptTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
-  var arretsTab = document.getElementById('tab-arrets-btn');
-  if(arretsTab) arretsTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
-  var bulkTab = document.getElementById('tab-bulk-btn');
-  if(bulkTab) bulkTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
-  var cmp2Tab = document.getElementById('tab-cmp2-btn');
-  if(cmp2Tab) cmp2Tab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
-  var ncpTab = document.getElementById('tab-ncp-btn');
-  if(ncpTab) ncpTab.style.display = (isAdmin || isVisiteur) ? 'flex' : 'none';
-  var recTab = document.getElementById('tab-recrutement-btn');
-  if(recTab) recTab.style.display = isAdmin ? 'flex' : 'none';
-  canEditFormations = isAdmin || isSubchef;
-  var formAddBtn = document.getElementById('form-btn-add');
-  if(formAddBtn) formAddBtn.style.display = canEditFormations ? 'inline-flex' : 'none';
-
-  // Acces personnalise par onglet (defini par l'admin dans Comptes employes)
-  if(!isAdmin && role !== 'subchef' && currentUser && currentUser.tabs){
-    var tCfg = currentUser.tabs;
-    ['ov','br','pl','ab','formations','pt','arrets','bulk','ncp','recrutement','espace'].forEach(function(t){
-      var tBtn = document.querySelector('.tab[data-tab="'+t+'"]');
-      var visible = (t === 'espace') ? (tCfg[t] !== false) : !!tCfg[t];
-      if(tBtn) tBtn.style.display = visible ? 'flex' : 'none';
-    });
-    var badge2 = document.getElementById('role-badge');
-    if(badge2){
-      badge2.textContent=t('role_acces_perso');
-      badge2.style.background='rgba(249,115,22,.15)';
-      badge2.style.color='var(--orange)';
-      badge2.style.borderColor='rgba(249,115,22,.3)';
-    }
-    var activeTabBtn2 = document.querySelector('.tab.on');
-    if(activeTabBtn2 && !tCfg[activeTabBtn2.dataset.tab]){
-      var order2 = ['pl','espace','ov','formations','br','ab','pt','arrets','bulk','ncp','recrutement'];
-      var firstOk = null;
-      for(var i2=0;i2<order2.length;i2++){ if(tCfg[order2[i2]]){ firstOk = order2[i2]; break; } }
-      var firstBtn = firstOk && document.querySelector('.tab[data-tab="'+firstOk+'"]');
-      if(firstBtn) firstBtn.click();
-    }
-  }
-
-  // Email dans panneau admin
-  var ae = document.getElementById('admin-email-display');
-  if(ae && currentUser) ae.textContent = currentUser.email;
-
-  // Visiteur : acces en lecture a tout (sauf Admin), aucune ecriture possible.
-  // Depuis la publication des regles Firebase du 02/09/2026, le blocage est
-  // aussi applique cote serveur : meme si un bouton d'ecriture restait visible
-  // quelque part, la base refuserait l'ecriture. Double securite reelle — avant
-  // cette date, seule l'interface bloquait et la base acceptait tout.
-  if(isVisiteur){
-    document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
-
-    // Masquer les boutons d'action principaux, pour une experience propre
-    document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
-      el.style.display = 'none';
-    });
-
-    document.addEventListener('click', function(e){
-      var tab = e.target.closest('.tab');
-      if(tab && tab.dataset.tab === 'admin'){
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        toast('Acces non autorise (compte visiteur)', '#ef4444');
-      }
-    }, true);
-
-    return;
-  }
-
-  // Sous-chef : accès Planning uniquement
-  if(!isAdmin){
-    // Masquer les onglets non autorisés
-    ['ov','br','ab'].forEach(function(tab){
-      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
-      if(btn) btn.style.display = 'none';
-    });
-
-    // Forcer l'onglet Planning actif au démarrage
-    setTimeout(function(){
-      document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
-      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on');});
-      var plTab = document.querySelector('.tab[data-tab="pl"]');
-      var plPane = document.getElementById('pane-pl');
-      if(plTab) plTab.classList.add('on');
-      if(plPane) plPane.classList.add('on');
-    }, 100);
-
-    // Intercepter les clics directs sur les panes interdits
-    document.addEventListener('click', function(e){
-      var tab = e.target.closest('.tab');
-      if(tab && ['ov','br','ab','admin'].indexOf(tab.dataset.tab) !== -1){
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        toast('Acces non autorise', '#ef4444');
-      }
-    }, true);
-
-    // Sous-chef PEUT modifier le planning (ziek/verlof/postes)
-    // Aucun blocage sur applyShift
-  }
-}
 
 // Verification centralisee des droits
-function canEdit(){
-  if(!currentUser){toast('Non connecte','#ef4444');return false;}
-  // Admin et sous-chef peuvent modifier le planning
-  if(currentUser.role==='admin'||currentUser.role==='subchef'||currentUser.editPlanning) return true;
-  toast('Acces non autorise','#ef4444');
-  return false;
-}
 
 // Verification pour les actions admin uniquement
-function isAdmin(){
-  return currentUser && currentUser.role === 'admin';
-}
+
 // ---- GESTION EMPLOYES ----
 var editingEmpId = null;
 
@@ -2826,21 +2655,6 @@ function deactivateEmp(idx){
   }).catch(function(err){ toast(t('err_generic_prefix')+err.message,'#ef4444'); });
 }
 
-function doLogin(){var email=document.getElementById('li-email').value.trim();var pass=document.getElementById('li-pass').value;var btn=document.getElementById('li-btn');var err=document.getElementById('li-err');if(!email||!pass){err.textContent='Remplis tous les champs.';return;}btn.textContent=t('topbar_connecting');btn.disabled=true;err.textContent='';firebase.auth().signInWithEmailAndPassword(email,pass).catch(function(e){err.textContent=e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Email ou mot de passe incorrect.':'Erreur: '+e.message;btn.textContent=t('login_btn');btn.disabled=false;});}
-function doForgotPassword(){
-  var email=document.getElementById('li-email').value.trim();
-  var err=document.getElementById('li-err');
-  if(!email){ err.style.color='#ef4444'; err.textContent='Renseigne ton email dans le champ ci-dessus, puis clique a nouveau sur "Mot de passe oublie ?".'; return; }
-  err.style.color='var(--tx3)'; err.textContent='Envoi en cours...';
-  firebase.auth().sendPasswordResetEmail(email).then(function(){
-    err.style.color='#10b981';
-    err.textContent='Email envoye a '+email+' (verifie aussi tes spams).';
-  }).catch(function(e){
-    err.style.color='#ef4444';
-    err.textContent = e.code==='auth/user-not-found' ? 'Aucun compte avec cet email.' : 'Erreur: '+e.message;
-  });
-}
-function doLogout(){firebase.auth().signOut();}
 window.addEventListener('load',function(){
   applyI18n();
   document.getElementById('dchip').textContent=new Date().toLocaleDateString('fr-BE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
