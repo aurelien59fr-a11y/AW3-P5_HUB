@@ -56,6 +56,49 @@ extraction et correction de bugs.
   combine aux controles d'anti-regression deja passes a l'epoque, aucune
   correction rattrapee necessaire.
 
+## Etape 6 — Arrets Inpak
+
+- **Fonctions Bulk mal nommees comme si elles etaient du domaine Arrets** :
+  `buildArretsBulkChart()` et `buildArretsBulkEquipeChart()` portent un nom
+  qui laisse penser qu'elles appartiennent au domaine Arrets Inpak, mais leur
+  corps ne fait que deleguer purement a `buildBulkSections()` (aucune logique
+  Arrets propre). Verification faite sur le code reel : elles sont bien du
+  domaine Bulk & Bijijin malgre leur nom. Laissees dans `app.js` pour cette
+  etape (non extraites avec `metier/arrets.js` / `vues/arrets-inpak.js`), a
+  extraire avec le domaine Bulk a l'etape 8. Le nom pretant a confusion
+  pourrait etre corrige a ce moment-la (hors perimetre Phase 2, qui
+  n'effectue que des deplacements sans renommage).
+
+- **Aides "equipe" partagees non extraites** : `COULEURS_EQUIPE`,
+  `equipeDansSel()`, `basculerEquipe()`, `selEquipeTexte()` et
+  `majPastillesEquipe()` sont utilisees par les vues Arrets Inpak *et* par le
+  domaine Bulk (pas encore extrait). Laissees dans `app.js` pour cette etape
+  afin de ne pas casser silencieusement le Bulk en attendant son extraction
+  a l'etape 8 — a deplacer alors vers un fichier partage (candidat :
+  `core/equipes.js`) plutot que duplique dans les deux domaines.
+
+- **Ecart de comptage avec le plan** : le plan estimait 26 fonctions pour
+  Arrets Inpak et 3 pour le sous-onglet Comparaison (29 au total).
+  L'analyse reelle (avec `extract_fn2.js`, controle de chevauchement des
+  offsets passe sans anomalie) en denombre 27 pour Arrets Inpak (dont les
+  2 fonctions d'import Grafana, isolees dans `imports/grafana.js`) et 4 pour
+  Comparaison, soit 31 au total. Ecart minime, coherent avec la reserve deja
+  exprimee par le plan sur l'approximation de son propre comptage — l'ecart
+  s'explique principalement par l'exclusion correcte des 2 wrappers Bulk
+  mentionnes ci-dessus (que le plan semble avoir comptes dans l'estimation
+  Arrets a cause de leur nom) et par les aides "equipe" partagees, elles
+  aussi exclues de ce compte.
+
+- **Verification fonctionnelle live** : apres deploiement, les 51 001
+  arrets s'affichent correctement (verifie via
+  `Object.keys(ARRETS_DATA).length`), les filtres ligne / equipe / operateur
+  / raison sont fonctionnels (teste : filtre "Line 31", le graphique
+  "Analyse des causes" se met a jour en consequence), la comparaison
+  inter-equipes (P1 a P5) et la comparaison par operateur s'affichent
+  correctement, et l'import manuel (bouton "Importer Grafana") ouvre bien la
+  boite de dialogue de collage JSON referencant `grafana_arrets_inpak.js`.
+  Aucune erreur en console.
+
 ## `recalc()` — signature impure (rappel)
 
 `recalc()` ne prend aucun parametre et ne retourne rien : elle lit le
