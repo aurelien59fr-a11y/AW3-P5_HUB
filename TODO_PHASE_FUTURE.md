@@ -195,6 +195,89 @@ extraction et correction de bugs.
   (fusion non destructive, toujours dans `app.js`) ouvre bien sa boite
   de dialogue.
 
+## Etape 8 — Bulk / Bijlijn
+
+- **Quatre fonctions reclassifiees de "metier" vers "vue"** par rapport au
+  premier tri automatique (marqueurs DOM/HTML) : `buildArretsBulkChart`,
+  `buildArretsBulkEquipeChart` et `bulkSauverUnite` sont de purs relais
+  d'une seule ligne (`{ buildBulkSections(); }`), sans aucun calcul propre ;
+  `filtrerBulkEquipe` modifie l'etat de filtre equipe puis appelle
+  directement `majPastillesEquipe()` (DOM) avant de rafraichir via
+  `buildBulkSections()`. Meme famille que les onze reclassifications NCP de
+  l'etape 7 (gestionnaires d'action utilisateur qui delegvent le rendu).
+  `loadBulkData()` en revanche est **restee en metier** malgre son appel
+  final a `buildBulkSections()` : c'est l'ecouteur Firebase `bulk_data`
+  lui-meme (memes schema que `loadArretsInpak()`/`loadNCPData()`), pas un
+  gestionnaire d'action utilisateur.
+
+- **Aucune IIFE de redefinition trouvee** (motif rencontre a l'etape 7 pour
+  NCP, cause d'une perte silencieuse de comportement si non detecte) :
+  recherche exhaustive sur le fichier entier de tout `bulkXxx = function` /
+  `var bulkXxx = function` pour les 42 noms Bulk — aucun resultat. Coherent
+  avec la note du plan signalant Bulk comme le domaine ou calcul et rendu
+  etaient deja le plus nettement separes.
+
+- **`importerBulk()` / `openImportBulkModal()` extraites a cette etape**,
+  contrairement a `importerArretsInpak()` (etape 6) et `importerNCP()`
+  (etape 7) qui avaient ete laissees dans `app.js` en attendant l'etape 10.
+  Verification faite sur le texte exact du plan (section etape 10) : seuls
+  quatre fichiers d'import y sont explicitement lister — `imports/base.js`,
+  `imports/protime.js`, `imports/grafana.js` et `imports/ncp.js` ("les
+  quatre imports") — `imports/bulk.js` n'y figure pas. Les deux fonctions
+  sont donc deplacees directement dans `vues/bulk.js`, coherent avec leur
+  classification "vue" du premier tri automatique.
+
+- **Variables classees individuellement** (aucune n'est groupee dans une
+  meme instruction `var` avec d'autres domaines) : `BULK_DATA` (donnee
+  brute de l'ecouteur Firebase), `BULK_EQ` (liste constante des equipes) et
+  `_bulkPosteCache` (cache interne pur, utilise uniquement dans
+  `bulkHeuresPoste`) rangees en metier — meme famille que `NCP_DATA` /
+  `NCP_JOURS` (etape 7). `BULK_COUL` (utilisee uniquement dans les
+  fonctions de rendu), `BULK_DATE_DEBUT` / `BULK_DATE_FIN` (etat de filtre
+  de periode, ecrit uniquement par les gestionnaires UI de periode, lu en
+  lecture seule cote metier par `bulkDansPeriode`), `BULK_EQUIPE_FILTRE`
+  (etat de filtre equipe, ecrit uniquement par `filtrerBulkEquipe`,
+  desormais cote vue) et les deux instances Chart.js
+  `_arretsBulkChart` / `_arretsBulkEquipeChart` rangees en vue.
+
+- **Aides "equipe" partagees toujours pas extraites** : `COULEURS_EQUIPE`,
+  `equipeDansSel()`, `basculerEquipe()`, `selEquipeTexte()` et
+  `majPastillesEquipe()` restent dans `app.js`, comme annonce a l'etape 6 —
+  elles sont utilisees a la fois par Bulk (cette etape) et par Planning
+  (pas encore extrait, etape 9). Confirme candidates pour un futur
+  `core/equipes.js` en Phase 3, non extraites ici pour ne pas casser
+  Planning en attendant son tour.
+
+- **Anomalie pre-existante trouvee (non corrigee, point 25)** : la boite de
+  dialogue d'import Bulk affiche `arr_bulk_modal_title` (la cle de
+  traduction brute) au lieu du texte "Importer Bulkopvang + Bijlijn" prevu
+  en repli statique dans `index.html`
+  (`<span data-i18n="arr_bulk_modal_title">Importer Bulkopvang +
+  Bijlijn</span>`). Verifie : cette cle est absente du dictionnaire
+  `I18N.fr` dans `app.js` **d'origine** (avant toute modification de cette
+  etape) — c'est un bug preexistant du systeme de traduction, sans lien
+  avec l'extraction, non corrige ici conformement au point 25 du prompt
+  initial.
+
+- **Ecart de comptage avec le plan** : le plan estimait 40 fonctions pour
+  Bulk. L'analyse reelle (memes outils qu'aux etapes 5-7, controle de
+  chevauchement des offsets passe sans anomalie) en denombre 42 (17 metier
+  + 25 vue). Ecart de +5%, le plus faible rencontre depuis le debut de la
+  Phase 2 — coherent avec la note du plan qualifiant Bulk de "le plus
+  simple des quatre blocs metier".
+
+- **Verification fonctionnelle live** : apres deploiement, l'onglet Bulk &
+  Bijlijn charge sans erreur console, les KPI (surproduction, noodafvoer,
+  total bulk, activite) et le tableau par equipe (P1 a P5) s'affichent avec
+  des tonnages coherents (teste : filtre equipe "P1" -> KPI et ligne de
+  tableau P1 identiques, 1173,2 t), le graphique se recalcule en
+  consequence, le bandeau d'information periode confirme le decoupage en
+  jour de production 05h->05h ("les journees vont de 05h a 05h, comme les
+  postes"), et la boite de dialogue d'import Bulk (bouton "Importer
+  Grafana") s'ouvre et se ferme correctement (anomalie de traduction
+  ci-dessus mise a part, preexistante). `js/metier/bulk.js` et
+  `js/vues/bulk.js` se chargent tous deux en 200.
+
 ## `recalc()` — signature impure (rappel)
 
 `recalc()` ne prend aucun parametre et ne retourne rien : elle lit le
