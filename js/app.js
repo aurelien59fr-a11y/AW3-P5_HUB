@@ -4474,15 +4474,15 @@ var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', 
    ici en JSON puis stockees dans Firebase sous ncp_data/
 ============================================================ */
 
-var NCP_DATA = [];
-var NCP_FILTRE_UNITE = 'all';
-var NCP_FILTRE_DECOTE = false;
-var NCP_FILTRE_TYPE = 'all';
-var NCP_FILTRE_EQUIPE = 'all';
-var NCP_FILTRE_DEBUT = '';
-var NCP_FILTRE_FIN = '';
-var NCP_PRESET_ACTIF = 'all';
-var _ncpEvolutionChart = null, _ncpCausesChart = null, _ncpTonnageChart = null, _ncpLignesChart = null, _ncpProduitsChart = null;
+
+
+
+
+
+
+
+
+
 
 // ============================================================
 // MON ESPACE — vue individuelle par employe (pointages, absences,
@@ -4737,221 +4737,32 @@ html += meSection('🔧', t('espace_sec_ncp'), ncpEntries.length, ncpBody);
 
 wrap.innerHTML = html;
 }
-function loadNCPData(){
-  if(!db) return;
-  db.ref('ncp_data').on('value', function(snap){
-    var data = snap.val() || {};
-    NCP_DATA = Object.keys(data).map(function(k){ return data[k]; }); /* Lexique des libelles de probleme, construit A CHAUD a chaque chargement a partir des SEULES fiches dont le poste declarant est fiable (INPAK_WB d'un cote, PLOEGCH_WB et AW_EXP de l'autre). Le champ problems est un vocabulaire controle du systeme qualite et certains libelles sont exclusivement Inpak : "open lasnaden / langsnaad open" 80 fois cote Inpak et 0 cote Production, "problemen codering zak/doosje" 71/0, "verpakking andere reden" 25/0. Il sert plus bas a typer les fiches declarees par un nom de personne, pour qui le poste ne dit rien. Construit a chaud plutot qu'en dur : le lexique se met a jour tout seul quand de nouveaux libelles apparaissent. */ var _LEXI = {}, _LEXP = {}; NCP_DATA.forEach(function(r){ var w = String(r.reporter || ''); var eI = /INPAK_WB/i.test(w), eP = /PLOEGCH_WB|AW_EXP/i.test(w); if(!eI && !eP) return; String(r.problems || '').toLowerCase().split('|').forEach(function(t){ t = t.trim(); if(!t) return; if(eI) _LEXI[t] = (_LEXI[t] || 0) + 1; else _LEXP[t] = (_LEXP[t] || 0) + 1; }); }); NCP_DATA.forEach(function(r){ var p = String(r.created_on || '').split('/'); var iso = (p.length === 3) ? (p[2] + '-' + ('0' + p[1]).slice(-2) + '-' + ('0' + p[0]).slice(-2)) : null; r.date_fichier = r.created_date_iso || null; r.heure_fiable = !!(iso && iso === r.date_fichier); if(iso) r.created_date_iso = iso; /* Unite erronee dans la source : on ne corrige QUE si deux indices independants -- le declarant (INPAK_WB<n> / PLOEGCH_WB<n>) et le numero de ligne -- designent tous les deux la MEME autre unite. Un seul indice ne suffit pas : un chef de poste peut declarer un NCP concernant une autre unite (93% de concordance seulement). */ var _mRep = String(r.reporter || '').match(/WB\s*([123])\b/i); var _uRep = _mRep ? ('AW' + _mRep[1]) : null; var _mLig = String(r.ligne || '').match(/(\d{1,3})/); var _nLig = _mLig ? parseInt(_mLig[1], 10) : null; var _uLig = null; if(_nLig !== null){ if(_nLig >= 1 && _nLig <= 12) _uLig = 'AW1'; else if(_nLig >= 21 && _nLig <= 26) _uLig = 'AW2'; else if(_nLig >= 31 && _nLig <= 36) _uLig = 'AW3'; } if(r.unite && _uRep && _uLig && _uRep === _uLig && _uRep !== r.unite){ r.unite_corrigee_depuis = r.unite; r.unite = _uRep; } /* Unite ABSENTE dans la source. Depuis le 08/08/2026 des lots sont importes sans les champs d'enrichissement (unite, unite_source, ligne) : le pipeline amont "ncp_enrichi" ne tourne plus. On rejoue donc ici SES trois regles, par ordre de force de preuve : 1) numero de ligne cite (L31 -> AW3) 2) mention explicite "AW3" dans le texte, uniquement si une seule unite y est citee 3) code du declarant (INPAK_WB3 / PLOEGCH_WB3). La regle 3 est la plus faible (93% de concordance : un chef de poste peut declarer pour une autre unite) d'ou son rang. Verifie sur les 243 fiches sans unite : les trois indices ne se contredisent jamais. La source retenue est tracee dans unite_source et r.unite_deduite marque la deduction, pour rester auditable et reversible. */ if(!r.unite){ var _nDed = (_nLig !== null && _uLig) ? _nLig : null; if(_nDed === null){ var _rxD = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, _mD; while((_mD = _rxD.exec(String(r.description || ''))) !== null){ var _vD = parseInt(_mD[1], 10); if((_vD >= 1 && _vD <= 12) || (_vD >= 21 && _vD <= 26) || (_vD >= 31 && _vD <= 36)){ _nDed = _vD; break; } } } var _uDedLigne = null; if(_nDed !== null){ if(_nDed >= 1 && _nDed <= 12) _uDedLigne = 'AW1'; else if(_nDed >= 21 && _nDed <= 26) _uDedLigne = 'AW2'; else if(_nDed >= 31 && _nDed <= 36) _uDedLigne = 'AW3'; } var _uDedTexte = null, _vusAW = {}, _rxAW = /\bAW\s*([123])\b/gi, _mAW; var _blobAW = String(r.description || '') + ' ' + String(r.ncp_extra_info || ''); while((_mAW = _rxAW.exec(_blobAW)) !== null){ _vusAW['AW' + _mAW[1]] = 1; } var _ksAW = Object.keys(_vusAW); if(_ksAW.length === 1) _uDedTexte = _ksAW[0]; if(_uDedLigne){ r.unite = _uDedLigne; r.unite_source = 'ligne_premier_chiffre'; } else if(_uDedTexte){ r.unite = _uDedTexte; r.unite_source = 'texte_libre'; } else if(_uRep){ r.unite = _uRep; r.unite_source = 'reporter'; } if(r.unite) r.unite_deduite = true; } /* type_ncp errone dans la source : c'est le POSTE DECLARANT qui determine le type. PLOEGCH_WB<n> (chef de poste) et AW_EXP (expedition) declarent de la PRODUCTION ; INPAK_WB<n> declare de l'INPAK. La correspondance est nette dans la base : 470 Ploegchef -> Production et 939 Inpak -> Inpak ; les 31 fiches qui s'en ecartent sont des erreurs de la source, dont 28 sur le seul mois d'aout 2026 -- meme cause que l'unite absente, l'enrichissement amont ne tourne plus. Un type errone fausse tout l'aval : ligne_type, recherche de ligne dans le texte, recherche de l'operateur Inpak et aiguillage dans Mon Espace (un NCP de chef de poste ne doit jamais atterrir chez les operateurs Inpak). L'ancienne valeur est conservee dans type_ncp_source. */ var _wRep = String(r.reporter || ''); if(/PLOEGCH_WB|AW_EXP/i.test(_wRep) && r.type_ncp !== 'Production'){ r.type_ncp_source = r.type_ncp; r.type_ncp = 'Production'; } else if(/INPAK_WB/i.test(_wRep) && r.type_ncp !== 'Inpak'){ r.type_ncp_source = r.type_ncp; r.type_ncp = 'Inpak'; } else if(_wRep && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(_wRep)){ /* Declarant = nom de personne (qualite, planning, magasin...). Le poste ne dit rien sur le type, on tranche donc par le vocabulaire de problems : si TOUS les libelles de la fiche sont des libelles vus au moins 5 fois cote Inpak et au moins 5 fois plus souvent cote Inpak que cote Production, c'est de l'Inpak. Sinon on laisse Production. Critere volontairement strict : 9 fiches sur 280 basculent. */ var _tk = String(r.problems || '').toLowerCase().split('|').map(function(t){ return t.trim(); }).filter(Boolean); if(_tk.length && _tk.every(function(t){ return (_LEXI[t] || 0) >= 5 && (_LEXP[t] || 0) * 5 < (_LEXI[t] || 0); })){ if(r.type_ncp !== 'Inpak'){ r.type_ncp_source = r.type_ncp; r.type_ncp = 'Inpak'; r.type_ncp_deduit = 'problems'; } } } /* Correction manuelle de l'unite. Appliquee AVANT le calcul de VL pour que la validation de la ligne utilise bien la plage de la nouvelle unite. Un override gagne toujours sur la deduction automatique, et l'import ne peut pas l'ecraser : importerNCP part d'une copie de l'existant et ne recopie que les champs presents dans le fichier importe. */ if(r.unite_override){ if(r.unite && r.unite !== r.unite_override) r.unite_avant_override = r.unite; r.unite = r.unite_override; r.unite_source = 'manuel'; r.unite_deduite = false; } var VL = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; var nl = null; if(r.ligne){ var mn = /(\d{1,3})/.exec(String(r.ligne)); if(mn && VL.indexOf(parseInt(mn[1],10)) !== -1){ nl = parseInt(mn[1],10); } } if(nl === null){ var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx; while((mx = rex.exec(String(r.description || ''))) !== null){ var vv = parseInt(mx[1],10); if(VL.indexOf(vv) !== -1){ nl = vv; r.ligne_source = 'texte_description'; break; } } } /* La ligne n'est plus fournie par la source depuis le 08/08/2026 (0% des fiches contre 42% avant). Elle figure pourtant tres souvent dans le texte libre : "lijn 6 van 20u40", "Ligne 25", "ligne 32", "LIJN 7 dwarsnaad". On etend donc la recherche a ncp_extra_info, nettoye de ses en-tetes de mail. Purement additif : +78 fiches sur la base, aucune ligne deja trouvee n'est modifiee. Le filtre par plage de lignes valides de l'unite reste la garde principale contre les faux positifs. */ if(nl === null && r.type_ncp !== 'Production'){ var rex2 = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, mx2, t2 = ncpTexteUtile(r); while((mx2 = rex2.exec(t2)) !== null){ var vv2 = parseInt(mx2[1],10); if(VL.indexOf(vv2) !== -1){ nl = vv2; r.ligne_source = 'texte_info_ncp'; break; } } } if(nl !== null){ r.ligne = 'L' + ('0' + nl).slice(-2); r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } else { r.ligne = null; r.ligne_source = null; r.ligne_type = null; } /* Correction manuelle de la ligne, appliquee apres toute la deduction. 'aucune' permet de forcer une fiche a n'avoir aucune ligne. */ if(r.ligne_override){ if(r.ligne && r.ligne !== r.ligne_override) r.ligne_avant_override = r.ligne; if(r.ligne_override === 'aucune'){ r.ligne = null; r.ligne_source = 'manuel'; } else { r.ligne = r.ligne_override; r.ligne_source = 'manuel'; r.ligne_type = (r.type_ncp === 'Production') ? 'unite_production' : 'cause_directe'; } } r.lignes_multiples = ncpLignesCitees(r); }); NCP_DATA = ncpEclaterLignes(NCP_DATA);
-    buildNCPTab();
-  }, function(error){
-    console.warn('[NCP] Erreur chargement:', error);
-  });
-}
 
-function ncpLignesValides(u){ if(u === 'AW1') return [1,2,3,4,5,6,7,8,9,10,11,12]; if(u === 'AW2') return [21,22,23,24,25,26]; if(u === 'AW3') return [31,32,33,34,35,36]; return [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36]; } function ncpLignesCitees(r){ if(r.type_ncp === 'Production') return []; var V = ncpLignesValides(r.unite || ''); var rex = /\b(?:L|G|LIGNE|LIJN|LINE)\s*\.?\s*0?(\d{1,2})\b/gi, m, vus = []; while((m = rex.exec(String(r.description || ''))) !== null){ var v = parseInt(m[1],10); if(V.indexOf(v) !== -1 && vus.indexOf(v) === -1) vus.push(v); } return vus.map(function(v){ return 'L' + ('0' + v).slice(-2); }); } function ncpEclaterLignes(list){ var out = []; list.forEach(function(r){ var lg = r.lignes_multiples || []; if(lg.length < 2){ out.push(r); return; } lg.forEach(function(l){ var c = {}; for(var k in r){ c[k] = r[k]; } c.ligne = l; c.ligne_type = 'cause_directe'; c.ligne_source = 'multi_lignes'; c.ncp_partage = lg.length; c.total_pallets = (Number(r.total_pallets) || 0) / lg.length; c.total_tonnes = (Number(r.total_tonnes) || 0) / lg.length; c.total_kg = (Number(r.total_kg) || 0) / lg.length; out.push(c); }); }); return out; } var NCP_VUE = []; function ncpNomCle(w){ return String(w||'').trim().toLowerCase().replace(/\s+/g,' '); } function ncpNomAff(w){ return ncpNomCle(w).replace(/(^|[- ])([a-zà-ÿ])/g, function(m,a,b){ return a + b.toUpperCase(); }); } function closeNCPList(){ var m = document.getElementById('ncp-list-modal'); if(m) m.style.display = 'none'; } function ncpRendreListe(titre, rows){ var h = ''; if(!rows.length){ h = '<div style="font-size:12px;color:var(--tx3)">' + t('ncp_liste_vide') + '</div>'; } else { h = '<table class="bt" style="width:100%"><thead><tr><th>'+t('ncp_col_numero')+'</th><th>'+t('ncp_col_date')+'</th><th>'+t('ncp_col_unite')+'</th><th>'+t('ncp_col_ligne')+'</th><th>'+t('ncp_col_type')+'</th><th>'+t('ncp_col_declarant')+'</th><th>'+t('ncp_col_client')+'</th><th>'+t('ncp_col_palettes')+'</th><th>'+t('ncp_col_tonnage')+'</th><th>'+t('ncp_col_description')+'</th></tr></thead><tbody>'; rows.forEach(function(r){ h += '<tr style="cursor:pointer" onclick="ncpDetail(\'' + r.notification + '\')"><td style="color:#fff;font-weight:600">' + ncpEsc(r.notification) + '</td><td>' + ncpEsc(r.created_on || r.created_date_iso || '-') + '</td><td>' + ncpEsc(r.unite || '-') + '</td><td>' + ncpEsc(r.ligne || '-') + '</td><td>' + ncpEsc(r.type_ncp || '-') + '</td><td>' + ncpEsc(ncpNomAff(r.reporter)) + '</td><td>' + ncpEsc(r.famille_produit || '-') + '</td><td>' + (Number(r.total_pallets) || 0).toFixed(1) + '</td><td>' + (Number(r.total_tonnes) || 0).toFixed(2) + '</td><td style="max-width:320px;font-size:11px;color:var(--tx3)">' + ncpEsc(String(r.description || '').slice(0, 110)) + '</td></tr>'; }); h += '</tbody></table>'; } var tEl = document.getElementById('ncp-list-title'); if(tEl) tEl.textContent = titre + ' (' + rows.length + ')'; var bEl = document.getElementById('ncp-list-body'); if(bEl) bEl.innerHTML = h; var mEl = document.getElementById('ncp-list-modal'); if(mEl) mEl.style.display = 'flex'; } function ncpListeDeclarant(cle){ var rows = (NCP_VUE || []).filter(function(r){ return ncpNomCle(r.reporter) === cle; }); ncpRendreListe(t('ncp_titre_declare_par').replace('{n}', ncpNomAff(cle)), rows); } function ncpKpiListe(k){ var rows = (NCP_VUE || []).slice(); var titre = t('ncp_titre_total'); if(k === 'inpak'){ rows = rows.filter(function(r){ return r.type_ncp === 'Inpak'; }); titre = t('ncp_titre_inpak'); } else if(k === 'prod'){ rows = rows.filter(function(r){ return r.type_ncp === 'Production'; }); titre = t('ncp_titre_prod'); } else if(k === 'nonclasse'){ rows = rows.filter(ncpEstNonClasse); titre = t('ncp_titre_nonclasse'); } else if(k === 'tonnes'){ rows = rows.filter(function(r){ return (Number(r.total_tonnes) || 0) > 0; }).sort(function(a, b){ return (Number(b.total_tonnes) || 0) - (Number(a.total_tonnes) || 0); }); titre = t('ncp_titre_tonnage'); } else if(k === 'debloque'){
-    rows = rows.filter(ncpEstDebloquee).sort(function(x, y){
-      return (Number(y.total_tonnes) || 0) - (Number(x.total_tonnes) || 0);
-    });
-    titre = t('ncp_titre_debloque');
-  } ncpRendreListe(titre, rows); } function ncpBindKpi(){ var p = [['ncp-k-total','total'],['ncp-k-inpak','inpak'],['ncp-k-prod','prod'],
-         ['ncp-k-tonnes','tonnes'],['ncp-k-debloque','debloque']]; p.forEach(function(x){ var el = document.getElementById(x[0]); var c = el ? el.parentNode : null; if(!c || c.getAttribute('data-kpibound')) return; c.setAttribute('data-kpibound','1'); c.style.cursor = 'pointer'; c.title = t('ncp_tooltip_ncp_concernes'); c.addEventListener('click', function(){ ncpKpiListe(x[1]); }); }); } function ncpBuildDeclarants(rows){ ncpBindKpi(); var box = document.getElementById('ncp-declarants'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!ncpEstNonClasse(r)) return; var k = ncpNomCle(r.reporter); if(!m[k]) m[k] = { n: 0, t: 0, u: {}, sem: 0, we: 0 }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); if(r.unite) m[k].u[r.unite] = 1; if(r.created_date_iso){ var j = new Date(r.created_date_iso + 'T12:00:00').getDay(); if(j === 0 || j === 6) m[k].we++; else m[k].sem++; } }); var a = Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(x, y){ return y[1].n - x[1].n; }); var tot = 0; a.forEach(function(x){ tot += x[1].n; }); var cnt = document.getElementById('ncp-decl-count'); var rat = 0; rows.forEach(function(r){ if(ncpEstNonClasse(r) && ncpBakorderLien(r)) rat++; }); if(cnt) cnt.textContent = '(' + t('ncp_decl_count').replace('{n}', a.length).replace('{tot}', tot).replace('{rat}', rat) + ')'; if(!a.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">' + t('ncp_decl_aucun') + '</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">'; a.forEach(function(x){ var v = x[1]; var un = Object.keys(v.u).sort().join(' '); h += '<div onclick="ncpListeDeclarant(\'' + x[0] + '\')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:13px;font-weight:600;color:#fff">' + ncpEsc(ncpNomAff(x[0])) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + (un || t('ncp_decl_unite_inconnue')) + ' - ' + v.t.toFixed(1) + ' t - ' + t('ncp_decl_semaine').replace('{s}', v.sem).replace('{w}', v.we) + '</div></div><div style="font-size:18px;font-weight:700;color:#a78bfa">' + v.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpEstNonClasse(r){ var w = String(r.reporter || ''); return !!w && !/INPAK_WB|PLOEGCH_WB|AW_EXP/i.test(w); } // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
+
+             // Operateur(s) INPAK affecte(s) a la ligne au moment du NCP -- reutilise
 // la meme logique que les Arrets Inpak (SHIFTS + groupes de lignes).
 // Uniquement pertinent pour les NCP de type "Inpak" (lignes 31 a 36).
-function ncpOperateurs(r){
-  /* Operateur saisi a la main : prioritaire sur tout, et disponible sur TOUS les
-     NCP y compris Production, ou le planning ne peut rien deduire. */
-  if(r.operateur_override) return r.operateur_override;
-  if(r.type_ncp !== 'Inpak') return null;
-  // On s'aligne sur la meme base horaire que l'equipe affichee (ncpEquipesMulti
-  // -> ncpFenetre). Avant, si ncpHeureInfo ne rendait pas d'heure (cas
-  // heure_fiable === false, ex: PDF exporte plusieurs jours apres le defaut),
-  // on abandonnait ici -- alors que la fenetre du defaut, elle, suffisait deja
-  // a deduire l'equipe. Resultat : une equipe P5 affichee sans jamais pouvoir
-  // nommer l'operateur, alors que le planning du jour le donne.
-  var _hi = ncpHeureInfo(r);
-  var dateISO = null, heure = null;
-  if(_hi.heure){ dateISO = _hi.date_iso || r.created_date_iso; heure = _hi.heure; }
-  else { var f = ncpFenetre(r); if(f){ dateISO = f.dateDebut; heure = f.heureDebut; } }
-  if(!dateISO || !heure) return null;
-  var ligneNum = String(r.ligne || '').replace(/[^0-9]/g, '');
-  if(!ligneNum) return null;
-  return getOperateur(dateISO, heure, ligneNum);
-}
-function ncpEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function ncpToggleDeCote(notif){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
-  if(!r) return;
-  var nouveauEtat = !r.de_cote;
-  db.ref('ncp_data/' + notif + '/de_cote').set(nouveauEtat || null).then(function(){
-    r.de_cote = nouveauEtat;
-    toast(nouveauEtat ? 'Mis de cote' : 'Retire des mis de cote', '#3b82f6');
-    ncpDetail(notif);
-    if(document.getElementById('ncp-tbody')) buildNCPTab();
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
-}
 
-function ncpOpenComment(notif){
-  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
-  if(!r) return;
-  var prev = r.commentaire_perso || '';
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99999;display:flex;align-items:center;justify-content:center';
-  d.id = 'ncp-cm-popup';
-  d.innerHTML = '<div style="background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:420px;max-width:95vw">'
-    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">Note perso &mdash; NCP ' + ncpEsc(notif) + '</div>'
-    + (r.commentaire_date ? '<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">Derniere modif : ' + ncpEsc(r.commentaire_date) + (r.commentaire_par ? ' par ' + ncpEsc(r.commentaire_par) : '') + '</div>' : '<div style="margin-bottom:12px"></div>')
-    + '<textarea id="ncp-cm-txt" style="width:100%;height:110px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">' + ncpEsc(prev) + '</textarea>'
-    + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
-    + '<button onclick="document.getElementById(\'ncp-cm-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Annuler</button>'
-    + '<button onclick="ncpSaveComment(\'' + notif + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
-    + '</div></div>';
-  document.body.appendChild(d);
-  d.addEventListener('click', function(e){ if(e.target === d) d.remove(); });
-  document.getElementById('ncp-cm-txt').focus();
-}
 
-function ncpSaveComment(notif){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  var txt = document.getElementById('ncp-cm-txt').value.trim();
-  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
-  var qui = currentUser ? (currentUser.name || currentUser.email || '?') : '?';
-  var quand = new Date().toLocaleDateString('fr-BE');
-  var maj = txt
-    ? { commentaire_perso: txt, commentaire_par: qui, commentaire_date: quand }
-    : { commentaire_perso: null, commentaire_par: null, commentaire_date: null };
-  db.ref('ncp_data/' + notif).update(maj).then(function(){
-    if(r){ r.commentaire_perso = maj.commentaire_perso; r.commentaire_par = maj.commentaire_par; r.commentaire_date = maj.commentaire_date; }
-    var p = document.getElementById('ncp-cm-popup'); if(p) p.remove();
-    toast(txt ? 'Commentaire enregistre' : 'Commentaire supprime', '#10b981');
-    ncpDetail(notif);
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
-}
-function ncpToggleControle(notif){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
-  if(!r) return;
-  var nouveauEtat = !r.controle_perso;
-  var chemin = 'ncp_data/' + notif;
-  var qui = currentUser ? (currentUser.name || currentUser.email || '?') : '?';
-  var quand = new Date().toLocaleDateString('fr-BE');
-  var maj = nouveauEtat
-    ? { controle_perso: true, controle_par: qui, controle_date: quand }
-    : { controle_perso: null, controle_par: null, controle_date: null };
-  db.ref(chemin).update(maj).then(function(){
-    r.controle_perso = nouveauEtat; r.controle_par = maj.controle_par; r.controle_date = maj.controle_date;
-    toast(nouveauEtat ? 'Marque comme controle' : 'Controle retire', '#10b981');
-    ncpDetail(notif);
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
-}
+
+
+
+
+
+
 
 // Traduction a la demande (bouton) via l'API gratuite MyMemory (pas de cle,
 // limite ~500 caracteres par requete, ~5000 caract/jour en anonyme -- largement
 // suffisant pour un usage manuel fiche par fiche).
-function ncpTraduireTexte(txt){
-  if(!txt || !txt.trim()) return Promise.resolve(txt);
-  var morceaux = [];
-  var reste = txt;
-  while(reste.length > 480){
-    var coupe = reste.lastIndexOf('\n', 480);
-    if(coupe < 50) coupe = 480;
-    morceaux.push(reste.slice(0, coupe));
-    reste = reste.slice(coupe);
-  }
-  morceaux.push(reste);
-  return Promise.all(morceaux.map(function(m){
-    if(!m.trim()) return m;
-    var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(m) + '&langpair=autodetect|fr';
-    return fetch(url).then(function(r){ return r.json(); }).then(function(d){
-      var t = d && d.responseData && d.responseData.translatedText;
-      return t || m;
-    }).catch(function(){ return m; });
-  })).then(function(parts){ return parts.join(''); });
-}
 
-function ncpTraduire(){
-  var body = document.getElementById('ncp-detail-body');
-  if(!body) return;
-  var btn = document.getElementById('ncp-traduire-btn');
-  if(btn){ btn.disabled = true; btn.textContent = '\u23f3 Traduction...'; }
-  var blocs = body.querySelectorAll('.ncp-tr');
-  var taches = [];
-  blocs.forEach(function(el){
-    if(el.getAttribute('data-original') === null){
-      el.setAttribute('data-original', el.textContent);
-    }
-    var original = el.getAttribute('data-original');
-    taches.push(ncpTraduireTexte(original).then(function(trad){ el.textContent = trad; }));
-  });
-  Promise.all(taches).then(function(){
-    if(btn){
-      btn.disabled = false;
-      btn.innerHTML = '&#8617; Original';
-      btn.onclick = ncpRevenirOriginal;
-    }
-  });
-}
 
-function ncpRevenirOriginal(){
-  var body = document.getElementById('ncp-detail-body');
-  if(!body) return;
-  body.querySelectorAll('.ncp-tr').forEach(function(el){
-    var o = el.getAttribute('data-original');
-    if(o !== null) el.textContent = o;
-  });
-  var btn = document.getElementById('ncp-traduire-btn');
-  if(btn){ btn.innerHTML = '&#127760; Traduire'; btn.onclick = ncpTraduire; }
-} function openImportNCPModal(){
+
+
+ function openImportNCPModal(){
   document.getElementById('ncp-import-modal').style.display = 'flex';
 }
 
-function ncpInitClicks(){ var tb = document.getElementById('ncp-tbody'); if(!tb || tb.getAttribute('data-clickbound')) return; tb.setAttribute('data-clickbound','1'); tb.style.cursor = 'pointer'; tb.addEventListener('click', function(e){ var tr = (e.target && e.target.closest) ? e.target.closest('tr') : null; if(!tr || !tr.cells || !tr.cells[0]) return; var c = tr.getAttribute('data-notif') || ''; if(!c){ var mm = tr.cells[0].textContent.match(/\d{6,}/); c = mm ? mm[0] : ''; } if(c && c !== '-') ncpDetail(c); }); } function closeNCPDetail(){ var m = document.getElementById('ncp-detail-modal'); if(m) m.style.display = 'none'; } function ncpDetail(notif){ var r = null, i; for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } } if(!r) return; var f = [['Numero', r.notification], ['Date de creation', r.created_on + (ncpJour(r.created_on) ? ' (' + ncpJour(r.created_on) + ')' : '')], ['Heure fiche', r.created_heure], ['Unite', r.unite], ['Ligne', r.ligne], ['Operateur(s) INPAK', ncpOperateurs(r) || (r.type_ncp === 'Inpak' ? 'non identifie' : '-')], ['Type', r.type_ncp], ['Source de l heure', ncpLibelleSrc(r)], ['Bakorder', ncpBakorder(r) || '-'], ['Production rattachable', (ncpBakorderLien(r) || ['-']).join(' | ')], ['Declarant', r.reporter], ['Statut', r.status], ['Code produit', r.code_produit], ['Client', r.famille_produit], ['Palettes', (Number(r.total_pallets) || 0).toFixed(1)], ['Tonnage', (Number(r.total_tonnes) || 0).toFixed(2) + ' t'], ['Priorite', r.priority], ['Site', r.plant], ['Responsable', r.person_responsible], ['Fichier PDF', r.fichier]]; var h = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px"><div class="ncp-tr" style="font-size:16px;font-weight:600">' + ncpEsc(r.description) + '</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">'
-  + '<button id="ncp-decote-btn" onclick="ncpToggleDeCote(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.de_cote ? 'var(--blue)' : 'var(--bd2)') + ';background:' + (r.de_cote ? 'rgba(59,130,246,.12)' : 'none') + ';color:' + (r.de_cote ? 'var(--blue)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">' + (r.de_cote ? '&#128204; De cote' : '&#128204; Mettre de cote') + '</button>'
-  + '<button id="ncp-comment-btn" onclick="ncpOpenComment(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.commentaire_perso ? 'var(--amber)' : 'var(--bd2)') + ';background:' + (r.commentaire_perso ? 'rgba(245,158,11,.12)' : 'none') + ';color:' + (r.commentaire_perso ? 'var(--amber)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">&#9998; ' + (r.commentaire_perso ? 'Commentaire' : 'Commenter') + '</button>'
-  + '<button id="ncp-controle-btn" onclick="ncpToggleControle(\'' + r.notification + '\')" style="padding:5px 12px;border-radius:99px;border:1px solid ' + (r.controle_perso ? 'var(--green)' : 'var(--bd2)') + ';background:' + (r.controle_perso ? 'rgba(16,185,129,.12)' : 'none') + ';color:' + (r.controle_perso ? 'var(--green)' : 'var(--tx2)') + ';font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">' + (r.controle_perso ? '&#10003; Controle' : '&#9711; Marquer controle') + '</button>'
-  + '<button id="ncp-traduire-btn" onclick="ncpTraduire()" style="padding:5px 12px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer;white-space:nowrap">&#127760; Traduire</button>'
-  + '</div></div>';
-if(r.controle_perso) h += '<div style="font-size:11px;color:var(--green);margin-bottom:6px">&#10003; Controle par ' + ncpEsc(r.controle_par || '?') + ' le ' + ncpEsc(r.controle_date || '?') + '</div>';
-if(r.commentaire_perso) h += '<div style="font-size:12px;color:var(--tx1);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:8px 10px;margin-bottom:10px;white-space:pre-wrap"><span style="color:var(--amber);font-weight:600">&#9998; Note perso</span> (' + ncpEsc(r.commentaire_par || '?') + ', ' + ncpEsc(r.commentaire_date || '?') + ') :<br>' + ncpEsc(r.commentaire_perso) + '</div>';
-if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bottom:10px">Fiche repartie sur ' + r.ncp_partage + ' lignes : palettes et tonnage divises</div>'; h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin-bottom:16px">'; f.forEach(function(c){ h += '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0"><span style="font-size:11px;color:var(--tx3)">' + c[0] + '</span><span style="font-size:12px;text-align:right">' + ncpEsc(c[1] || '-') + '</span></div>'; });
-  var auto = (function(){ var save = r.equipe_override; r.equipe_override = null; var v = ncpGetEquipe(r); r.equipe_override = save; return v; })();
-  var equipes5 = ['P1','P2','P3','P4','P5'];
-  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0">'
-    + '<span style="font-size:11px;color:var(--tx3)">Equipe' + (r.equipe_override ? ' <span style="color:var(--amber)" title="Corrigee manuellement, deduction auto : ' + (auto || 'non deduite') + '">(corrigee)</span>' : '') + '</span>'
-    + '<select onchange="ncpSetEquipeOverride(\'' + r.notification + '\', this.value===\'auto\'?null:this.value)" style="font-size:12px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx1);border:1px solid var(--bd2);border-radius:6px;padding:2px 6px">'
-    + '<option value="auto"' + (!r.equipe_override ? ' selected' : '') + '>Auto (' + (auto || 'non deduite') + ')</option>'
-    + equipes5.map(function(e){ return '<option value="' + e + '"' + (r.equipe_override === e ? ' selected' : '') + '>' + e + '</option>'; }).join('')
-    + '</select></div>';
-  /* Corrections manuelles : unite, ligne, operateur. Disponibles sur TOUTES les
-     fiches. Chaque menu affiche entre parentheses ce que la deduction automatique
-     avait trouve, pour qu'on voie ce qu'on remplace. Repasser sur "Auto" efface
-     l'override et rend la main a la deduction. */
-  var _uAuto = r.unite_override ? (r.unite_avant_override || 'non deduite') : (r.unite || 'non deduite');
-  var _lAuto = r.ligne_override ? (r.ligne_avant_override || 'non deduite') : (r.ligne || 'non deduite');
-  var _opAuto = (function(){ var sv = r.operateur_override; r.operateur_override = null; var v = ncpOperateurs(r); r.operateur_override = sv; return v || 'non deduit'; })();
-  var _selSty = 'font-size:12px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx1);border:1px solid var(--bd2);border-radius:6px;padding:2px 6px';
-  var _rowSty = 'display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--bd);padding:3px 0';
-  var _lblSty = 'font-size:11px;color:var(--tx3)';
-  var _marque = function(actif, auto){ return actif ? ' <span style="color:var(--amber)" title="Corrige manuellement, deduction auto : ' + ncpEsc(auto) + '">(corrige)</span>' : ''; };
-  h += '<div style="' + _rowSty + '"><span style="' + _lblSty + '">Unite' + _marque(r.unite_override, _uAuto) + '</span>'
-    + '<select onchange="ncpSetUniteOverride(\'' + r.notification + '\', this.value===\'auto\'?null:this.value)" style="' + _selSty + '">'
-    + '<option value="auto"' + (!r.unite_override ? ' selected' : '') + '>Auto (' + ncpEsc(_uAuto) + ')</option>'
-    + ['AW1','AW2','AW3'].map(function(u){ return '<option value="' + u + '"' + (r.unite_override === u ? ' selected' : '') + '>' + u + '</option>'; }).join('')
-    + '</select></div>';
-  var _lignesU = (r.unite === 'AW1') ? [1,2,3,4,5,6,7,8,9,10,11,12] : (r.unite === 'AW2') ? [21,22,23,24,25,26] : (r.unite === 'AW3') ? [31,32,33,34,35,36] : [1,2,3,4,5,6,7,8,9,10,11,12,21,22,23,24,25,26,31,32,33,34,35,36];
-  h += '<div style="' + _rowSty + '"><span style="' + _lblSty + '">Ligne' + _marque(r.ligne_override, _lAuto) + '</span>'
-    + '<select onchange="ncpSetLigneOverride(\'' + r.notification + '\', this.value===\'auto\'?null:this.value)" style="' + _selSty + '">'
-    + '<option value="auto"' + (!r.ligne_override ? ' selected' : '') + '>Auto (' + ncpEsc(_lAuto) + ')</option>'
-    + '<option value="aucune"' + (r.ligne_override === 'aucune' ? ' selected' : '') + '>Aucune ligne</option>'
-    + _lignesU.map(function(n){ var v = 'L' + ('0' + n).slice(-2); return '<option value="' + v + '"' + (r.ligne_override === v ? ' selected' : '') + '>' + v + '</option>'; }).join('')
-    + '</select></div>';
-  h += '<div style="' + _rowSty + '"><span style="' + _lblSty + '">Operateur' + _marque(r.operateur_override, _opAuto) + '</span>'
-    + '<span style="display:flex;gap:4px;align-items:center">'
-    + '<input id="ncp-op-input" list="ncp-op-datalist" value="' + ncpEsc(r.operateur_override || '') + '" placeholder="' + ncpEsc(_opAuto) + '" style="' + _selSty + ';width:150px" />'
-    + '<datalist id="ncp-op-datalist">' + ((typeof EMP !== 'undefined' && EMP) ? EMP.map(function(e){ return '<option value="' + ncpEsc(e.n) + '"></option>'; }).join('') : '') + '</datalist>'
-    + '<button onclick="ncpSetOperateurOverride(\'' + r.notification + '\', document.getElementById(\'ncp-op-input\').value)" style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);cursor:pointer;font-family:var(--fn)">OK</button>'
-    + '</span></div>';
-  h += '</div>'; var bloc = function(t, v){ if(Array.isArray(v)) v = v.join(' | '); return v ? '<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px">' + t + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v) + '</div></div>' : ''; }; h += bloc('Probleme', r.problems) + bloc('Mesures', r.measures) + bloc('Toutes les mesures', r.toutes_mesures) + bloc('Info palettes', r.ncp_extra_info); var hist = r.historique_actions || []; if(hist.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px">Historique (' + hist.length + ' version(s))</div>'; hist.forEach(function(v){ h += '<div style="border-left:2px solid var(--bd2);padding-left:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(v.date_version) + (ncpJour(v.date_version) ? ' (' + ncpJour(v.date_version) + ')' : '') + '</div><div class="ncp-tr" style="font-size:12px;white-space:pre-wrap">' + ncpEsc(v.detail) + '</div></div>'; }); } var deg = r.degustationsLiees || []; if(deg.length){ h += '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px;margin-top:14px">Degustations liees (' + deg.length + ')</div>'; deg.forEach(function(d){ var dt = d.dateProduction ? (new Date(d.dateProduction).toLocaleString('fr-BE') + ' (' + ncpJour(d.dateProduction) + ')') : '-'; h += '<div style="border-left:2px solid var(--blue);padding-left:10px;margin-bottom:10px">' + '<div style="font-size:11px;color:var(--tx3);font-family:var(--mo)">' + ncpEsc(dt) + ' &middot; ' + ncpEsc(d.ligne || '-') + (d.employe ? ' &middot; ' + ncpEsc(d.employe) : '') + '</div>' + '<div style="font-size:12px">' + ncpEsc(d.produit || '-') + (d.bakorder ? ' (bakorder ' + ncpEsc(d.bakorder) + ')' : '') + '</div>' + (d.remarque ? '<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap">' + ncpEsc(d.remarque) + '</div>' : '') + (d.actionEffectuee ? '<div style="font-size:12px;color:var(--amber);white-space:pre-wrap">&#8594; ' + ncpEsc(d.actionEffectuee) + '</div>' : '') + '</div>'; }); } var body = document.getElementById('ncp-detail-body'); if(body) body.innerHTML = h; var md = document.getElementById('ncp-detail-modal'); if(md) md.style.display = 'flex'; } function importerNCP(){
+   function importerNCP(){
   var txt = document.getElementById('ncp-import-txt').value.trim();
   var errEl = document.getElementById('ncp-import-err');
   errEl.textContent = '';
@@ -5076,538 +4887,50 @@ if(r.ncp_partage) h += '<div style="font-size:12px;color:var(--amber);margin-bot
   });
 }
 
-function filtrerNCPUnite(u){
-  NCP_FILTRE_UNITE = u;
-  document.querySelectorAll('.ncp-unite-btn').forEach(function(b){
-    var on = b.dataset.unite === u;
-    b.classList.toggle('on', on);
-    b.style.background = on ? 'var(--blue)' : 'none';
-    b.style.color = on ? '#fff' : 'var(--tx2)';
-    b.style.borderColor = on ? 'var(--blue)' : 'var(--bd2)';
-  });
-  buildNCPTab();
-}
 
-function filtrerNCPType(ty){
-  NCP_FILTRE_TYPE = ty;
-  document.querySelectorAll('.ncp-type-btn').forEach(function(b){
-    var on = b.dataset.type === ty;
-    var couleur = ty === 'Inpak' ? 'var(--amber)' : ty === 'Production' ? 'var(--red)' : 'var(--blue)';
-    b.classList.toggle('on', on);
-    b.style.background = on ? (b.dataset.type === 'all' ? 'var(--blue)' : couleur) : 'none';
-    b.style.color = on ? '#fff' : (b.dataset.type === 'all' ? 'var(--tx2)' : couleur);
-  });
-  buildNCPTab();
-}
 
-function filtrerNCPEquipe(e){
-  NCP_FILTRE_EQUIPE = e;
-  document.querySelectorAll('.ncp-equipe-btn').forEach(function(b){
-    var on = b.dataset.equipe === e;
-    var couleur = b.dataset.equipe === 'all' ? 'var(--blue)' : COULEURS_EQUIPE[b.dataset.equipe];
-    b.classList.toggle('on', on);
-    b.style.background = on ? couleur : 'none';
-    b.style.color = on ? '#fff' : couleur;
-  });
-  buildNCPTab();
-}
+
+
+
 
 // --- Selection d une periode (dates libres ou raccourcis) ---
-function ncpISO(dt){
-  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
-}
+
 
 // Jour de la semaine a partir d'une date "DD/MM/YYYY" ou "YYYY-MM-DD".
 // Ajoute pour eviter toute confusion/erreur de calcul manuel du jour.
-var NCP_JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-function ncpJour(dateStr){
-  if(!dateStr) return '';
-  var iso;
-  if(/^\d{4}-\d{2}-\d{2}/.test(dateStr)) iso = dateStr.slice(0,10);
-  else { var p = dateStr.split('/'); if(p.length !== 3) return ''; iso = p[2] + '-' + p[1] + '-' + p[0]; }
-  var d = new Date(iso + 'T00:00:00');
-  if(isNaN(d.getTime())) return '';
-  return NCP_JOURS[d.getDay()];
-}
 
-function majNCPPresets(){
-  document.querySelectorAll('.ncp-preset-btn').forEach(function(b){
-    b.classList.toggle('on', b.dataset.preset === NCP_PRESET_ACTIF);
-  });
-}
 
-function filtrerNCPDates(){
-  var eD = document.getElementById('ncp-date-debut');
-  var eF = document.getElementById('ncp-date-fin');
-  NCP_FILTRE_DEBUT = eD ? eD.value : '';
-  NCP_FILTRE_FIN = eF ? eF.value : '';
-  // Si les deux bornes sont inversees, on les remet dans l ordre
-  if(NCP_FILTRE_DEBUT && NCP_FILTRE_FIN && NCP_FILTRE_DEBUT > NCP_FILTRE_FIN){
-    var tmp = NCP_FILTRE_DEBUT;
-    NCP_FILTRE_DEBUT = NCP_FILTRE_FIN;
-    NCP_FILTRE_FIN = tmp;
-    if(eD) eD.value = NCP_FILTRE_DEBUT;
-    if(eF) eF.value = NCP_FILTRE_FIN;
-  }
-  NCP_PRESET_ACTIF = (!NCP_FILTRE_DEBUT && !NCP_FILTRE_FIN) ? 'all' : 'perso';
-  majNCPPresets();
-  buildNCPTab();
-}
 
-function ncpPresetPeriode(cle){
-  NCP_PRESET_ACTIF = cle;
-  var auj = new Date();
-  var debut = '', fin = '';
-  if(cle !== 'all'){
-    fin = ncpISO(auj);
-    var d;
-    if(cle === 'mois'){
-      d = new Date(auj.getFullYear(), auj.getMonth(), 1);
-    } else if(cle === 'annee'){
-      d = new Date(auj.getFullYear(), 0, 1);
-    } else {
-      d = new Date(auj.getTime());
-      d.setDate(d.getDate() - parseInt(cle, 10));
-    }
-    debut = ncpISO(d);
-  }
-  NCP_FILTRE_DEBUT = debut;
-  NCP_FILTRE_FIN = fin;
-  var eD = document.getElementById('ncp-date-debut'); if(eD) eD.value = debut;
-  var eF = document.getElementById('ncp-date-fin'); if(eF) eF.value = fin;
-  majNCPPresets();
-  buildNCPTab();
-}
 
-var _ncpFamillesChart = null; var NCP_FAMILLES = [['Soudure / etancheite', /lasna|langsnaad|dwarsnaad|sealing|seal|niet dicht|lek|naad/i], ['Codage / impression', /coder|codering|gedrukt|geprint|print|etiket|label|sticker|datum|mhd|barcode|ean/i], ['Corps etranger', /vreemd|metaal|plastic|hout|glas|insect|haar|steen/i], ['Emballage / carton', /karton|omdo|doos|doz|zak|verpakking|folie|pallet|palet/i], ['Aspect produit', /zwart|grauw|kleur|colour|vet|defect|stootblauw|kruiden|snit|snijpositie|lengte|producteigen|oorzaak product|ingredi|olie|dosage|fractie|gamma|calibr|structuur|smaak|geur|agtron|droge stof|vochtgehalte|ffa\b|polaire|zuurgraad|peroxide/i], ['Poids / quantite', /gewicht|aantal|te weinig|te veel|stuks/i], ['Temperature / froid', /temp|vriezer|frigo|ontdooid|t°/i], ['Process / panne', /storing|productie andere reden|machine|panne|opstart|stilstand/i], ['Stock / logistique', /stock|magazijn|retour|levering|transport/i], ['Controle / test', /standaardtest|test|controle|monster|staal/i]]; function ncpFamille(lib){ var s = String(lib || ''); for(var i = 0; i < NCP_FAMILLES.length; i++){ if(NCP_FAMILLES[i][1].test(s)) return NCP_FAMILLES[i][0]; } return 'Autre'; } var NCP_RECHERCHE = ''; var NCP_TOUT = false; var _ncpRechTimer = null; function ncpRecherche(){ var e = document.getElementById('ncp-recherche'); NCP_RECHERCHE = e ? e.value.trim().toLowerCase() : ''; if(_ncpRechTimer) clearTimeout(_ncpRechTimer); _ncpRechTimer = setTimeout(buildNCPTab, 260); } function ncpToggleFiltreDecote(){
-  NCP_FILTRE_DECOTE = !NCP_FILTRE_DECOTE;
-  var b = document.getElementById('ncp-btn-decote');
-  if(b){
-    b.textContent = (NCP_FILTRE_DECOTE ? '\u2713 ' : '') + '\ud83d\udccc Mis de cote';
-    b.style.borderColor = NCP_FILTRE_DECOTE ? 'var(--blue)' : 'var(--bd2)';
-    b.style.color = NCP_FILTRE_DECOTE ? 'var(--blue)' : 'var(--tx2)';
-    b.style.background = NCP_FILTRE_DECOTE ? 'rgba(59,130,246,.12)' : 'none';
-  }
-  buildNCPTab();
-}
-function ncpInjecterBoutonDecote(){
-  if(document.getElementById('ncp-btn-decote')) return;
-  var ref = document.getElementById('ncp-btn-tout');
-  if(!ref || !ref.parentNode) return;
-  var b = document.createElement('button');
-  b.id = 'ncp-btn-decote';
-  b.textContent = '\ud83d\udccc Mis de cote';
-  b.style.cssText = 'padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer;margin-left:8px';
-  b.onclick = ncpToggleFiltreDecote;
-  ref.parentNode.insertBefore(b, ref.nextSibling);
-}
-function ncpToggleTout(){ NCP_TOUT = !NCP_TOUT; var b = document.getElementById('ncp-btn-tout'); if(b) b.textContent = NCP_TOUT ? t('ncp_limiter_200') : t('ncp_tout_afficher'); buildNCPTab(); } function ncpBakorder(r){ if(r._bo !== undefined) return r._bo; var t = [r.description, r.ncp_extra_info, r.measures, r.toutes_mesures, JSON.stringify(r.historique_actions || '')].join(' '); var m = String(t).match(/(?:bakorder|ordre|order)[^0-9]{0,20}(\d{6,8})/i); r._bo = m ? m[1] : null; return r._bo; } function ncpBakorderLien(r){ var bo = ncpBakorder(r); if(!bo) return null; var out = []; NCP_DATA.forEach(function(x){ if(x === r || ncpBakorder(x) !== bo || ncpEstNonClasse(x)) return; var eq = ncpGetEquipe(x); if(eq && out.length < 4) out.push(eq + ' (NCP ' + x.notification + ' du ' + x.created_on + ')'); }); return out.length ? out : null; } function ncpTexteRecherche(r){ if(!r._srch) r._srch = [r.notification, r.created_on, r.unite, r.ligne, r.type_ncp, r.code_produit, r.famille_produit, r.reporter, r.status, r.description, r.problems, ncpBakorder(r)].join(' ').toLowerCase(); return r._srch; } function ncpExportCSV(){ var rows = NCP_VUE || []; var NL = String.fromCharCode(13, 10); var head = ['Numero','Date','Heure','Source heure','Unite','Ligne','Equipe','Type','Bakorder','Produit','Client','Palettes','Tonnage','Statut','Declarant','Motifs','Description']; var q = function(v){ return '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\s+/g, ' ') + '"'; }; var lignes = [head.map(q).join(';')]; rows.forEach(function(r){ var hi = ncpHeureInfo(r); lignes.push([r.notification, r.created_on, hi.heure || '', hi.src || '', r.unite, r.ligne, ncpGetEquipe(r) || '', r.type_ncp, ncpBakorder(r) || '', r.code_produit, r.famille_produit, (Number(r.total_pallets) || 0).toFixed(1), (Number(r.total_tonnes) || 0).toFixed(2), r.status, r.reporter, r.problems, r.description].map(q).join(';')); }); var blob = new Blob([String.fromCharCode(65279) + lignes.join(NL)], { type: 'text/csv;charset=utf-8' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'NCP_export_' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); } var _ncpDelaiChart = null; var NCP_RECUR = []; function ncpParseFR(s){ var m = String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null; } function ncpDelai(r){ var c = ncpParseFR(r.created_on); var h = r.historique_actions || []; var last = null; for(var i = 0; i < h.length; i++){ var d = ncpParseFR(h[i].date_version); if(d && (!last || d > last)) last = d; } if(!c || !last) return null; var j = Math.round((last - c) / 86400000); return j < 0 ? null : j; } function ncpEstSoldee(r){ return String(r.status || '').toLowerCase().indexOf('vrijgave') >= 0; } function ncpBuildRecurrences(rows){ var box = document.getElementById('ncp-recurrences'); if(!box) return; var m = {}; rows.forEach(function(r){ if(!r.problems) return; var vus = {}; String(r.problems).split('|').forEach(function(p){ var lib = p.trim(); if(!lib) return; var fa = ncpFamille(lib); if(vus[fa]) return; vus[fa] = 1; var k = (r.famille_produit || '?') + ' ' + (r.code_produit || '?') + ' > ' + fa; if(!m[k]) m[k] = { n: 0, t: 0, ids: {} }; m[k].n++; m[k].t += (Number(r.total_tonnes) || 0); m[k].ids[String(r.notification)] = 1; }); }); NCP_RECUR = Object.keys(m).filter(function(k){ return m[k].n >= 3; }).sort(function(x, y){ return m[y].n - m[x].n; }).slice(0, 18).map(function(k){ return { k: k, n: m[k].n, t: m[k].t, ids: Object.keys(m[k].ids) }; }); if(!NCP_RECUR.length){ box.innerHTML = '<div style="font-size:12px;color:var(--tx3)">' + t('ncp_aucune_recurrence') + '</div>'; return; } var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:8px">'; NCP_RECUR.forEach(function(x, i){ h += '<div onclick="ncpListeRecurrence(' + i + ')" style="cursor:pointer;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:12px;font-weight:600;color:#fff">' + ncpEsc(x.k) + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + t('ncp_bloque_au_total').replace('{t}', x.t.toFixed(1)) + '</div></div><div style="font-size:18px;font-weight:700;color:var(--amber)">' + x.n + '</div></div>'; }); h += '</div>'; box.innerHTML = h; } function ncpListeRecurrence(i){ var x = NCP_RECUR[i]; if(!x) return; var rows = (NCP_VUE || []).filter(function(r){ return x.ids.indexOf(String(r.notification)) >= 0; }); ncpRendreListe(t('ncp_recurrence_titre').replace('{k}', x.k), rows); } /* Le champ ncp_extra_info contient parfois un fil de mail colle tel quel : en-tetes Van:/Verzonden:/Aan:/CC:/Onderwerp:, signature, telephone, adresse, site. L'heure d'ENVOI du mail n'est PAS l'heure du DEFAUT : sans ce filtre le dashboard retenait par exemple 14:21 (heure d'envoi du mail) au lieu de l'heure reelle, sur 6 fiches. Comme l'heure lue dans le texte est prioritaire sur celle de la fiche, l'equipe attribuee etait fausse. On retire donc ces lignes avant toute lecture d'heure ou de ligne dans le texte libre. */ function ncpTexteUtile(r){ var lignes = String(r.ncp_extra_info || '').split(/\r?\n/).filter(function(L){ if(/^\s*(Van|From|Verzonden|Sent|Aan|To|CC|Bcc|Onderwerp|Subject|Datum|Date)\s*:/i.test(L)) return false; if(/^\s*[TM]\s*\+\s*\d/.test(L)) return false; if(/\S+@\S+\.\w{2,}/.test(L)) return false; if(/^\s*www\./i.test(L)) return false; return true; }); return lignes.join(' '); } function ncpHeureTexte(r){ var t = String(r.description || '') + ' ' + ncpTexteUtile(r); var m = t.match(/\b([01]?\d|2[0-3])[:uh]([0-5]\d)\b/); if(!m) return null; return ('0' + m[1]).slice(-2) + ':' + m[2]; }
-function ncpHeureLocale(dp){                       // ISO -> { date, heure } heure d'usine
-  var d = new Date(dp);
-  if(isNaN(d.getTime())) return null;
-  var p = new Intl.DateTimeFormat('fr-BE',{timeZone:'Europe/Brussels',year:'numeric',
-          month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);
-  var g = function(k){ return p.find(function(x){ return x.type === k; }).value; };
-  return { date: g('year')+'-'+g('month')+'-'+g('day'),
-           heure: (g('hour') === '24' ? '00' : g('hour'))+':'+g('minute') };
-}
-function ncpHeureDegustation(r){
-  var deg = r.degustationsLiees || [];
-  if(!deg.length) return null;
-  var wanted = r.created_date_iso, match = null;
-  for(var i = 0; i < deg.length; i++){
-    var loc = deg[i].dateProduction ? ncpHeureLocale(deg[i].dateProduction) : null;
-    if(!loc) continue;
-    if(!match) match = loc;
-    if(wanted && loc.date === wanted){ match = loc; break; }
-  }
-  if(!match) return null;
-  return { heure: match.heure, date_iso: match.date };
-}
-function ncpHeureInfo(r){
-  if(!r.created_date_iso) return { heure: null, src: null, date_iso: null };
-  // Priorite : 1) heure reelle d'une degustation liee (vrai horodatage systeme)
-  //            2) heure ecrite dans le texte du NCP (le moment reel du defaut, tel que decrit)
-  //            3) heure de la fiche, seulement si aucune des deux precedentes n'existe
-  //               (c'est souvent juste l'heure de saisie papier, pas celle du defaut)
-  var dg = ncpHeureDegustation(r);
-  if(dg) return { heure: dg.heure, src: 'degustation', date_iso: dg.date_iso };
-  var h = ncpHeureTexte(r);
-  if(h) return { heure: h, src: 'texte', date_iso: r.created_date_iso };
-  if(r.created_heure && r.heure_fiable !== false) return { heure: r.created_heure, src: 'fiche', date_iso: r.created_date_iso };
-  return { heure: null, src: null, date_iso: null };
-}
-var NCP_SEUIL_PART = 0.15;       // part de temps mini pour retenir une equipe secondaire
-var NCP_MAX_PLAGE_TEXTE_H = 6;   // au-dela, deux heures citees ne sont pas une plage
-var NCP_EQM_CACHE = new WeakMap();
 
-function ncpHeuresTexteToutes(r){                  // toutes les heures citees, dans l'ordre
-  var t = String([r.description, r.ncp_extra_info].join(' '));
-  var re = /\b([01]?\d|2[0-3])[:uh.]([0-5]\d)\b/g, m, out = [];
-  while((m = re.exec(t)) !== null){
-    var v = ('0'+m[1]).slice(-2)+':'+m[2];
-    if(out.indexOf(v) < 0) out.push(v);
-  }
-  return out;
-}
 
-function ncpFenetre(r){                            // fenetre debut -> fin du defaut
-  var mins = function(hh){ return (+hh.slice(0,2))*60 + (+hh.slice(3,5)); };
-  var locs = (r.degustationsLiees || []).map(function(d){
-    return d.dateProduction ? ncpHeureLocale(d.dateProduction) : null;
-  }).filter(Boolean).sort(function(x,y){
-    return (x.date+x.heure) < (y.date+y.heure) ? -1 : 1;
-  });
-  if(locs.length){
-    var lA = locs[0], lB = locs[locs.length-1];
-    var dur = (new Date(lB.date+'T'+lB.heure+':00') - new Date(lA.date+'T'+lA.heure+':00'))/60000;
-    return { dateDebut:lA.date, heureDebut:lA.heure, dateFin:lB.date, heureFin:lB.heure,
-             duree:dur, src:(dur > 0 ? 'degustation-plage' : 'degustation'), n:locs.length };
-  }
-  var hs = ncpHeuresTexteToutes(r);
-  if(hs.length && r.created_date_iso){
-    var h1 = hs[0], h2 = hs[hs.length-1];
-    var span = mins(h2) - mins(h1); if(span < 0) span += 1440;
-    if(hs.length > 1 && span > 0 && span <= NCP_MAX_PLAGE_TEXTE_H*60){
-      var fin = mins(h2) < mins(h1)
-        ? new Date(new Date(r.created_date_iso+'T00:00:00').getTime()+86400000).toISOString().slice(0,10)
-        : r.created_date_iso;
-      return { dateDebut:r.created_date_iso, heureDebut:h1, dateFin:fin, heureFin:h2,
-               duree:span, src:'texte-plage', n:hs.length };
-    }
-    return { dateDebut:r.created_date_iso, heureDebut:h1, dateFin:r.created_date_iso,
-             heureFin:h1, duree:0, src:'texte', n:1 };
-  }
-  if(r.created_date_iso && r.created_heure)
-    return { dateDebut:r.created_date_iso, heureDebut:r.created_heure, dateFin:r.created_date_iso,
-             heureFin:r.created_heure, duree:0, src:'fiche', n:1 };
-  return null;
-}
 
-function ncpEquipesMulti(r){        // { principale, equipes:[{equipe,minutes,part}], multi, src }
-  if(r.equipe_override)
-    return { equipes:[{equipe:r.equipe_override,minutes:0,part:1}], toutes:[],
-             principale:r.equipe_override, multi:false, src:'manuel', duree:0 };
-  if(NCP_EQM_CACHE.has(r)) return NCP_EQM_CACHE.get(r);
-  var res;
-  if(ncpEstNonClasse(r)) res = { equipes:[], toutes:[], principale:null, multi:false, src:'declarant' };
-  else {
-    var f = ncpFenetre(r);
-    if(!f) res = { equipes:[], toutes:[], principale:null, multi:false, src:null };
-    else {
-      var start = new Date(f.dateDebut+'T'+f.heureDebut+':00');
-      var end   = new Date(f.dateFin  +'T'+f.heureFin  +':00');
-      if(end < start) end = new Date(end.getTime()+86400000);
-      var span = Math.min((end-start)/60000, 24*60), pas = 5, acc = {}, tot = 0;
-      for(var m = 0; m <= span; m += pas){
-        var cur = new Date(start.getTime()+m*60000);
-        var iso = cur.getFullYear()+'-'+('0'+(cur.getMonth()+1)).slice(-2)+'-'+('0'+cur.getDate()).slice(-2);
-        var hh  = ('0'+cur.getHours()).slice(-2)+':'+('0'+cur.getMinutes()).slice(-2);
-        var eq  = equipeReelle(iso, hh);
-        if(eq){ acc[eq] = (acc[eq] || 0) + pas; tot += pas; }
-        if(span === 0) break;
-      }
-      var list = Object.keys(acc).map(function(k){
-        return { equipe:k, minutes:acc[k], part: tot ? acc[k]/tot : 0 };
-      }).sort(function(x,y){ return y.part - x.part; });
-      var keep = list.filter(function(x){ return x.part >= NCP_SEUIL_PART; });
-      if(!keep.length && list.length) keep = [list[0]];
-      res = { equipes:keep, toutes:list, principale: keep.length ? keep[0].equipe : null,
-              multi: keep.length > 1, src:f.src, duree:f.duree };
-    }
-  }
-  NCP_EQM_CACHE.set(r, res);
-  return res;
-}
 
-function ncpConcerneEquipe(r, eq){
-  return ncpEquipesMulti(r).equipes.some(function(x){ return x.equipe === eq; });
-}
-function ncpTonnagePondere(r, eq){                 // tonnage au pro-rata du temps
-  var x = ncpEquipesMulti(r).equipes.find(function(e){ return e.equipe === eq; });
-  return x ? (Number(r.total_tonnes) || 0) * x.part : 0;
-}
-function ncpEtiquetteMulti(r){                     // "+P2" a coller derriere l'equipe
-  var mm = ncpEquipesMulti(r);
-  if(!mm.multi) return '';
-  return ' <span style="color:#8b5cf6;font-size:11px" title="NCP a cheval sur plusieurs postes : '
-    + mm.equipes.map(function(e){ return e.equipe+' '+Math.round(e.part*100)+'%'; }).join(' + ')
-    + ' (source : '+mm.src+')">+'
-    + mm.equipes.slice(1).map(function(e){ return e.equipe; }).join('/') + '</span>';
-}
-function ncpEstDebloquee(r){ return ncpEstSoldee(r); }
-function ncpBadgeSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') return ' <span title="Heure reelle prise sur la degustation liee (la plus fiable)" style="color:#10b981">&#9679;</span>'; if(i.src === 'fiche') return ''; if(i.src === 'texte') return ' <span title="Heure du defaut lue dans le texte du NCP (prioritaire sur l heure de la fiche)" style="color:var(--amber)">~</span>'; return ' <span title="Aucune heure exploitable : equipe non deduite" style="color:var(--tx3)">*</span>'; } function ncpLibelleSrc(r){ var i = ncpHeureInfo(r); if(i.src === 'degustation') return 'heure reelle de la degustation liee (' + i.heure + ') - la plus fiable'; if(i.src === 'texte') return 'heure ecrite dans le texte du NCP (' + i.heure + ') - prioritaire sur la fiche'; if(i.src === 'fiche') return 'heure de la fiche (' + i.heure + ')'; return 'aucune heure exploitable'; } function ncpMajCouverture(rows){ var el = document.getElementById('ncp-couverture'); if(!el) return; var d = 0, f = 0, x = 0, n = 0, pl = 0, mu = 0;
-  rows.forEach(function(r){
-    var m = ncpEquipesMulti(r);
-    if(m.src === 'declarant'){ n++; return; }
-    if(!m.principale) return;
-    if(m.src === 'degustation' || m.src === 'degustation-plage') d++;
-    else if(m.src === 'texte-plage'){ x++; pl++; }
-    else if(m.src === 'texte') x++;
-    else if(m.src === 'fiche') f++;
-    if(m.multi) mu++;
-  });
-  var tot = rows.length, att = d + f + x;
-  el.innerHTML = '<br>' + t('ncp_couverture_text')
-    .replace('{att}', att).replace('{tot}', tot)
-    .replace('{pct}', tot ? Math.round(att/tot*100) : 0)
-    .replace('{d}', d).replace('{x}', x).replace('{pl}', pl)
-    .replace('{f}', f).replace('{mu}', mu).replace('{n}', n);
-  } function ncpGetEquipe(r){
-  if(r.equipe_override) return r.equipe_override;
-  if(ncpEstNonClasse(r)) return null; var _hi = ncpHeureInfo(r); if(!_hi.heure) return null;
-  return equipeReelle(_hi.date_iso || r.created_date_iso, _hi.heure);
-}
-function ncpSetEquipeOverride(notif, valeur){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  var r = NCP_DATA.find(function(x){ return String(x.notification) === String(notif); });
-  var chemin = 'ncp_data/' + notif + '/equipe_override';
-  var ecrire = valeur ? db.ref(chemin).set(valeur) : db.ref(chemin).remove();
-  ecrire.then(function(){
-    if(r) r.equipe_override = valeur || null;
-    toast(valeur ? ('Equipe forcee a ' + valeur) : 'Retour a la deduction automatique', '#10b981');
-    ncpDetail(notif);
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
-}
 
-function buildNCPTab(){
-  ncpInjecterBoutonDecote();
-  var emptyState = document.getElementById('ncp-empty-state');
-  var contentWrap = document.getElementById('ncp-content-wrap');
-  if(!NCP_DATA || NCP_DATA.length === 0){
-    if(emptyState) emptyState.style.display = 'block';
-    if(contentWrap) contentWrap.style.display = 'none';
-    return;
-  }
-  if(emptyState) emptyState.style.display = 'none';
-  if(contentWrap) contentWrap.style.display = 'block';
+       
 
-  var filtres = NCP_DATA.filter(function(r){
-    if(NCP_FILTRE_DECOTE && !r.de_cote) return false;
-    if(NCP_FILTRE_UNITE !== 'all' && r.unite !== NCP_FILTRE_UNITE) return false;
-    if(NCP_FILTRE_TYPE !== 'all' && r.type_ncp !== NCP_FILTRE_TYPE) return false;
-    if(NCP_FILTRE_EQUIPE !== 'all' && !ncpConcerneEquipe(r, NCP_FILTRE_EQUIPE)) return false;
-    if(NCP_FILTRE_DEBUT && (!r.created_date_iso || r.created_date_iso < NCP_FILTRE_DEBUT)) return false;
-    if(NCP_FILTRE_FIN && (!r.created_date_iso || r.created_date_iso > NCP_FILTRE_FIN)) return false; if(NCP_RECHERCHE && ncpTexteRecherche(r).indexOf(NCP_RECHERCHE) < 0) return false;
-    return true;
-  });
+            /* Le champ ncp_extra_info contient parfois un fil de mail colle tel quel : en-tetes Van:/Verzonden:/Aan:/CC:/Onderwerp:, signature, telephone, adresse, site. L'heure d'ENVOI du mail n'est PAS l'heure du DEFAUT : sans ce filtre le dashboard retenait par exemple 14:21 (heure d'envoi du mail) au lieu de l'heure reelle, sur 6 fiches. Comme l'heure lue dans le texte est prioritaire sur celle de la fiche, l'equipe attribuee etait fausse. On retire donc ces lignes avant toute lecture d'heure ou de ligne dans le texte libre. */  
 
-  // Filtres actifs mais aucun resultat : message clair plutot que des graphiques vides
-  if(filtres.length === 0){
-    ['ncp-k-total','ncp-k-inpak','ncp-k-prod','ncp-k-tonnes','ncp-k-debloque','ncp-k-sl-inpak','ncp-k-sl-prod'].forEach(function(id){
-      var el = document.getElementById(id); if(el) el.textContent = '0';
-    });
-    var elPer = document.getElementById('ncp-k-periode'); if(elPer) elPer.textContent = '-';
-    [_ncpEvolutionChart, _ncpCausesChart, _ncpTonnageChart, _ncpLignesChart, _ncpProduitsChart].forEach(function(c){ if(c) c.destroy(); });
-    _ncpEvolutionChart = _ncpCausesChart = _ncpTonnageChart = _ncpLignesChart = _ncpProduitsChart = null;
-    var tbody0 = document.getElementById('ncp-tbody');
-    if(tbody0) tbody0.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:24px;font-size:13px">'+t('ncp_no_match')+'</td></tr>';
-    NCP_VUE = []; ncpBuildDeclarants([]); var countEl0 = document.getElementById('ncp-liste-count'); if(countEl0) countEl0.textContent = '(0)';
-    return;
-  }
 
-  NCP_VUE = filtres; ncpMajCouverture(filtres); // --- KPI ---
-  // Client "BLK" = bulk interne / surproduction, pas un vrai defaut client :
-  // exclu des totaux/KPI/graphiques, mais reste visible dans la liste ci-dessous.
-  var filtresKPI = filtres.filter(function(r){ return r.famille_produit !== 'BLK'; });
-  var total = filtresKPI.length;
-  var nInpak = filtresKPI.filter(function(r){ return r.type_ncp === 'Inpak'; }).length;
-  var nProd = filtresKPI.filter(function(r){ return r.type_ncp === 'Production'; }).length;
-  var tonnes = filtresKPI.reduce(function(s, r){ return s + (r.total_tonnes || 0); }, 0);
-  var elTotal = document.getElementById('ncp-k-total'); if(elTotal) elTotal.textContent = total;
-  var elInpak = document.getElementById('ncp-k-inpak'); if(elInpak) elInpak.textContent = nInpak;
-  var elInpakPct = document.getElementById('ncp-k-inpak-pct'); if(elInpakPct) elInpakPct.textContent = total ? Math.round(nInpak/total*100) + '%' : '-';
-  var elProd = document.getElementById('ncp-k-prod'); if(elProd) elProd.textContent = nProd;
-  var elProdPct = document.getElementById('ncp-k-prod-pct'); if(elProdPct) elProdPct.textContent = total ? Math.round(nProd/total*100) + '%' : '-';
-  var elTonnes = document.getElementById('ncp-k-tonnes'); if(elTonnes) elTonnes.textContent = Math.round(tonnes) + ' t';
-  // NCP encore ouvertes : tout ce qui n a pas ete libere par la qualite
-  var nNonClasses = filtresKPI.filter(ncpEstNonClasse).length;
-  var nOuvertes = nNonClasses;
-  var elOuv = document.getElementById('ncp-k-ouvertes'); if(elOuv) elOuv.textContent = nOuvertes;
-  var elClo = document.getElementById('ncp-k-cloture-pct');
-  if(elClo) elClo.textContent = total ? t('ncp_pct_cloture').replace('{pct}', Math.round(nNonClasses / total * 100)) : '-';
-  var nDebloque = filtresKPI.filter(ncpEstDebloquee);
-  var tDebloque = nDebloque.reduce(function(s, r){ return s + (Number(r.total_tonnes) || 0); }, 0);
-  var elDeb = document.getElementById('ncp-k-debloque');
-  if(elDeb) elDeb.textContent = nDebloque.length;
-  var elDebM = document.getElementById('ncp-k-debloque-meta');
-  if(elDebM) elDebM.textContent = t('ncp_debloque_meta')
-    .replace('{t}', Math.round(tDebloque))
-    .replace('{pct}', total ? Math.round(nDebloque.length / total * 100) : 0);
-  var elPeriode = document.getElementById('ncp-k-periode');
-  if(elPeriode && filtresKPI.length){
-    var dates = filtresKPI.map(function(r){ return r.created_date_iso; }).filter(Boolean).sort();
-    if(dates.length) elPeriode.textContent = dFR(dates[0]) + t('date_range_sep') + dFR(dates[dates.length-1]);
-  }
 
-  // --- Evolution mensuelle ---
-  var ctxEvo = document.getElementById('ncpEvolutionChart');
-  if(ctxEvo && typeof Chart !== 'undefined'){
-    var parMois = {};
-    filtresKPI.forEach(function(r){
-      if(!r.created_date_iso) return;
-      var mois = r.created_date_iso.slice(0,7);
-      parMois[mois] = (parMois[mois] || 0) + 1;
-    });
-    var moisTries = Object.keys(parMois).sort();
-    var moisActuel = new Date().toISOString().slice(0, 7);
-    var moisEnCours = moisTries.length > 0 && moisTries[moisTries.length - 1] === moisActuel;
-    if(_ncpEvolutionChart){ _ncpEvolutionChart.destroy(); _ncpEvolutionChart = null; }
-    _ncpEvolutionChart = new Chart(ctxEvo, {
-      type: 'line',
-      data: { labels: moisTries.map(moisFR), datasets: [{
-        data: moisTries.map(function(m){ return parMois[m]; }),
-        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.1)', fill: true, tension: .3, pointRadius: 3,
-        // Le mois en cours n est pas termine : on le trace en pointilles
-        segment: { borderDash: function(ctx){ return (moisEnCours && ctx.p1DataIndex === moisTries.length - 1) ? [5, 4] : undefined; } }
-      }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-        scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } }
-    });
-  }
+       // part de temps mini pour retenir une equipe secondaire
+   // au-dela, deux heures citees ne sont pas une plage
 
-  // --- Top 10 des causes reelles (Pareto) ---
-  // Remplace l ancien graphique 'Comparaison par equipe' : celui-ci comparait
-  // les equipes sur l heure de creation de la fiche qualite, pas sur l heure
-  // reelle du defaut, ce qui penalisait mecaniquement les equipes de journee.
-  var ctxCa = document.getElementById('ncpCausesChart');
-  if(ctxCa && typeof Chart !== 'undefined'){
-    var parCause = {};
-    filtresKPI.forEach(function(r){
-      if(!r.problems) return;
-      String(r.problems).split('|').forEach(function(p){
-        var lib = p.trim();
-        if(!lib) return;
-        parCause[lib] = (parCause[lib] || 0) + 1;
-      });
-    });
-    var causes = Object.keys(parCause).sort(function(x, y){ return parCause[y] - parCause[x]; });
-    var topCauses = causes.slice(0, 10);
-    if(_ncpCausesChart){ _ncpCausesChart.destroy(); _ncpCausesChart = null; }
-    if(topCauses.length){
-      var totalCauses = causes.reduce(function(s, k){ return s + parCause[k]; }, 0);
-      var cumul = 0;
-      var cumulPct = topCauses.map(function(c){ cumul += parCause[c]; return Math.round(cumul / totalCauses * 100); });
-      _ncpCausesChart = new Chart(ctxCa, {
-        data: {
-          labels: topCauses.map(function(c){ return c.length > 24 ? c.slice(0, 23) + '\u2026' : c; }),
-          datasets: [
-            { type: 'bar', data: topCauses.map(function(c){ return parCause[c]; }), backgroundColor: '#8b5cf6', borderRadius: 4, order: 2 },
-            { type: 'line', data: cumulPct, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#f59e0b', tension: .25, yAxisID: 'y2', order: 1 }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false },
-            tooltip: { callbacks: {
-              title: function(items){ return topCauses[items[0].dataIndex]; },
-              label: function(c){ return c.datasetIndex === 1 ? ('Cumul : ' + c.parsed.y + '%') : (c.parsed.y + ' NCP'); }
-            } } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 9 }, maxRotation: 55, minRotation: 40, autoSkip: false } },
-            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4', precision: 0 } },
-            y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#f59e0b', font: { size: 10 }, callback: function(v){ return v + '%'; } } }
-          } }
-      });
-    }
-  }
 
-  var ctxFa = document.getElementById('ncpFamillesChart'); if(ctxFa && typeof Chart !== 'undefined'){ var parFam = {}; var totFam = 0; filtresKPI.forEach(function(r){ if(!r.problems) return; String(r.problems).split('|').forEach(function(p){ var lib = p.trim(); if(!lib) return; var fa = ncpFamille(lib); parFam[fa] = (parFam[fa] || 0) + 1; totFam++; }); }); var fams = Object.keys(parFam).sort(function(a, b){ return parFam[b] - parFam[a]; }); if(_ncpFamillesChart){ _ncpFamillesChart.destroy(); _ncpFamillesChart = null; } if(fams.length){ var cumF = 0; var cumFPct = fams.map(function(f){ cumF += parFam[f]; return Math.round(cumF / totFam * 100); }); _ncpFamillesChart = new Chart(ctxFa, { data: { labels: fams, datasets: [ { type: 'bar', data: fams.map(function(f){ return parFam[f]; }), backgroundColor: '#3b82f6', borderRadius: 4, order: 2 }, { type: 'line', data: cumFPct, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f59e0b', tension: .25, yAxisID: 'y2', order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.datasetIndex === 1 ? (t('ncp_cumul_label') + ' ' + c.parsed.y + '%') : (c.parsed.y + ' ' + t('ncp_mentions_label') + ', ' + t('ncp_pct_total').replace('{pct}', Math.round(c.parsed.y / totFam * 100))); } } } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4', maxRotation: 40, minRotation: 40, font: { size: 10 } } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#f59e0b', callback: function(v){ return v + '%'; } } } } } }); } }   var ctxDe = document.getElementById('ncpDelaiChart'); if(ctxDe && typeof Chart !== 'undefined'){ var seaux = [0, 0, 0, 0, 0]; var nMes = 0, somme = 0, sup7 = 0, nonSoldees = 0; filtresKPI.forEach(function(r){ if(!ncpEstSoldee(r)) nonSoldees++; var j = ncpDelai(r); if(j === null) return; nMes++; somme += j; if(j > 7) sup7++; if(j <= 2) seaux[0]++; else if(j <= 7) seaux[1]++; else if(j <= 14) seaux[2]++; else if(j <= 30) seaux[3]++; else seaux[4]++; }); var elInfo = document.getElementById('ncp-delai-info'); if(elInfo) elInfo.textContent = t('ncp_delai_info').replace('{moy}', nMes ? (somme / nMes).toFixed(1) : '-').replace('{n}', nMes).replace('{sup7}', sup7).replace('{ns}', nonSoldees); if(_ncpDelaiChart){ _ncpDelaiChart.destroy(); _ncpDelaiChart = null; } _ncpDelaiChart = new Chart(ctxDe, { type: 'bar', data: { labels: [t('ncp_delai_l1'), t('ncp_delai_l2'), t('ncp_delai_l3'), t('ncp_delai_l4'), t('ncp_delai_l5')], datasets: [{ data: seaux, backgroundColor: ['#10b981', '#34d399', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#8b90a4' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } } } } }); }   // --- Tonnage bloque par client ---
-  // Remplace l ancien donut 'Repartition par unite' : trois parts quasi egales
-  // n apportaient aucune information exploitable.
-  var ctxTo = document.getElementById('ncpTonnageChart');
-  if(ctxTo && typeof Chart !== 'undefined'){
-    var parFam = {};
-    filtresKPI.forEach(function(r){
-      var t = parseFloat(r.total_tonnes) || 0;
-      if(t <= 0) return;
-      var fam = r.famille_produit || 'Inconnu';
-      parFam[fam] = (parFam[fam] || 0) + t;
-    });
-    var topFam = Object.keys(parFam).sort(function(x, y){ return parFam[y] - parFam[x]; }).slice(0, 10);
-    if(_ncpTonnageChart){ _ncpTonnageChart.destroy(); _ncpTonnageChart = null; }
-    if(topFam.length){
-      _ncpTonnageChart = new Chart(ctxTo, {
-        type: 'bar',
-        data: { labels: topFam, datasets: [{ data: topFam.map(function(f){ return Math.round(parFam[f]); }), backgroundColor: '#10b981', borderRadius: 4 }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.parsed.x + ' t bloquees'; } } } },
-          scales: {
-            x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } },
-            y: { grid: { display: false }, ticks: { color: '#8b90a4', font: { size: 11 } } }
-          } }
-      });
-    }
-  }
 
-  // --- Top lignes (cause directe uniquement, exclut les consequences Production) ---
-  var ctxLi = document.getElementById('ncpLignesChart');
-  if(ctxLi && typeof Chart !== 'undefined'){
-    var parLigne = {};
-    filtresKPI.forEach(function(r){
-      if(!r.ligne || r.ligne_type !== 'cause_directe') return;
-      parLigne[r.ligne] = (parLigne[r.ligne] || 0) + 1;
-    });
-    var topLignes = Object.keys(parLigne).sort(function(a,b){ return parLigne[b]-parLigne[a]; }).slice(0,10);
-    if(_ncpLignesChart){ _ncpLignesChart.destroy(); _ncpLignesChart = null; }
-    if(topLignes.length){
-      _ncpLignesChart = new Chart(ctxLi, {
-        type: 'bar',
-        data: { labels: topLignes, datasets: [{ data: topLignes.map(function(l){ return parLigne[l]; }), backgroundColor: '#3b82f6', borderRadius: 4 }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y: { grid: { display: false }, ticks: { color: '#8b90a4' } } } }
-      });
-    }
-  }
 
-  // --- Top produits ---
-  var ctxPr = document.getElementById('ncpProduitsChart');
-  if(ctxPr && typeof Chart !== 'undefined'){
-    var parProduit = {};
-    filtresKPI.forEach(function(r){
-      if(!r.code_produit) return;
-      parProduit[r.code_produit] = (parProduit[r.code_produit] || 0) + 1;
-    });
-    var topProduits = Object.keys(parProduit).sort(function(a,b){ return parProduit[b]-parProduit[a]; }).slice(0,10);
-    if(_ncpProduitsChart){ _ncpProduitsChart.destroy(); _ncpProduitsChart = null; }
-    if(topProduits.length){
-      _ncpProduitsChart = new Chart(ctxPr, {
-        type: 'bar',
-        data: { labels: topProduits, datasets: [{ data: topProduits.map(function(p){ return parProduit[p]; }), backgroundColor: '#f97316', borderRadius: 4 }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b90a4' } }, y: { grid: { display: false }, ticks: { color: '#8b90a4' } } } }
-      });
-    }
-  }
 
-  // --- Table (200 plus recents) ---
-  var tbody = document.getElementById('ncp-tbody');
-  ncpInitClicks(); ncpBuildDeclarants(filtresKPI); ncpBuildRecurrences(filtresKPI); var countEl = document.getElementById('ncp-liste-count');
-  if(countEl) countEl.textContent = '(' + filtres.length + ')';
-  if(tbody){
-    var tries = filtres.slice().sort(function(a,b){ return (b.created_date_iso||'').localeCompare(a.created_date_iso||''); });
-    var LIMITE = 200;
-    LIMITE = NCP_TOUT ? 999999 : 200; var tronque = tries.length > LIMITE;
-    var affiches = tries.slice(0, LIMITE);
-    tbody.innerHTML = affiches.map(function(r){
-      var eq = ncpEquipesMulti(r).principale;
-      var typeColor = r.type_ncp === 'Inpak' ? 'var(--amber)' : 'var(--red)';
-      var autreDeclarant = ncpEstNonClasse(r);
-      return '<tr>'
-        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx);font-weight:600">' + (r.de_cote ? '<span title="Mis de cote" style="color:var(--blue);margin-right:5px;vertical-align:middle">&#128204;</span>' : '') + (r.commentaire_perso ? '<span title="' + ncpEsc(r.commentaire_perso) + '" style="color:var(--amber);margin-right:5px;vertical-align:middle">&#9998;</span>' : '') + (r.controle_perso ? '<span title="Controle par ' + ncpEsc(r.controle_par || '?') + ' le ' + ncpEsc(r.controle_date || '?') + '" style="color:var(--green);margin-right:5px;vertical-align:middle">&#10003;</span>' : '') + (autreDeclarant ? '<span title="Bloque par une personne autre qu\'Inpak ou Production (' + ncpEsc(ncpNomAff(r.reporter)) + ')" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a78bfa;margin-right:6px;vertical-align:middle"></span>' : '') + (r.notification || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px">' + dFR(r.created_date_iso) + '<span style="color:var(--tx3);font-size:10px"> (' + ncpJour(r.created_date_iso) + ')</span>' + ncpBadgeSrc(r) + '</td>'
-        + '<td>' + (r.unite || '-') + '</td>'
-        + '<td>' + (eq || '-') + ncpEtiquetteMulti(r) + '</td>'
-        + '<td style="color:' + typeColor + ';font-weight:600">' + r.type_ncp + '</td>'
-        + '<td>' + (r.ligne || '-') + (r.ligne_type === 'consequence_blocage_aval' ? ' <span style="color:var(--tx3);font-size:10px">(consequence)</span>' : '') + (r.type_ncp === 'Inpak' && ncpOperateurs(r) ? '<br><span style="color:var(--tx3);font-size:10px">&#128100; ' + ncpEsc(ncpOperateurs(r)) + '</span>' : '') + '</td>'
-        + '<td style="font-family:var(--mo);font-size:11px;color:var(--tx3)">' + (ncpBakorder(r) || '-') + '</td>' + '<td>' + (r.code_produit || '-') + '</td>' + '<td style="font-family:var(--mo);font-size:12px;text-align:right">' + (Number(r.total_pallets) || 0) + '</td>' + '<td style="font-family:var(--mo);font-size:12px;text-align:right">' + (Number(r.total_tonnes) || 0).toFixed(2) + ' t</td>'
-        + '<td style="font-size:12px;color:var(--tx3)">' + (r.status || '-') + '</td>'
-        + '<td style="font-size:12px">' + (r.description || '-') + '</td>'
-        + '</tr>';
-    }).join('');
-    if(tronque){
-      tbody.innerHTML += '<tr><td colspan="12" style="text-align:center;color:var(--tx3);padding:10px;font-size:12px">'+t('ncp_truncated').replace('{n}',LIMITE).replace('{total}',tries.length)+'</td></tr>';
-    }
-  }
-}
+
+
+
+
+
+
+
+   
+
+
+
 
 // ============================================================
 // ONGLET RECRUTEMENT — Évaluation mentalité candidats
@@ -6272,131 +5595,36 @@ window.buildRecrutementTab = function(){
    Total = Inpak + Production + Sans controle labo Inpak + Sans controle labo Prod
    Un NCP n apparait que dans une seule tuile.
    ==================================================================== */
-var NCP_ACTIONS_RESTANTES = /strippen|dierenvoeding|kwaliteit|stickeren|ompakken|overstapelen|metaaldetector|vergisting|speciale bestemming|tape|bid|bulken|onderneem actie/i;
 
-function ncpMesures(r){
-  return String(r.toutes_mesures || r.measures || '').split(/[|,]/).map(function(s){ return s.trim(); }).filter(Boolean);
-}
+
+
 
 /* Debloque = Vrijgave explicite ET aucune action restante derriere
    (Dierenvoeding, Strippen, Ompakken... restent bloques) */
-function ncpEstDebloque(r){
-  var m = ncpMesures(r);
-  if(!m.some(function(x){ return /^vrijgave$/i.test(x); })) return false;
-  return !m.some(function(x){ return NCP_ACTIONS_RESTANTES.test(x); });
-}
+
 
 /* Bloc de shift couvrant un instant donne (miroir de getEquipe)
    Semaine : 05h-13h / 13h-21h / 21h-05h   -   Week-end : 05h-17h / 17h-05h */
-function ncpBlocShift(dateISO, heure){
-  if(!dateISO || !heure) return null;
-  var hh = parseInt(String(heure).split(':')[0], 10);
-  if(isNaN(hh)) return null;
-  var d = new Date(dateISO + 'T00:00:00');
-  if(isNaN(d.getTime())) return null;
-  var jour = function(x){ return x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2); };
-  var mk = function(ds, h){ return new Date(ds + 'T' + ('0'+h).slice(-2) + ':00:00'); };
-  var dow = d.getDay(), we = (dow === 0 || dow === 6);
-  if(hh >= 5){
-    if(we){
-      if(hh < 17) return { d: mk(dateISO,5), f: mk(dateISO,17), b: '05h-17h' };
-      return { d: mk(dateISO,17), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '17h-05h' };
-    }
-    if(hh < 13) return { d: mk(dateISO,5),  f: mk(dateISO,13), b: '05h-13h' };
-    if(hh < 21) return { d: mk(dateISO,13), f: mk(dateISO,21), b: '13h-21h' };
-    return { d: mk(dateISO,21), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '21h-05h' };
-  }
-  var v = new Date(d.getTime() - 86400000), vs = jour(v), vdow = v.getDay();
-  if(vdow === 0 || vdow === 6) return { d: mk(vs,17), f: mk(dateISO,5), b: '17h-05h' };
-  return { d: mk(vs,21), f: mk(dateISO,5), b: '21h-05h' };
-}
+
 
 /* Hors shift = la fiche a ete creee en dehors du bloc horaire du shift
    concerne par le defaut (heure reelle du defaut via ncpHeureInfo). */
-function ncpHorsShift(r){
-  if(!r.created_date_iso || !r.created_heure) return false;
-  var hi = ncpHeureInfo(r);
-  if(!hi || !hi.heure) return false;
-  var bloc = ncpBlocShift(hi.date_iso || r.created_date_iso, hi.heure);
-  if(!bloc) return false;
-  var crea = new Date(r.created_date_iso + 'T' + r.created_heure + ':00');
-  if(isNaN(crea.getTime())) return false;
-  return crea < bloc.d || crea >= bloc.f;
-}
 
-function ncpSansLabo(r){ return ncpHorsShift(r); }
-function ncpSansLaboInpak(r){ return ncpHorsShift(r) && r.type_ncp === 'Inpak'; }
-function ncpSansLaboProd(r){ return ncpHorsShift(r) && r.type_ncp === 'Production'; }
+
+
+
+
 
 /* Meme base que les KPI existants : NCP_VUE sans les BLK */
-function ncpBaseKPI(){
-  return (NCP_VUE || []).filter(function(r){ return r.famille_produit !== 'BLK'; });
-}
 
-var NCP_KPI_MAP = {
-  'ncp-k-total':'total', 'ncp-k-inpak':'inpak', 'ncp-k-prod':'prod',
-  'ncp-k-tonnes':'tonnes', 'ncp-k-debloque':'debloque',
-  'ncp-k-sl-inpak':'slinpak', 'ncp-k-sl-prod':'slprod'
-};
 
-function ncpBindTuiles(){
-  var g = document.querySelector('#ncp-content-wrap .kgrid');
-  if(!g) return;
-  if(!g.getAttribute('data-kpideleg')){
-    g.setAttribute('data-kpideleg','1');
-    g.addEventListener('click', function(ev){
-      var card = ev.target.closest ? ev.target.closest('.kcard') : null;
-      if(!card) return;
-      var v = card.querySelector('.kval');
-      if(!v || !NCP_KPI_MAP[v.id]) return;
-      ev.stopPropagation();
-      ncpKpiListe(NCP_KPI_MAP[v.id]);
-    }, true);
-  }
-  Array.prototype.forEach.call(g.querySelectorAll('.kcard'), function(c){
-    var v = c.querySelector('.kval');
-    if(v && NCP_KPI_MAP[v.id]){ c.style.cursor = 'pointer'; c.title = t('ncp_tooltip_liste'); }
-  });
-}
 
-function ncpMajTuilesExtra(){
-  function set(id, v){ var e = document.getElementById(id); if(e) e.textContent = v; }
-  var b = ncpBaseKPI(), tot = b.length;
-  var deb = 0, i = 0, p = 0, si = 0, sp = 0;
-  b.forEach(function(r){
-    if(ncpEstDebloque(r)) deb++;
-    var t = r.type_ncp;
-    if(ncpSansLabo(r)){ if(t === 'Inpak') si++; else if(t === 'Production') sp++; }
-    else              { if(t === 'Inpak') i++;  else if(t === 'Production') p++;  }
-  });
-  function pct(n){ return tot ? t('ncp_pct_total').replace('{pct}', Math.round(n / tot * 100)) : '-'; }
-  function pctSl(n){ return tot ? t('ncp_pct_sanslabo').replace('{pct}', Math.round(n / tot * 100)) : '-'; }
-  set('ncp-k-inpak', i);      set('ncp-k-inpak-pct', pct(i));
-  set('ncp-k-prod', p);       set('ncp-k-prod-pct', pct(p));
-  set('ncp-k-debloque', deb); set('ncp-k-debloque-pct', pct(deb));
-  set('ncp-k-sl-inpak', si);  set('ncp-k-sl-inpak-pct', pctSl(si));
-  set('ncp-k-sl-prod', sp);   set('ncp-k-sl-prod-pct', pctSl(sp));
-  ncpBindTuiles();
-}
 
-(function(){
-  var _kpi = ncpKpiListe;
-  ncpKpiListe = function(k){
-    var b = ncpBaseKPI();
-    if(k === 'debloque') return ncpRendreListe(t('ncp_titre_debloques2'), b.filter(ncpEstDebloque));
-    if(k === 'inpak')    return ncpRendreListe(t('ncp_titre_inpak_shift'), b.filter(function(r){ return r.type_ncp === 'Inpak' && !ncpSansLabo(r); }));
-    if(k === 'prod')     return ncpRendreListe(t('ncp_titre_prod_shift'), b.filter(function(r){ return r.type_ncp === 'Production' && !ncpSansLabo(r); }));
-    if(k === 'slinpak')  return ncpRendreListe(t('ncp_titre_hors_shift_inpak'), b.filter(ncpSansLaboInpak));
-    if(k === 'slprod')   return ncpRendreListe(t('ncp_titre_hors_shift_prod'), b.filter(ncpSansLaboProd));
-    return _kpi.call(this, k);
-  };
-  var _build = buildNCPTab;
-  buildNCPTab = function(){
-    var out = _build.apply(this, arguments);
-    try { ncpMajTuilesExtra(); } catch(e){ console.warn('tuiles NCP', e); }
-    return out;
-  };
-})();
+
+
+
+
+
 
 function fmtDateFormation(iso){
   if(!iso) return '-';
@@ -6930,70 +6158,22 @@ buildMobileNav();
    Bloc ajoute en fin de fichier et branche par enrobage des fonctions
    existantes, pour ne rien modifier de la logique deja en place.
    ========================================================================= */
-function ncpNonDirigeable(r){
-  if(!r.unite) return true;
-  if(r.type_ncp === 'Inpak' && !r.ligne) return true;
-  return false;
-}
+
 
 /* Ecriture d'un override. Le champ est supprime de Firebase quand la valeur est
    vide, ce qui rend la main a la deduction automatique. Le listener temps reel
    sur ncp_data rejoue loadNCPData tout seul : la liste et les tuiles se
    remettent a jour sans rechargement. */
-function ncpSetOverrideChamp(notif, champ, valeur, libelle){
-  if(!db){ toast('Connexion Firebase non disponible', '#ef4444'); return; }
-  var r = null, i;
-  for(i = 0; i < NCP_DATA.length; i++){ if(String(NCP_DATA[i].notification) === String(notif)){ r = NCP_DATA[i]; break; } }
-  var chemin = 'ncp_data/' + notif + '/' + champ;
-  var ecrire = valeur ? db.ref(chemin).set(valeur) : db.ref(chemin).remove();
-  ecrire.then(function(){
-    if(r) r[champ] = valeur || null;
-    toast(valeur ? (libelle + ' : ' + valeur) : (libelle + ' : retour a la deduction automatique'), '#10b981');
-    setTimeout(function(){ try { ncpDetail(notif); } catch(e){} }, 450);
-  }).catch(function(e){ toast('Erreur : ' + e.message, '#ef4444'); });
-}
-function ncpSetUniteOverride(n, v){ ncpSetOverrideChamp(n, 'unite_override', v, 'Unite'); }
-function ncpSetLigneOverride(n, v){ ncpSetOverrideChamp(n, 'ligne_override', v, 'Ligne'); }
-function ncpSetOperateurOverride(n, v){ ncpSetOverrideChamp(n, 'operateur_override', String(v || '').trim(), 'Operateur'); }
+
+
+
+
 
 /* La tuile est injectee depuis le JS plutot qu'ecrite dans index.html : meme
    principe que le bouton "Mis de cote", ca evite de toucher au gabarit. */
-function ncpInjecterTuileACompleter(){
-  if(document.getElementById('ncp-k-acompleter')) return;
-  var g = document.querySelector('#ncp-content-wrap .kgrid');
-  if(!g) return;
-  var c = document.createElement('div');
-  c.className = 'kcard pu';
-  c.innerHTML = '<div class="klbl">Fiches a completer</div>'
-    + '<div class="kval" id="ncp-k-acompleter">-</div>'
-    + '<div class="kmeta" id="ncp-k-acompleter-pct">-</div>';
-  g.appendChild(c);
-  if(typeof NCP_KPI_MAP !== 'undefined') NCP_KPI_MAP['ncp-k-acompleter'] = 'acompleter';
-}
 
-(function(){
-  var _kpiAC = ncpKpiListe;
-  ncpKpiListe = function(k){
-    if(k === 'acompleter'){
-      return ncpRendreListe('Fiches a completer - unite ou ligne manquante', ncpBaseKPI().filter(ncpNonDirigeable));
-    }
-    return _kpiAC.call(this, k);
-  };
-  var _buildAC = buildNCPTab;
-  buildNCPTab = function(){
-    var out = _buildAC.apply(this, arguments);
-    try {
-      ncpInjecterTuileACompleter();
-      var b = ncpBaseKPI(), n = b.filter(ncpNonDirigeable).length;
-      var e = document.getElementById('ncp-k-acompleter');
-      if(e) e.textContent = n;
-      var p = document.getElementById('ncp-k-acompleter-pct');
-      if(p) p.textContent = b.length ? (Math.round(n / b.length * 100) + '% du total') : '-';
-      if(typeof ncpBindTuiles === 'function') ncpBindTuiles();
-    } catch(err){ console.warn('tuile a completer', err); }
-    return out;
-  };
-})();
+
+
 
 /* ==================== NCP : tri des listes ====================
    ncpRendreListe affichait les fiches dans l'ordre brut de NCP_DATA, donc
@@ -7003,58 +6183,17 @@ function ncpInjecterTuileACompleter(){
    4-Low ; a priorite egale, la plus recente d'abord). Le tri s'applique a
    toutes les listes du dashboard, pas seulement a la tuile "a completer".
    ============================================================== */
-var NCP_LISTE_TRI = 'date';
-var NCP_LISTE_COURANTE = null;
-var NCP_LISTE_TITRE = '';
 
-function ncpPrioriteRang(r){
-  var m = String(r.priority || '').match(/^\s*(\d)/);
-  return m ? parseInt(m[1], 10) : 9;
-}
-function ncpCleDate(r){
-  return String(r.created_date_iso || '') + ' ' + String(r.created_heure || '');
-}
-function ncpTrierListe(rows){
-  var c = rows.slice();
-  if(NCP_LISTE_TRI === 'priorite'){
-    c.sort(function(a, b){
-      var d = ncpPrioriteRang(a) - ncpPrioriteRang(b);
-      if(d) return d;
-      return ncpCleDate(b).localeCompare(ncpCleDate(a));
-    });
-  } else {
-    c.sort(function(a, b){ return ncpCleDate(b).localeCompare(ncpCleDate(a)); });
-  }
-  return c;
-}
-function ncpBasculerTriListe(){
-  NCP_LISTE_TRI = (NCP_LISTE_TRI === 'date') ? 'priorite' : 'date';
-  if(NCP_LISTE_COURANTE) ncpRendreListe(NCP_LISTE_TITRE, NCP_LISTE_COURANTE);
-}
-function ncpInjecterBoutonTri(){
-  var tEl = document.getElementById('ncp-list-title');
-  if(!tEl || !tEl.parentNode) return;
-  var b = document.getElementById('ncp-btn-tri');
-  if(!b){
-    b = document.createElement('button');
-    b.id = 'ncp-btn-tri';
-    b.onclick = ncpBasculerTriListe;
-    b.style.cssText = 'margin-right:auto;margin-left:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer;white-space:nowrap';
-    tEl.parentNode.insertBefore(b, tEl.nextSibling);
-  }
-  b.textContent = (NCP_LISTE_TRI === 'date') ? '\u2193 Plus recentes d abord' : '\u2193 Priorite d abord';
-}
 
-(function(){
-  var _rendreTri = ncpRendreListe;
-  ncpRendreListe = function(titre, rows){
-    NCP_LISTE_TITRE = titre;
-    NCP_LISTE_COURANTE = rows;
-    var out = _rendreTri.call(this, titre, ncpTrierListe(rows));
-    try { ncpInjecterBoutonTri(); } catch(e){ console.warn('bouton tri', e); }
-    return out;
-  };
-})();
+
+
+
+
+
+
+
+
+
 
 /* ==================== NCP : filtre par unite sur les listes ====================
    Ajoute une zone de recherche/filtre (select AW1/AW2/AW3/Toutes) a cote du
@@ -7064,49 +6203,15 @@ function ncpInjecterBoutonTri(){
    de liste different est ouvert ; il est conserve si on rechange juste le
    filtre sur la meme liste.
    =================================================================================== */
-var NCP_LISTE_FILTRE_UNITE = 'toutes';
-var NCP_LISTE_BASE = [];
-var NCP_LISTE_TITRE_PREC = null;
 
-function ncpAppliquerFiltreUnite(rows){
-  if(NCP_LISTE_FILTRE_UNITE === 'toutes') return rows;
-  return rows.filter(function(r){ return r.unite === NCP_LISTE_FILTRE_UNITE; });
-}
-function ncpChangerFiltreUnite(v){
-  NCP_LISTE_FILTRE_UNITE = v;
-  if(NCP_LISTE_TITRE_PREC !== null) ncpRendreListe(NCP_LISTE_TITRE_PREC, NCP_LISTE_BASE);
-}
-function ncpInjecterFiltreUnite(){
-  var tEl = document.getElementById('ncp-list-title');
-  if(!tEl || !tEl.parentNode) return;
-  var s = document.getElementById('ncp-sel-filtre-unite');
-  if(!s){
-    s = document.createElement('select');
-    s.id = 'ncp-sel-filtre-unite';
-    s.onchange = function(){ ncpChangerFiltreUnite(this.value); };
-    s.style.cssText = 'margin-left:8px;padding:4px 10px;border-radius:8px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px;cursor:pointer';
-    ['toutes','AW1','AW2','AW3'].forEach(function(u){
-      var o = document.createElement('option');
-      o.value = u;
-      o.textContent = (u === 'toutes') ? 'Toutes les unites' : u;
-      s.appendChild(o);
-    });
-    var ref = document.getElementById('ncp-btn-tri');
-    tEl.parentNode.insertBefore(s, ref ? ref.nextSibling : tEl.nextSibling);
-  }
-  s.value = NCP_LISTE_FILTRE_UNITE;
-}
 
-(function(){
-  var _rendreFiltre = ncpRendreListe;
-  ncpRendreListe = function(titre, rows){
-    if(titre !== NCP_LISTE_TITRE_PREC){ NCP_LISTE_FILTRE_UNITE = 'toutes'; NCP_LISTE_TITRE_PREC = titre; }
-    NCP_LISTE_BASE = rows;
-    var out = _rendreFiltre.call(this, titre, ncpAppliquerFiltreUnite(rows));
-    try { ncpInjecterFiltreUnite(); } catch(e){ console.warn('filtre unite', e); }
-    return out;
-  };
-})();
+
+
+
+
+
+
+
 
 /* ==================== NCP : verrouillage ecriture pour les visiteurs ====================
    Le role "visiteur" (lecture seule) cachait deja les boutons d'import et
@@ -7117,33 +6222,4 @@ function ncpInjecterFiltreUnite(){
    uniquement les elements qui declenchent une ecriture Firebase — tout le
    reste (traduire, fermer, degustations liees, historique...) reste
    consultable normalement. Rien n'est modifie dans ncpDetail lui-meme. */
-(function(){
-  var _ncpDetailVisiteur = ncpDetail;
-  ncpDetail = function(notif){
-    var out = _ncpDetailVisiteur.call(this, notif);
-    try {
-      if(currentUser && currentUser.role === 'visiteur'){
-        var body = document.getElementById('ncp-detail-body');
-        if(body){
-          var sel = [
-            'button[onclick^="ncpOpenComment"]',
-            'button[onclick^="ncpSetOperateurOverride"]',
-            'button[onclick^="ncpToggleControle"]',
-            'button[onclick^="ncpToggleDeCote"]',
-            'select[onchange^="ncpSetEquipeOverride"]',
-            'select[onchange^="ncpSetLigneOverride"]',
-            'select[onchange^="ncpSetUniteOverride"]',
-            '#ncp-op-input'
-          ].join(',');
-          body.querySelectorAll(sel).forEach(function(el){
-            el.disabled = true;
-            el.style.opacity = '.45';
-            el.style.cursor = 'not-allowed';
-            el.title = 'Lecture seule (compte visiteur)';
-          });
-        }
-      }
-    } catch(e){ console.warn('ncpDetail verrou visiteur', e); }
-    return out;
-  };
-})();
+
