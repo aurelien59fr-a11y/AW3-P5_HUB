@@ -99,6 +99,102 @@ extraction et correction de bugs.
   boite de dialogue de collage JSON referencant `grafana_arrets_inpak.js`.
   Aucune erreur en console.
 
+## Etape 7 — NCP
+
+- **Fonctions redefinies apres coup (IIFE), non detectees par un simple
+  grep de `function NOM(`** : dans le fichier d'origine, quatre fonctions
+  du domaine NCP sont chacune REDEFINIES apres leur declaration de base
+  par une ou plusieurs IIFE anonymes qui capturent l'ancienne version
+  dans une fermeture puis remplacent la globale par une version enrichie :
+  - `ncpKpiListe` — redefinie deux fois (ajout du cas `debloque/inpak/
+    prod/slinpak/slprod`, puis du cas `acompleter`).
+  - `buildNCPTab` — redefinie deux fois (ajout de `ncpMajTuilesExtra()`,
+    puis de `ncpInjecterTuileACompleter()` et de la mise a jour de la
+    tuile "a completer").
+  - `ncpRendreListe` — redefinie deux fois (ajout du tri de liste, puis
+    du filtre par unite).
+  - `ncpDetail` — redefinie une fois (verrouillage des boutons d'action
+    en ecriture pour le role "visiteur").
+
+  Une extraction naive par nom de fonction (comme aux etapes 5 et 6)
+  aurait deplace uniquement la declaration de base et **silencieusement
+  perdu** ces cinq couches de comportement actif (dont le verrou de
+  securite du role visiteur). Verification faite par recherche exhaustive
+  de tout `nomFonction = function` dans le fichier entier (pas seulement
+  dans la zone NCP) : aucune autre fonction, du domaine NCP ou d'un
+  autre domaine, n'est concernee par ce motif — a l'exception de
+  `applyRole` (deja extraite dans `core/auth.js` a l'etape 4) et d'un
+  IIFE cosmetique (nav mobile/splash), tous deux hors du perimetre NCP
+  et donc non deplaces. Les cinq IIFE NCP ont ete deplacees telles
+  quelles dans `vues/ncp.js`, **dans leur ordre d'origine**, a la suite
+  de la declaration de base de la fonction qu'elles enrobent — l'ordre
+  d'execution des redefinitions en chaine est preserve a l'identique.
+
+- **Code non contigu** : le domaine NCP n'est pas regroupe en un seul
+  bloc dans `app.js` d'origine — les cinq IIFE ci-dessus se trouvent
+  dans une deuxieme zone du fichier (autour de la section Recrutement/
+  auth/splash-screen), entremelees avec du code d'autres domaines
+  (`applyRole`, l'ecran de demarrage cosmetique, les questions
+  d'entretien de Recrutement). Chaque fragment a ete identifie et
+  extrait individuellement par nom, sans toucher au code environnant
+  qui n'appartient pas a NCP.
+
+- **Import NCP non extrait a cette etape** : `importerNCP()` et
+  `openImportNCPModal()` restent dans `app.js`, conformement au plan
+  (`imports/ncp.js` est prevu a l'etape 10, avec `imports/base.js` et
+  `imports/protime.js`, et non a l'etape 7). Verifie fonctionnel en
+  l'etat apres extraction.
+
+- **Fonctions reclassifiees de "metier" vers "vue" par rapport a un
+  premier tri automatique** : un premier passage (marqueurs DOM/HTML
+  uniquement) rangeait `ncpKpiListe`, `ncpListeDeclarant`,
+  `ncpListeRecurrence`, `ncpBasculerTriListe`, `ncpChangerFiltreUnite`,
+  `ncpSetOverrideChamp`, `ncpSetEquipeOverride`, `ncpSetLigneOverride`,
+  `ncpSetUniteOverride`, `ncpSetOperateurOverride` et `ncpToggleControle`
+  en "metier" faute d'appel direct au DOM. Revu manuellement : ce sont
+  des gestionnaires d'action utilisateur (ecriture Firebase suivie d'un
+  rafraichissement de modale, ou filtrage/tri d'une liste deja affichee)
+  — meme famille que `saveComment()`/`openComment()` de Bradford
+  (etape 5), deplaces en `vues/bradford.js` malgre l'ecriture Firebase.
+  Les onze ont ete replacees dans `vues/ncp.js` pour rester coherentes
+  avec ce precedent.
+
+- **Ecart de comptage avec le plan** : le plan estimait 59 fonctions
+  pour NCP. L'analyse reelle (memes outils qu'aux etapes 5-6, controle
+  de chevauchement des offsets passe sans anomalie) en denombre 91
+  (89 extraites cette etape + les 2 fonctions d'import laissees en
+  place). Ecart plus important que sur les etapes precedentes, dans la
+  continuite de la reserve deja exprimee par le plan sur son propre
+  comptage — NCP etant explicitement signale par le plan comme "le
+  bloc le plus enchevetre".
+
+- **`buildNCPTab()` (18,8 Ko) deplacee intacte, sans scission
+  calcul/rendu** : le plan notait que separer calcul et rendu a
+  l'interieur de cette fonction demanderait de la lire ligne a ligne.
+  Conformement au principe "aucun changement de comportement" applique
+  a toute la Phase 2 (deja suivi pour `recalc()` a l'etape 5), la
+  fonction est deplacee en un seul bloc vers `vues/ncp.js` — elle fait
+  a la fois filtrage, agregation et generation HTML, ce qui la classe
+  cote "vue" comme `buildBT()`/`buildArretsInpak()` aux etapes
+  precedentes. La vraie separation calcul/rendu, si souhaitee, reste a
+  faire en Phase 3.
+
+- **Verification fonctionnelle live** : apres deploiement, l'onglet
+  NCP Qualite charge sans erreur console, les KPI (total, Inpak,
+  Production, tonnes, debloque, hors-shift, fiches a completer) et
+  leurs listes filtrees s'affichent (teste : clic sur une tuile ->
+  liste avec tri et filtre par unite fonctionnels, confirmant les deux
+  couches de wrap sur `ncpRendreListe`), le detail d'une fiche s'ouvre
+  correctement avec ses actions (mettre de cote, commenter, marquer
+  controle, traduire, overrides equipe/ligne/unite/operateur) actives
+  pour un compte Admin — comportement attendu, le verrou ne s'applique
+  qu'au role "visiteur" et n'a pas ete reteste avec un tel compte faute
+  d'en avoir un sous la main pour cette verification —, les graphiques
+  (evolution mensuelle, top causes, tonnage par client) se dessinent et
+  se recalculent quand le filtre d'unite change, et l'import NCP
+  (fusion non destructive, toujours dans `app.js`) ouvre bien sa boite
+  de dialogue.
+
 ## `recalc()` — signature impure (rappel)
 
 `recalc()` ne prend aucun parametre et ne retourne rien : elle lit le
