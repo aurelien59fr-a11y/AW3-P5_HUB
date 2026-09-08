@@ -284,3 +284,65 @@ extraction et correction de bugs.
 global `ABS` et ecrit le global `BD` par effet de bord. La rendre pure
 (`calculateBradford(abs) -> resultat`) est explicitement reporte a la
 Phase 3 par le plan, pour ne pas melanger extraction et refonte.
+
+## Etape 9 — Pointages, Admin, Recrutement (fin de l'extraction des vues)
+
+Extraction des trois derniers domaines de la Phase 2 : `js/vues/pointages.js`,
+`js/vues/admin.js`, `js/vues/recrutement.js`. Chaque domaine a suivi le
+protocole habituel (4 fichiers dans l'ordre : `vues/<domaine>.js`,
+`index.html`, `app.js`, `sw.js`), avec verification octet pour octet
+(hash SHA-256) de chaque fichier avant et apres commit via l'API Git de
+GitHub (`git/blobs`), pas seulement via `raw.githubusercontent.com` qui
+sert parfois une version en cache pendant quelques minutes apres un commit.
+
+Versions : Pointages -> v76 / bradford-v59, Admin -> v77 / bradford-v60,
+Recrutement -> v78 / bradford-v61.
+
+### Methode de deploiement retenue
+
+Le depot GitHub distant ne permet pas de `git push` direct depuis cet
+environnement (aucun identifiant configure, et la consigne de securite
+interdit de toute facon de manipuler des identifiants). L'upload manuel
+fichier par fichier dans l'interface web GitHub a ete fait de la maniere
+suivante, qui s'est averee fiable :
+
+1. Les fichiers prepares (contenu exact, deja verifie par hash en local)
+   sont ecrits directement dans le dossier Telechargements de l'utilisateur.
+2. La page GitHub "Upload files" est ouverte a la racine du depot, et
+   l'utilisateur selectionne lui-meme les fichiers dans la boite de
+   dialogue Windows (l'automatisation native du clic dans cette boite de
+   dialogue s'est averee non fiable dans cet environnement — echecs
+   systematiques et repetes, meme apres plusieurs tentatives sur des
+   cibles differentes).
+3. Une fois les fichiers commites (a la racine, sous leur nom temporaire),
+   leur contenu est recupere directement depuis l'API Git de GitHub
+   (`git/blobs/<sha>`), reconverti en octets dans le navigateur, puis
+   reinjecte comme fichier via un objet `File`/`DataTransfer` sur la page
+   d'upload du bon sous-dossier (`js/`, `js/vues/`). Cela permet de
+   deplacer/renommer un fichier vers son emplacement final sans jamais
+   faire retranscrire son contenu par le modele (risque de corruption sur
+   de gros fichiers en texte).
+4. Les fichiers temporaires a la racine sont ensuite supprimes.
+5. Chaque fichier final est reverifie par hash SHA-256 via l'API Git
+   avant de considerer le domaine termine.
+
+Cette methode a remplace une premiere approche (retranscription manuelle
+du contenu en base64 par blocs de ~10000 caracteres, avec verification de
+hash a chaque bloc) qui s'est revelee correcte mais tres lente et sujette
+a des erreurs de transcription sur de tres longues chaines repetitives
+(plusieurs blocs ont du etre re-decoupes en blocs de 5000 caracteres pour
+etre transcrits sans erreur). Elle reste documentee ici au cas ou elle
+serait necessaire de nouveau (par exemple si l'upload de fichier via
+`File`/`DataTransfer` cesse de fonctionner) : lire le fichier local par
+blocs, les injecter un par un dans une variable JS cote navigateur, et
+verifier le hash SHA-256 de chaque bloc avant de les concatener.
+
+### Verification
+
+Pour les trois domaines : `index.html`, `sw.js`, `js/app.js` et le nouveau
+`js/vues/<domaine>.js` ont ete verifies avec le hash SHA-256 attendu
+(calcule localement avant l'upload), et le site `aw3-p5-hub.vercel.app` a
+ete recharge sans erreur console apres chaque domaine. La page de connexion
+s'affiche normalement pour Pointages ; les onglets Admin et Recrutement
+n'ont pas ete testes en profondeur avec un compte reel (pas d'identifiants
+manipules par l'assistant), a confirmer par l'utilisateur.
