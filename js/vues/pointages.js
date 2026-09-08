@@ -19,8 +19,8 @@
  * applyProtimeImport, detectMissingWeeks, matchNomProtime,
  * classifierTypeAbsence, importerAbsencesProtime, ptKey — soit 14
  * fonctions au total, qui forment le cluster complet d'import Protime et
- * seront extraitees ensemble a l'Etape 10.
- * =================================================================== */
+ * seront extraites ensemble a l'Etape 10.
+ * ==================================================================== */
 
 var PT_DATA = {};
 
