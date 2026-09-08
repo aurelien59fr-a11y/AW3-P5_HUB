@@ -6,7 +6,7 @@
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v58';
+const CACHE_VERSION = 'bradford-v59';
 const APP_SHELL = [
   './',
   './index.html',
@@ -25,7 +25,8 @@ const APP_SHELL = [
   './js/vues/bulk.js?v=1',
   './js/vues/planning.js?v=1',
   './js/vues/formations.js?v=1',
-  './js/app.js?v=75',
+  './js/vues/pointages.js?v=1',
+  './js/app.js?v=76',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
