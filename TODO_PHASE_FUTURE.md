@@ -421,3 +421,37 @@ domaine metier/vue specifique et ne sont donc pas ciblees par le decoupage
 de la Phase 2. Avec cette etape, les 4 fichiers prevus dans
 `js/imports/README.md` (base.js, grafana.js, protime.js, ncp.js) sont tous
 presents -- le cluster d'import manuel de la Phase 2 est complet.
+
+## Etape 11 -- Mon espace (js/vues/espace.js)
+
+Extraction du dernier domaine de vue identifie dans js/vues/README.md : "Mon
+espace" (onglet espace), vue individuelle agregee par employe (pointages,
+absences, formations, NCP le concernant). Un employe normal ne voit que sa
+propre fiche ; seul l'admin peut choisir un autre employe via le selecteur.
+
+Fonctions deplacees vers js/vues/espace.js : normNomEspace(s),
+monEspaceTrouverEmpActuel(), monEspaceToggle(hdr), buildMonEspace().
+
+Methode : extraction du cluster "MON ESPACE" de app.js (237096 -> 222290
+octets) par reperage du commentaire banniere et comptage d'accolades pour
+trouver la fin exacte de buildMonEspace(). Verification exhaustive : les 31
+fonctions originales se retrouvent integralement reparties en 27 (app.js) +
+4 (espace.js), sans perte ni doublon. index.html met a jour la balise
+<script> (espace.js?v=1, apres recrutement.js) et bascule app.js en v80.
+sw.js passe en cache bradford-v63, ajoute espace.js?v=1 a la liste des
+fichiers caches et reference app.js?v=80.
+
+Verification : hash SHA-256 de chaque fichier commite (espace.js, app.js,
+index.html, sw.js) compare au hash attendu calcule localement avant
+deploiement -- correspondance exacte dans les 4 cas. Site live verifie sans
+erreur console, balises <script> confirmant espace.js?v=1 et app.js?v=80.
+
+Etat apres extraction : tous les fichiers vues/ annonces dans le README
+correspondent desormais a un fichier reel, SAUF deux entrees du README qui
+n'ont pas d'equivalent extrait : "ov.js" et "ab.js" (absences). Une
+premiere analyse de app.js (221674 octets, 25 fonctions restantes) montre
+un cluster ABSENCES encore present (updAbsLbl, buildAbs, buildTodayAbs) et
+une fonction applyOverviewAccess qui pourrait correspondre a "ov.js", ainsi
+qu'un cluster ANNIVERSAIRES (birthdays) non repertorie dans le README. Ces
+clusters restent a examiner et a extraire lors d'etapes futures (Etape 12+)
+si le decoupage de la Phase 2 doit couvrir la totalite du README.
