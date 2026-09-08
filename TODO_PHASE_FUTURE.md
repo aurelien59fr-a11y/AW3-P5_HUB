@@ -346,3 +346,78 @@ ete recharge sans erreur console apres chaque domaine. La page de connexion
 s'affiche normalement pour Pointages ; les onglets Admin et Recrutement
 n'ont pas ete testes en profondeur avec un compte reel (pas d'identifiants
 manipules par l'assistant), a confirmer par l'utilisateur.
+
+## Etape 10 — Cluster imports (base.js, protime.js, ncp.js)
+
+Extraction du cluster "imports manuels" reste de app.js vers `js/imports/`,
+completant les 4 fichiers prevus par `js/imports/README.md` (base.js,
+grafana.js deja fait a une etape anterieure, protime.js, ncp.js).
+
+Perimetre exact : les 14 fonctions listees dans le commentaire d'en-tete de
+`js/vues/pointages.js` (ajoute a l'Etape 9) comme "differees a l'Etape 10" :
+loadPointages, parseProtimeJson, protimeDateToDDMM, protimeDateToYear,
+previewProtimeImport, purgeAllProtimeAbsences, purgeUntypedAbsences,
+purgeProtimeAbsences, applyProtimeImport, detectMissingWeeks,
+matchNomProtime, classifierTypeAbsence, importerAbsencesProtime, ptKey —
+plus openImportNCPModal et importerNCP (cluster NCP, differe depuis
+l'Etape 7). Repartition finale :
+
+- `js/imports/base.js` : ptKey seule (partagee avec grafana.js, doit donc
+  se charger avant lui).
+- `js/imports/protime.js` : les 13 autres fonctions du cluster Protime.
+- `js/imports/ncp.js` : openImportNCPModal + importerNCP (fichier distinct
+  de `js/metier/ncp.js`, deja extrait a l'Etape 7 -- pas de collision de
+  nom, chemins differents).
+
+Version : v79 / bradford-v62.
+
+### Methode d'extraction (nouvelle etape par rapport aux domaines precedents)
+
+Contrairement aux domaines vues/metier des etapes precedentes (fichiers
+deja prepares en amont), le decoupage a ete fait directement dans cet
+environnement a partir du `js/app.js` en production :
+
+1. Recuperation de `js/app.js` via `curl` (l'environnement sandbox peut
+   contacter `raw.githubusercontent.com` directement, contrairement aux
+   services de paste anonymes qui sont bloques par le proxy).
+2. Reperage des positions exactes de chaque fonction/bloc du cluster
+   imports en repartant de la liste faisant autorite (commentaire d'en-tete
+   de `vues/pointages.js`, cf. Etape 9), une premiere recherche automatique
+   par mot-cle ayant manque 2 fonctions (loadPointages, detectMissingWeeks,
+   qui ne contiennent ni "protime" ni "absence" dans leur nom).
+3. Extraction par un petit analyseur Python maison (comptage d'accolades)
+   qui saute correctement les chaines ('/"), les template literals
+   (backticks), et les commentaires (// et /* */) pour trouver la fin
+   exacte du corps de chaque fonction, evitant de couper au milieu d'une
+   chaine contenant des accolades.
+4. Verification exhaustive avant upload : `node --check` sur les 4 fichiers
+   produits, verification que les 58 noms de fonctions d'origine se
+   retrouvent exactement une fois dans l'ensemble des 4 fichiers (0 perte,
+   0 doublon), et verification que la longueur totale retiree de app.js
+   correspond exactement a la somme des blocs extraits.
+
+Le reste de la methode de deploiement (upload racine -> deplacement via
+`fetch` + `File`/`DataTransfer` vers le chemin final -> suppression des
+fichiers temporaires -> verification hash SHA-256 via l'API Git) est
+identique a celle documentee a l'Etape 9.
+
+### Verification
+
+`js/imports/base.js`, `js/imports/protime.js`, `js/imports/ncp.js`,
+`js/app.js`, `index.html` et `sw.js` ont tous ete verifies par hash
+SHA-256 via l'API Git (`git/blobs`) apres commit, correspondant exactement
+au contenu prepare localement. Le site `aw3-p5-hub.vercel.app` recharge
+sans le cache navigateur affiche bien les scripts `js/imports/base.js?v=1`,
+`js/imports/grafana.js?v=1`, `js/imports/protime.js?v=1`,
+`js/imports/ncp.js?v=1` puis `js/app.js?v=79`, sans erreur console.
+
+### Etat de app.js apres l'Etape 10
+
+`js/app.js` fait maintenant 237096 octets (contre 259132 avant cette
+etape) et contient : le CSS injecte dynamiquement en tete de fichier, et
+31 fonctions restantes formant la coquille de l'application (demarrage,
+gestion des onglets, authentification, etc.) qui ne font pas partie d'un
+domaine metier/vue specifique et ne sont donc pas ciblees par le decoupage
+de la Phase 2. Avec cette etape, les 4 fichiers prevus dans
+`js/imports/README.md` (base.js, grafana.js, protime.js, ncp.js) sont tous
+presents -- le cluster d'import manuel de la Phase 2 est complet.
