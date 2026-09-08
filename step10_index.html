@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradford Dashboard - AW3 Ploeg 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <link rel="manifest" href="manifest.json?v=2">
+  <meta name="theme-color" content="#FFC20F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AW3 · P5">
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=2">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=2">
+  <style>
+    /* CSS critique du splash, en ligne pour eviter tout flash non-style
+       avant que js/app.js (charge en fin de page) n'injecte le reste. */
+    #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
+    @media (max-width:768px){ #splash-screen{background-image:url('icons/splash-mobile.jpg?v=1')} }
+    #splash-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,12,.15) 0%,rgba(5,7,12,.35) 55%,rgba(5,7,12,.82) 100%)}
+    #splash-screen.splash-hide{opacity:0;pointer-events:none}
+    .splash-badge{position:absolute;top:22px;left:22px;z-index:1;display:flex;align-items:center;gap:9px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.02em}
+    .splash-badge img{width:22px;height:22px;border-radius:6px;object-fit:cover;display:block}
+    .splash-loader{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+    .splash-spinner{width:30px;height:30px;border-radius:50%;border:3px solid rgba(59,130,246,.2);border-top-color:#3b82f6;animation:splash-spin .8s linear infinite}
+    @keyframes splash-spin{to{transform:rotate(360deg)}}
+    .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+    body{background:#0f1117}
+  </style>
+</head>
+<body>
+<div id="splash-screen">
+  <div class="splash-badge"><img src="icons/icon-192.png" alt=""><span>AW3 P5 &middot; Production Hub</span></div>
+  <div class="splash-loader">
+    <div class="splash-spinner"></div>
+    <div class="splash-txt" data-i18n="splash_loading">Chargement...</div>
+  </div>
+</div>
+<script>
+/* Filet de securite INDEPENDANT de app.js : garantit que le splash
+   disparait toujours, meme si app.js plante completement pour une
+   raison quelconque (Firebase indisponible, erreur JS, reseau...).
+   Place ici, tout en haut, pour ne jamais dependre du reste du script. */
+(function(){
+  var DELAI_MAX_MS = 10000;
+  var DELAI_VERIF_2 = 13000; // 2e verif si le dismissal etait en cours mais pas fini
+  var dejaTraite = false;
+  function afficherErreurChargement(){
+    if(dejaTraite) return; dejaTraite = true;
+    var el = document.getElementById('splash-screen');
+    if(!el) return;
+    el.innerHTML = '<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px">'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:8px">Le chargement prend plus de temps que prevu</div>'
+      + '<div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion, ou reessaie.</div>'
+      + '<button onclick="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button>'
+      + '</div>';
+  }
+  // Si l'app a demarre normalement, app.js retire lui-meme #splash-screen
+  // du DOM (voir plus bas dans app.js). On verifie aussi el.dataset.hidden,
+  // pose par app.js DES qu'il commence a fermer le splash (avant meme
+  // l'animation de fondu) -- si c'est deja pose, app.js a bien reussi,
+  // on lui laisse juste un peu plus de temps pour finir l'animation,
+  // plutot que d'afficher une fausse alerte pendant qu'il termine.
+  setTimeout(function(){
+    var el = document.getElementById('splash-screen');
+    if(!el) return; // deja retire -> tout est ok
+    if(el.dataset.hidden){
+      // app.js a bien demarre la fermeture, on lui laisse un peu plus de temps
+      setTimeout(function(){
+        var el2 = document.getElementById('splash-screen');
+        if(el2) afficherErreurChargement(); // toujours la apres le delai supplementaire -> vrai probleme
+      }, DELAI_VERIF_2 - DELAI_MAX_MS);
+    } else {
+      afficherErreurChargement(); // rien n'a demarre du tout -> vrai probleme
+    }
+  }, DELAI_MAX_MS);
+})();
+</script>
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><img class="dot" src="icons/icon-192.png" alt="Logo AW3 Ploeg 5"><div><div class="login-title">Bradford Dashboard</div><div class="login-sub">AW3 &middot; Ploeg 5</div></div></div>
+    <div class="li-field"><label class="li-label" data-i18n="login_email">Email</label><input class="li-input" type="email" id="li-email" placeholder="votre@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('li-pass').focus()"></div>
+    <div class="li-field"><label class="li-label" data-i18n="login_password">Mot de passe</label><input class="li-input" type="password" id="li-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="li-err" id="li-err"></div>
+    <button class="li-btn" id="li-btn" onclick="doLogin()" data-i18n="login_btn">Se connecter</button>
+    <div style="text-align:center;margin-top:10px"><a href="#" onclick="doForgotPassword();return false;" style="font-size:12px;color:var(--blue);text-decoration:none" data-i18n="login_forgot">Mot de passe oublie ?</a></div>
+    <div style="text-align:center;font-size:11px;color:var(--tx3);margin-top:8px" data-i18n="login_autoconnect">Tu resteras connecte automatiquement</div>
+  </div>
+</div>
+<div id="app-screen" style="display:none">
+<div style="display:flex;flex-direction:column;min-height:100vh">
+  <header class="topbar">
+    <div class="logo"><img class="logo-dot" src="icons/icon-192.png" alt="Logo AW3 Ploeg 5"><div>Bradford Dashboard<div class="logo-sub">AW3 &middot; Ploeg 5</div></div></div>
+    <div class="topbar-r">
+      <span id="conn-status" style="font-size:11px;color:var(--amber);font-family:var(--mo)" data-i18n="topbar_connecting">Connexion...</span>
+      <span id="role-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid;font-weight:500"></span>
+      <span class="badge">15 <span data-i18n="ov_badge_employees">employ&eacute;s</span></span>
+      <span style="font-size:11px;color:var(--tx3)" id="user-email"></span>
+      <button id="lang-toggle" onclick="toggleLang()" title="Changer de langue" style="display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fn)">NL</button>
+      <button onclick="doLogout()" style="padding:3px 10px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--tx3);font-size:11px;cursor:pointer;font-family:var(--fn)" data-i18n="topbar_logout">Deconnexion</button>
+      <span class="chip" id="dchip"></span>
+    </div>
+  </header>
+  <div class="tabs-wrap">
+  <nav class="tabs">
+    <button class="tab on" data-tab="ov">&#9672; <span data-i18n="tab_ov">Vue d&rsquo;ensemble</span></button>
+    <button class="tab" data-tab="br">&#9673; <span data-i18n="tab_br">Bradford</span></button>
+    <button class="tab" data-tab="pl">&#9638; <span data-i18n="tab_pl">Planning</span></button>
+    <button class="tab" data-tab="espace">&#128188; <span data-i18n="tab_espace">Mon espace</span></button>
+    <button class="tab" data-tab="ab">&#9675; <span data-i18n="tab_ab">Absences</span></button>
+    <button class="tab" id="tab-formations-btn" data-tab="formations">&#127891; <span data-i18n="tab_formations">Formations</span></button>
+    <button class="tab" id="tab-pt-btn" data-tab="pt" style="display:none">&#128197; <span data-i18n="tab_pt">Pointages</span></button>
+    <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; <span data-i18n="tab_arrets">Arrets Inpak</span></button>
+    <button class="tab" id="tab-bulk-btn" data-tab="bulk" style="display:none">&#128230; <span data-i18n="tab_bulk">Bulk &amp; Bijlijn</span></button>
+    <button class="tab" id="tab-ncp-btn" data-tab="ncp" style="display:none">&#9888; <span data-i18n="tab_ncp">NCP Qualite</span></button>
+    <button class="tab" id="tab-recrutement-btn" data-tab="recrutement" style="display:none">&#128100; <span data-i18n="tab_recrutement">Recrutement</span></button>
+    <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; <span data-i18n="tab_admin">Admin</span></button>
+  </nav>
+  </div>
+  <main class="content">
+    <div class="pane on" id="pane-ov">
+      <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" data-i18n="ov_subtitle">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
+      <div id="birthday-notif" style="display:none;align-items:center;gap:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
+<div id="formation-notif" style="display:none;align-items:center;gap:14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
+      <div class="kgrid">
+        <div class="kcard bl"><div class="klbl" data-i18n="ov_kcard_team">Equipe</div><div class="kval">15</div><div class="kmeta">TL + INPAK + Prod + Unit</div></div>
+        <div class="kcard gn"><div class="klbl">Score &le; 50</div><div class="kval" id="k-ok">-</div><div class="kmeta" id="k-okp">-</div></div>
+        <div class="kcard am"><div class="klbl" data-i18n="status_wn">A surveiller</div><div class="kval" id="k-wn">-</div><div class="kmeta">Score 51-500</div><div id="k-wn-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
+        <div class="kcard rd"><div class="klbl" data-i18n="status_cr">Critique</div><div class="kval" id="k-cr">-</div><div class="kmeta" id="k-crm">Score &gt; 500</div><div id="k-cr-names" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div></div>
+      </div>
+      <div id="k-alerts"></div>
+      <div class="two">
+        <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_bradford">Scores Bradford</div><div class="lgd"><div class="li"><div class="ld" style="background:#10b981"></div><span data-i18n="status_ok">OK</span></div><div class="li"><div class="ld" style="background:#f59e0b"></div><span data-i18n="legend_watch_short">Surveiller</span></div><div class="li"><div class="ld" style="background:#ef4444"></div><span data-i18n="status_cr">Critique</span></div></div></div><div class="cw" style="height:260px"><canvas id="cBrad"></canvas></div></div>
+        <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_absences_trim">Absences par trimestre</div></div><div class="cw" style="height:260px"><canvas id="cTrim"></canvas></div></div>
+      </div>
+      <div class="cc"><div class="cch"><div class="cct" data-i18n="ov_chart_days_per_emp">Jours d&rsquo;absence par employ&eacute;</div></div><div class="cw" style="height:220px"><canvas id="cJour"></canvas></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" data-i18n="ov_next30_title">Absences &mdash; 30 prochains jours</div></div><div id="mini-cal" style="padding:0 4px"></div></div>
+<div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127891; <span data-i18n="ov_formations_upcoming">Formations a venir</span></div></div><div id="mini-cal-formations" style="padding:0 4px"></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="today-abs-title" data-i18n="ov_today_prefix">Absents aujourd'hui</div></div><div id="today-abs" style="padding:4px"></div></div>
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">&#127874; <span data-i18n="ov_birthdays_title">Anniversaires à venir</span></div></div><div id="birthday-cal" style="padding:4px"></div></div>
+    </div>
+    <div class="pane" id="pane-br">
+      <div class="sh"><div class="st" data-i18n="br_title">Score Bradford</div><div class="ss" data-i18n="br_subtitle">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all" data-i18n="plan_all">Tous</option><option value="ok" data-i18n="status_ok">OK</option><option value="wn" data-i18n="status_wn">A surveiller</option><option value="al" data-i18n="status_al">Preoccupant</option><option value="cr" data-i18n="status_cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
+      <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd);font-size:12px;color:var(--tx2);display:flex;gap:24px;flex-wrap:wrap">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px"></span>0-50 <span data-i18n="status_ok">OK</span></span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:5px"></span>51-200 <span data-i18n="legend_watch_short">Surveiller</span></span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-right:5px"></span>201-500 <span data-i18n="status_al">Preoccupant</span></span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:5px"></span>&gt;500 <span data-i18n="status_cr">Critique</span></span>
+      </div>
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)"><table class="bt" id="btable"></table></div>
+    </div>
+    <div class="pane" id="pane-pl">
+      <div class="sh"><div class="st" id="plan-title">Planning 2026</div><div class="ss" data-i18n="plan_subtitle">Cliquez sur un poste pour modifier</div></div>
+      <div class="ptb">
+        <div class="ytabs"><button class="ytab" data-yr="2025">2025</button><button class="ytab on" data-yr="2026">2026</button><button class="ytab" data-yr="2027">2027</button></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="prevMonth()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8249;</button>
+          <span id="month-label" style="font-size:13px;font-weight:600;color:var(--tx1);min-width:90px;text-align:center" data-i18n="plan_all">Tous</span>
+          <button onclick="nextMonth()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8250;</button>
+          <button onclick="curMonth=null;buildPT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:11px;cursor:pointer" data-i18n="plan_all_btn">Tout</button>
+        </div>
+        <button onclick="goToday()" style="display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:rgba(59,130,246,.12);color:var(--blue);font-family:var(--fn);font-size:12px;font-weight:500;cursor:pointer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="2" fill="currentColor"/></svg>
+          <span data-i18n="plan_today">Aujourd'hui</span>
+        </button>
+        <button class="pbtn" style="margin-left:auto" onclick="openPrintModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span data-i18n="plan_print">Imprimer</span>
+        </button>
+      </div>
+      <div class="pscroll"><table class="ptable" id="ptable"></table></div>
+      <div id="no-today" data-i18n="plan_no_today">Aujourd'hui n'est pas un jour planifie.</div>
+      <div id="notes-panel" class="notes-panel" style="display:none"></div>
+      <div class="lgbar">
+        <div class="lch"><span class="sp s-tl">TL</span> <span data-i18n="legend_tl">Team Leader</span></div>
+        <div class="lch"><span class="sp s-coord">COORD</span> <span data-i18n="legend_coord">Coordinateur</span></div>
+        <div class="lch"><span class="sp s-31">31/32</span></div>
+        <div class="lch"><span class="sp s-33">33/34</span></div>
+        <div class="lch"><span class="sp s-35">35/36</span></div>
+        <div class="lch"><span class="sp s-ex">extra</span></div>
+        <div class="lch"><span class="sp s-pr">Prod</span></div>
+        <div class="lch"><span class="sp s-lb">Labo</span></div>
+        <div class="lch"><span class="sp s-bt">Batter</span></div>
+        <div class="lch"><span class="sp s-cl">Cleaning</span></div>
+        <div class="lch"><span class="sp s-ip">Inpak</span></div>
+        <div class="lch"><span class="sp s-bk">Bulk</span></div>              
+        <div class="lch"><span class="sp s-kt">Karton</span></div>
+        <div class="lch"><span class="sp s-kr">Kruiden</span></div>              
+        <div class="lch"><span class="sp s-aw1">AW1</span> <span data-i18n="legend_aw1">Equipe AW1</span></div>
+        <div class="lch"><span class="sp s-aw2">AW2</span> <span data-i18n="legend_aw2">Equipe AW2</span></div>
+        <div class="lch"><span class="sp s-zk">ziek</span> <span data-i18n="legend_ziek">Maladie</span></div>
+        <div class="lch"><span class="sp s-vl">verlof</span> <span data-i18n="legend_verlof">Conge</span></div>
+        <div class="lch"><span class="sp s-rc">recup</span> <span data-i18n="legend_recup">Recup</span></div>
+      </div>
+    </div>
+    <!-- MON ESPACE -->
+    <div class="pane" id="pane-espace">
+    <div class="sh">
+    <div class="st" data-i18n="tab_espace">Mon espace</div>
+    <div class="ss" data-i18n="espace_subtitle">Tes pointages, tes absences et les NCP qui te concernent</div>
+    </div>
+
+    <div class="cc" id="espace-picker-wrap" style="display:none;margin-bottom:16px">
+    <div class="cch"><div class="cct" data-i18n="espace_emp_label">Employé</div></div>
+    <select id="espace-emp-select" onchange="buildMonEspace()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+    <option value="">-- Choisir un employé --</option>
+    </select>
+    </div>
+
+    <div id="espace-content"></div>
+    </div>
+
+<div class="pane" id="pane-ab">
+      <div class="sh"><div class="st" data-i18n="ab_title">Absences</div><div class="ss" id="abs-lbl">-</div></div>
+      <div class="aflt">
+        <button class="fb on" data-f="all" data-i18n="plan_all">Tous</button>
+        <button class="fb" data-f="2025">2025</button>
+        <button class="fb" data-f="2026">2026</button>
+        <button class="fb" data-f="Anthony Raimondi">A. Raimondi</button>
+        <button class="fb" data-f="Mohamed Lalaoui">M. Lalaoui</button>
+      </div>
+      <div class="ascroll">
+        <div class="ahdr"><span data-i18n="ab_col_emp">Employe</span><span data-i18n="ab_col_start">Debut</span><span data-i18n="ab_col_end">Fin</span><span data-i18n="ab_col_days">Jours</span><span data-i18n="ab_col_intensity">Intensite</span><span style="text-align:right" data-i18n="ab_col_year">Annee</span></div>
+        <div class="agrid" id="agrid"></div>
+      </div>
+    </div>
+    
+    <div class="pane" id="pane-formations">
+<div class="sh"><div class="st" data-i18n="tab_formations">Formations</div><div class="ss" data-i18n="formations_subtitle">Planification et rappels des formations du personnel</div><button id="form-btn-add" onclick="openFormationModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="formations_btn_add">+ Nouvelle formation</button></div>
+<div class="cc"><div class="cch"><div class="cct" data-i18n="formations_upcoming">A venir</div></div><div id="form-liste-avenir"></div></div>
+<div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" data-i18n="formations_past">Passees</div></div><div id="form-liste-passees"></div></div>
+</div>
+    <!-- ADMIN -->
+    <div class="pane" id="pane-admin">
+      <div class="sh"><div class="st" data-i18n="adm_title">Administration</div><div class="ss" data-i18n="adm_subtitle">Outils reserves a l'admin</div></div>
+
+      <!-- TEST FIREBASE -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="adm_fb_test_title">Fiabilite Firebase</div><button onclick="testFirebaseConnection()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="adm_fb_test_btn">Tester la connexion</button></div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">Verifie que le dashboard peut bien lire/ecrire sur chaque section de Firebase (utile pour diagnostiquer un probleme de regles).</div>
+        <div id="fb-test-results" style="font-family:var(--mo);font-size:12px;line-height:1.9"></div>
+      </div>
+
+      <!-- REGLES FIREBASE -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="adm_fb_rules_title">Roles utilisateurs Firebase</div></div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.8;margin-bottom:12px">
+          Dans Firebase → Realtime Database → Regles, colle ces regles pour proteger le backend :
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:14px;font-family:var(--mo);font-size:11px;color:#5eddb7;line-height:1.8;user-select:all">
+{<br>
+&nbsp;&nbsp;"rules": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"users": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$uid": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null &amp;&amp; (auth.uid === $uid || root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;)"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"employees": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"planning": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2025": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2026": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"shifts2027": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"absences": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"extraHistorique": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lastUpdate": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"formations": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": "auth != null",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": "auth != null &amp;&amp; (root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;admin&#39; || root.child(&#39;users&#39;).child(auth.uid).child(&#39;role&#39;).val() === &#39;subchef&#39;)"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"pointages": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"arrets_inpak": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"ncp_data": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"bradford": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"comments": { ".read": "auth != null", ".write": "auth != null" },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"import_ts": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"recrutement": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"candidats": { ".read": "auth != null", ".write": "auth != null" }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px">
+          Toute personne authentifiee (avec un compte cree dans l'app) peut lire/ecrire le planning, les absences et l'historique extra. Seul le role admin peut gerer les comptes (users) et la liste des employes.
+        </div>
+      </div>
+
+      <!-- MIGRATION -->
+      <div class="cc" id="migration-box">
+        <div class="cch">
+          <div class="cct" data-i18n="adm_migration_title">Migration initiale Firebase</div>
+          <span id="migr-status" style="font-size:11px;color:var(--tx3)" data-i18n="adm_migration_status_none">Non effectuee</span>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;line-height:1.7">
+          Transfere toutes les donnees de base vers Firebase :<br>
+          15 employes · shifts 2025 et 2026 · 26 absences historiques.<br>
+          <strong style="color:var(--amber)">A faire une seule fois.</strong> Les donnees existantes dans Firebase seront ecrasees.
+        </div>
+        <div id="migr-log" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;font-size:11px;font-family:var(--mo);line-height:2;margin-bottom:16px;max-height:200px;overflow-y:auto"></div>
+        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:16px;display:none" id="migr-prog">
+          <div id="migr-bar" style="height:100%;background:var(--blue);border-radius:2px;transition:width .3s;width:0%"></div>
+        </div>
+        <button onclick="runMigration()" id="migr-btn" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          <span data-i18n="adm_migration_btn">Lancer la migration</span>
+        </button>
+      </div>
+
+      <!-- INFO UTILISATEUR -->
+      <div class="cc" style="margin-top:16px">
+        <div class="cch"><div class="cct" data-i18n="adm_session_title">Session active</div></div>
+        <div style="font-size:13px;color:var(--tx2)">
+          <span data-i18n="adm_session_connected_as">Connecte en tant que : </span><span style="color:var(--green);font-weight:500" id="admin-email-display"></span><br>
+          <span data-i18n="adm_session_role">Role : </span><span style="color:var(--green);font-weight:500">Admin</span>
+        </div>
+      </div>
+
+      <!-- IMPORT PROTIME -->
+      <div class="cc" style="margin-top:16px" id="protime-import-box">
+        <div class="cc" style="margin-bottom:20px">
+          <div class="cch"><div class="cct" data-i18n="adm_excel_report_title">Rapport mensuel Excel</div></div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+            <select id="rapport-mois" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
+              <option value="0" data-i18n="month_0">Janvier</option><option value="1" data-i18n="month_1">Fevrier</option><option value="2" data-i18n="month_2">Mars</option>
+              <option value="3" data-i18n="month_3">Avril</option><option value="4" data-i18n="month_4">Mai</option><option value="5" data-i18n="month_5">Juin</option>
+              <option value="6" data-i18n="month_6">Juillet</option><option value="7" data-i18n="month_7">Aout</option><option value="8" data-i18n="month_8">Septembre</option>
+              <option value="9" data-i18n="month_9">Octobre</option><option value="10" data-i18n="month_10">Novembre</option><option value="11" data-i18n="month_11">Decembre</option>
+            </select>
+            <select id="rapport-annee" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
+              <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+            </select>
+            <button onclick="genererRapportExcel()" style="padding:9px 18px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer">&#11123; <span data-i18n="adm_excel_report_btn">Generer rapport Excel</span></button>
+          </div>
+        </div>
+        <div class="cch">
+          <div class="cct" data-i18n="adm_protime_import_title">Importer depuis Protime</div>
+          <span id="protime-status" style="font-size:11px;color:var(--tx3)" data-i18n="adm_protime_status_none">Aucun import</span>
+          <span id="protime-last-import" style="font-size:11px;color:var(--tx3);margin-left:16px"></span>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.7">
+          1. Sur Protime, ouvre la console (F12) et colle le script d'extraction<br>
+          2. Le resultat est copie automatiquement dans le presse-papier<br>
+          3. Colle-le ci-dessous et clique sur Importer<br>
+          <strong style="color:var(--amber)">Protime fait toujours autorite</strong> : les jours concernes seront ecrases avec ces donnees (sauf l'affectation aux lignes, jamais touchee).
+        </div>
+        <textarea id="protime-paste" placeholder="Colle ici le JSON copie depuis la console Protime (Ctrl+V)..." style="width:100%;min-height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;font-size:11px;font-family:var(--mo);color:var(--tx);resize:vertical;outline:none;margin-bottom:12px"></textarea>
+        <div id="protime-preview" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.8"></div>
+        <div style="display:flex;gap:10px">
+          <button onclick="previewProtimeImport()" style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer" data-i18n="adm_btn_check">Verifier</button>
+          <button onclick="applyProtimeImport()" id="protime-apply-btn" disabled style="padding:9px 18px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer;opacity:.5" data-i18n="adm_btn_import_planning">Importer dans le planning</button>
+          <button onclick="purgeAllProtimeAbsences()" style="padding:9px 18px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:13px;cursor:pointer;margin-left:auto" data-i18n="adm_btn_purge_protime">Purger toutes les absences Protime</button>
+        </div>
+      </div>
+
+      <!-- GESTION EMPLOYES -->
+      <div class="cc" style="margin-top:16px">
+        <div class="cch">
+          <div class="cct" data-i18n="adm_emp_mgmt_title">Gestion des employes</div>
+          <button onclick="showAddEmp()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--green);color:#fff;font-family:var(--fn);font-size:12px;font-weight:500;cursor:pointer" data-i18n="adm_btn_add">
+            + Ajouter
+          </button>
+        </div>
+        <div id="emp-table-wrap" style="overflow-x:auto;border-radius:8px;border:1px solid var(--bd);background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+          <table style="width:100%;border-collapse:collapse" id="empTable">
+            <thead><tr>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd)" data-i18n="adm_col_name">Nom</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd)" data-i18n="adm_col_group">Groupe</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd)" data-i18n="br_col_role">Role</th>
+              <th style="padding:8px 12px;text-align:center;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd)" data-i18n="adm_col_actions">Actions</th>
+            </tr></thead>
+            <tbody id="empTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MODAL EMPLOYE -->
+      <div id="emp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center">
+        <div style="background:#1e2436;border:1px solid var(--bd2);border-radius:14px;padding:28px 32px;min-width:380px;max-width:440px;box-shadow:0 24px 60px rgba(0,0,0,.6)">
+          <div style="font-size:16px;font-weight:600;color:var(--tx);margin-bottom:20px" id="emp-modal-title" data-i18n="adm_emp_modal_add_title">Ajouter un employe</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div>
+              <label style="font-size:11px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-i18n="adm_field_fullname">Nom complet</label>
+              <input id="emp-name" type="text" placeholder="Prenom Nom" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <label style="font-size:11px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-i18n="adm_field_group">Groupe</label>
+                <select id="emp-group" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
+                  <option value="TL">TL</option>
+                  <option value="INPAK">INPAK</option>
+                  <option value="Prod">Prod</option>
+                  <option value="Unit">Unit</option>
+                  <option value="Manager">Manager</option>
+                  <option value="RH">RH</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-i18n="adm_field_role">Role</label>
+                <input id="emp-role" type="text" placeholder="ex: Operateur" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
+              </div>
+            </div>
+            <div style="margin-top:4px">
+                <label style="font-size:11px;color:var(--tx3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-i18n="adm_field_birthday">Date de naissance</label>
+                <input id="emp-birthday" type="date" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none">
+              </div>
+            <div id="emp-modal-err" style="font-size:12px;color:var(--red);min-height:16px"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button onclick="closeEmpModal()" style="padding:8px 18px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+              <button onclick="saveEmp()" id="emp-save-btn" style="padding:8px 18px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:500;cursor:pointer" data-i18n="btn_save">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="cc" style="margin-top:24px">
+      <div class="cch"><div class="cct" data-i18n="comptes_emp_title">Comptes employés</div></div>
+      <div id="comptes-emp-liste" style="padding:12px 4px"></div>
+    </div>
+    </div>
+
+
+    <div class="pane" id="pane-pt">
+      <div class="sh">
+        <div class="st" data-i18n="tab_pt">Pointages</div>
+        <div class="ss" data-i18n="pt_subtitle">Retards &amp; anomalies tourniquet/pointeuse</div>
+        <div style="display:flex;gap:8px;margin-left:auto;align-items:center">
+          <select id="pt-filter-person" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all" data-i18n="plan_all">Tous</option>
+          </select>
+          <select id="pt-filter-type" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all" data-i18n="pt_opt_all_types">Tous types</option>
+            <option value="retard" data-i18n="pt_opt_retards">Retards</option>
+            <option value="pointage" data-i18n="pt_opt_anomalies_tourniquet">Anomalies tourniquet</option>
+          </select>
+          <select id="pt-filter-status" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+            <option value="all" data-i18n="pt_opt_all_status">Tous statuts</option>
+            <option value="open" data-i18n="pt_opt_open">Non traités</option>
+            <option value="done" data-i18n="pt_opt_done">Traités</option>
+          </select>
+          <button onclick="openImportPointages()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; <span data-i18n="modal_import">Importer</span></button>
+        </div>
+      </div>
+
+      <!-- Bandeau alertes non traitées -->
+      <div id="pt-alerts-banner" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ef4444;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:18px">&#9888;</span>
+        <span id="pt-alerts-text" style="flex:1"></span>
+        <button onclick="markAllPtDone()" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">&#10003; <span data-i18n="pt_mark_all_done">Tout marquer comme traité</span></button>
+      </div>
+
+      <!-- Tableau -->
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+        <table class="bt" id="pt-table">
+          <thead>
+            <tr>
+              <th data-i18n="pt_col_person">Personne</th>
+              <th data-i18n="pt_col_date">Date</th>
+              <th data-i18n="pt_col_type">Type</th>
+              <th data-i18n="pt_col_detail">Détail</th>
+              <th data-i18n="pt_col_status">Statut</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="pt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ARRETS INPAK -->
+    <div class="pane" id="pane-arrets">
+      <div class="sh">
+        <div class="st" data-i18n="tab_arrets">Arrets Inpak</div>
+        <div class="ss" data-i18n="arr_subtitle">Lignes 31 a 36 — arrets avec raison et micro-arrets</div>
+        <button onclick="diagnostiquerDoublonsArrets()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128269; <span data-i18n="arr_btn_diag">Diagnostiquer les doublons</span></button>
+        <button onclick="nettoyerDoublonsArrets()" style="padding:6px 14px;border-radius:var(--r);border:1px solid #ef4444;background:none;color:#ef4444;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#128465; <span data-i18n="arr_btn_clean">Nettoyer les doublons</span></button>
+        <button onclick="openImportArretsModal()" style="padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
+      </div>
+
+      <!-- Zone de diagnostic (masquee par defaut) -->
+      <div class="cc" id="arrets-diag-wrap" style="display:none;margin-bottom:16px;max-height:400px;overflow-y:auto"></div>
+
+      <!-- Filtre ligne -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="arrets-filtre-ligne">
+        <button class="arrets-ligne-btn on" data-ligne="all" onclick="filtrerArretsLigne('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
+        <button class="arrets-ligne-btn" data-ligne="31" onclick="filtrerArretsLigne('31')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 31</button>
+        <button class="arrets-ligne-btn" data-ligne="32" onclick="filtrerArretsLigne('32')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 32</button>
+        <button class="arrets-ligne-btn" data-ligne="33" onclick="filtrerArretsLigne('33')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 33</button>
+        <button class="arrets-ligne-btn" data-ligne="34" onclick="filtrerArretsLigne('34')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 34</button>
+        <button class="arrets-ligne-btn" data-ligne="35" onclick="filtrerArretsLigne('35')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 35</button>
+        <button class="arrets-ligne-btn" data-ligne="36" onclick="filtrerArretsLigne('36')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">Line 36</button>
+      </div>
+
+      <!-- Filtre equipe -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="arrets-filtre-equipe">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ov_kcard_team">Equipe</span>
+        <button class="arrets-equipe-btn on" data-equipe="all" onclick="filtrerArretsEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
+        <button class="arrets-equipe-btn" data-equipe="P1" onclick="filtrerArretsEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+        <button class="arrets-equipe-btn" data-equipe="P2" onclick="filtrerArretsEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+        <button class="arrets-equipe-btn" data-equipe="P3" onclick="filtrerArretsEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+        <button class="arrets-equipe-btn" data-equipe="P4" onclick="filtrerArretsEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+        <button class="arrets-equipe-btn" data-equipe="P5" onclick="filtrerArretsEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
+      
+        <span style="font-size:11px;color:var(--tx3);margin-left:6px" data-i18n="eq_multi_hint">clique plusieurs equipes pour les cumuler</span>
+      </div>
+
+      <!-- Filtre operateur (multi-selection, rempli par JS) -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="col_operator">Operateur</span>
+        <div id="arrets-filtre-operateur" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Recherche date/heure precise -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="arr_search_title">Recherche precise</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="li-field">
+            <label class="li-label" data-i18n="arr_search_from">Du</label>
+            <input type="date" id="arrets-recherche-date" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label" data-i18n="arr_search_to">Au (optionnel — laisse vide pour un seul jour)</label>
+            <input type="date" id="arrets-recherche-date-fin" class="li-input">
+          </div>
+          <div class="li-field">
+            <label class="li-label" data-i18n="arr_search_hour">Heure (optionnel, seulement si "Au" est vide)</label>
+            <input type="time" id="arrets-recherche-heure" class="li-input">
+          </div>
+          <button onclick="rechercherArrets()" style="padding:9px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="btn_search">Rechercher</button>
+          <button onclick="reinitialiserRechercheArrets()" style="padding:9px 20px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="btn_reset">Reinitialiser</button>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px" data-i18n="arr_search_hint">Un seul jour : remplis juste "Du" (+ Heure en option, fenetre de 30 min). Fourchette (ex: plusieurs weekends) : remplis "Du" et "Au".</div>
+      </div>
+
+      <!-- Resume frequence -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="arr_freq_title">Frequence par ligne</div></div>
+        <div id="arrets-resume-wrap"></div>
+      </div>
+
+      <!-- Analyse des causes -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_ca_title">Analyse des causes</div>
+          <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+            <button id="arrets-tri-duree" onclick="arretsCausesTri('duree')" style="padding:6px 13px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_ca_tri_duree">Heures perdues</button>
+            <button id="arrets-tri-nombre" onclick="arretsCausesTri('nombre')" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_ca_tri_nombre">Nombre d'arrets</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:80ch" data-i18n="arr_ca_hint">Les 10 familles d'arrets classees par temps perdu, avec la courbe du cumule : les premieres barres montrent ou se joue l'essentiel. Clique une ligne du tableau pour deplier le detail de ses raisons. Le classement suit les filtres ligne, equipe et periode ci-dessus.</div>
+        <div style="height:280px;position:relative;margin-bottom:18px"><canvas id="arretsParetoChart"></canvas></div>
+        <div style="overflow-x:auto"><div id="arrets-causes-cat"></div></div>
+        <div id="arrets-causes-detail" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- Raison (filtre partage avec les graphiques ci-dessous) -->
+<div style="margin-bottom:12px">
+          <select id="arrets-raison-select" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+            <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
+          </select>
+        </div>
+
+<!-- Comparaison equipes / operateurs (fusionne avec Comparaison) -->
+<div id="cmp2-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--tx1)"></div>
+
+      <!-- Evolution dans le temps (mois par mois) -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="cmp_evolution_title">Evolution mois par mois</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_evolution_hint">Duree moyenne par mois, pour voir si ca s'ameliore ou pas dans le temps.</div>
+        <div style="height:260px"><canvas id="cmp2EvolutionChart"></canvas></div>
+      </div>
+
+      <!-- Comparaison par equipe -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="cmp_team_title">Comparaison par equipe (P1 a P5)</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_team_hint">Duree moyenne d'arret par equipe, pour la raison et la ligne selectionnees.</div>
+        <div style="height:260px"><canvas id="cmp2EquipeChart"></canvas></div>
+      </div>
+
+      <!-- Comparaison par operateur, avec filtre equipe -->
+      <div class="cc">
+        <div class="cch"><div class="cct" data-i18n="cmp_op_title">Comparaison par operateur</div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:10px" data-i18n="cmp_op_hint">Clique une equipe ci-dessus pour ne comparer que ses operateurs (ex: seulement P1 vs P2 en semaine).</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap" id="cmp2-filtre-equipe-op">
+          <button class="cmp2-equipe-op-btn on" data-equipe="all" onclick="filtrerCmp2EquipeOp('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="cmp_all_teams">Toutes equipes</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P1" onclick="filtrerCmp2EquipeOp('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P2" onclick="filtrerCmp2EquipeOp('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P3" onclick="filtrerCmp2EquipeOp('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P4" onclick="filtrerCmp2EquipeOp('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+          <button class="cmp2-equipe-op-btn" data-equipe="P5" onclick="filtrerCmp2EquipeOp('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_p5_moi">P5 (moi)</button>
+        </div>
+        <div style="height:260px"><canvas id="cmp2OperateurChart"></canvas></div>
+      </div>
+
+
+<!-- Arrets avec raison -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct"><span data-i18n="arr_with_reason_title">Arrets avec raison</span> <span id="arrets-raison-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div>
+        
+        <div id="arrets-raison-resume-wrap" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tx1)"></div>
+        <div id="arrets-raison-wrap"></div>
+      </div>
+
+      <!-- Microstops -->
+      <div class="cc">
+        <div class="cch" style="cursor:pointer" onclick="toggleMicrostopsDetail()">
+          <div class="cct"><span data-i18n="arr_micro_title">Micro-arrets</span> <span id="arrets-micro-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span> <span id="arrets-micro-toggle" style="font-size:11px;color:var(--tx3)">&#9660; <span data-i18n="arr_micro_show">afficher le detail</span></span></div>
+        </div>
+        <div id="arrets-micro-wrap" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- BULK &amp; BIJLIJN -->
+    <div class="pane" id="pane-bulk">
+      <div style="margin-bottom:20px">
+        <div class="st" data-i18n="tab_bulk">Bulk &amp; Bijlijn</div>
+        <div class="ss" data-i18n="bulk_subtitle">Surproduction envoyee en bulkopvang et volumes remballes sur la bij-ligne</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="bulk-filtre-equipe">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ov_kcard_team">Equipe</span>
+        <button class="bulk-equipe-btn on" data-equipe="all" onclick="filtrerBulkEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="filter_all_fem">Toutes</button>
+        <button class="bulk-equipe-btn" data-equipe="P1" onclick="filtrerBulkEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+        <button class="bulk-equipe-btn" data-equipe="P2" onclick="filtrerBulkEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+        <button class="bulk-equipe-btn" data-equipe="P3" onclick="filtrerBulkEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+        <button class="bulk-equipe-btn" data-equipe="P4" onclick="filtrerBulkEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+        <button class="bulk-equipe-btn" data-equipe="P5" onclick="filtrerBulkEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P5</button>
+        
+        <span style="font-size:11px;color:var(--tx3);margin-left:6px" data-i18n="eq_multi_hint">clique plusieurs equipes pour les cumuler</span>
+      </div>
+
+      <!-- Surproduction : bulk + bijlijn -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_title">Periode analysee</div>
+          <span style="font-size:11px;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:2px 9px" data-i18n="arr_bulk_unit_note">volumes en tonnes, moyennes en kg/h</span>
+          <button onclick="openImportBulkModal()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128229; <span data-i18n="arr_btn_import">Importer Grafana</span></button>
+          <button onclick="bulkExportCSV()" style="padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128190; <span data-i18n="arr_bulk_export">Exporter CSV</span></button>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+          <div class="li-field">
+            <label class="li-label" data-i18n="arr_search_from">Du</label>
+            <input type="date" id="bulk-date-debut" class="li-input" onchange="bulkFiltrerPeriode()">
+          </div>
+          <div class="li-field">
+            <label class="li-label" data-i18n="arr_search_to">Au</label>
+            <input type="date" id="bulk-date-fin" class="li-input" onchange="bulkFiltrerPeriode()">
+          </div>
+          <div id="bulk-periode-btns" style="display:flex;gap:6px;flex-wrap:wrap;padding-bottom:1px">
+            <button class="bulk-per-btn" data-per="7" onclick="bulkPeriodeRapide(7)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p7">7 jours</button>
+            <button class="bulk-per-btn" data-per="30" onclick="bulkPeriodeRapide(30)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p30">30 jours</button>
+            <button class="bulk-per-btn" data-per="90" onclick="bulkPeriodeRapide(90)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p90">90 jours</button>
+            <button class="bulk-per-btn" data-per="180" onclick="bulkPeriodeRapide(180)" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_p180">6 mois</button>
+            <button class="bulk-per-btn" data-per="annee" onclick="bulkPeriodeAnnee()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pannee">Annee en cours</button>
+            <button class="bulk-per-btn" data-per="all" onclick="bulkReinitialiserPeriode()" style="padding:6px 13px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="arr_bulk_pall">Tout</button>
+          </div>
+        </div>
+        <div id="bulk-meta" style="font-size:11px;color:var(--tx3);line-height:1.7"></div>
+        <div id="bulk-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;display:none" data-i18n="arr_bulk_empty">Aucune donnee bulk importee pour le moment.</div>
+      </div>
+
+      <div class="cc" id="bulk-card-sur" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_sur_title">Surproduction envoyee en bulk</div>
+        </div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_sur_hint">Produit envoye en bulkopvang faute de place sur ligne. Surproduction et noodafvoer comptes separement. P1-P2-P3 font 40 h/semaine, P4-P5 24 h : la colonne kg/h de poste est la seule comparaison honnete entre equipes. Les journees vont de 05h a 05h, comme les postes.</div>
+        <div id="bulk-kpi-sur" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px"></div>
+        <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkChart"></canvas></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Surproduction (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Noodafvoer (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total bulk (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">kg / h de poste</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-eq-sur"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc" id="bulk-card-bij" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_bij_title">Bijlijn / Kruiding emballe</div>
+        </div>
+        <div style="font-size:12px;color:var(--tx3);margin-bottom:14px;max-width:78ch" data-i18n="arr_bulk_bij_hint">Bulk de surproduction remballe sur la bij-ligne. Ce bulk ne vient pas forcement d'AW3 ni du jour meme : ces volumes ne se comparent pas a ceux du bloc precedent, c'est une activite a part.</div>
+        <div id="bulk-kpi-bij" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px"></div>
+        <div style="height:230px;position:relative;margin-bottom:16px"><canvas id="arretsBulkBijChart"></canvas></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eq">Equipe</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Emballe (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_poste">H. de poste</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_act">Activite</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_moy">kg / h de poste</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-eq-bij"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cc" id="bulk-card-detail" style="margin-bottom:16px">
+        <div class="cch" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="cct" data-i18n="arr_bulk_det_title">Detail jour par jour</div>
+          <button onclick="bulkImprimerDetail()" style="margin-left:auto;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; <span data-i18n="arr_bulk_print">Imprimer</span></button>
+        </div>
+        <div style="overflow-x:auto;max-height:460px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums">
+            <thead>
+              <tr style="border-bottom:1px solid var(--bd2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--bg3)">
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_day">Jour</th>
+                <th style="text-align:left;padding:8px 6px" data-i18n="arr_bulk_th_eqs">Equipes</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_std">Surproduction (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_urg">Noodafvoer (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_tot">Total bulk (t)</th>
+                <th style="text-align:right;padding:8px 6px" data-i18n="arr_bulk_th_bij">Bijlijn emballe (t)</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-detail-tbody"></tbody>
+            <tfoot id="bulk-detail-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NCP QUALITE -->
+    <div class="pane" id="pane-ncp">
+      <div class="sh">
+        <div class="st" data-i18n="tab_ncp">NCP Qualite</div>
+        <div class="ss" data-i18n="ncp_subtitle">Non-conformites Inpak et Production &mdash; AW1, AW2, AW3</div>
+        <button onclick="openImportNCPModal()" style="margin-left:auto;padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_btn_import">&#8659; Importer donnees NCP</button>
+      </div>
+
+      <!-- Etat vide : affiche tant qu'aucune donnee n'a ete importee -->
+      <div id="ncp-empty-state" style="display:none;text-align:center;padding:60px 20px;color:var(--tx3)">
+        <div style="font-size:32px;margin-bottom:12px">&#9888;</div>
+        <div style="font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:8px" data-i18n="ncp_empty_title">Aucune donnee NCP pour le moment</div>
+        <div style="font-size:13px;max-width:420px;margin:0 auto 16px" data-i18n="ncp_empty_desc">Clique sur "Importer donnees NCP" ci-dessus et colle le contenu du fichier NCP_dataset_complet.json pour remplir cet onglet.</div>
+      </div>
+
+      <div id="ncp-content-wrap">
+
+      <!-- KPI -->
+      <div class="kgrid">
+        <div class="kcard rd"><div class="klbl" data-i18n="ncp_kpi_total">Total NCP</div><div class="kval" id="ncp-k-total">-</div><div class="kmeta" id="ncp-k-periode">-</div></div>
+        <div class="kcard bl"><div class="klbl">Inpak</div><div class="kval" id="ncp-k-inpak">-</div><div class="kmeta" id="ncp-k-inpak-pct">-</div></div>
+        <div class="kcard am"><div class="klbl" data-i18n="ncp_kpi_prod">Production</div><div class="kval" id="ncp-k-prod">-</div><div class="kmeta" id="ncp-k-prod-pct">-</div></div>
+        <div class="kcard gn"><div class="klbl" data-i18n="ncp_kpi_tonnes">Tonnage bloqué</div><div class="kval" id="ncp-k-tonnes">-</div><div class="kmeta" data-i18n="ncp_kpi_tonnes_meta">total période filtrée</div></div>
+        <div class="kcard pk"><div class="klbl" data-i18n="ncp_kpi_debloque">NCP débloqués</div><div class="kval" id="ncp-k-debloque">-</div><div class="kmeta" id="ncp-k-debloque-pct">-</div></div>
+        <div class="kcard bl"><div class="klbl" data-i18n="ncp_kpi_sl_inpak">NCP hors shift · Inpak</div><div class="kval" id="ncp-k-sl-inpak">-</div><div class="kmeta" id="ncp-k-sl-inpak-pct">-</div></div>
+        <div class="kcard am"><div class="klbl" data-i18n="ncp_kpi_sl_prod">NCP hors shift · Prod</div><div class="kval" id="ncp-k-sl-prod">-</div><div class="kmeta" id="ncp-k-sl-prod-pct">-</div></div>
+      </div>
+
+      <!-- Filtre periode -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ncp_periode_label">Periode</span>
+        <button class="ncp-preset-btn on" data-preset="all" onclick="ncpPresetPeriode('all')" data-i18n="ncp_preset_tout">Tout</button>
+        <button class="ncp-preset-btn" data-preset="mois" onclick="ncpPresetPeriode('mois')" data-i18n="ncp_preset_mois">Mois en cours</button>
+        <button class="ncp-preset-btn" data-preset="30" onclick="ncpPresetPeriode('30')" data-i18n="ncp_preset_30">30 jours</button>
+        <button class="ncp-preset-btn" data-preset="90" onclick="ncpPresetPeriode('90')" data-i18n="ncp_preset_90">90 jours</button>
+        <button class="ncp-preset-btn" data-preset="annee" onclick="ncpPresetPeriode('annee')" data-i18n="ncp_preset_annee">Annee en cours</button>
+        <span style="width:1px;height:22px;background:var(--bd2);margin:0 6px"></span>
+        <label for="ncp-date-debut" style="font-size:11px;color:var(--tx3)" data-i18n="ncp_du">Du</label>
+        <input type="date" class="ncp-date-input" id="ncp-date-debut" onchange="filtrerNCPDates()">
+        <label for="ncp-date-fin" style="font-size:11px;color:var(--tx3)" data-i18n="ncp_au">au</label>
+        <input type="date" class="ncp-date-input" id="ncp-date-fin" onchange="filtrerNCPDates()">
+        <button class="ncp-preset-btn" onclick="ncpPresetPeriode('all')" title="Reinitialiser la periode" data-i18n-title="ncp_periode_reset_title">&#8634;</button>
+      </div>
+
+      <!-- Filtre unite -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ncp_unite_label">Unite</span>
+        <button class="ncp-unite-btn on" data-unite="all" onclick="filtrerNCPUnite('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_toutes">Toutes</button>
+        <button class="ncp-unite-btn" data-unite="AW1" onclick="filtrerNCPUnite('AW1')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">AW1</button>
+        <button class="ncp-unite-btn" data-unite="AW2" onclick="filtrerNCPUnite('AW2')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">AW2</button>
+        <button class="ncp-unite-btn" data-unite="AW3" onclick="filtrerNCPUnite('AW3')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">AW3</button>
+      </div>
+
+      <!-- Filtre type -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ncp_type_label">Type</span>
+        <button class="ncp-type-btn on" data-type="all" onclick="filtrerNCPType('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_tous">Tous</button>
+        <button class="ncp-type-btn" data-type="Inpak" onclick="filtrerNCPType('Inpak')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--amber);background:none;color:var(--amber);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">Inpak</button>
+        <button class="ncp-type-btn" data-type="Production" onclick="filtrerNCPType('Production')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--red);background:none;color:var(--red);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_kpi_prod">Production</button>
+      </div>
+
+      <!-- Filtre equipe -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px" data-i18n="ncp_equipe_label">Equipe</span>
+        <button class="ncp-equipe-btn on" data-equipe="all" onclick="filtrerNCPEquipe('all')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_toutes">Toutes</button>
+        <button class="ncp-equipe-btn" data-equipe="P1" onclick="filtrerNCPEquipe('P1')" style="padding:6px 14px;border-radius:99px;border:1px solid #8b5cf6;background:none;color:#8b5cf6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P1</button>
+        <button class="ncp-equipe-btn" data-equipe="P2" onclick="filtrerNCPEquipe('P2')" style="padding:6px 14px;border-radius:99px;border:1px solid #06b6d4;background:none;color:#06b6d4;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P2</button>
+        <button class="ncp-equipe-btn" data-equipe="P3" onclick="filtrerNCPEquipe('P3')" style="padding:6px 14px;border-radius:99px;border:1px solid #3b82f6;background:none;color:#3b82f6;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P3</button>
+        <button class="ncp-equipe-btn" data-equipe="P4" onclick="filtrerNCPEquipe('P4')" style="padding:6px 14px;border-radius:99px;border:1px solid #f59e0b;background:none;color:#f59e0b;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">P4</button>
+        <button class="ncp-equipe-btn" data-equipe="P5" onclick="filtrerNCPEquipe('P5')" style="padding:6px 14px;border-radius:99px;border:1px solid #10b981;background:none;color:#10b981;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer" data-i18n="ncp_equipe_moi">P5 (moi)</button>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin:-8px 0 16px;max-width:760px;line-height:1.5">
+        <span data-i18n="ncp_note1">Note : l equipe est deduite de l heure de la fiche quand celle-ci est fiable, sinon de l heure du defaut ecrite dans le texte (marquee ~ dans la colonne Date).</span> <span id="ncp-couverture"></span>
+        <span data-i18n="ncp_note2">Ce filtre sert a explorer les donnees, il ne constitue pas une comparaison de performance entre equipes.</span>
+      </div>
+
+      <!-- Evolution mensuelle -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="ncp_chart_evolution">Evolution mensuelle</div></div>
+        <div style="height:240px"><canvas id="ncpEvolutionChart"></canvas></div>
+      </div>
+
+      <div class="two">
+        <div class="cc">
+          <div class="cch"><div class="cct" data-i18n="ncp_chart_causes">Top 10 des causes</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px" data-i18n="ncp_chart_causes_hint">Motifs les plus frequents &mdash; la courbe orange donne le cumul en %</div>
+          <div class="cw" style="height:300px"><canvas id="ncpCausesChart"></canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cch"><div class="cct" data-i18n="ncp_chart_tonnage">Tonnage bloque par client</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px" data-i18n="ncp_chart_tonnage_hint">Impact matiere reel, en tonnes, par client</div>
+          <div class="cw" style="height:300px"><canvas id="ncpTonnageChart"></canvas></div></div><div class="cc"><div class="cch"><div class="cct" data-i18n="ncp_chart_familles">Familles de defauts</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px" data-i18n="ncp_chart_familles_hint">Les 457 motifs distincts regroupes en grandes familles &mdash; barres bleues : nombre de mentions, courbe orange : cumul en % sur l axe de droite</div><div class="cw" style="height:300px"><canvas id="ncpFamillesChart"></canvas></div></div><div class="cc"><div class="cch"><div class="cct" data-i18n="ncp_chart_delai">Delai de traitement</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px" id="ncp-delai-info">-</div><div class="cw" style="height:300px"><canvas id="ncpDelaiChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="two">
+        <div class="cc">
+          <div class="cch"><div class="cct" data-i18n="ncp_chart_lignes">Top 10 lignes touchees</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px" data-i18n="ncp_chart_lignes_hint">Lignes veritablement en cause (NCP Inpak) &mdash; exclut les blocages en consequence d'un probleme Production</div>
+          <div class="cw" style="height:280px"><canvas id="ncpLignesChart"></canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cch"><div class="cct" data-i18n="ncp_chart_produits">Top 10 codes produit touches</div></div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:8px" data-i18n="ncp_chart_produits_hint">Produits les plus souvent impliques dans un NCP</div>
+          <div class="cw" style="height:280px"><canvas id="ncpProduitsChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" data-i18n="ncp_recurrences_title">Recurrences a surveiller</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:10px" data-i18n="ncp_recurrences_hint">Meme produit et meme famille de defaut revenus au moins 3 fois sur la periode filtree. Clique sur une carte pour voir les NCP concernes.</div><div id="ncp-recurrences"></div></div>      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct"><span data-i18n="ncp_declarants_title">NCP declares par le personnel de semaine</span> <span id="ncp-decl-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:10px" data-i18n="ncp_declarants_hint">Fiches non classees : declarant nominatif (labo / qualite de semaine), equipe non attribuable. Clique sur un nom pour voir ses NCP, puis sur une ligne pour le detail du PDF.</div><div id="ncp-declarants"></div></div>      <!-- Liste -->
+      <div class="cc" style="margin-top:16px">
+        <div class="cch"><div class="cct"><span data-i18n="ncp_liste_title">Liste des NCP</span> <span id="ncp-liste-count" style="font-weight:400;color:var(--tx3);font-size:12px"></span></div></div><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center"><input id="ncp-recherche" type="text" placeholder="Rechercher : numero, produit, client, ligne, declarant, bakorder ou un mot du probleme..." data-i18n-ph="ncp_search_placeholder" oninput="ncpRecherche()" style="flex:1;min-width:280px;padding:8px 12px;border-radius:8px;border:1px solid var(--bd2);background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:12px"><button id="ncp-btn-tout" onclick="ncpToggleTout()" style="padding:8px 14px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer" data-i18n="ncp_btn_tout_afficher">Tout afficher</button><button onclick="ncpExportCSV()" style="padding:8px 14px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer" data-i18n="ncp_btn_export_csv">Export CSV</button></div>
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+          <table class="bt" id="ncp-table">
+            <thead><tr>
+              <th data-i18n="ncp_th_numero">Numero NCP</th><th data-i18n="ncp_th_date">Date</th><th data-i18n="ncp_th_unite">Unite</th><th data-i18n="ncp_th_equipe">Equipe</th><th data-i18n="ncp_th_type">Type</th><th data-i18n="ncp_th_ligne">Ligne</th><th data-i18n="ncp_th_bakorder">Bakorder</th><th data-i18n="ncp_th_produit">Produit</th><th data-i18n="ncp_th_palettes">Palettes</th><th data-i18n="ncp_th_tonnage">Tonnage</th><th data-i18n="ncp_th_statut">Statut</th><th data-i18n="ncp_th_description">Description</th>
+            </tr></thead>
+            <tbody id="ncp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-recrutement">
+      <div class="sh"><div class="st" data-i18n="tab_recrutement">Recrutement</div><div class="ss" data-i18n="rec_subtitle">Grille d'entretien mentalité — sécurité, fiabilité, motivation</div></div>
+
+      <div class="rec-subnav">
+        <button class="rec-subtab on" data-recsub="liste">Candidats</button>
+        <button class="rec-subtab" data-recsub="formulaire">+ Entretien</button>
+        <button class="rec-subtab" data-recsub="analyse">Analyse</button>
+      </div>
+
+      <!-- ===== LISTE ===== -->
+      <div class="rec-section on" id="rec-tab-liste">
+        <div class="rec-row" style="margin-bottom:16px">
+          <button class="tbtn" id="rec-btn-export-json">&#11015; Exporter (JSON)</button>
+          <button class="tbtn" id="rec-btn-import-json">&#11014; Importer</button>
+        </div>
+        <input type="file" id="rec-file-import" accept=".json,application/json" style="display:none">
+        <div class="cc">
+          <div class="cch"><div class="cct">Candidats évalués</div></div>
+          <div id="rec-liste-vide" class="rec-empty" style="display:none">
+            <div class="rec-signe">&#9678;</div>
+            <span class="rec-empty-line">Aucun candidat pour l'instant.</span><br><span class="rec-empty-line">Lance un entretien pour commencer.</span>
+          </div>
+          <div id="rec-liste-items"></div>
+        </div>
+      </div>
+
+      <!-- ===== FORMULAIRE ===== -->
+      <div class="rec-section" id="rec-tab-formulaire">
+        <button type="button" class="rec-mode-entretien-btn" id="rec-btn-mode-entretien">&#127908; Mode entretien (plein écran)</button>
+
+        <div class="cc">
+          <div class="cch"><div class="cct">&#128203; Questionnaire imprimable (candidat)</div></div>
+          <div class="rec-hint" style="font-size:12px;color:var(--tx3);margin-bottom:12px">Uniquement les questions, sans les repères de notation. Télécharge un fichier à ouvrir puis imprimer depuis ton navigateur.</div>
+          <div class="rec-row">
+            <button class="tbtn" id="rec-btn-print-fr">&#127467;&#127479; FR</button>
+            <button class="tbtn" id="rec-btn-print-nl">&#127475;&#127473; NL</button>
+            <button class="tbtn" id="rec-btn-print-en">&#127468;&#127463; EN</button>
+          </div>
+        </div>
+
+        <div class="cc">
+          <div class="cch"><div class="cct">Identité</div></div>
+          <label>Nom du candidat</label>
+          <input type="text" id="rec-f-nom" placeholder="Ex: J. Dupont">
+          <label>Date de l'entretien</label>
+          <input type="date" id="rec-f-date">          <div class="rec-row"><div style="flex:1"><label>Poste vise</label><select id="rec-f-poste"><option value="">-</option><option>Operateur emballage</option><option>Operateur production</option><option>Conducteur de ligne</option><option>Cariste</option><option>Technicien</option><option>Autre</option></select></div><div style="flex:1"><label>Unite</label><select id="rec-f-unite"><option value="">-</option><option>AW1</option><option>AW2</option><option>AW3</option></select></div><div style="flex:1"><label>Regime horaire</label><select id="rec-f-shift"><option value="">-</option><option>3 shifts semaine</option><option>Week-end</option><option>Jour fixe</option><option>Equipe jour</option><option>Equipe nuit</option></select></div></div>          <div class="rec-row"><div style="flex:1"><label>Evaluateur</label><input type="text" id="rec-f-evaluateur" placeholder="Qui a mene l entretien"></div><div style="flex:1"><label>Suite donnee</label><select id="rec-f-issue"><option value="">En cours</option><option value="non_retenu">Non retenu</option><option value="embauche">Embauche</option><option value="confirme">Confirme apres essai</option><option value="parti">Parti pendant l essai</option></select></div><div style="flex:1"><label>Employe lie (suivi a 12 mois)</label><select id="rec-f-empid"><option value="">-</option></select></div></div>
+        </div>
+
+        <div class="cc" id="rec-axes-container"></div>
+
+        <div class="cc">
+          <div class="cch"><div class="cct">Vérification des références — assiduité</div></div>
+          <div class="rec-hint" style="font-size:12px;color:var(--tx3);margin-bottom:12px">À renseigner après contact avec l'ancien employeur, pas une question posée directement au candidat.</div>
+          <label>Statut de la vérification</label>
+          <select id="rec-f-ref-statut">
+            <option value="">Pas encore vérifié</option>
+            <option value="positif">Contactée — retour positif sur l'assiduité</option>
+            <option value="surveiller">Contactée — point d'attention signalé</option>
+            <option value="injoignable">Ancien employeur injoignable / refus</option>
+          </select>
+          <label>Notes (optionnel)</label>
+          <textarea id="rec-f-ref-notes" placeholder="Détails du retour de l'ancien employeur..."></textarea>
+        </div>
+
+        <div class="cc">
+          <div class="cch"><div class="cct">Verdict global de compatibilité</div></div>
+          <div class="rec-verdict-choix" id="rec-verdict-choix">
+            <button data-v="bon">&#10003; Bon fit</button>
+            <button data-v="creuser">? À creuser</button>
+            <button data-v="incompatible">&#10007; Incompatible</button>
+          </div>
+          <label>Point à vérifier en période d'essai</label>
+          <textarea id="rec-f-suivi" placeholder="Optionnel"></textarea>
+        </div>
+
+        <div class="rec-row" id="rec-edit-actions" style="display:none;margin-bottom:10px">
+          <button class="tbtn" id="rec-btn-pdf">&#128196; Exporter PDF</button>
+          <button class="rec-btn rec-rouge" id="rec-btn-supprimer">&#128465; Supprimer</button>
+        </div>
+
+        <div class="rec-row">
+          <button class="tbtn" id="rec-btn-annuler">Annuler</button>
+          <button class="rec-btn" id="rec-btn-enregistrer">Enregistrer</button>
+        </div>
+      </div>
+
+      <!-- ===== ANALYSE ===== -->
+      <div class="rec-section" id="rec-tab-analyse">
+        <div class="cc">
+          <div class="cch"><div class="cct">Comparer des candidats</div></div>
+          <div id="rec-compare-checklist"></div>
+          <div id="rec-analyse-vide" class="rec-empty" style="display:none">
+            <div class="rec-signe">&#9678;</div>
+            <span class="rec-empty-line">Ajoute au moins 2 candidats pour comparer.</span>
+          </div>
+          <div style="height:320px"><canvas id="rec-radar"></canvas></div>
+        </div>
+        <div class="two"><div class="cc"><div class="cch"><div class="cct">Distribution des notes par axe</div></div><div class="rec-hint" style="font-size:11px;color:var(--tx3);margin-bottom:8px">Sur tous les candidats evalues. Un axe ou tout le monde a la meme note ne discrimine rien et doit etre reformule.</div><div style="height:300px"><canvas id="rec-distrib"></canvas></div></div><div class="cc"><div class="cch"><div class="cct">Prediction contre realite</div></div><div style="font-size:11px;color:var(--tx3);margin-bottom:8px" id="rec-pred-info">-</div><div style="height:300px"><canvas id="rec-pred"></canvas></div></div></div>        <div class="two"><div class="cc"><div class="cch"><div class="cct">Entonnoir de recrutement</div></div><div class="rec-hint" style="font-size:11px;color:var(--tx3);margin-bottom:8px">Evalues, juges bon fit, embauches, puis confirmes apres la periode d essai.</div><div style="height:260px"><canvas id="rec-funnel"></canvas></div></div><div class="cc"><div class="cch"><div class="cct">Entretiens par mois</div></div><div class="rec-hint" style="font-size:11px;color:var(--tx3);margin-bottom:8px">Charge d entretiens sur les 12 derniers mois.</div><div style="height:260px"><canvas id="rec-mois"></canvas></div></div></div>        <div class="cc" id="rec-tableau-card" style="display:none">
+          <div class="cch"><div class="cct">Détail des scores</div></div>
+          <div style="overflow-x:auto">
+            <table class="bt" id="rec-tableau-scores"></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec-io-overlay rec-hidden" id="rec-io-overlay">
+  <div class="rec-io-top">
+    <button class="rec-io-close" id="rec-io-close">&times;</button>
+    <div class="rec-io-progress" id="rec-io-progress">1 / 8</div>
+    <div style="width:24px"></div>
+  </div>
+  <div class="rec-io-body" id="rec-io-body"></div>
+  <div class="rec-io-nav">
+    <button class="tbtn" id="rec-io-prev">&#9668; Précédent</button>
+    <button class="rec-btn" id="rec-io-next">Suivant &#9658;</button>
+  </div>
+</div>
+    </div>
+
+  </main>
+  <nav class="mobile-nav" id="mobile-nav"></nav>
+  <div class="mobile-menu-sheet" id="mobile-menu-sheet">
+    <div class="mms-backdrop" onclick="closeMobileMenu()"></div>
+    <div class="mms-panel">
+      <div class="mms-handle"></div>
+      <div class="mms-title" data-i18n="nav_menu">Menu</div>
+      <div id="mobile-menu-list"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="popup" id="popup"></div>
+
+
+  <script src="js/core/format.js?v=1"></script>
+  <script src="js/core/ui.js?v=1"></script>
+  <script src="js/core/firebase.js?v=1"></script>
+  <script src="js/core/auth.js?v=1"></script>
+  <script src="js/metier/bradford.js?v=1"></script>
+  <script src="js/vues/bradford.js?v=1"></script>
+  <script src="js/metier/arrets.js?v=1"></script>
+  <script src="js/vues/arrets-inpak.js?v=1"></script>
+  <script src="js/imports/base.js?v=1"></script>
+  <script src="js/imports/grafana.js?v=1"></script>
+  <script src="js/imports/protime.js?v=1"></script>
+  <script src="js/imports/ncp.js?v=1"></script>
+  <script src="js/metier/ncp.js?v=1"></script>
+  <script src="js/vues/ncp.js?v=1"></script>
+  <script src="js/metier/bulk.js?v=1"></script>
+  <script src="js/vues/bulk.js?v=1"></script>
+  <script src="js/vues/planning.js?v=1"></script>
+  <script src="js/vues/formations.js?v=1"></script>
+  <script src="js/vues/pointages.js?v=1"></script>
+  <script src="js/vues/admin.js?v=1"></script>
+  <script src="js/vues/recrutement.js?v=1"></script>
+  <script src="js/app.js?v=79"></script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('sw.js')
+          .then(function(reg){ console.log('[PWA] SW enregistré:', reg.scope); })
+          .catch(function(err){ console.warn('[PWA] SW erreur:', err); });
+      });
+    }
+  </script>
+
+<!-- Modal import pointages -->
+<div id="pt-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:500px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="pt_modal_title">Importer pointages Protime</span></div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON généré par le script <b>exportEnrichi()</b> dans la console Protime</div>
+    <textarea id="pt-import-txt" style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:12px;padding:10px;resize:vertical"></textarea>
+    <div id="pt-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerPointages()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal import arrets Inpak -->
+<div id="arrets-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="arr_modal_title">Importer les arrets Inpak</span></div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON genere par <code>analyserArretsInpak()</code> / <code>exporterArretsInpak()</code> depuis le script <code>grafana_arrets_inpak.js</code> (console Grafana)</div>
+    <textarea id="arrets-import-txt" placeholder="Colle ici le JSON..." style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
+    <div id="arrets-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('arrets-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerArretsInpak()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal import Bulkopvang + Bijlijn -->
+<div id="bulk-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="arr_bulk_modal_title">Importer Bulkopvang + Bijlijn</span></div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON genere par le script <code>extraire_bulkopvang_annee.js</code> (console Grafana)</div>
+    <textarea id="bulk-import-txt" placeholder="Colle ici le JSON..." style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
+    <div id="bulk-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('bulk-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerBulk()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
+    </div>
+  </div>
+</div>
+
+<div id="ncp-list-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9993;align-items:center;justify-content:center" onclick="if(event.target===this)closeNCPList()"><div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:1040px;max-width:96vw;max-height:88vh;overflow:auto"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-weight:700;font-size:15px" id="ncp-list-title">Liste</div><button onclick="closeNCPList()" style="padding:4px 12px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer" data-i18n="modal_close">Fermer</button></div><div id="ncp-list-body" style="overflow-x:auto"></div></div></div><div id="ncp-detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9995;align-items:center;justify-content:center" onclick="if(event.target===this)closeNCPDetail()"><div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:780px;max-width:95vw;max-height:88vh;overflow:auto"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-weight:700;font-size:15px" data-i18n="ncp_detail_title">Detail du NCP</div><button onclick="closeNCPDetail()" style="padding:4px 12px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer" data-i18n="modal_close">Fermer</button></div><div id="ncp-detail-body"></div></div></div> <!-- Modal import NCP -->
+<div id="ncp-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px" data-i18n="ncp_btn_import">&#8659; Importer les donnees NCP</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le contenu du fichier <code>NCP_dataset_complet.json</code> (tableau JSON complet)</div>
+    <textarea id="ncp-import-txt" placeholder="Colle ici le JSON..." style="width:100%;height:160px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--mo);font-size:11px;padding:10px;resize:vertical"></textarea>
+    <div id="ncp-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+      <button onclick="document.getElementById('ncp-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+      <button onclick="importerNCP()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="modal_import">Importer</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="formation-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center" onclick="if(event.target===this)closeFormationModal()">
+<div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:520px;max-width:95vw;max-height:88vh;overflow:auto">
+<div style="font-weight:700;font-size:15px;margin-bottom:16px" id="formation-modal-title" data-i18n="formations_modal_title_new">Nouvelle formation</div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_titre">Titre</label>
+<input type="text" id="form-f-titre" placeholder="Ex: Formation securite incendie" data-i18n-ph="formations_placeholder_titre" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);margin-bottom:12px">
+<div style="display:flex;gap:10px;margin-bottom:12px">
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_date">Date</label><input type="date" id="form-f-date" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_heure_debut">Heure debut</label><input type="time" id="form-f-heure-debut" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+<div style="flex:1"><label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_heure_fin">Heure fin</label><input type="time" id="form-f-heure-fin" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);color-scheme:dark"></div>
+</div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_lieu">Lieu / formateur (optionnel)</label>
+<input type="text" id="form-f-lieu" placeholder="Ex: Salle de reunion, formateur externe..." data-i18n-ph="formations_placeholder_lieu" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);margin-bottom:12px">
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_employes">Employes concernes</label>
+<div id="form-f-employes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+<label style="display:block;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px" data-i18n="formations_field_notes">Notes (optionnel)</label>
+<textarea id="form-f-notes" placeholder="Details, materiel a prevoir..." data-i18n-ph="formations_placeholder_notes" style="width:100%;border:1px solid var(--bd2);border-radius:var(--r);padding:10px 11px;font-size:13.5px;font-family:var(--fn);color:var(--tx);background:var(--bg3);resize:vertical;min-height:56px;margin-bottom:14px"></textarea>
+<div id="formation-modal-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-bottom:6px"></div>
+<div style="display:flex;gap:10px;justify-content:space-between;align-items:center">
+<button id="form-btn-delete" onclick="deleteFormation()" style="display:none;padding:8px 16px;border-radius:var(--r);border:1px solid rgba(239,68,68,.4);background:none;color:#ef4444;font-family:var(--fn);font-size:12px;cursor:pointer" data-i18n="formations_btn_delete">Supprimer</button>
+<div style="display:flex;gap:10px;margin-left:auto">
+<button onclick="closeFormationModal()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>
+<button onclick="saveFormation()" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer" data-i18n="formations_btn_save">Enregistrer</button>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>7
