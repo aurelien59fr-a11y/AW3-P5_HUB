@@ -6,7 +6,7 @@
    - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v72';
+const CACHE_VERSION = 'bradford-v73';
 const APP_SHELL = [
   './',
   './index.html',
@@ -18,7 +18,7 @@ const APP_SHELL = [
   './js/vues/bradford.js?v=2',
   './js/metier/arrets.js?v=1',
   './js/vues/arrets-inpak.js?v=1',
-  './js/imports/base.js?v=1',
+  './js/imports/base.js?v=2',
   './js/imports/grafana.js?v=1',
   './js/imports/protime.js?v=1',
   './js/imports/ncp.js?v=1',
