@@ -455,3 +455,52 @@ une fonction applyOverviewAccess qui pourrait correspondre a "ov.js", ainsi
 qu'un cluster ANNIVERSAIRES (birthdays) non repertorie dans le README. Ces
 clusters restent a examiner et a extraire lors d'etapes futures (Etape 12+)
 si le decoupage de la Phase 2 doit couvrir la totalite du README.
+
+## Etape 12 -- Absences (js/vues/absences.js)
+
+Extraction du domaine "Absences" (onglet ab) identifie dans js/vues/README.md.
+Fonctions deplacees : updAbsLbl() (libelle du compteur admin), buildAbs()
+(grille des absences maladie ABS) et buildTodayAbs() (widget "absences du
+jour" affiche sur la vue d'ensemble).
+
+Particularite : ces 3 fonctions ne formaient pas un bloc contigu dans
+app.js -- updAbsLbl/buildAbs sont immediatement suivies par le bootstrap
+central de l'application (listeners .fb/.ytab, puis window.addEventListener
+('load', ...) qui initialise Firebase Auth et demarre l'app), et buildAbs()
+est ensuite separee de buildTodayAbs() par la fonction startApp() elle-meme.
+Extraction realisee par decoupage precis de chaque fonction individuellement
+(reperage nom+accolades, comptage d'accolades pour la fin exacte), sans
+toucher au code de demarrage/bootstrap qui reste dans app.js. Verifie :
+aucune fonction manquante (25 fonctions avant extraction, 22 restantes dans
+app.js + 3 dans absences.js, plus la fonction interne pFR() imbriquee dans
+buildTodayAbs), accolades equilibrees dans les deux fichiers, syntaxe validee
+(new Function() sans erreur).
+
+index.html ajoute <script src="js/vues/absences.js?v=1"></script> juste
+apres espace.js et passe app.js en v81. sw.js passe en cache bradford-v64,
+ajoute absences.js?v=1 a la liste des fichiers caches et reference
+app.js?v=81.
+
+Verification : hash SHA-256 de chaque fichier commite (absences.js, app.js,
+index.html, sw.js) compare au hash attendu -- correspondance exacte dans
+les 4 cas (verifie via le sha du fichier tel que rapporte par l'API commit,
+car l'API git/trees a montre un leger delai de propagation apres coup, deja
+documente aux etapes precedentes). Un premier essai de commit pour retirer
+le cluster de app.js a atterri par erreur a la racine du repo (mauvais
+chemin d'upload) : corrige par suppression du fichier errone puis nouveau
+commit au bon chemin js/app.js, verifie.
+
+Etat apres extraction : il reste dans app.js un cluster VUE D'ENSEMBLE (tab
+ov, fonction applyOverviewAccess et logique KPI inline dans startApp()) et
+un cluster ANNIVERSAIRES (getBirthdays, isBirthdayToday, buildBirthdayNotif,
+buildBirthdayCal, getBirthdayStarForDate, loadBirthdaysFromFirebase). Ces
+deux clusters sont fortement imbriques avec le bootstrap central de l'app
+(startApp(), window.addEventListener('load',...) qui gere l'authentification
+Firebase) et ne correspondent pas a un decoupage aussi net que les domaines
+deja extraits. Le cluster VUE D'ENSEMBLE alimente directement les KPI de
+pane-ov (k-ok, k-wn, k-cr) depuis startApp(), qui est elle-meme la fonction
+de rafraichissement centrale appelee apres chaque connexion -- son extraction
+demanderait une restructuration plus profonde plutot qu'un simple decoupage,
+ce qui sortirait du cadre "zero changement de comportement" de la Phase 2.
+Ces deux clusters restent donc consideres comme faisant partie de la coquille
+applicative (app.js) sauf decision contraire.
