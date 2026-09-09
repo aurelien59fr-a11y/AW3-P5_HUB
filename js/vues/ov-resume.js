@@ -105,8 +105,8 @@ function ovBuildWatchlist(){
   if(typeof BD!=='undefined'){
     var crit = BD.filter(function(e){return e.sc>500;}).sort(function(a,b){return b.sc-a.sc;});
     var prevo = BD.filter(function(e){return e.sc>200&&e.sc<=500;}).sort(function(a,b){return b.sc-a.sc;});
-    crit.forEach(function(e){ items.push({icon:'🔴', txt:'Bradford critique — '+e.n+' (score '+e.sc+')', nom:e.n}); });
-    prevo.forEach(function(e){ items.push({icon:'🟠', txt:'Bradford préoccupant — '+e.n+' (score '+e.sc+')', nom:e.n}); });
+    crit.forEach(function(e){ items.push({icon:'\uD83D\uDD34', txt:'Bradford critique \u2014 '+e.n+' (score '+e.sc+')', nom:e.n}); });
+    prevo.forEach(function(e){ items.push({icon:'\uD83D\uDFE0', txt:'Bradford pr\u00e9occupant \u2014 '+e.n+' (score '+e.sc+')', nom:e.n}); });
   }
 
   // NCP AW3 P5 recent -- fenetre d'affichage de 3 jours (choix d'affichage, ne modifie aucune donnee ni seuil metier).
@@ -118,7 +118,7 @@ function ovBuildWatchlist(){
     var lastNcp = ncpP5[0];
     if(lastNcp && lastNcp.created_date_iso){
       var joursDepuis = Math.floor((new Date()-new Date(lastNcp.created_date_iso+'T00:00:00'))/86400000);
-      if(joursDepuis<=3) items.push({icon:'📋', txt:'NCP AW3 P5 récent — '+(lastNcp.code_produit||lastNcp.notification)+' ('+(lastNcp.created_on||'')+')', notif:lastNcp.notification});
+      if(joursDepuis<=3) items.push({icon:'\uD83D\uDCCB', txt:'NCP AW3 P5 r\u00e9cent \u2014 '+(lastNcp.code_produit||lastNcp.notification)+' ('+(lastNcp.created_on||'')+')', notif:lastNcp.notification});
     }
   }
 
@@ -127,7 +127,7 @@ function ovBuildWatchlist(){
   if(weekend && weekend.length){
     var byPerson = ovWeekendAbsences(weekend);
     var nAbs = Object.keys(byPerson).length;
-    if(nAbs>=3) items.push({icon:'👥', txt:nAbs+' absents ce week-end — voir Absences ci-dessous', scrollTo:'ov-weekend-abs'});
+    if(nAbs>=3) items.push({icon:'\uD83D\uDC65', txt:nAbs+' absents ce week-end \u2014 voir Absences ci-dessous', scrollTo:'ov-weekend-abs'});
   }
 
   // Formation dans les 7 prochains jours -- fenetre d'affichage, aucun nouveau champ.
@@ -138,11 +138,11 @@ function ovBuildWatchlist(){
       var days=(d-today0)/86400000;
       return days>=0 && days<=7;
     }).sort(function(a,b){return a.date<b.date?-1:1;})[0];
-    if(soon) items.push({icon:'🎓', txt:'Formation proche — '+(soon.titre||'Formation')+' ('+(typeof fmtDateFormation==='function'?fmtDateFormation(soon.date):soon.date)+')', tab:'formations'});
+    if(soon) items.push({icon:'\uD83C\uDF93', txt:'Formation proche \u2014 '+(soon.titre||'Formation')+' ('+(typeof fmtDateFormation==='function'?fmtDateFormation(soon.date):soon.date)+')', tab:'formations'});
   }
 
   items = items.slice(0,5);
-  if(!items.length){ el.innerHTML=ovVideMsg('✓ Rien à signaler'); return; }
+  if(!items.length){ el.innerHTML=ovVideMsg('\u2713 Rien \u00e0 signaler'); return; }
   window._ovWatchActions = items.map(function(it){
     return function(){
       if(it.nom && typeof goToBradford==='function') goToBradford(it.nom);
@@ -166,7 +166,7 @@ function ovBuildWatchlist(){
 function ovBuildNCP(){
   var el=document.getElementById('ov-ncp');
   if(!el) return;
-  if(typeof NCP_DATA==='undefined' || typeof ncpEquipesMulti!=='function'){ el.innerHTML=ovVideMsg('Données NCP indisponibles'); return; }
+  if(typeof NCP_DATA==='undefined' || typeof ncpEquipesMulti!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es NCP indisponibles'); return; }
   var esc=(typeof ncpEsc==='function')?ncpEsc:function(s){return String(s==null?'':s);};
   var list = NCP_DATA.filter(function(r){
     if(r.unite!=='AW3') return false;
@@ -175,7 +175,7 @@ function ovBuildNCP(){
     var da=a.created_date_iso||'', db=b.created_date_iso||'';
     return da<db?1:(da>db?-1:0);
   }).slice(0,3);
-  if(!list.length){ el.innerHTML=ovVideMsg('Aucun NCP AW3 P5 identifié'); return; }
+  if(!list.length){ el.innerHTML=ovVideMsg('Aucun NCP AW3 P5 identifi\u00e9'); return; }
   el.innerHTML = list.map(function(r){
     var defaut = String(r.problems||'').split('|')[0].trim() || (r.description? String(r.description).slice(0,70):'-');
     var tonnage = (Number(r.total_tonnes)||0).toFixed(2)+' t';
@@ -183,7 +183,7 @@ function ovBuildNCP(){
     var tc = r.type_ncp==='Inpak' ? '#3b82f6' : '#f97316';
     return '<div onclick="ovGoToNCP(\''+String(r.notification).replace(/'/g,"\\'")+'\')" style="cursor:pointer;padding:10px 0;border-bottom:1px solid var(--bd2)">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-      +'<span style="font-size:12px;color:var(--tx3);font-family:var(--mo)">'+esc(r.created_on||'-')+' · '+esc(r.ligne||'-')+'</span>'
+      +'<span style="font-size:12px;color:var(--tx3);font-family:var(--mo)">'+esc(r.created_on||'-')+' \u00b7 '+esc(r.ligne||'-')+'</span>'
       +'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+esc(typeLbl)+'</span>'
       +'</div>'
       +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+esc(r.code_produit||'-')+'</div>'
@@ -205,13 +205,13 @@ function ovBuildBradfordWatch(){
   var watch = BD.filter(function(e){ return e.sc>50; })
     .map(function(e){ return {e:e, st:scSt(e.sc)}; })
     .sort(function(a,b){ return b.e.sc-a.e.sc; });
-  if(!watch.length){ el.innerHTML=ovVideMsg('✓ Aucun Bradford à surveiller'); return; }
-  var icon = {cr:'🔴', al:'🟠', wn:'🟡'};
+  if(!watch.length){ el.innerHTML=ovVideMsg('\u2713 Aucun Bradford \u00e0 surveiller'); return; }
+  var icon = {cr:'\uD83D\uDD34', al:'\uD83D\uDFE0', wn:'\uD83D\uDFE1'};
   el.innerHTML = watch.map(function(x){
     var col = scColor(x.e.sc);
     return '<div onclick="goToBradford(\''+x.e.n.replace(/'/g,"\\'")+'\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:'+col+'12;border:1px solid '+col+'33">'
       +'<span style="font-size:13px;font-weight:600;color:var(--tx1)">'+(icon[x.st.c]||'')+' '+x.e.n+'</span>'
-      +'<span style="font-size:12px;font-weight:600;color:'+col+'">'+x.st.l+' · '+x.e.sc+'</span>'
+      +'<span style="font-size:12px;font-weight:600;color:'+col+'">'+x.st.l+' \u00b7 '+x.e.sc+'</span>'
       +'</div>';
   }).join('');
 }
@@ -226,20 +226,20 @@ function ovBuildWeekendAbs(){
   if(!el) return;
   if(typeof ABS==='undefined'){ return; }
   var weekend=ovNextWeekend();
-  if(!weekend||!weekend.length){ el.innerHTML=ovVideMsg('Aucun prochain week-end de travail trouvé'); return; }
-  var MOIS=(typeof MOIS_I18N!=='undefined'&&typeof LANG!=='undefined'&&(MOIS_I18N[LANG]||MOIS_I18N.fr))||['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+  if(!weekend||!weekend.length){ el.innerHTML=ovVideMsg('Aucun prochain week-end de travail trouv\u00e9'); return; }
+  var MOIS=(typeof MOIS_I18N!=='undefined'&&typeof LANG!=='undefined'&&(MOIS_I18N[LANG]||MOIS_I18N.fr))||['janv','f\u00e9vr','mars','avr','mai','juin','juil','ao\u00fbt','sept','oct','nov','d\u00e9c'];
   var d0=weekend[0], d1=weekend[weekend.length-1];
-  var titreDates = d0.getDate()+(weekend.length>1?('–'+d1.getDate()):'')+' '+MOIS[d0.getMonth()];
-  if(titleEl) titleEl.textContent = 'Absences — week-end du '+titreDates;
+  var titreDates = d0.getDate()+(weekend.length>1?('\u2013'+d1.getDate()):'')+' '+MOIS[d0.getMonth()];
+  if(titleEl) titleEl.textContent = 'Absences \u2014 week-end du '+titreDates;
   var byPerson = ovWeekendAbsences(weekend);
   var names = Object.keys(byPerson);
-  if(!names.length){ el.innerHTML=ovVideMsg('✓ Équipe complète'); return; }
+  if(!names.length){ el.innerHTML=ovVideMsg('\u2713 \u00c9quipe compl\u00e8te'); return; }
   el.innerHTML = names.sort().map(function(n){
     var entries=byPerson[n];
     var jours=entries.map(function(e){return e.jour;});
     var t0=entries[0].t;
     var tc = t0==='ziek'?'#ef4444':t0==='verlof'?'#3b82f6':'#10b981';
-    var tl = t0==='ziek'?'Maladie':t0==='verlof'?'Congé':'Récup';
+    var tl = t0==='ziek'?'Maladie':t0==='verlof'?'Cong\u00e9':'R\u00e9cup';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2)">'
       +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+n+'</div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
@@ -256,11 +256,11 @@ function ovBuildWeekendAbs(){
 function ovBuildArretsP5(){
   var el=document.getElementById('ov-arrets-p5');
   if(!el) return;
-  if(typeof ARRETS_DATA==='undefined' || typeof equipeReelle!=='function'){ el.innerHTML=ovVideMsg('Données indisponibles'); return; }
+  if(typeof ARRETS_DATA==='undefined' || typeof equipeReelle!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es indisponibles'); return; }
   var all = Object.keys(ARRETS_DATA).map(function(k){return ARRETS_DATA[k];}).filter(function(a){
     return a && a.type==='avec_raison' && a.raison && equipeReelle(a.date,a.heure)==='P5';
   });
-  if(!all.length){ el.innerHTML=ovVideMsg('Aucune donnée P5 disponible'); return; }
+  if(!all.length){ el.innerHTML=ovVideMsg('Aucune donn\u00e9e P5 disponible'); return; }
   var lastDate=null;
   all.forEach(function(a){ if(!lastDate||a.date>lastDate) lastDate=a.date; });
   var jour = all.filter(function(a){ return a.date===lastDate; });
@@ -273,8 +273,8 @@ function ovBuildArretsP5(){
   var h=Math.floor(totalMin/60), m=totalMin%60;
   el.innerHTML = '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">'+(typeof dFR==='function'?dFR(lastDate):lastDate)+'</div>'
     +'<div class="klbl">Total</div><div class="kval" style="font-size:20px">'+h+'h'+String(m).padStart(2,'0')+'</div>'
-    +'<div class="klbl" style="margin-top:10px">Ligne la plus impactée</div><div style="font-size:14px;font-weight:600">'+(pireLigne||'-')+(pireLigne?(' — '+parLigne[pireLigne]+' min'):'')+'</div>'
-    +'<div class="klbl" style="margin-top:10px">Principale cause</div><div style="font-size:14px;font-weight:600">'+raisonLbl+(pireRaison?(' — '+parRaison[pireRaison]+' min'):'')+'</div>';
+    +'<div class="klbl" style="margin-top:10px">Ligne la plus impact\u00e9e</div><div style="font-size:14px;font-weight:600">'+(pireLigne||'-')+(pireLigne?(' \u2014 '+parLigne[pireLigne]+' min'):'')+'</div>'
+    +'<div class="klbl" style="margin-top:10px">Principale cause</div><div style="font-size:14px;font-weight:600">'+raisonLbl+(pireRaison?(' \u2014 '+parRaison[pireRaison]+' min'):'')+'</div>';
   el.onclick=function(){ var tab=document.querySelector('.tab[data-tab="arrets"]'); if(tab) tab.click(); };
   el.style.cursor='pointer';
 }
@@ -282,13 +282,27 @@ function ovBuildArretsP5(){
 function ovBuildBulkP5(){
   var el=document.getElementById('ov-bulk-p5');
   if(!el) return;
-  if(typeof bulkBornesDonnees!=='function' || typeof bulkCalc!=='function' || typeof bulkTon!=='function' || typeof bulkFmt!=='function'){ el.innerHTML=ovVideMsg('Données indisponibles'); return; }
+  if(typeof bulkBornesDonnees!=='function' || typeof bulkCalc!=='function' || typeof bulkTon!=='function' || typeof bulkFmt!=='function' || typeof bulkDateISO!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es indisponibles'); return; }
   var bornes = bulkBornesDonnees();
-  if(!bornes || !bornes.max){ el.innerHTML=ovVideMsg('Aucune donnée P5 disponible'); return; }
-  var res = bulkCalc(bornes.max, bornes.max, ['P5']);
+  if(!bornes || !bornes.max){ el.innerHTML=ovVideMsg('Aucune donn\u00e9e P5 disponible'); return; }
+  // Le tout dernier jour present dans BULK_DATA (bornes.max) peut n'avoir que des
+  // releves a 0 (ex. jour tout juste commence, avant les premieres mesures reelles) --
+  // on cherche donc, en remontant depuis ce jour, le dernier jour ou l'equipe P5 a
+  // une activite reellement mesuree (bulkCalc/bulkJourProd reutilises tels quels,
+  // seul le choix du jour affiche est adapte pour ne pas montrer un jour vide).
+  var res=null, jourRetenu=null;
+  var d = new Date(bornes.max+'T12:00:00');
+  for(var i=0;i<30;i++){
+    var iso = bulkDateISO(d);
+    if(iso < bornes.min) break;
+    var r = bulkCalc(iso, iso, ['P5']);
+    if((r.totaux.standaard+r.totaux.noodafvoer+r.totaux.bijlijn1)>0){ res=r; jourRetenu=iso; break; }
+    d.setDate(d.getDate()-1);
+  }
+  if(!res){ el.innerHTML=ovVideMsg('Aucune activit\u00e9 P5 mesur\u00e9e sur les 30 derniers jours'); return; }
   var totalT = bulkTon(res.totaux.standaard)+bulkTon(res.totaux.noodafvoer)+bulkTon(res.totaux.bijlijn1);
   var kgh = (typeof bulkKgH==='function' && res.heuresPoste>0) ? bulkKgH(totalT, res.heuresPoste) : null;
-  el.innerHTML = '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">'+(typeof dFR==='function'?dFR(bornes.max):bornes.max)+'</div>'
+  el.innerHTML = '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">'+(typeof dFR==='function'?dFR(jourRetenu):jourRetenu)+'</div>'
     +'<div class="klbl">Surproduction</div><div class="kval" style="font-size:20px">'+bulkFmt(bulkTon(res.totaux.standaard),1)+' t</div>'
     +'<div class="klbl" style="margin-top:10px">Noodafvoer</div><div style="font-size:14px;font-weight:600">'+bulkFmt(bulkTon(res.totaux.noodafvoer),1)+' t</div>'
     +'<div class="klbl" style="margin-top:10px">Bijlijn</div><div style="font-size:14px;font-weight:600">'+bulkFmt(bulkTon(res.totaux.bijlijn1),1)+' t</div>'
@@ -312,10 +326,10 @@ function ovBuildAVenir(){
       var avenir = FORMATIONS.filter(function(f){ return new Date(f.date+'T00:00:00')>=today0; })
         .sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(b.date+(b.heureDebut||'')); })
         .slice(0,3);
-      elF.innerHTML = '<div class="klbl" style="margin-bottom:8px">🎓 Formations à venir</div>'
+      elF.innerHTML = '<div class="klbl" style="margin-bottom:8px">\uD83C\uDF93 Formations \u00e0 venir</div>'
         + (avenir.length ? avenir.map(function(f){
-            return '<div style="padding:6px 0;border-bottom:1px solid var(--bd2)"><div style="font-size:13px;font-weight:600">'+(f.titre||'Formation')+'</div><div style="font-size:11px;color:var(--tx3)">'+(typeof formationEmployesLabel==='function'?formationEmployesLabel(f):'')+' · '+(typeof fmtDateFormation==='function'?fmtDateFormation(f.date):f.date)+'</div></div>';
-          }).join('') : ovVideMsg('Aucune formation à venir'));
+            return '<div style="padding:6px 0;border-bottom:1px solid var(--bd2)"><div style="font-size:13px;font-weight:600">'+(f.titre||'Formation')+'</div><div style="font-size:11px;color:var(--tx3)">'+(typeof formationEmployesLabel==='function'?formationEmployesLabel(f):'')+' \u00b7 '+(typeof fmtDateFormation==='function'?fmtDateFormation(f.date):f.date)+'</div></div>';
+          }).join('') : ovVideMsg('Aucune formation \u00e0 venir'));
       elF.onclick=function(){ var tab=document.querySelector('.tab[data-tab="formations"]'); if(tab) tab.click(); };
       elF.style.cursor='pointer';
     }
@@ -334,7 +348,7 @@ function ovBuildAVenir(){
       }).sort(function(a,b){return a.daysUntil-b.daysUntil;});
       var next=upcoming[0];
       elB.innerHTML = '<div class="klbl" style="margin-bottom:8px">Prochain anniversaire</div>'
-        + (next ? ('<div style="font-size:13px">🎂 <b>'+next.n.split(' ')[0]+'</b> — '+(next.daysUntil===0?'aujourd’hui !':('dans '+next.daysUntil+' jours'))+'</div>') : ovVideMsg('Aucune date enregistrée'));
+        + (next ? ('<div style="font-size:13px">\uD83C\uDF82 <b>'+next.n.split(' ')[0]+'</b> \u2014 '+(next.daysUntil===0?'aujourd\u2019hui !':('dans '+next.daysUntil+' jours'))+'</div>') : ovVideMsg('Aucune date enregistr\u00e9e'));
     }
   }
 }
@@ -351,7 +365,7 @@ function buildOvResume(){
   if(greetEl){
     var emp = (typeof monEspaceTrouverEmpActuel === 'function') ? monEspaceTrouverEmpActuel() : null;
     var prenom = (emp && emp.n) ? emp.n.split(' ')[0] : ((typeof currentUser !== 'undefined' && currentUser && currentUser.nom) ? currentUser.nom.split(' ')[0] : '');
-    greetEl.textContent = prenom ? ('Bonjour ' + prenom + ' — briefing rapide AW3 P5') : 'Briefing rapide AW3 P5';
+    greetEl.textContent = prenom ? ('Bonjour ' + prenom + ' \u2014 briefing rapide AW3 P5') : 'Briefing rapide AW3 P5';
   }
   ovBuildWatchlist();
   ovBuildNCP();
