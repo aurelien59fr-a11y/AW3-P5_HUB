@@ -24,6 +24,7 @@ function loadBulkData(){
   db.ref('bulk_data').on('value', function(snap){
     BULK_DATA = snap.val() || null;
     buildBulkSections();
+    if(typeof buildOvResume === 'function') buildOvResume();
   }, function(error){
     console.error('[Bulk] Erreur de lecture Firebase :', error);
   });
