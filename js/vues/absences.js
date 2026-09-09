@@ -60,6 +60,7 @@ function buildTodayAbs(){
       absToday.push({n:emp.n,t:sv,a:today+'/'+yr,b:today+'/'+yr,d:1});
   });
   window.OV_ABSENTS_TODAY = absToday.length;
+  window.OV_ABSENTS_LIST = absToday;
   window.OV_ABSENTS_IS_TODAY = isToday;
   if(typeof buildOvResume==='function') buildOvResume();
   var MOIS=MOIS_I18N[LANG]||MOIS_I18N.fr;
