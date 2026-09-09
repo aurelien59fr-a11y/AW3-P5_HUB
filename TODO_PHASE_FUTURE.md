@@ -542,3 +542,41 @@ reel, plus de "15" fige).
 Perimetre explicitement NON touche : autres onglets, regles Firebase, calculs
 metier (Bradford/Bulk/Arrets/NCP), authentification, roles, Grafana, navigation
 generale.
+
+
+## HORS PHASE 2 -- Ajustements Vue d'ensemble (09/09/2026, suite au retour utilisateur)
+
+Deux corrections demandees apres la premiere livraison du cockpit :
+
+1. Absences basees sur le prochain jour travaille : buildTodayAbs() (absences.js)
+   determine desormais si "aujourd'hui" figure dans le calendrier de planning
+   (WEEKS25/26/27) -- meme definition du "jour travaille" que goToday() dans
+   vues/planning.js (un jour est travaille s'il est present dans le calendrier
+   de shifts). Si non (ex: mercredi 09/09/2026, jour de repos pour Ploeg 5),
+   recherche le prochain jour present dans ce calendrier (jusqu'a 60 jours,
+   avec bascule d'annee comme goToday()) et affiche les absences prevues pour
+   ce jour-la, avec un libelle explicite ("Absents au prochain jour travaille
+   -- [jour] [date]"). Nouvelles cles i18n ov_nextday_prefix (fr/nl/en) ajoutees
+   dans app.js pour rester coherent avec l'existant. Aucune nouvelle regle de
+   jour ferie/weekend inventee : la source de verite reste le planning deja
+   utilise partout ailleurs dans l'app.
+
+2. Reduction des repetitions dans le cockpit :
+   - Les puces nominatives (k-wn-names / k-cr-names) dans les cartes KPI
+     "A surveiller" / "Critique" sont masquees (display:none, elements
+     conserves dans le DOM pour ne pas casser updKPI() qui les remplit sans
+     garde de nullite) car desormais redondantes avec le bloc Bradford
+     detaille (nom + score) juste en dessous.
+   - Le bloc "Equipe" (texte recapitulatif genere par ov-resume.js, qui ne
+     faisait que reformuler les KPI Equipe/Absences deja affiches) est
+     fusionne avec l'ancien bloc "Absents aujourd'hui" (today-abs) : un seul
+     bloc "Equipe" affiche desormais directement qui est absent et pour
+     quel jour, au lieu de deux blocs distincts et partiellement redondants.
+
+Fichiers modifies : js/vues/absences.js, js/vues/ov-resume.js, js/app.js (i18n),
+index.html (fusion du bloc Equipe, versions de cache bumpees), sw.js
+(bradford-v67, app.js v82, absences.js v2, ov-resume.js v2).
+
+Verifie en production : le mercredi 09/09/2026 (jour de repos) affiche bien
+"Absents au prochain jour travaille -- Samedi 12 Septembre" avec la liste
+correcte, aucune erreur console.
