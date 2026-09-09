@@ -39,6 +39,8 @@ function buildTodayAbs(){
     if((sv==='verlof'||sv==='recup')&&!absToday.find(function(a){return a.n===emp.n;}))
       absToday.push({n:emp.n,t:sv,a:today+'/'+yr,b:today+'/'+yr,d:1});
   });
+  window.OV_ABSENTS_TODAY = absToday.length;
+  if(typeof buildOvResume==='function') buildOvResume();
   var MOIS=MOIS_I18N[LANG]||MOIS_I18N.fr;
   var dow=(DOW_FULL_I18N[LANG]||DOW_FULL_I18N.fr)[now.getDay()];
   if(title) title.textContent=t('ov_today_prefix')+' \u2014 '+dow+' '+now.getDate()+' '+MOIS[now.getMonth()];
