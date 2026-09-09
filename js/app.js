@@ -1508,6 +1508,16 @@ document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click'
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
   if(b.dataset.tab === 'recrutement' && typeof buildRecrutementTab === 'function') buildRecrutementTab();
 if(b.dataset.tab === 'espace' && typeof buildMonEspace === 'function') buildMonEspace();
+  if(b.dataset.tab === 'br'){
+    // Graphiques Bradford deplaces dans cet onglet (mission refonte Vue d'ensemble, 09/09/2026) :
+    // ils sont crees des le chargement (initCharts(), appele par startApp()) alors que ce panneau
+    // est encore masque (display:none), donc Chart.js les dessine a taille 0. On force un resize()
+    // au moment ou l'onglet devient visible -- aucun recalcul de donnees, juste un rafraichissement
+    // d'affichage sur les instances Chart.js existantes.
+    if(typeof chB!=='undefined' && chB) chB.resize();
+    if(typeof chT!=='undefined' && chT) chT.resize();
+    if(typeof chJ!=='undefined' && chJ) chJ.resize();
+  }
 });});
 
 // ==============================================================
