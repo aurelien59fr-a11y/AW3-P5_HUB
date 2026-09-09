@@ -610,3 +610,43 @@ des 3 blocs graphiques vers pane-br, conteneur ov-abs-names), sw.js
 Verifie en production : tuile Absences affiche "Hakkim - Maladie" / "Mohamed -
 Conge", les 3 graphiques s'affichent correctement dans l'onglet Bradford
 (taille correcte des le premier clic sur l'onglet), aucune erreur console.
+
+
+## HORS PHASE 2 -- Refonte "briefing rapide" de la Vue d'ensemble (09/09/2026, 3e demande utilisateur)
+
+Sur demande explicite et detaillee de l'utilisateur (cahier des charges complet
+valide avant codage, reponse "va y"), la Vue d'ensemble a ete entierement
+restructuree en 6 sections fixes : A surveiller, Derniers NCP -- AW3 P5,
+Bradford a surveiller, Absences -- week-end a venir, Derniere activite
+Production -- P5, A venir. Retrait de la carte "Equipe 15", des KPI redondants,
+et des 3 graphiques (deja deplaces vers l'onglet Bradford lors du round precedent).
+
+Aucune regle metier modifiee : reutilisation stricte des fonctions et donnees
+deja calculees ailleurs (scSt()/BD pour Bradford, ncpEquipesMulti()/ncpGetEquipe()
+pour identifier AW3+P5 sur les NCP, equipeReelle() pour filtrer Arrets Inpak et
+Bulk & Bijlijn sur P5, bulkCalc() qui respecte deja la regle de journee de
+production 05h->05h, meme algorithme de recherche du prochain jour travaille
+que goToday()/buildTodayAbs() pour trouver le prochain week-end).
+
+Nouveau fichier js/vues/ov-resume.js (agregateur complet des 6 sections,
+aucune donnee recalculee). Deux nouveaux points d'accroche ajoutes pour que
+le cockpit se rafraichisse a chaque changement de donnees : updKPI()
+(vues/bradford.js) et loadNCPData() (metier/ncp.js) appellent desormais
+buildOvResume(), sur le meme modele que loadArretsInpak()/loadBulkData() qui
+le faisaient deja.
+
+Fichiers modifies : js/vues/ov-resume.js (reecriture complete), index.html
+(pane-ov restructure, anciens elements KPI Bradford masques en display:none
+pour ne pas casser updKPI() qui y ecrit sans garde), js/vues/bradford.js
+(hook buildOvResume() en fin de updKPI()), js/metier/ncp.js (hook
+buildOvResume() en fin du listener Firebase ncp_data). Cache : bradford.js v2,
+metier/ncp.js v2, ov-resume.js v4, sw.js CACHE_VERSION bradford-v70.
+
+Verifie en production : les 6 sections s'affichent avec les vraies donnees
+(Bradford critique Hakkim 2904, preoccupant Mohamed 350, a surveiller Anthony
+72 ; NCP AW3 P5 les plus recents avec date/ligne/produit/defaut/tonnage/type ;
+absences du week-end du 12-13 septembre avec jour(s) et type par personne ;
+arrets Inpak et Bulk & Bijlijn filtres P5 ; formations et prochain
+anniversaire). Carte "Equipe 15" et anciens KPI bien retires du DOM. Onglet
+Bradford verifie fonctionnel apres le hook ajoute dans updKPI() (graphiques,
+tableau detail). Aucune erreur console.
