@@ -23,18 +23,18 @@ function buildOvResume(){
     greetEl.textContent = prenom ? ("Bonjour " + prenom + " - situation de l'equipe et de la production") : "Situation de l'equipe et de la production";
   }
 
-  // --- Equipe / Absences aujourd'hui ---
+  // --- Equipe / Absences (aujourd'hui si jour travaille, sinon prochain jour travaille -- cf. absences.js buildTodayAbs()) ---
   var teamVal = document.getElementById('ov-team-val');
   var teamMeta = document.getElementById('ov-team-meta');
   var absVal = document.getElementById('ov-abs-val');
-  var teamDetail = document.getElementById('ov-team-detail');
+  var absMeta = document.getElementById('ov-abs-meta');
   if(typeof EMP !== 'undefined' && EMP.length){
     var absToday = (typeof window.OV_ABSENTS_TODAY === 'number') ? window.OV_ABSENTS_TODAY : 0;
     var present = Math.max(0, EMP.length - absToday);
     if(teamVal) teamVal.textContent = present + '/' + EMP.length;
     if(teamMeta) teamMeta.textContent = present + ' presents';
     if(absVal) absVal.textContent = absToday;
-    if(teamDetail) teamDetail.textContent = EMP.length + " collaborateurs - " + present + " presents - " + absToday + (absToday>1 ? " absents" : " absent") + " aujourd'hui";
+    if(absMeta) absMeta.textContent = (window.OV_ABSENTS_IS_TODAY === false) ? 'prochain jour travaille' : "aujourd'hui";
   }
 
   // --- Production : Arrets Inpak (aujourd'hui, meme decoupage type/date/duree que buildArretsInpak) ---
