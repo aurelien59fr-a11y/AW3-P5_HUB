@@ -80,6 +80,7 @@ function loadArretsInpak(){
     ARRETS_DATA = snap.val() || {};
     buildArretsInpak();
     if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
+    if(typeof buildOvResume === 'function') buildOvResume();
   }, function(error){
     console.error('[Arrets Inpak] Erreur de lecture Firebase :', error);
   });
