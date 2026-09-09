@@ -504,3 +504,41 @@ demanderait une restructuration plus profonde plutot qu'un simple decoupage,
 ce qui sortirait du cadre "zero changement de comportement" de la Phase 2.
 Ces deux clusters restent donc consideres comme faisant partie de la coquille
 applicative (app.js) sauf decision contraire.
+
+
+## HORS PHASE 2 -- Mission "Refonte Vue d'ensemble" (09/09/2026)
+
+Mission independante de la refactorisation architecturale Phase 2 (analyse validee
+par l'utilisateur avant codage, puis "go"). Transformation de l'onglet Vue
+d'ensemble en cockpit operationnel, en pur agregateur visuel (aucune donnee
+Firebase supplementaire lue en boucle, aucune regle metier dupliquee ou
+recalculee -- Bradford/Bulk/Arrets Inpak restent calcules exactement comme avant).
+
+Realise :
+- Nouveau fichier js/vues/ov-resume.js : agrege En-tete (prenom dynamique),
+  Equipe/Absences du jour, Production (Arrets Inpak du jour + ligne la plus
+  impactee, Bulk & Bijlijn via bulkCalc()/bulkJourProd() -- regle 05h->05h
+  reutilisee telle quelle, aucune nouvelle regle).
+- js/vues/absences.js : expose window.OV_ABSENTS_TODAY et appelle
+  buildOvResume() a chaque rafraichissement de buildTodayAbs().
+- js/metier/arrets.js et js/metier/bulk.js : appellent buildOvResume() apres
+  chargement de leurs donnees respectives (aucune nouvelle lecture Firebase,
+  reutilise ARRETS_DATA/BULK_DATA deja charges).
+- js/vues/bradford.js (updKPI()) : ajoute des listes detaillees (nom complet +
+  score Bradford) pour Critique et A surveiller, cliquables vers la fiche
+  Bradford (goToBradford()), avec message positif si aucune personne
+  critique/a surveiller. Seuils et calcul Bradford INCHANGES.
+- index.html : restructuration du bloc pane-ov (header compact, ligne de 5 KPI
+  reels via kgrid kgrid5, bloc "A surveiller", bloc Bradford detaille,
+  Production, Equipe, puis graphiques/mini-calendriers existants conserves
+  tels quels en dessous).
+- sw.js : CACHE_VERSION bradford-v65, ajout de js/vues/ov-resume.js au cache.
+
+Verifie en production (aw3-p5-hub.vercel.app) : aucune erreur console, listes
+Bradford Critique/A surveiller correctement peuplees (nom + score), clic vers
+la fiche Bradford fonctionnel, KPI Equipe/Absences dynamiques (EMP.length
+reel, plus de "15" fige).
+
+Perimetre explicitement NON touche : autres onglets, regles Firebase, calculs
+metier (Bradford/Bulk/Arrets/NCP), authentification, roles, Grafana, navigation
+generale.
