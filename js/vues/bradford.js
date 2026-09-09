@@ -38,6 +38,18 @@ function updKPI(){
     BD_PREV_STATUS[e.n]=curr;
   });
   alertEl.innerHTML=alerts.length?'<div style="background:#f59e0b22;border:1px solid #f59e0b55;border-radius:8px;padding:10px 14px;font-size:13px;color:#f59e0b;margin-bottom:12px">⚠ '+alerts.join(' &nbsp;·&nbsp; ')+'</div>':'';
+
+  // Vue d'ensemble -- listes detaillees nom complet + score (mission refonte du 09/09/2026),
+  // reutilise exactement les memes tableaux wn/cr deja calcules ci-dessus, aucune nouvelle regle.
+  var crDet = document.getElementById('k-cr-detail');
+  var wnDet = document.getElementById('k-wn-detail');
+  function ovRowDetail(e, color){
+    var nomEsc = e.n.split("'").join("\\'");
+    return '<div onclick="goToBradford(\'' + nomEsc + '\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:' + color + '12;border:1px solid ' + color + '33"><span style="font-size:13px;font-weight:600;color:var(--tx1)">' + e.n + '</span><span style="font-size:12px;font-weight:600;color:' + color + '">Bradford ' + e.sc + '</span></div>';
+  }
+  if(crDet) crDet.innerHTML = cr.length ? cr.map(function(e){ return ovRowDetail(e, '#ef4444'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford critique</div>';
+  if(wnDet) wnDet.innerHTML = wn.length ? wn.map(function(e){ return ovRowDetail(e, '#f59e0b'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford a surveiller</div>';
+
   applyOverviewAccess();
 }
 
