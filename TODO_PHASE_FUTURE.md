@@ -580,3 +580,33 @@ index.html (fusion du bloc Equipe, versions de cache bumpees), sw.js
 Verifie en production : le mercredi 09/09/2026 (jour de repos) affiche bien
 "Absents au prochain jour travaille -- Samedi 12 Septembre" avec la liste
 correcte, aucune erreur console.
+
+
+## HORS PHASE 2 -- Ajustements Vue d'ensemble (09/09/2026, 2e retour utilisateur)
+
+1. La tuile KPI "Absences" affiche desormais directement les noms des personnes
+   concernees sous forme de puces colorees (nom + type : Maladie/Conge/Recup),
+   au lieu d'un simple chiffre -- reutilise OV_ABSENTS_LIST (nouvellement
+   expose par absences.js, le meme tableau absToday deja calcule par
+   buildTodayAbs(), aucun nouveau calcul). Repond au besoin de voir "qui"
+   directement, verlof et recup inclus (ils l'etaient deja dans le calcul,
+   seul l'affichage manquait).
+
+2. Les 3 graphiques (Scores Bradford, Absences par trimestre, Jours d'absence
+   par employe) sont retires de la Vue d'ensemble et deplaces dans l'onglet
+   Bradford (au-dessus du tableau detaille) : ils y ont plus de place et
+   evitent la redondance avec les listes deja presentes dans le cockpit.
+   Comme ces canvases sont crees par initCharts() au chargement (avant que
+   l'onglet Bradford soit actif, donc masque), un chB.resize()/chT.resize()/
+   chJ.resize() a ete ajoute au clic sur l'onglet Bradford (app.js) pour
+   forcer Chart.js a redessiner a la bonne taille -- aucune donnee ni calcul
+   modifie, uniquement un correctif d'affichage lie au deplacement.
+
+Fichiers modifies : js/vues/absences.js (OV_ABSENTS_LIST), js/vues/ov-resume.js
+(puces nominatives), js/app.js (resize onglet Bradford), index.html (deplacement
+des 3 blocs graphiques vers pane-br, conteneur ov-abs-names), sw.js
+(bradford-v68, app.js v83, absences.js v3, ov-resume.js v3).
+
+Verifie en production : tuile Absences affiche "Hakkim - Maladie" / "Mohamed -
+Conge", les 3 graphiques s'affichent correctement dans l'onglet Bradford
+(taille correcte des le premier clic sur l'onglet), aucune erreur console.
