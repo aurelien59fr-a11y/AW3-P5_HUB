@@ -35,6 +35,16 @@ function buildOvResume(){
     if(teamMeta) teamMeta.textContent = present + ' presents';
     if(absVal) absVal.textContent = absToday;
     if(absMeta) absMeta.textContent = (window.OV_ABSENTS_IS_TODAY === false) ? 'prochain jour travaille' : "aujourd'hui";
+    var absNamesEl = document.getElementById('ov-abs-names');
+    if(absNamesEl){
+      var list = Array.isArray(window.OV_ABSENTS_LIST) ? window.OV_ABSENTS_LIST : [];
+      absNamesEl.innerHTML = list.map(function(a){
+        var tc = a.t==='ziek' ? '#ef4444' : a.t==='verlof' ? '#3b82f6' : '#10b981';
+        var tl = a.t==='ziek' ? 'Maladie' : a.t==='verlof' ? 'Conge' : 'Recup';
+        var fn = a.n.split(' ')[0];
+        return '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'55;white-space:nowrap">'+fn+' &middot; '+tl+'</span>';
+      }).join('');
+    }
   }
 
   // --- Production : Arrets Inpak (aujourd'hui, meme decoupage type/date/duree que buildArretsInpak) ---
