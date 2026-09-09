@@ -57,18 +57,37 @@ function importerBulk(){
   // On garde l'unite deja enregistree si le fichier importe n'en precise pas
   if(!parsed.unite && BULK_DATA && BULK_DATA.unite) parsed.unite = BULK_DATA.unite;
 
+  // Fusion avec les donnees deja presentes au lieu d'un ecrasement complet
+  // (bulk_data.set()) : le script d'extraction peut desormais ne couvrir
+  // qu'une fenetre recente (ex. les 3 dernieres semaines) sans effacer le
+  // reste de l'historique deja importe. Dedoublonnage par "heure" (cle
+  // unique de chaque point), la nouvelle valeur remplace l'ancienne pour
+  // le meme point si les deux existent (donnees Grafana revues/corrigees).
+  var fusionne = fusionnerBulkData(BULK_DATA, parsed);
+
   err.style.color = '#3b82f6';
   err.textContent = 'Import en cours...';
-  db.ref('bulk_data').set(parsed).then(function(){
+  db.ref('bulk_data').set(fusionne).then(function(){
     document.getElementById('bulk-import-modal').style.display = 'none';
     document.getElementById('bulk-import-txt').value = '';
     err.style.color = '#ef4444';
     err.textContent = '';
     var n = (parsed.standaard||[]).length + (parsed.noodafvoer||[]).length + (parsed.bijlijn1||[]).length;
-    toast(n + ' points importes (Bulkopvang + Bijlijn)', '#10b981');
+    toast(n + ' point(s) importe(s) et fusionne(s) (Bulkopvang + Bijlijn)', '#10b981');
   }).catch(function(e){
     err.textContent = 'Erreur Firebase : ' + e.message;
   });
+}
+
+function fusionnerBulkData(existant, nouveau){
+  var resultat = { unite: nouveau.unite };
+  ['standaard', 'noodafvoer', 'bijlijn1'].forEach(function(cle){
+    var parHeure = {};
+    ((existant && existant[cle]) || []).forEach(function(p){ if(p && p.heure) parHeure[p.heure] = p; });
+    ((nouveau && nouveau[cle]) || []).forEach(function(p){ if(p && p.heure) parHeure[p.heure] = p; });
+    resultat[cle] = Object.keys(parHeure).sort().map(function(h){ return parHeure[h]; });
+  });
+  return resultat;
 }
 
 var BULK_EQUIPE_FILTRE = [];
