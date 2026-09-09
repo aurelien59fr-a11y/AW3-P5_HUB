@@ -97,6 +97,26 @@ function buildMiniCal(){
       if(dd>=d0&&dd<=d1){abs30.push({name:a.n,date:fmtDDMM(day),type:a.t,ts:a.ts||0});}
     });
   });
+  // Ajoute les verlof/recup issus du planning (codes jour par jour dans SHIFTS,
+  // pas des entrees ABS a plage de dates) -- meme regle et meme source que
+  // buildTodayAbs() dans vues/absences.js, etendue aux 30 jours affiches ici.
+  // Aucune nouvelle regle metier : on relit simplement le meme planning.
+  days.forEach(function(day){
+    var yr=String(day.getFullYear());
+    var weeks=yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:yr==='2025'?WEEKS25:null;
+    var shifts=yr==='2027'?SHIFTS27:yr==='2026'?SHIFTS26:yr==='2025'?SHIFTS25:null;
+    if(!weeks||!shifts) return;
+    var allD=weeks.reduce(function(a,w){return a.concat(w.d);},[]);
+    var key=fmtDDMM(day);
+    var ti=allD.indexOf(key);
+    if(ti===-1) return;
+    shifts.forEach(function(emp){
+      var sv=emp.s[ti]||'';
+      if(sv==='verlof'||sv==='recup'){
+        abs30.push({name:emp.n,date:key,type:sv,ts:0});
+      }
+    });
+  });
   // Grouper par date, en ne gardant qu'une entree par personne (la plus
   // recemment importee) si plusieurs types d'absence se chevauchent ce jour-la.
   var byDate={};
