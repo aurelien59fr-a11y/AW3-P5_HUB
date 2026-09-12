@@ -9,16 +9,69 @@
    la portee globale du script fait qu'aucun ordre de chargement n'est requis.
    calcSaisons() n'a aucun appelant dans le fichier (deja le cas avant cette
    extraction) ; conservee telle quelle, sans changement de comportement --
-   signale dans TODO_PHASE_FUTURE.md. */
+   signale dans TODO_PHASE_FUTURE.md.
+
+   MAJ du 12/09/2026 (demande utilisateur) : deux points corriges ensemble
+   pour rester coherents entre le score et son affichage, aucune autre regle
+   touchee --
+   1) le filtre "deb>now" qui excluait une absence maladie deja saisie mais
+      dont la date de debut/fin est a venir a ete retire : une maladie compte
+      des sa saisie, meme si elle couvre des jours pas encore ecoules (ex :
+      un arret medical de plusieurs jours saisi a l'avance). Seule la fenetre
+      glissante de 365 jours (fin<cut) continue a exclure les absences trop
+      anciennes -- aucun changement du calcul S^2*D lui-meme.
+   2) la fusion d'episodes (2 absences maladie consecutives, ou separees
+      seulement par un week-end, ne comptent que pour un seul episode) est
+      desormais une fonction partagee mergerAbsencesEnEpisodes(), pour que
+      vues/bradford.js (panneau de detail) affiche exactement les memes
+      episodes fusionnes que ceux comptes dans le score -- zero duplication
+      de cette regle. */
 
 function scColor(s){return s<=50?'#10b981':s<=200?'#f59e0b':s<=500?'#f97316':'#ef4444';}
 
 function scSt(s){return s<=50?{l:t('status_ok'),c:'ok'}:s<=200?{l:t('status_wn'),c:'wn'}:s<=500?{l:t('status_al'),c:'al'}:{l:t('status_cr'),c:'cr'};}
 
+function pFRBradford(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+function addDaysBradford(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+
+// Fusionne une liste d'intervalles {deb,fin,d} (dates JS + nb de jours) en
+// episodes distincts : deux intervalles qui se chevauchent, se touchent, ou
+// ne sont separes que par un week-end (samedi+dimanche) forment un seul
+// episode (ex : vendredi malade + lundi malade = 1 episode). Utilisee par
+// recalc() pour le score Bradford ET par openBradfordPanel() (vues/bradford.js)
+// pour afficher les memes episodes -- une seule implementation, reutilisee
+// partout, pas de regle dupliquee.
+function mergerAbsencesEnEpisodes(intervals){
+  if(!intervals.length) return [];
+  var sorted=intervals.slice().sort(function(a,b){return a.deb-b.deb;});
+  var episodes=[];
+  var cur={deb:sorted[0].deb, fin:sorted[0].fin, days:sorted[0].d};
+  for(var i=1;i<sorted.length;i++){
+    var iv=sorted[i];
+    var gapStart=addDaysBradford(cur.fin,1);
+    var bridgesWeekend=true;
+    var d=new Date(gapStart);
+    while(d<=addDaysBradford(iv.deb,-1)){
+      var dow=d.getDay(); // 0=dimanche, 6=samedi
+      if(dow!==0&&dow!==6){bridgesWeekend=false;break;}
+      d=addDaysBradford(d,1);
+    }
+    if(iv.deb<=addDaysBradford(cur.fin,1) || bridgesWeekend){
+      // chevauchement, contigu, ou separe uniquement par un week-end : meme episode
+      if(iv.fin>cur.fin) cur.fin=iv.fin;
+      cur.days+=iv.d;
+    } else {
+      episodes.push(cur);
+      cur={deb:iv.deb, fin:iv.fin, days:iv.d};
+    }
+  }
+  episodes.push(cur);
+  return episodes;
+}
+
 function recalc(){
   var now=new Date(),cut=new Date(now);cut.setFullYear(cut.getFullYear()-1);
-  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-  function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+  var pFR=pFRBradford;
 
   // 1) Regrouper, par personne, uniquement les absences maladie (t==='ziek')
   //    qui tombent dans la fenetre glissante des 365 derniers jours.
@@ -27,39 +80,15 @@ function recalc(){
   ABS.forEach(function(a){
     if(a.t!=='ziek') return; // seules les maladies comptent pour Bradford (legacy sans t = ignore, pas de supposition)
     var deb=pFR(a.a),fin=pFR(a.b);
-    if(fin<cut||deb>now) return; // hors fenetre 365 jours
+    if(fin<cut) return; // hors fenetre 365 jours (une maladie compte des sa saisie, meme si elle couvre des jours a venir)
     if(!byPerson[a.n]) return;
     byPerson[a.n].push({deb:deb,fin:fin,d:a.d});
   });
 
-  // 2) Pour chaque personne, fusionner les intervalles maladie qui se
-  //    touchent ou ne sont separes que par un week-end (samedi+dimanche),
-  //    afin qu'un vendredi malade + lundi malade ne forment qu'un seul episode.
+  // 2) Pour chaque personne, fusionner les intervalles maladie (meme fonction
+  //    que le panneau de detail) puis en deduire S (nb d'episodes) et D (jours).
   function mergeEpisodes(intervals){
-    if(!intervals.length) return {S:0,D:0};
-    intervals.sort(function(a,b){return a.deb-b.deb;});
-    var episodes=[];
-    var cur={deb:intervals[0].deb, fin:intervals[0].fin, days:intervals[0].d};
-    for(var i=1;i<intervals.length;i++){
-      var iv=intervals[i];
-      var gapStart=addDays(cur.fin,1);
-      var bridgesWeekend=true;
-      var d=new Date(gapStart);
-      while(d<=addDays(iv.deb,-1)){
-        var dow=d.getDay(); // 0=dimanche, 6=samedi
-        if(dow!==0&&dow!==6){bridgesWeekend=false;break;}
-        d=addDays(d,1);
-      }
-      if(iv.deb<=addDays(cur.fin,1) || bridgesWeekend){
-        // chevauchement, contigu, ou separe uniquement par un week-end : meme episode
-        if(iv.fin>cur.fin) cur.fin=iv.fin;
-        cur.days+=iv.d;
-      } else {
-        episodes.push(cur);
-        cur={deb:iv.deb, fin:iv.fin, days:iv.d};
-      }
-    }
-    episodes.push(cur);
+    var episodes=mergerAbsencesEnEpisodes(intervals);
     var totalD=0;
     episodes.forEach(function(ep){totalD+=ep.days;});
     return {S:episodes.length, D:totalD};
