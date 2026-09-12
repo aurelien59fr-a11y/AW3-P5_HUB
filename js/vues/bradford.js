@@ -143,20 +143,26 @@ function openBradfordPanel(name){
   if(!e) return;
   var col=scColor(e.sc);
   var st=scSt(e.sc);
-  // Récupérer les épisodes de cette personne triés par date
-  var eps=ABS.filter(function(a){return a.n===name&&a.t==='ziek';});
-  eps.sort(function(a,b){
-    function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
-    return pFR(b.a)-pFR(a.a);
+  // Récupérer les épisodes de cette personne, fusionnés exactement comme pour
+  // le score (mergerAbsencesEnEpisodes(), definie dans metier/bradford.js) --
+  // deux absences maladie consecutives (ou separees seulement par un week-end)
+  // s'affichent donc comme un seul episode ici aussi, pas de regle dupliquee.
+  function pFR(s){var p=s.split('/');return new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));}
+  function fmtFR(dt){function pad(n){return n<10?'0'+n:''+n;}return pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+'/'+dt.getFullYear();}
+  var brut=ABS.filter(function(a){return a.n===name&&a.t==='ziek';}).map(function(a){
+    return {deb:pFR(a.a), fin:pFR(a.b), d:a.d};
   });
+  var eps=(typeof mergerAbsencesEnEpisodes==='function') ? mergerAbsencesEnEpisodes(brut) : brut.map(function(a){return {deb:a.deb,fin:a.fin,days:a.d};});
+  eps.sort(function(a,b){return b.deb-a.deb;});
   var cm=BD_COMMENTS[name];
   var d=document.createElement('div');
   d.style.cssText='position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-left:1px solid var(--bd2);z-index:9998;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.4)';
-  var epsHtml=eps.length?eps.map(function(a){
-    var same=a.a===a.b;
+  var epsHtml=eps.length?eps.map(function(ep){
+    var same=ep.deb.getTime()===ep.fin.getTime();
+    var aStr=fmtFR(ep.deb), bStr=fmtFR(ep.fin);
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd2)">'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--tx1)">'+(same?a.a:a.a+' → '+a.b)+'</div>'
-      +'<div style="font-size:11px;color:var(--tx3)">'+a.d+(a.d>1?t('br_days_suffix_n'):t('br_days_suffix_1'))+'</div></div>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--tx1)">'+(same?aStr:aStr+' → '+bStr)+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+ep.days+(ep.days>1?t('br_days_suffix_n'):t('br_days_suffix_1'))+'</div></div>'
       +'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">'+t('br_episode_badge')+'</span>'
       +'</div>';
   }).join(''):'<div style="color:var(--tx3);font-size:13px;padding:20px 0;text-align:center">'+t('br_no_episode')+'</div>';
