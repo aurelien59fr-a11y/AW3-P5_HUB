@@ -37,14 +37,20 @@ function applyRole(role){
   document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
     el.style.display = '';
   });
-  ['ov','br','ab'].forEach(function(tab){
+  ['ov','br'].forEach(function(tab){
     var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
     if(btn) btn.style.display = 'flex';
   });
+  // Onglet Absences — masque pour tout le monde (fait double emploi avec le
+  // detail Bradford, qui montre les memes absences maladie en plus complet).
+  // Rien n'est supprime : le code, les donnees et l'onglet lui-meme restent
+  // en place, seul l'affichage du bouton est desactive ici.
+  var abTabAlways = document.querySelector('.tab[data-tab="ab"]');
+  if(abTabAlways) abTabAlways.style.display = 'none';
 
   // Employe — acces limite a Planning + Formations
   if(isEmploye){
-    ['ov','br','ab'].forEach(function(tab){
+    ['ov','br'].forEach(function(tab){
       var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
       if(btn) btn.style.display = 'none';
     });
