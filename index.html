@@ -263,16 +263,24 @@
 
       <!-- IMPORT GLOBAL -->
       <div class="cc" style="margin-bottom:16px">
-        <div class="cch"><div class="cct">Import global (Grafana)</div></div>
+        <div class="cch"><div class="cct">Import global</div></div>
         <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">
-          Colle ici le JSON produit par <code>extraire_tout_grafana.js</code> (Arrets Inpak + Bulk &amp; Bijlijn en un seul bloc) :
-          l'import detecte automatiquement chaque partie et appelle le meme import que les boutons "Importer Grafana" / "Importer" de leurs onglets respectifs -- rien d'autre ne change.
-          D'autres sources (NCP/Mendix, Protime) pourront etre ajoutees ici plus tard.
+          Colle ici le JSON produit par n'importe quel script d'extraction (Grafana Arrets Inpak, Grafana Bulk &amp; Bijlijn,
+          Protime/Pointages, NCP) : l'import detecte automatiquement la source de chaque bloc et appelle le meme import que
+          le bouton "Importer" de son propre onglet -- rien d'autre ne change. Colle plusieurs blocs a la fois (dans un
+          tableau JSON) ou un par un, "Importer tout" traite tout ce qui est reconnu.
         </div>
-        <textarea id="global-import-txt" rows="6" style="width:100%;box-sizing:border-box;background:var(--bg3);color:var(--tx1);border:1px solid var(--bd);border-radius:8px;padding:10px;font-family:var(--mo);font-size:11px;margin-bottom:10px" placeholder="Colle ici le JSON complet genere par extraire_tout_grafana.js"></textarea>
-        <div style="display:flex;align-items:center;gap:12px">
+        <textarea id="global-import-txt" rows="6" style="width:100%;box-sizing:border-box;background:var(--bg3);color:var(--tx1);border:1px solid var(--bd);border-radius:8px;padding:10px;font-family:var(--mo);font-size:11px;margin-bottom:10px" placeholder="Colle ici le JSON genere par un des scripts d'extraction (Grafana, Protime, NCP...)"></textarea>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
           <button onclick="importerGlobal()" style="padding:8px 18px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer">Importer tout</button>
           <div id="global-import-err" style="font-size:12px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Ou importe une source a la fois (memes fenetres que sur leurs onglets respectifs) :</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <button onclick="openImportArretsModal()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Arrets Inpak</button>
+          <button onclick="openImportBulkModal()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Bulk &amp; Bijlijn</button>
+          <button onclick="openImportPointages()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Pointages (Protime)</button>
+          <button onclick="openImportNCPModal()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; NCP Qualite</button>
         </div>
       </div>
 
@@ -1042,17 +1050,17 @@
   <script src="js/vues/bradford.js?v=3"></script>
   <script src="js/metier/arrets.js?v=1"></script>
   <script src="js/vues/arrets-inpak.js?v=1"></script>
-  <script src="js/imports/base.js?v=2"></script>
+  <script src="js/imports/base.js?v=3"></script>
   <script src="js/imports/grafana.js?v=1"></script>
   <script src="js/imports/protime.js?v=1"></script>
-  <script src="js/imports/ncp.js?v=1"></script>
+  <script src="js/imports/ncp.js?v=2"></script>
   <script src="js/metier/ncp.js?v=2"></script>
   <script src="js/vues/ncp.js?v=1"></script>
   <script src="js/metier/bulk.js?v=1"></script>
   <script src="js/vues/bulk.js?v=2"></script>
   <script src="js/vues/planning.js?v=5"></script>
   <script src="js/vues/formations.js?v=1"></script>
-  <script src="js/vues/pointages.js?v=1"></script>
+  <script src="js/vues/pointages.js?v=2"></script>
   <script src="js/vues/admin.js?v=1"></script>
   <script src="js/vues/recrutement.js?v=1"></script>
   <script src="js/vues/espace.js?v=1"></script>
