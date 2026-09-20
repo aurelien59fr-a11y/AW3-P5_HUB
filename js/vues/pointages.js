@@ -52,6 +52,12 @@ function importerPointages(){
   try { data = JSON.parse(raw); }
   catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
 
+  // Tolere aussi l'enveloppe {source:'protime_pointages', data:{...}} generee
+  // par le script Protime pour Admin -> "Import global" -- meme JSON, colle
+  // ici ou la-bas, meme resultat. Aucune logique dupliquee : on deballe juste
+  // avant de continuer exactement comme avant.
+  if(data && data.source === 'protime_pointages' && data.data) data = data.data;
+
   if(!data || (!data.retards && !data.pointages && !data.anomaliesPointage && !data.absences)){
     err.textContent = 'Format non reconnu. Utilise exportEnrichiJSON() dans la console Protime.'; return;
   }
