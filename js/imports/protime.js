@@ -330,6 +330,11 @@ function classifierTypeAbsence(titre, detail, groupe){
   if(/ziek|maladie|sick/.test(texte)) return 'ziek';
   if(/recup|compensation/.test(texte)) return 'recup';
   if(/verlof|cong|vacation|vakantie/.test(texte)) return 'verlof';
+  // "Absent" (libelle Protime generique, sans plus de detail) : confirme avec
+  // l'utilisateur le 20/09/2026 -- compte comme conge (verlof), plutot que
+  // d'ignorer ces jours comme avant. Cas reel : Mohamed Lalaoui, plusieurs
+  // jours futurs d'octobre 2026 etiquetes juste "Absent" cote Protime.
+  if(/\babsent\b/.test(texte)) return 'verlof';
   return null; // type inconnu : on ignore plutot que de deviner
 }
 
