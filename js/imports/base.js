@@ -9,18 +9,21 @@ function ptKey(nom, date, type, heure){
 
 /* ---- Import global (Admin) --------------------------------------------
    Point d'entree unique pour coller le JSON produit par n'importe lequel
-   des scripts d'extraction externes (aujourd'hui : Grafana Arrets Inpak
-   et Grafana Bulk & Bijlijn, format standardise en enveloppes
-   {source, extraitLe, data}). Ne reimplemente AUCUNE logique d'import :
+   des scripts d'extraction externes (Grafana Arrets Inpak, Grafana Bulk &
+   Bijlijn, Protime/Pointages, NCP), format standardise en enveloppes
+   {source, extraitLe, data}. Ne reimplemente AUCUNE logique d'import :
    se contente de reconnaitre la source de chaque enveloppe et d'appeler
    la fonction d'import existante correspondante (importerArretsInpak(),
-   importerBulk()), exactement comme si le JSON avait ete colle a la main
-   dans son propre onglet. D'autres sources (NCP/Mendix, Protime) pourront
-   etre ajoutees ici plus tard, une fois leur format d'enveloppe confirme --
-   volontairement pas fait maintenant pour ne pas inventer un mapping non
-   verifie. */
+   importerBulk(), importerPointages(), importerNCP()), exactement comme
+   si le JSON avait ete colle a la main dans son propre onglet -- les
+   boutons "Importer" de chaque onglet restent d'ailleurs en place et
+   fonctionnent exactement comme avant, Import global est juste un point
+   d'entree supplementaire qui les appelle a distance.
+   Le tableau peut contenir plusieurs enveloppes de sources differentes
+   (une par script lance) : colle-les toutes en une seule fois dans un
+   tableau JSON, ou une par une, chaque "Importer tout" les traite. */
 
-var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk'];
+var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk', 'protime_pointages', 'ncp'];
 
 function importerGlobal(){
   var txt = document.getElementById('global-import-txt');
@@ -56,6 +59,17 @@ function importerGlobal(){
       document.getElementById('bulk-import-txt').value = JSON.stringify(env.data || {});
       importerBulk();
       traites.push('Bulk & Bijlijn');
+    } else if(env.source === 'protime_pointages'){
+      if(typeof importerPointages !== 'function'){ ignores.push('protime_pointages (module Pointages non charge)'); return; }
+      document.getElementById('pt-import-txt').value = JSON.stringify(env.data || {});
+      importerPointages();
+      traites.push('Pointages (Protime)');
+    } else if(env.source === 'ncp'){
+      if(typeof importerNCP !== 'function'){ ignores.push('ncp (module NCP non charge)'); return; }
+      // importerNCP() attend directement un tableau JSON (pas un objet {data:...})
+      document.getElementById('ncp-import-txt').value = JSON.stringify(env.data || []);
+      importerNCP();
+      traites.push('NCP Qualite');
     }
   });
 

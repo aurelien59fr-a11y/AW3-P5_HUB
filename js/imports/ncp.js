@@ -15,6 +15,11 @@ function openImportNCPModal(){
   var arr;
   try {
     arr = JSON.parse(txt);
+    // Tolere aussi l'enveloppe {source:'ncp', data:[...]} generee par le
+    // script d'extraction pour Admin -> "Import global" -- meme JSON, colle
+    // ici ou la-bas, meme resultat. On deballe juste avant de continuer,
+    // aucune logique d'import dupliquee ou changee.
+    if(arr && !Array.isArray(arr) && arr.source === 'ncp' && Array.isArray(arr.data)) arr = arr.data;
     if(!Array.isArray(arr)) throw new Error('Le JSON doit etre un tableau (liste de NCP).');
   } catch(e){
     errEl.textContent = 'JSON invalide : ' + e.message;
