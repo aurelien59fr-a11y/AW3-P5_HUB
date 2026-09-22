@@ -22,8 +22,8 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=2">
   <style>
     /* CSS critique du splash, en ligne pour eviter tout flash non-style
-       avant que js/app.js (charge en fin de page) n'injecte le reste. */
-    #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
+       avant que css/styles.css (charge en <head>) ne soit applique. */   
+        #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
     @media (max-width:768px){ #splash-screen{background-image:url('icons/splash-mobile.jpg?v=1')} }
     #splash-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,12,.15) 0%,rgba(5,7,12,.35) 55%,rgba(5,7,12,.82) 100%)}
     #splash-screen.splash-hide{opacity:0;pointer-events:none}
@@ -35,6 +35,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
+  <link rel="stylesheet" href="css/styles.css?v=83">
 </head>
 <body>
 <div id="splash-screen">
