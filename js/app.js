@@ -5,6 +5,7 @@
 
 // CSS deplace vers css/styles.css le 22/09/2026 (etape 1 de la refonte UI/UX).
 // Charge via <link rel="stylesheet" href="css/styles.css"> dans index.html.
+
 // ============================================================
 // CODE APPLICATIF
 // ============================================================
@@ -1248,7 +1249,7 @@ if(b.dataset.tab === 'espace' && typeof buildMonEspace === 'function') buildMonE
   // Fleches gauche / droite au clavier
   nav.addEventListener('keydown', function(e){
     if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    var visibles = [].slice.call(nav.querySelectorAll('.tab')).filter(function(t){ return t.offsetParent !== null; });
+    var visibles = [].slice.call(nav.querySelectorAll('.tab')).filter(function(t){ return t.style.display !== 'none'; });
     var idx = visibles.indexOf(document.activeElement);
     if(idx === -1) return;
     var suiv = visibles[idx + (e.key === 'ArrowRight' ? 1 : -1)];
@@ -2113,8 +2114,13 @@ var MNAV_ICONS = {
 var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','formations','pt','recrutement','admin'];
 
 function mnavVisibleTabs(){
+  // On lit directement style.display (ecrit par applyRole()/l'acces personnalise
+  // par onglet) plutot que offsetParent : offsetParent exige un layout deja
+  // calcule et renvoie null si un ancetre est temporairement masque (ex: pendant
+  // l'enchainement auth -> applyRole au chargement), ce qui pouvait faire
+  // disparaitre des onglets de la barre mobile de facon aleatoire au demarrage.
   return [].slice.call(document.querySelectorAll('.tab[data-tab]')).filter(function(b){
-    return b.offsetParent !== null;
+    return b.style.display !== 'none';
   });
 }
 
