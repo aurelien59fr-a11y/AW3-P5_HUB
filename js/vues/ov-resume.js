@@ -1,21 +1,26 @@
 /* ====================================================================
  * vues/ov-resume.js -- Cockpit "Vue d'ensemble" (refonte "briefing rapide"
- * du 09/09/2026, sur demande utilisateur).
+ * du 09/09/2026, restructuree le 22/09/2026 -- etape 2 de la refonte
+ * UI/UX validee avec Aurelien : voir Obsidian "Refonte UI-UX.md").
  * Agregateur visuel uniquement : ne recalcule et n'invente AUCUNE regle
  * metier, ne relit que des globales et fonctions deja calculees ailleurs :
  *  - EMP/ABS/SHIFTS25-27/WEEKS25-27 (deja charges par app.js)
  *  - BD + scSt()/scColor() (metier/bradford.js -- score et seuils Bradford
  *    inchanges, meme fonction que l'onglet Bradford)
- *  - NCP_DATA + ncpEquipesMulti()/ncpGetEquipe() (metier/ncp.js -- meme
- *    deduction unite/equipe que l'onglet NCP Qualite)
- *  - ARRETS_DATA + equipeReelle() (metier/arrets.js + core/format.js --
- *    meme filtre equipe que l'onglet Arrets Inpak)
- *  - BULK_DATA + bulkCalc()/bulkBornesDonnees() (metier/bulk.js -- meme
- *    regle de journee de production 05h->05h, meme filtre equipe)
+ *  - NCP_DATA + ncpEquipesMulti() (metier/ncp.js -- meme deduction
+ *    unite/equipe que l'onglet NCP Qualite, uniquement pour l'item "NCP
+ *    recent" de la liste A traiter)
+ *  - ARRETS_DATA + equipeReelle()/arretCat()/arretRaisonTexte() (metier/
+ *    arrets.js -- meme filtre equipe et memes categories que l'onglet
+ *    Arrets Inpak)
  *  - FORMATIONS + getBirthdays() (deja charges/exposes ailleurs)
- * Six sections fixes, demandees explicitement : A surveiller, Derniers NCP
- * AW3 P5, Bradford a surveiller, Absences week-end a venir, Derniere
- * activite Production P5, A venir. Aucune section/KPI supplementaire.
+ * Quatre sections fixes : (1) A traiter -- liste unique triee par gravite,
+ * (2) Absences week-end a venir -- repliable, (3) Production -- anomalie
+ * du jour uniquement si un seuil est depasse (voir OV_SEUIL_ANOMALIE_MIN
+ * plus bas, tranche le 22/09/2026), (4) Rappels discrets (formation +
+ * anniversaire, une ligne). Les details Bradford/NCP/Bulk & Bijlijn
+ * retires de l'accueil restent consultables dans leurs onglets respectifs
+ * (rien n'est supprime, seulement retire de cette page).
  * Toutes les lectures DOM sont protegees (aucune erreur si un element
  * n'existe pas encore ou si une donnee source n'est pas encore chargee).
  * ==================================================================== */
@@ -87,7 +92,8 @@ function ovVideMsg(txt){
 }
 
 // ----------------------------------------------------------------------
-// Section 1 -- A surveiller (max 5, agregation des sections 2/3/4/6)
+// Section 1 -- A traiter (max 5, agrege Bradford critique/preoccupant,
+// NCP AW3 P5 recent, absences week-end importantes, formation proche)
 // ----------------------------------------------------------------------
 
 function ovGoToNCP(notif){
@@ -160,64 +166,7 @@ function ovBuildWatchlist(){
 }
 
 // ----------------------------------------------------------------------
-// Section 2 -- Derniers NCP AW3 P5 (3 max)
-// ----------------------------------------------------------------------
-
-function ovBuildNCP(){
-  var el=document.getElementById('ov-ncp');
-  if(!el) return;
-  if(typeof NCP_DATA==='undefined' || typeof ncpEquipesMulti!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es NCP indisponibles'); return; }
-  var esc=(typeof ncpEsc==='function')?ncpEsc:function(s){return String(s==null?'':s);};
-  var list = NCP_DATA.filter(function(r){
-    if(r.unite!=='AW3') return false;
-    return ncpEquipesMulti(r).equipes.some(function(x){return x.equipe==='P5';});
-  }).sort(function(a,b){
-    var da=a.created_date_iso||'', db=b.created_date_iso||'';
-    return da<db?1:(da>db?-1:0);
-  }).slice(0,3);
-  if(!list.length){ el.innerHTML=ovVideMsg('Aucun NCP AW3 P5 identifi\u00e9'); return; }
-  el.innerHTML = list.map(function(r){
-    var defaut = String(r.problems||'').split('|')[0].trim() || (r.description? String(r.description).slice(0,70):'-');
-    var tonnage = (Number(r.total_tonnes)||0).toFixed(2)+' t';
-    var typeLbl = r.type_ncp || '-';
-    var tc = r.type_ncp==='Inpak' ? '#3b82f6' : '#f97316';
-    return '<div onclick="ovGoToNCP(\''+String(r.notification).replace(/'/g,"\\'")+'\')" style="cursor:pointer;padding:10px 0;border-bottom:1px solid var(--bd2)">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-      +'<span style="font-size:12px;color:var(--tx3);font-family:var(--mo)">'+esc(r.created_on||'-')+' \u00b7 '+esc(r.ligne||'-')+'</span>'
-      +'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+esc(typeLbl)+'</span>'
-      +'</div>'
-      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+esc(r.code_produit||'-')+'</div>'
-      +'<div style="font-size:12px;color:var(--tx2);margin-top:2px">'+esc(defaut)+'</div>'
-      +'<div style="font-size:11px;color:var(--tx3);margin-top:2px">'+tonnage+'</div>'
-      +'</div>';
-  }).join('');
-}
-
-// ----------------------------------------------------------------------
-// Section 3 -- Bradford a surveiller (critique/preoccupant/a surveiller,
-// jamais OK -- meme fonction scSt()/scColor() que l'onglet Bradford).
-// ----------------------------------------------------------------------
-
-function ovBuildBradfordWatch(){
-  var el=document.getElementById('ov-bradford-watch');
-  if(!el) return;
-  if(typeof BD==='undefined' || typeof scSt!=='function' || typeof scColor!=='function'){ return; }
-  var watch = BD.filter(function(e){ return e.sc>50; })
-    .map(function(e){ return {e:e, st:scSt(e.sc)}; })
-    .sort(function(a,b){ return b.e.sc-a.e.sc; });
-  if(!watch.length){ el.innerHTML=ovVideMsg('\u2713 Aucun Bradford \u00e0 surveiller'); return; }
-  var icon = {cr:'\uD83D\uDD34', al:'\uD83D\uDFE0', wn:'\uD83D\uDFE1'};
-  el.innerHTML = watch.map(function(x){
-    var col = scColor(x.e.sc);
-    return '<div onclick="goToBradford(\''+x.e.n.replace(/'/g,"\\'")+'\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:'+col+'12;border:1px solid '+col+'33">'
-      +'<span style="font-size:13px;font-weight:600;color:var(--tx1)">'+(icon[x.st.c]||'')+' '+x.e.n+'</span>'
-      +'<span style="font-size:12px;font-weight:600;color:'+col+'">'+x.st.l+' \u00b7 '+x.e.sc+'</span>'
-      +'</div>';
-  }).join('');
-}
-
-// ----------------------------------------------------------------------
-// Section 4 -- Absences week-end a venir (liste complete, sans limite)
+// Section 2 -- Absences week-end a venir (liste complete, sans limite)
 // ----------------------------------------------------------------------
 
 function ovBuildWeekendAbs(){
@@ -250,107 +199,91 @@ function ovBuildWeekendAbs(){
 }
 
 // ----------------------------------------------------------------------
-// Section 5 -- Derniere activite Production P5 (Arrets Inpak + Bulk & Bijlijn)
+// Section 3 -- Production : anomalie du jour uniquement (P5, Arrets Inpak).
+// Seuil TRANCHE le 22/09/2026 avec Aurelien : 120 min cumulees pour la
+// MEME cause, sur une seule journee de production (le champ a.date des
+// arrets Inpak represente deja la journee de production telle qu'exportee
+// depuis Grafana -- aucune conversion supplementaire), categories "00"
+// (Reinigen/Nettoyage) et "01" (Wissel/Changement = Ombouw) exclues du
+// calcul (voir ARRETS_REF_CAT dans metier/arrets.js). Section masquee tant
+// qu'aucune cause ne depasse ce seuil sur la derniere journee disponible --
+// pas de "rien a signaler" ici, juste rien affiche (cf. proposition du
+// 22/09/2026 : "retirer ces blocs de l'accueil plutot que de les afficher
+// sans regle claire" -- desormais la regle existe, donc affichage
+// uniquement quand elle se declenche).
 // ----------------------------------------------------------------------
 
-function ovBuildArretsP5(){
-  var el=document.getElementById('ov-arrets-p5');
-  if(!el) return;
-  if(typeof ARRETS_DATA==='undefined' || typeof equipeReelle!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es indisponibles'); return; }
+var OV_SEUIL_ANOMALIE_MIN = 120;
+var OV_CAT_EXCLUES = ['00','01'];
+
+function ovBuildProdAnomaly(){
+  var wrap=document.getElementById('ov-prod-wrap');
+  var el=document.getElementById('ov-prod-anomaly');
+  if(!wrap||!el) return;
+  if(typeof ARRETS_DATA==='undefined' || typeof equipeReelle!=='function' || typeof arretCat!=='function'){ wrap.style.display='none'; return; }
   var all = Object.keys(ARRETS_DATA).map(function(k){return ARRETS_DATA[k];}).filter(function(a){
     return a && a.type==='avec_raison' && a.raison && equipeReelle(a.date,a.heure)==='P5';
   });
-  if(!all.length){ el.innerHTML=ovVideMsg('Aucune donn\u00e9e P5 disponible'); return; }
+  if(!all.length){ wrap.style.display='none'; return; }
   var lastDate=null;
   all.forEach(function(a){ if(!lastDate||a.date>lastDate) lastDate=a.date; });
-  var jour = all.filter(function(a){ return a.date===lastDate; });
-  var totalMin = jour.reduce(function(s,a){ return s+(a.duree||0); },0);
-  var parLigne={}; jour.forEach(function(a){ parLigne[a.ligne]=(parLigne[a.ligne]||0)+(a.duree||0); });
-  var pireLigne=null; Object.keys(parLigne).forEach(function(l){ if(!pireLigne||parLigne[l]>parLigne[pireLigne]) pireLigne=l; });
-  var parRaison={}; jour.forEach(function(a){ parRaison[a.raison]=(parRaison[a.raison]||0)+(a.duree||0); });
-  var pireRaison=null; Object.keys(parRaison).forEach(function(r){ if(!pireRaison||parRaison[r]>parRaison[pireRaison]) pireRaison=r; });
-  var raisonLbl = pireRaison ? (typeof arretRaisonTexte==='function' ? arretRaisonTexte(pireRaison) : pireRaison) : '-';
-  var h=Math.floor(totalMin/60), m=totalMin%60;
+  var jour = all.filter(function(a){
+    if(a.date!==lastDate) return false;
+    var cat = arretCat(a.raison);
+    return OV_CAT_EXCLUES.indexOf(cat)===-1;
+  });
+  var parRaison={};
+  jour.forEach(function(a){ parRaison[a.raison]=(parRaison[a.raison]||0)+(a.duree||0); });
+  var causes = Object.keys(parRaison).map(function(r){ return {raison:r, min:parRaison[r]}; })
+    .filter(function(x){ return x.min>=OV_SEUIL_ANOMALIE_MIN; })
+    .sort(function(a,b){ return b.min-a.min; });
+  if(!causes.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
   el.innerHTML = '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">'+(typeof dFR==='function'?dFR(lastDate):lastDate)+'</div>'
-    +'<div class="klbl">Total</div><div class="kval" style="font-size:20px">'+h+'h'+String(m).padStart(2,'0')+'</div>'
-    +'<div class="klbl" style="margin-top:10px">Ligne la plus impact\u00e9e</div><div style="font-size:14px;font-weight:600">'+(pireLigne||'-')+(pireLigne?(' \u2014 '+parLigne[pireLigne]+' min'):'')+'</div>'
-    +'<div class="klbl" style="margin-top:10px">Principale cause</div><div style="font-size:14px;font-weight:600">'+raisonLbl+(pireRaison?(' \u2014 '+parRaison[pireRaison]+' min'):'')+'</div>';
+    + causes.map(function(c){
+        var lbl = typeof arretRaisonTexte==='function' ? arretRaisonTexte(c.raison) : c.raison;
+        var h=Math.floor(c.min/60), m=c.min%60;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd2)">'
+          +'<span style="font-size:13px;font-weight:600;color:var(--tx1)">'+lbl+'</span>'
+          +'<span style="font-size:12px;font-weight:600;color:var(--amber);font-family:var(--mo)">'+h+'h'+String(m).padStart(2,'0')+'</span>'
+          +'</div>';
+      }).join('');
   el.onclick=function(){ var tab=document.querySelector('.tab[data-tab="arrets"]'); if(tab) tab.click(); };
   el.style.cursor='pointer';
 }
 
-function ovBuildBulkP5(){
-  var el=document.getElementById('ov-bulk-p5');
+// ----------------------------------------------------------------------
+// Section 4 -- Rappels discrets (formation la plus proche + prochain
+// anniversaire, une seule ligne, plus de bandeaux/cartes permanents).
+// ----------------------------------------------------------------------
+
+function ovBuildRappels(){
+  var el=document.getElementById('ov-rappels');
   if(!el) return;
-  if(typeof bulkBornesDonnees!=='function' || typeof bulkCalc!=='function' || typeof bulkTon!=='function' || typeof bulkFmt!=='function' || typeof bulkDateISO!=='function'){ el.innerHTML=ovVideMsg('Donn\u00e9es indisponibles'); return; }
-  var bornes = bulkBornesDonnees();
-  if(!bornes || !bornes.max){ el.innerHTML=ovVideMsg('Aucune donn\u00e9e P5 disponible'); return; }
-  // Le tout dernier jour present dans BULK_DATA (bornes.max) peut n'avoir que des
-  // releves a 0 (ex. jour tout juste commence, avant les premieres mesures reelles) --
-  // on cherche donc, en remontant depuis ce jour, le dernier jour ou l'equipe P5 a
-  // une activite reellement mesuree (bulkCalc/bulkJourProd reutilises tels quels,
-  // seul le choix du jour affiche est adapte pour ne pas montrer un jour vide).
-  var res=null, jourRetenu=null;
-  var d = new Date(bornes.max+'T12:00:00');
-  for(var i=0;i<30;i++){
-    var iso = bulkDateISO(d);
-    if(iso < bornes.min) break;
-    var r = bulkCalc(iso, iso, ['P5']);
-    if((r.totaux.standaard+r.totaux.noodafvoer+r.totaux.bijlijn1)>0){ res=r; jourRetenu=iso; break; }
-    d.setDate(d.getDate()-1);
+  var parts=[];
+  if(typeof FORMATIONS!=='undefined'){
+    var now=new Date(); var today0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    var soon = FORMATIONS.filter(function(f){ return new Date(f.date+'T00:00:00')>=today0; })
+      .sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(b.date+(b.heureDebut||'')); })[0];
+    if(soon) parts.push({txt:'\uD83C\uDF93 '+(soon.titre||'Formation')+' \u2014 '+(typeof fmtDateFormation==='function'?fmtDateFormation(soon.date):soon.date), tab:'formations'});
   }
-  if(!res){ el.innerHTML=ovVideMsg('Aucune activit\u00e9 P5 mesur\u00e9e sur les 30 derniers jours'); return; }
-  var totalT = bulkTon(res.totaux.standaard)+bulkTon(res.totaux.noodafvoer)+bulkTon(res.totaux.bijlijn1);
-  var kgh = (typeof bulkKgH==='function' && res.heuresPoste>0) ? bulkKgH(totalT, res.heuresPoste) : null;
-  el.innerHTML = '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">'+(typeof dFR==='function'?dFR(jourRetenu):jourRetenu)+'</div>'
-    +'<div class="klbl">Surproduction</div><div class="kval" style="font-size:20px">'+bulkFmt(bulkTon(res.totaux.standaard),1)+' t</div>'
-    +'<div class="klbl" style="margin-top:10px">Noodafvoer</div><div style="font-size:14px;font-weight:600">'+bulkFmt(bulkTon(res.totaux.noodafvoer),1)+' t</div>'
-    +'<div class="klbl" style="margin-top:10px">Bijlijn</div><div style="font-size:14px;font-weight:600">'+bulkFmt(bulkTon(res.totaux.bijlijn1),1)+' t</div>'
-    +'<div class="klbl" style="margin-top:10px">kg/h</div><div style="font-size:14px;font-weight:600">'+(kgh!=null?bulkFmt(kgh,0):'-')+'</div>';
-  el.onclick=function(){ var tab=document.querySelector('.tab[data-tab="bulk"]'); if(tab) tab.click(); };
-  el.style.cursor='pointer';
-}
-
-// ----------------------------------------------------------------------
-// Section 6 -- A venir (formations + prochain anniversaire uniquement,
-// pas de 2e liste d'absences -- deja couvertes en section 4).
-// ----------------------------------------------------------------------
-
-function ovBuildAVenir(){
-  var elF=document.getElementById('ov-formations-next');
-  var elB=document.getElementById('ov-next-birthday');
-  if(elF){
-    if(typeof FORMATIONS==='undefined'){ elF.innerHTML=''; }
-    else {
-      var now=new Date(); var today0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-      var avenir = FORMATIONS.filter(function(f){ return new Date(f.date+'T00:00:00')>=today0; })
-        .sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(b.date+(b.heureDebut||'')); })
-        .slice(0,3);
-      elF.innerHTML = '<div class="klbl" style="margin-bottom:8px">\uD83C\uDF93 Formations \u00e0 venir</div>'
-        + (avenir.length ? avenir.map(function(f){
-            return '<div style="padding:6px 0;border-bottom:1px solid var(--bd2)"><div style="font-size:13px;font-weight:600">'+(f.titre||'Formation')+'</div><div style="font-size:11px;color:var(--tx3)">'+(typeof formationEmployesLabel==='function'?formationEmployesLabel(f):'')+' \u00b7 '+(typeof fmtDateFormation==='function'?fmtDateFormation(f.date):f.date)+'</div></div>';
-          }).join('') : ovVideMsg('Aucune formation \u00e0 venir'));
-      elF.onclick=function(){ var tab=document.querySelector('.tab[data-tab="formations"]'); if(tab) tab.click(); };
-      elF.style.cursor='pointer';
-    }
+  if(typeof getBirthdays==='function'){
+    var now2=new Date(); var today02=new Date(now2.getFullYear(),now2.getMonth(),now2.getDate());
+    var upcoming = getBirthdays().map(function(b){
+      var thisYear=new Date(now2.getFullYear(),b.month-1,b.day);
+      var nextYear=new Date(now2.getFullYear()+1,b.month-1,b.day);
+      var next = thisYear>=today02 ? thisYear : nextYear;
+      return {n:b.n, daysUntil:Math.floor((next-today02)/86400000)};
+    }).sort(function(a,b){return a.daysUntil-b.daysUntil;})[0];
+    if(upcoming) parts.push({txt:'\uD83C\uDF82 '+upcoming.n.split(' ')[0]+' \u2014 '+(upcoming.daysUntil===0?'aujourd\u2019hui':('dans '+upcoming.daysUntil+' j')), tab:null});
   }
-  if(elB){
-    if(typeof getBirthdays!=='function'){ elB.innerHTML=''; }
-    else {
-      var now2=new Date(); var today02=new Date(now2.getFullYear(),now2.getMonth(),now2.getDate());
-      var bdAll=getBirthdays();
-      var upcoming = bdAll.map(function(b){
-        var thisYear=new Date(now2.getFullYear(),b.month-1,b.day);
-        var nextYear=new Date(now2.getFullYear()+1,b.month-1,b.day);
-        var next = thisYear>=today02 ? thisYear : nextYear;
-        var daysUntil=Math.floor((next-today02)/86400000);
-        return {n:b.n, daysUntil:daysUntil};
-      }).sort(function(a,b){return a.daysUntil-b.daysUntil;});
-      var next=upcoming[0];
-      elB.innerHTML = '<div class="klbl" style="margin-bottom:8px">Prochain anniversaire</div>'
-        + (next ? ('<div style="font-size:13px">\uD83C\uDF82 <b>'+next.n.split(' ')[0]+'</b> \u2014 '+(next.daysUntil===0?'aujourd\u2019hui !':('dans '+next.daysUntil+' jours'))+'</div>') : ovVideMsg('Aucune date enregistr\u00e9e'));
-    }
-  }
+  if(!parts.length){ el.innerHTML=''; return; }
+  window._ovRappelsActions = parts.map(function(p){
+    return function(){ if(p.tab){ var t=document.querySelector('.tab[data-tab="'+p.tab+'"]'); if(t) t.click(); } };
+  });
+  el.innerHTML = parts.map(function(p,i){
+    return '<span'+(p.tab?' onclick="window._ovRappelsActions['+i+']()" style="cursor:pointer"':'')+'>'+p.txt+'</span>';
+  }).join('');
 }
 
 // ----------------------------------------------------------------------
@@ -368,10 +301,7 @@ function buildOvResume(){
     greetEl.textContent = prenom ? ('Bonjour ' + prenom + ' \u2014 briefing rapide AW3 P5') : 'Briefing rapide AW3 P5';
   }
   ovBuildWatchlist();
-  ovBuildNCP();
-  ovBuildBradfordWatch();
   ovBuildWeekendAbs();
-  ovBuildArretsP5();
-  ovBuildBulkP5();
-  ovBuildAVenir();
+  ovBuildProdAnomaly();
+  ovBuildRappels();
 }
