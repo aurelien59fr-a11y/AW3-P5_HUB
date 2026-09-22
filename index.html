@@ -127,10 +127,8 @@
   </nav>
   </div>
   <main class="content">
-    <div class="pane on" id="pane-ov">
-      <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" id="ov-greet">365 derniers jours &bull; Week-ends + f&eacute;ri&eacute;s + ponts</div></div>
-      <div id="birthday-notif" style="display:none;align-items:center;gap:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
-<div id="formation-notif" style="display:none;align-items:center;gap:14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
+            <div class="pane on" id="pane-ov">
+      <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" id="ov-greet">Briefing rapide AW3 P5</div></div>
       <!-- Anciens elements KPI/graphiques conserves en DOM (masques) uniquement parce que
            updKPI() (vues/bradford.js) y ecrit sans garde null -- les retirer casserait
            applyOverviewAccess() en fin de fonction. Aucune donnee affichee ici. -->
@@ -139,30 +137,29 @@
         <div id="k-wn-names"></div><div id="k-cr-names"></div><div id="k-alerts"></div><div id="k-cr-detail"></div><div id="k-wn-detail"></div>
       </div>
 
-      <div class="cc"><div class="cch"><div class="cct">&#9888; A surveiller</div></div><div id="ov-watch"></div></div>
+      <div class="cc"><div class="cch"><div class="cct">&#9888; A traiter</div></div><div id="ov-watch"></div></div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
-        <div class="cc"><div class="cch"><div class="cct">Derniers NCP &mdash; AW3 P5</div></div><div id="ov-ncp"></div></div>
-        <div class="cc"><div class="cch"><div class="cct">Bradford &agrave; surveiller</div></div><div id="ov-bradford-watch"></div></div>
+      <div class="cc" id="ov-prod-wrap" style="display:none;margin-top:16px"><div class="cch"><div class="cct">&#9201; Production &mdash; anomalie du jour (P5, &ge; 120 min cumul&eacute;es, hors ombouw/nettoyage)</div></div><div id="ov-prod-anomaly"></div></div>
+
+      <details class="cc" style="margin-top:16px" open>
+        <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between"><div class="cct" id="ov-weekend-title">Absences &mdash; week-end &agrave; venir</div><span style="font-size:11px;color:var(--tx3)">&#9660;</span></summary>
+        <div id="ov-weekend-abs" style="margin-top:10px"></div>
+      </details>
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="pbtn" onclick="goToday();var t=document.querySelector('.tab[data-tab=&quot;pl&quot;]');if(t)t.click();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Planning du jour
+        </button>
+        <button class="pbtn" onclick="var t=document.querySelector('.tab[data-tab=&quot;espace&quot;]');if(t)t.click();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+          Mon espace
+        </button>
       </div>
 
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct" id="ov-weekend-title">Absences &mdash; week-end &agrave; venir</div></div><div id="ov-weekend-abs"></div></div>
-
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">Derni&egrave;re activit&eacute; Production &mdash; P5</div></div>
-        <div class="two">
-          <div><div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px">Arr&ecirc;ts Inpak &mdash; P5</div><div id="ov-arrets-p5"></div></div>
-          <div><div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px">Bulk &amp; Bijlijn &mdash; P5</div><div id="ov-bulk-p5"></div></div>
-        </div>
-      </div>
-
-      <div class="cc" style="margin-top:16px"><div class="cch"><div class="cct">A venir</div></div>
-        <div class="two">
-          <div id="ov-formations-next"></div>
-          <div id="ov-next-birthday"></div>
-        </div>
-      </div>
+      <div id="ov-rappels" style="margin-top:16px;font-size:12px;color:var(--tx3);display:flex;gap:18px;flex-wrap:wrap"></div>
     </div>
-    <div class="pane" id="pane-br">
+ class="pane" id="pane-br">
       <div class="sh"><div class="st" data-i18n="br_title">Score Bradford</div><div class="ss" data-i18n="br_subtitle">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all" data-i18n="plan_all">Tous</option><option value="ok" data-i18n="status_ok">OK</option><option value="wn" data-i18n="status_wn">A surveiller</option><option value="al" data-i18n="status_al">Preoccupant</option><option value="cr" data-i18n="status_cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
       <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd);font-size:12px;color:var(--tx2);display:flex;gap:24px;flex-wrap:wrap">
         <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px"></span>0-50 <span data-i18n="status_ok">OK</span></span>
@@ -1066,7 +1063,7 @@
   <script src="js/vues/recrutement.js?v=1"></script>
   <script src="js/vues/espace.js?v=1"></script>
   <script src="js/vues/absences.js?v=3"></script>
-  <script src="js/vues/ov-resume.js?v=5"></script>
+  <script src="js/vues/ov-resume.js?v=6"></script>
   <script src="js/app.js?v=83"></script>
   <script>
     if('serviceWorker' in navigator){
