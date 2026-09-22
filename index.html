@@ -22,8 +22,8 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=2">
   <style>
     /* CSS critique du splash, en ligne pour eviter tout flash non-style
-       avant que css/styles.css (charge en <head>) ne soit applique. */   
-        #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
+       avant que css/styles.css (charge en <head>) ne soit applique. */
+    #splash-screen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 48px;background:#05070c url('icons/splash-pc.jpg?v=1') no-repeat center/cover;transition:opacity .5s ease;opacity:1}
     @media (max-width:768px){ #splash-screen{background-image:url('icons/splash-mobile.jpg?v=1')} }
     #splash-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,12,.15) 0%,rgba(5,7,12,.35) 55%,rgba(5,7,12,.82) 100%)}
     #splash-screen.splash-hide{opacity:0;pointer-events:none}
@@ -35,7 +35,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-  <link rel="stylesheet" href="css/styles.css?v=83">
+<link rel="stylesheet" href="css/styles.css?v=84">
 </head>
 <body>
 <div id="splash-screen">
@@ -110,6 +110,9 @@
       <span class="chip" id="dchip"></span>
     </div>
   </header>
+  <div class="app-body">
+  <aside class="rail" id="desktop-rail"></aside>
+  <div class="app-main-col">
   <div class="tabs-wrap">
   <nav class="tabs">
     <button class="tab on" data-tab="ov">&#9672; <span data-i18n="tab_ov">Vue d&rsquo;ensemble</span></button>
@@ -127,7 +130,7 @@
   </nav>
   </div>
   <main class="content">
-            <div class="pane on" id="pane-ov">
+    <div class="pane on" id="pane-ov">
       <div class="sh"><div class="st" data-i18n="ov_title">Tableau de bord</div><div class="ss" id="ov-greet">Briefing rapide AW3 P5</div></div>
       <!-- Anciens elements KPI/graphiques conserves en DOM (masques) uniquement parce que
            updKPI() (vues/bradford.js) y ecrit sans garde null -- les retirer casserait
@@ -159,7 +162,7 @@
 
       <div id="ov-rappels" style="margin-top:16px;font-size:12px;color:var(--tx3);display:flex;gap:18px;flex-wrap:wrap"></div>
     </div>
-     <div class="pane" id="pane-br">
+    <div class="pane" id="pane-br">
       <div class="sh"><div class="st" data-i18n="br_title">Score Bradford</div><div class="ss" data-i18n="br_subtitle">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all" data-i18n="plan_all">Tous</option><option value="ok" data-i18n="status_ok">OK</option><option value="wn" data-i18n="status_wn">A surveiller</option><option value="al" data-i18n="status_al">Preoccupant</option><option value="cr" data-i18n="status_cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
       <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd);font-size:12px;color:var(--tx2);display:flex;gap:24px;flex-wrap:wrap">
         <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px"></span>0-50 <span data-i18n="status_ok">OK</span></span>
@@ -1026,12 +1029,14 @@
     </div>
 
   </main>
+  </div>
+  </div>
   <nav class="mobile-nav" id="mobile-nav"></nav>
   <div class="mobile-menu-sheet" id="mobile-menu-sheet">
     <div class="mms-backdrop" onclick="closeMobileMenu()"></div>
     <div class="mms-panel">
       <div class="mms-handle"></div>
-      <div class="mms-title" data-i18n="nav_menu">Menu</div>
+      <div class="mms-title" id="mobile-menu-title">Menu</div>
       <div id="mobile-menu-list"></div>
     </div>
   </div>
@@ -1056,7 +1061,7 @@
   <script src="js/vues/ncp.js?v=1"></script>
   <script src="js/metier/bulk.js?v=1"></script>
   <script src="js/vues/bulk.js?v=2"></script>
-  <script src="js/vues/planning.js?v=5"></script>
+  <script src="js/vues/planning.js?v=6"></script>
   <script src="js/vues/formations.js?v=1"></script>
   <script src="js/vues/pointages.js?v=2"></script>
   <script src="js/vues/admin.js?v=1"></script>
@@ -1064,7 +1069,7 @@
   <script src="js/vues/espace.js?v=1"></script>
   <script src="js/vues/absences.js?v=3"></script>
   <script src="js/vues/ov-resume.js?v=6"></script>
-  <script src="js/app.js?v=84"></script>
+  <script src="js/app.js?v=85"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
