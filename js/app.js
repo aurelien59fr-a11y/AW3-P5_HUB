@@ -179,6 +179,7 @@ var I18N={
     tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin',
     nav_ov:'Accueil', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Espace', nav_ab:'Absences',
     nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu',
+    nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
     plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
@@ -440,6 +441,7 @@ var I18N={
     tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin',
     nav_ov:'Start', nav_br:'Prest.', nav_pl:'Planning', nav_espace:'Ruimte', nav_ab:'Afwez.',
     nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu',
+    nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
     plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -701,6 +703,7 @@ var I18N={
     tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin',
     nav_ov:'Home', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Space', nav_ab:'Absences',
     nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu',
+    nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
     plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
     legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -2107,11 +2110,23 @@ var MNAV_ICONS = {
   pt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6.5V12l4 2.2"/></svg>',
   arrets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>',
   ncp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  bulk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>',
   recrutement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   admin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>',
-  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>'
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>',
+  group_equipe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  group_prod: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  group_plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>'
 };
 var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','formations','pt','recrutement','admin'];
+// Groupes de la nav (rail desktop + feuilles mobiles) -- etape 3 refonte UI/UX.
+// 'ab' (Absences) volontairement absent : masque pour tous les roles (deja le cas
+// avant la refonte, decision actee dans applyRole()). Logboek volontairement
+// absent : module pas encore construit (point ouvert #3 du dossier refonte).
+var NAV_DIRECT = ['ov','pl','espace'];
+var NAV_GROUP_EQUIPE = ['br','formations','pt'];
+var NAV_GROUP_PROD = ['arrets','bulk','ncp'];
+var NAV_GROUP_PLUS = ['recrutement','admin'];
 
 function mnavVisibleTabs(){
   // On lit directement style.display (ecrit par applyRole()/l'acces personnalise
@@ -2124,53 +2139,108 @@ function mnavVisibleTabs(){
   });
 }
 
+// Retrouve les vrais boutons .tab[data-tab] (source de verite pour la visibilite
+// par role) correspondant a une liste d'ids de groupe, dans l'ordre du groupe.
+function navGroupVisible(ids){
+  return ids.filter(function(id){
+    var b = document.querySelector('.tab[data-tab="'+id+'"]');
+    return b && b.style.display !== 'none';
+  });
+}
+function navLabel(id){
+  var b = document.querySelector('.tab[data-tab="'+id+'"]');
+  var lbl = b && b.querySelector('span[data-i18n]');
+  return lbl ? lbl.textContent : (t('tab_'+id) || id);
+}
+
+/* ===== Rail desktop (>=769px) ===== */
+function buildDesktopRail(){
+  var rail = document.getElementById('desktop-rail');
+  if(!rail) return;
+  var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+
+  function itemHtml(id){
+    var on = id === activeId ? ' on' : '';
+    return '<div class="rail-item'+on+'" data-rail="'+id+'" onclick="mnavGo(\''+id+'\')">'
+      + (MNAV_ICONS[id] || '') + '<span class="rail-tip">'+navLabel(id)+'</span></div>';
+  }
+  function groupHtml(groupId, ids, icon, label){
+    var visible = navGroupVisible(ids);
+    if(!visible.length) return '';
+    var groupActive = visible.indexOf(activeId) !== -1;
+    var panelItems = visible.map(function(id){
+      var on = id === activeId ? ' on' : '';
+      return '<div class="rail-panel-item'+on+'" onclick="mnavGo(\''+id+'\')">'+(MNAV_ICONS[id]||'')+'<span>'+navLabel(id)+'</span></div>';
+    }).join('');
+    return '<div class="rail-group" data-rail-group="'+groupId+'">'
+      + '<div class="rail-item'+(groupActive?' on':'')+'">'+icon+'<span class="rail-tip">'+label+'</span></div>'
+      + '<div class="rail-panel">'+panelItems+'</div>'
+      + '</div>';
+  }
+
+  var direct = navGroupVisible(NAV_DIRECT).map(itemHtml).join('');
+  var equipe = groupHtml('equipe', NAV_GROUP_EQUIPE, MNAV_ICONS.group_equipe, t('rail_group_equipe'));
+  var prod = groupHtml('prod', NAV_GROUP_PROD, MNAV_ICONS.group_prod, t('rail_group_prod'));
+  var plus = groupHtml('plus', NAV_GROUP_PLUS, MNAV_ICONS.group_plus, t('rail_group_plus'));
+
+  rail.innerHTML =
+    '<div class="rail-logo">AW3</div>'
+    + direct
+    + ((equipe||prod) ? '<div class="rail-sep"></div>' : '')
+    + equipe + prod
+    + '<div class="rail-spacer"></div>'
+    + plus;
+
+  // Ouvre/ferme les panneaux de groupe au clic (en plus du survol CSS, utile
+  // au clavier/tactile). Un seul groupe ouvert a la fois.
+  rail.querySelectorAll('.rail-group').forEach(function(g){
+    g.querySelector('.rail-item').addEventListener('click', function(e){
+      e.stopPropagation();
+      var wasOpen = g.classList.contains('expanded');
+      rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
+      if(!wasOpen) g.classList.add('expanded');
+    });
+  });
+  document.addEventListener('click', function(){
+    rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
+  });
+}
+
+/* ===== Barre mobile (<=768px) : 5 entrees fixes, Equipe/Plus ouvrent une feuille ===== */
 function buildMobileNav(){
   var nav = document.getElementById('mobile-nav');
   var menuList = document.getElementById('mobile-menu-list');
+  var menuTitle = document.getElementById('mobile-menu-title');
   if(!nav || !menuList) return;
 
-  var visibles = mnavVisibleTabs();
-  var visibleIds = visibles.map(function(b){ return b.dataset.tab; });
-  if(!visibleIds.length) return; // rien a construire (avant login / app-screen cache)
+  var visibleDirect = navGroupVisible(NAV_DIRECT);
+  if(!visibleDirect.length) return; // rien a construire (avant login / app-screen cache)
 
-  // 4 emplacements principaux, choisis par ordre de priorite parmi les onglets
-  // reellement visibles pour le compte connecte (memes regles que applyRole()).
-  var primary = MNAV_PRIORITY.filter(function(id){ return visibleIds.indexOf(id) !== -1; }).slice(0, 4);
-  // Si moins de 4 onglets prioritaires visibles, on complete avec les autres
-  // onglets visibles (cas des acces personnalises tres restreints).
-  if(primary.length < 4){
-    visibleIds.forEach(function(id){
-      if(primary.length < 4 && primary.indexOf(id) === -1) primary.push(id);
-    });
-  }
-
+  var equipeIds = navGroupVisible(NAV_GROUP_EQUIPE.concat(NAV_GROUP_PROD));
+  var plusIds = navGroupVisible(NAV_GROUP_PLUS);
   var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+  var activeInEquipe = equipeIds.indexOf(activeId) !== -1;
+  var activeInPlus = plusIds.indexOf(activeId) !== -1;
 
-  var activeInPrimary = primary.indexOf(activeId) !== -1;
-  var navHtml = primary.map(function(id){
+  var html = visibleDirect.map(function(id){
     var on = id === activeId ? ' on' : '';
-    return '<button class="mnav-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
-      + '<span class="mnav-bar"></span>'
-      + (MNAV_ICONS[id] || '')
-      + '<span class="mnav-lbl">'+t('nav_'+id)+'</span>'
-      + '</button>';
+    return '<div class="mnav-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+      + (MNAV_ICONS[id]||'') + '<span>'+t('nav_'+id)+'</span></div>';
   }).join('');
-  // 5e emplacement : Menu, toujours present, ouvre la liste complete des
-  // onglets visibles (y compris ceux deja epingles au-dessus). S'affiche
-  // comme actif quand l'onglet courant n'est pas l'un des 4 epingles, pour
-  // qu'il y ait toujours un repere visuel meme depuis un onglet du menu.
-  navHtml += '<button class="mnav-item'+(!activeInPrimary && activeId ? ' on' : '')+'" data-mnav="menu" onclick="openMobileMenu()">'
-    + '<span class="mnav-bar"></span>' + MNAV_ICONS.menu + '<span class="mnav-lbl">'+t('nav_menu')+'</span></button>';
-  nav.innerHTML = navHtml;
+  if(equipeIds.length){
+    html += '<div class="mnav-item'+(activeInEquipe?' on':'')+'" data-mnav="grp-equipe" onclick="openMobileMenu(\'equipe\')">'
+      + MNAV_ICONS.group_equipe + '<span>'+t('nav_equipe')+'</span></div>';
+  }
+  if(plusIds.length){
+    html += '<div class="mnav-item'+(activeInPlus?' on':'')+'" data-mnav="grp-plus" onclick="openMobileMenu(\'plus\')">'
+      + MNAV_ICONS.group_plus + '<span>'+t('nav_plus')+'</span></div>';
+  }
+  nav.innerHTML = html;
 
-  menuList.innerHTML = visibles.map(function(b){
-    var id = b.dataset.tab;
-    var on = id === activeId ? ' on' : '';
-    var lbl = b.querySelector('span[data-i18n]');
-    var texte = lbl ? lbl.textContent : (t('tab_'+id) || id);
-    return '<button class="mms-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
-      + (MNAV_ICONS[id] || '') + '<span>'+texte+'</span></button>';
-  }).join('');
+  // Feuilles : contenu construit a l'ouverture (openMobileMenu) pour rester
+  // simple ; on garde juste les listes ici pour y acceder facilement.
+  nav.dataset.equipeIds = equipeIds.join(',');
+  nav.dataset.plusIds = plusIds.join(',');
 }
 
 function mnavGo(id){
@@ -2178,7 +2248,19 @@ function mnavGo(id){
   if(btn) btn.click();
   closeMobileMenu();
 }
-function openMobileMenu(){
+function openMobileMenu(group){
+  var nav = document.getElementById('mobile-nav');
+  var menuList = document.getElementById('mobile-menu-list');
+  var menuTitle = document.getElementById('mobile-menu-title');
+  if(!nav || !menuList) return;
+  var ids = (group === 'plus' ? nav.dataset.plusIds : nav.dataset.equipeIds || '').split(',').filter(Boolean);
+  var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+  if(menuTitle) menuTitle.textContent = group === 'plus' ? t('nav_plus') : t('nav_equipe');
+  menuList.innerHTML = ids.map(function(id){
+    var on = id === activeId ? ' on' : '';
+    return '<button class="mms-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+      + (MNAV_ICONS[id] || '') + '<span>'+navLabel(id)+'</span></button>';
+  }).join('');
   var sheet = document.getElementById('mobile-menu-sheet');
   if(sheet) sheet.classList.add('on');
 }
@@ -2187,39 +2269,52 @@ function closeMobileMenu(){
   if(sheet) sheet.classList.remove('on');
 }
 function updateMobileNavActive(id){
-  var matchedPrimary = false;
   document.querySelectorAll('.mnav-item[data-mnav]').forEach(function(el){
-    var match = el.dataset.mnav === id;
-    if(match) matchedPrimary = true;
-    el.classList.toggle('on', match);
+    el.classList.toggle('on', el.dataset.mnav === id);
   });
-  if(!matchedPrimary){
-    var menuBtn = document.querySelector('.mnav-item[data-mnav="menu"]');
-    if(menuBtn) menuBtn.classList.add('on');
+  var nav = document.getElementById('mobile-nav');
+  if(nav){
+    var equipeIds = (nav.dataset.equipeIds||'').split(',');
+    var plusIds = (nav.dataset.plusIds||'').split(',');
+    var eqBtn = nav.querySelector('[data-mnav="grp-equipe"]');
+    var plBtn = nav.querySelector('[data-mnav="grp-plus"]');
+    if(eqBtn) eqBtn.classList.toggle('on', equipeIds.indexOf(id) !== -1);
+    if(plBtn) plBtn.classList.toggle('on', plusIds.indexOf(id) !== -1);
   }
   document.querySelectorAll('.mms-item[data-mnav]').forEach(function(el){
     el.classList.toggle('on', el.dataset.mnav === id);
   });
+  document.querySelectorAll('.rail-item[data-rail]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.rail === id);
+  });
+  // Groupes du rail (Equipe/Production/Plus) : actifs si l'onglet courant en fait partie.
+  var railGroups = {equipe: NAV_GROUP_EQUIPE, prod: NAV_GROUP_PROD, plus: NAV_GROUP_PLUS};
+  Object.keys(railGroups).forEach(function(g){
+    var el = document.querySelector('.rail-group[data-rail-group="'+g+'"] > .rail-item');
+    if(el) el.classList.toggle('on', railGroups[g].indexOf(id) !== -1);
+  });
 }
 // Ecoute additionnelle sur les vrais boutons d onglets (n interfere pas avec
-// le gestionnaire de clic existant) pour garder la barre mobile synchronisee,
+// le gestionnaire de clic existant) pour garder la nav (rail + mobile) synchronisee,
 // y compris quand un changement d onglet est declenche depuis le code
 // (ex: .click() programmatique dans applyRole()).
 document.querySelectorAll('.tab[data-tab]').forEach(function(b){
   b.addEventListener('click', function(){ updateMobileNavActive(b.dataset.tab); });
 });
-// Reconstruit la barre mobile a chaque application des regles de role/acces
-// (login, changement de langue via setLang, edition d acces personnalise) —
-// donc toujours a jour avec les vraies permissions du compte connecte.
+// Reconstruit la nav a chaque application des regles de role/acces (login,
+// changement de langue via setLang, edition d acces personnalise) — donc
+// toujours a jour avec les vraies permissions du compte connecte.
 (function(){
   var _applyRoleMnav = applyRole;
   applyRole = function(role){
     var out = _applyRoleMnav.apply(this, arguments);
     try { buildMobileNav(); } catch(e){ console.warn('mobile nav', e); }
+    try { buildDesktopRail(); } catch(e){ console.warn('desktop rail', e); }
     return out;
   };
 })();
 buildMobileNav();
+buildDesktopRail();
 
 /* ============================================================
    ECRAN DE DEMARRAGE (splash) — purement cosmetique, independant
