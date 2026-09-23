@@ -27,6 +27,10 @@ function logbookApresDebut(dateISO){
    Firebase, comme le reste du dashboard) -- voir logbookAjouterNote(). */
 function loadLogbookNotes(){
     if(!db) return;
+    // Notes confidentielles (noms, signalements, photos) : lecture admin seul.
+    // La regle Firebase (database.rules.json) bloque deja les autres roles ;
+    // on n'ecoute meme pas le noeud pour eviter une erreur "permission denied".
+    if(!currentUser || currentUser.role !== 'admin'){ LOGBOOK_NOTES = {}; return; }
     db.ref('logbook_notes').on('value', function(snap){
           LOGBOOK_NOTES = snap.val() || {};
           if(typeof buildLogbook === 'function') buildLogbook();
@@ -35,20 +39,48 @@ function loadLogbookNotes(){
     });
 }
 
-function logbookAjouterNote(dateISO, poste, texte){
+function logbookAjouterNote(dateISO, poste, texte, photos){
     if(!db){ if(typeof toast === 'function') toast(t('pt_firebase_unavailable'), '#ef4444'); return; }
     if(!currentUser || currentUser.role !== 'admin'){
           if(typeof toast === 'function') toast('Reserve a l\'admin', '#ef4444');
           return;
     }
     texte = String(texte || '').trim();
-    if(!texte) return;
-    db.ref('logbook_notes').push({
+    photos = (photos || []).filter(Boolean);
+    if(!texte && !photos.length) return;
+    var note = {
           date: dateISO,
           poste: poste,
           auteur: (currentUser && currentUser.email) || 'admin',
           texte: texte,
           horodatage_saisie: new Date().toISOString()
+    };
+    // Photos : images deja compressees en JPEG (data URL, ~100-250 Ko chacune)
+    // par logbookCompresserPhoto() -- stockees dans la note elle-meme, pas
+    // besoin d'activer Firebase Storage.
+    if(photos.length) note.photos = photos;
+    return db.ref('logbook_notes').push(note);
+}
+
+/* Reduit une image choisie par l'admin (max 1600 px, JPEG qualite 0.75)
+   avant stockage, pour garder la base legere. Renvoie une Promise<dataURL>. */
+function logbookCompresserPhoto(fichier){
+    return new Promise(function(resolve, reject){
+          var lecteur = new FileReader();
+          lecteur.onerror = reject;
+          lecteur.onload = function(){
+                var img = new Image();
+                img.onerror = reject;
+                img.onload = function(){
+                      var max = 1600, w = img.width, h = img.height;
+                      if(w > max || h > max){ var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+                      var c = document.createElement('canvas'); c.width = w; c.height = h;
+                      c.getContext('2d').drawImage(img, 0, 0, w, h);
+                      resolve(c.toDataURL('image/jpeg', 0.75));
+                };
+                img.src = lecteur.result;
+          };
+          lecteur.readAsDataURL(fichier);
     });
 }
 
