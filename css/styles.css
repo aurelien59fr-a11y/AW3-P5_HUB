@@ -370,9 +370,17 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
     padding:5px 9px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;
     transition:opacity .15s ease;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:6;
   }
-  .rail-item:hover .rail-tip{opacity:1}
   .rail-group{position:relative;flex:0 0 auto}
-  .rail-group:hover .rail-panel, .rail-group.expanded .rail-panel{display:flex}
+  .rail-group.expanded .rail-panel{display:flex}
+  /* Le survol n'ouvre tooltip/panneau que sur un appareil a vraie souris :
+     sur ecran tactile (tablette, laptop hybride), :hover peut rester "colle"
+     apres un tap (pas d'evenement mouseleave), ce qui laissait le panneau
+     de groupe (ex: "Equipe") flotter en permanence par-dessus le contenu.
+     Sur tactile, seul le clic (gere en JS, ferme via .expanded) ouvre le panneau. */
+  @media (hover:hover) and (pointer:fine){
+    .rail-item:hover .rail-tip{opacity:1}
+    .rail-group:hover .rail-panel{display:flex}
+  }
   .rail-panel{
     display:none;position:absolute;left:56px;top:0;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;
     padding:6px;flex-direction:column;gap:2px;min-width:190px;box-shadow:0 8px 28px rgba(0,0,0,.45);z-index:5;
