@@ -161,12 +161,20 @@ function logbookPosteCardHtml(resume, debut, fin){
   var notesHtml = resume.notes.map(function(n){
         var dt = new Date(n.horodatage_saisie);
         var dtTxt = isNaN(dt.getTime()) ? '' : (' - ' + String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0'));
-        return '<div class="note"><b>' + (n.auteur || 'admin') + dtTxt + '</b><br>' + String(n.texte).replace(/</g,'&lt;') + '</div>';
+        var photosHtml = (n.photos || []).map(function(src, i){
+              return '<img class="lb-photo" src="' + src + '" alt="Photo ' + (i + 1) + '" data-note="' + n.id + '" data-idx="' + i + '">';
+        }).join('');
+        return '<div class="note"><b>' + String(n.auteur || 'admin').replace(/</g,'&lt;') + dtTxt + '</b>'
+              + (n.texte ? '<div class="lb-note-txt">' + String(n.texte).replace(/</g,'&lt;') + '</div>' : '')
+              + (photosHtml ? '<div class="lb-photos">' + photosHtml + '</div>' : '')
+              + '</div>';
   }).join('');
 
   var addNoteHtml = isAdmin
       ? '<div class="lb-addnote-wrap">'
           + '<textarea class="lb-addnote-input" placeholder="Ajouter une note / observation..." data-date="' + resume.date + '" data-poste="' + resume.poste + '"></textarea>'
+          + '<label class="lb-addphoto">+ photos <input type="file" accept="image/*" multiple class="lb-addnote-files"></label>'
+          + '<span class="lb-addnote-count"></span>'
           + '<button class="addnote lb-addnote-btn" data-date="' + resume.date + '" data-poste="' + resume.poste + '">+ ajouter une note</button>'
           + '</div>'
         : '';
@@ -201,12 +209,46 @@ function logbookWireNoteButtons(){
           btn.addEventListener('click', function(){
                   var wrap = btn.closest('.lb-addnote-wrap');
                   var input = wrap.querySelector('.lb-addnote-input');
+                  var files = wrap.querySelector('.lb-addnote-files');
                   var texte = input.value.trim();
-                  if(!texte) return;
-                  logbookAjouterNote(btn.dataset.date, btn.dataset.poste, texte);
-                  input.value = '';
+                  var liste = files ? Array.prototype.slice.call(files.files || []) : [];
+                  if(!texte && !liste.length) return;
+                  btn.disabled = true; btn.textContent = 'Enregistrement...';
+                  Promise.all(liste.map(logbookCompresserPhoto)).then(function(photos){
+                        return logbookAjouterNote(btn.dataset.date, btn.dataset.poste, texte, photos);
+                  }).then(function(){
+                        input.value = ''; if(files) files.value = '';
+                        if(typeof toast === 'function') toast('Note enregistree', '#10b981');
+                  }).catch(function(err){
+                        console.error('[Logbook] note', err);
+                        if(typeof toast === 'function') toast('Erreur : note non enregistree', '#ef4444');
+                  }).then(function(){ btn.disabled = false; btn.textContent = '+ ajouter une note'; });
           });
     });
+    document.querySelectorAll('.lb-addnote-files').forEach(function(f){
+          f.addEventListener('change', function(){
+                var c = f.closest('.lb-addnote-wrap').querySelector('.lb-addnote-count');
+                if(c) c.textContent = f.files.length ? (f.files.length + ' photo(s) choisie(s)') : '';
+          });
+    });
+    document.querySelectorAll('#lb-panel .lb-photo').forEach(function(img){
+          img.addEventListener('click', function(){ logbookVoirPhoto(img.src); });
+    });
+}
+
+/* Visionneuse plein ecran d'une photo de note (clic ou Echap pour fermer). */
+function logbookVoirPhoto(src){
+    var v = document.getElementById('lb-photo-viewer');
+    if(!v){
+          v = document.createElement('div');
+          v.id = 'lb-photo-viewer';
+          v.innerHTML = '<img alt="Photo">';
+          v.addEventListener('click', function(){ v.classList.remove('open'); });
+          document.addEventListener('keydown', function(e){ if(e.key === 'Escape') v.classList.remove('open'); }, true);
+          document.body.appendChild(v);
+    }
+    v.querySelector('img').src = src;
+    v.classList.add('open');
 }
 
 function logbookStatsOf(dateISO){
