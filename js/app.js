@@ -176,9 +176,9 @@ var I18N={
     login_forgot:'Mot de passe oublié ?', login_autoconnect:'Tu resteras connecté automatiquement', splash_loading:'Chargement...',
     topbar_connecting:'Connexion...', topbar_logout:'Déconnexion',
     tab_ov:'Vue d’ensemble', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
-    tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin',
+    tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Accueil', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Espace', nav_ab:'Absences',
-    nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu',
+    nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
     nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
     plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
@@ -438,9 +438,9 @@ var I18N={
     login_forgot:'Wachtwoord vergeten?', login_autoconnect:'Je blijft automatisch aangemeld', splash_loading:'Laden...',
     topbar_connecting:'Verbinden...', topbar_logout:'Afmelden',
     tab_ov:'Overzicht', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Afwezigheden',
-    tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin',
+    tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin', tab_lb:'Logboek',
     nav_ov:'Start', nav_br:'Prest.', nav_pl:'Planning', nav_espace:'Ruimte', nav_ab:'Afwez.',
-    nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu',
+    nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logboek',
     nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
     plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
@@ -700,9 +700,9 @@ var I18N={
     login_forgot:'Forgot password?', login_autoconnect:'You will stay automatically logged in', splash_loading:'Loading...',
     topbar_connecting:'Connecting...', topbar_logout:'Log out',
     tab_ov:'Overview', tab_br:'Bradford', tab_pl:'Planning', tab_ab:'Absences',
-    tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin',
+    tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Home', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Space', nav_ab:'Absences',
-    nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu',
+    nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
     nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
     plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
@@ -1020,6 +1020,7 @@ function setLang(l){
   if(typeof buildMiniCalFormations==='function'&&document.getElementById('mini-cal-formations'))buildMiniCalFormations();
   if(typeof buildNCPTab==='function'&&document.getElementById('ncp-content-wrap')&&NCP_DATA&&NCP_DATA.length)buildNCPTab();
   if(typeof buildComptesEmpListe==='function'&&document.getElementById('comptes-emp-liste'))buildComptesEmpListe();
+     if(typeof buildLogbook==='function'&&document.getElementById('pane-lb')&&document.getElementById('pane-lb').classList.contains('on'))buildLogbook();
   if(typeof applyRole==='function'&&currentUser&&currentUser.role)applyRole(currentUser.role);
 }
 function toggleLang(){setLang(LANG_ORDER[(LANG_ORDER.indexOf(LANG)+1)%LANG_ORDER.length]);}
@@ -1131,6 +1132,7 @@ document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click'
   if(b.dataset.tab === 'bulk' && typeof buildBulkSections === 'function') buildBulkSections();
   if(b.dataset.tab === 'ncp' && typeof buildNCPTab === 'function') buildNCPTab();
   if(b.dataset.tab === 'recrutement' && typeof buildRecrutementTab === 'function') buildRecrutementTab();
+                                                                                              if(b.dataset.tab === 'lb' && typeof buildLogbook === 'function') buildLogbook();
 if(b.dataset.tab === 'espace' && typeof buildMonEspace === 'function') buildMonEspace();
   if(b.dataset.tab === 'br'){
     // Graphiques Bradford deplaces dans cet onglet (mission refonte Vue d'ensemble, 09/09/2026) :
@@ -1384,7 +1386,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();loadLogbookNotes();
         buildEmpTable();
       }
     }
@@ -1491,7 +1493,7 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();loadLogbookNotes();
   }
 }
 
@@ -2111,6 +2113,7 @@ var MNAV_ICONS = {
   arrets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>',
   ncp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
   bulk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>',
+     lb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="7" y1="13" x2="7" y2="13"/><line x1="12" y1="13" x2="12" y2="13"/><line x1="17" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="7" y2="17"/><line x1="12" y1="17" x2="12" y2="17"/></svg>',
   recrutement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   admin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>',
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>',
@@ -2118,14 +2121,15 @@ var MNAV_ICONS = {
   group_prod: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
   group_plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>'
 };
-var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','formations','pt','recrutement','admin'];
+var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','lb','formations','pt','recrutement','admin'];
 // Groupes de la nav (rail desktop + feuilles mobiles) -- etape 3 refonte UI/UX.
 // 'ab' (Absences) volontairement absent : masque pour tous les roles (deja le cas
-// avant la refonte, decision actee dans applyRole()). Logboek volontairement
-// absent : module pas encore construit (point ouvert #3 du dossier refonte).
+// avant la refonte, decision actee dans applyRole()). 'lb' (Logbook) ajoute le
+// 23/09/2026 -- calendrier de synthese par poste (P1-P5), voir metier/logbook.js
+// et vues/logbook.js (Calendrier logbook - design.md dans Obsidian).
 var NAV_DIRECT = ['ov','pl','espace'];
 var NAV_GROUP_EQUIPE = ['br','formations','pt'];
-var NAV_GROUP_PROD = ['arrets','bulk','ncp'];
+var NAV_GROUP_PROD = ['arrets','bulk','ncp','lb'];
 var NAV_GROUP_PLUS = ['recrutement','admin'];
 
 function mnavVisibleTabs(){
