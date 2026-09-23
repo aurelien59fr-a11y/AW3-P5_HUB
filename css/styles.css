@@ -504,7 +504,7 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
    le rail tactile ailleurs dans ce fichier si presents, sinon definis ici) */
 #lb-overlay.overlay{
      position:fixed;inset:0;background:rgba(6,8,12,.6);backdrop-filter:blur(2px);
-     display:flex;align-items:flex-start;justify-content:flex-end;z-index:90;
+     display:flex;align-items:flex-start;justify-content:flex-end;z-index:200;
      opacity:0;pointer-events:none;transition:opacity .18s ease;
 }
 #lb-overlay.overlay.open{opacity:1;pointer-events:auto}
