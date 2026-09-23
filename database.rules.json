@@ -134,18 +134,12 @@
     },
 
     // -----------------------------------------------------------------
-    // LOGBOOK -- notes/observations manuelles par poste (P1-P5), ajoutees
-    // le 23/09/2026 (voir metier/logbook.js). Lecture pour tout compte
-    // connecte (comme arrets_inpak/ncp_data) ; ecriture non declaree ici
-    // donc heritee de la racine == admin seul, conforme a la decision
-    // d'Aurelien ("seulement moi" peut ecrire une note). L'UI verifie
-    // aussi currentUser.role === 'admin' avant d'afficher le champ de
-    // saisie (logbookAjouterNote(), vues/logbook.js), mais c'est bien
-    // cette regle serveur qui empeche une ecriture forcee.
+    // LOGBOOK (logbook_notes) -- volontairement NON declare ici : lecture
+    // ET ecriture heritees de la racine == admin seul. Les notes peuvent
+    // contenir des noms, des signalements et des photos (confidentiel).
+    // Changement du 23/09/2026 : la lecture etait ouverte a tout compte
+    // connecte, elle est desormais reservee a l'admin.
     // -----------------------------------------------------------------
-    "logbook_notes": {
-            ".read": "auth != null"
-    },
 
     // -----------------------------------------------------------------
     // BRADFORD — commentaires et horodatage du dernier import.
