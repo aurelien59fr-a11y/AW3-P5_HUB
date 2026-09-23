@@ -35,7 +35,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-<link rel="stylesheet" href="css/styles.css?v=86">
+<link rel="stylesheet" href="css/styles.css?v=87">
 </head>
 <body>
 <div id="splash-screen">
@@ -125,6 +125,7 @@
     <button class="tab" id="tab-arrets-btn" data-tab="arrets" style="display:none">&#128721; <span data-i18n="tab_arrets">Arrets Inpak</span></button>
     <button class="tab" id="tab-bulk-btn" data-tab="bulk" style="display:none">&#128230; <span data-i18n="tab_bulk">Bulk &amp; Bijlijn</span></button>
     <button class="tab" id="tab-ncp-btn" data-tab="ncp" style="display:none">&#9888; <span data-i18n="tab_ncp">NCP Qualite</span></button>
+        <button class="tab" id="tab-lb-btn" data-tab="lb" style="display:none">&#128220; <span data-i18n="tab_lb">Logbook</span>span></button>button>
     <button class="tab" id="tab-recrutement-btn" data-tab="recrutement" style="display:none">&#128100; <span data-i18n="tab_recrutement">Recrutement</span></button>
     <button class="tab" id="tab-admin-btn" data-tab="admin" style="display:none">&#9881; <span data-i18n="tab_admin">Admin</span></button>
   </nav>
@@ -909,6 +910,15 @@
       </div>
     </div>
 
+    <!-- LOGBOOK -->
+        <div class="pane" id="pane-lb">
+                <div class="sh">
+                          <div class="st" data-i18n="tab_lb">Logbook</div>
+                          <div class="ss">Calendrier de synthese par poste (P1-P5) -- absences, NCP, temps d'arret et notes, depuis le 1er janvier 2026</div>
+                </div>
+                <div id="lb-root"></div>
+        </div>
+    
     <div class="pane" id="pane-recrutement">
       <div class="sh"><div class="st" data-i18n="tab_recrutement">Recrutement</div><div class="ss" data-i18n="rec_subtitle">Grille d'entretien mentalité — sécurité, fiabilité, motivation</div></div>
 
@@ -1048,7 +1058,7 @@
   <script src="js/core/format.js?v=1"></script>
   <script src="js/core/ui.js?v=1"></script>
   <script src="js/core/firebase.js?v=1"></script>
-  <script src="js/core/auth.js?v=2"></script>
+    <script src="js/core/auth.js?v=3"></script>
   <script src="js/metier/bradford.js?v=2"></script>
   <script src="js/vues/bradford.js?v=3"></script>
   <script src="js/metier/arrets.js?v=1"></script>
@@ -1059,6 +1069,8 @@
   <script src="js/imports/ncp.js?v=2"></script>
   <script src="js/metier/ncp.js?v=2"></script>
   <script src="js/vues/ncp.js?v=1"></script>
+        <script src="js/metier/logbook.js?v=1"></script>
+        <script src="js/vues/logbook.js?v=1"></script>
   <script src="js/metier/bulk.js?v=1"></script>
   <script src="js/vues/bulk.js?v=2"></script>
   <script src="js/vues/planning.js?v=6"></script>
@@ -1069,7 +1081,7 @@
   <script src="js/vues/espace.js?v=1"></script>
   <script src="js/vues/absences.js?v=3"></script>
   <script src="js/vues/ov-resume.js?v=6"></script>
-  <script src="js/app.js?v=85"></script>
+    <script src="js/app.js?v=86"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
