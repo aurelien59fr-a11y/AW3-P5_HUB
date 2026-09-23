@@ -133,7 +133,7 @@ function logbookEnsureOverlay(){
     document.body.appendChild(wrap.firstChild);
     document.getElementById('lb-close').addEventListener('click', logbookCloseOverlay);
     document.getElementById('lb-overlay').addEventListener('click', function(e){
-          if(e.target.id === 'lb-overlay') logbookCloseOverlay();
+          if(e.target.id === 'lb-overlay') logbookCloseOverlay(); }); document.addEventListener('keydown', function(e){ if(e.key === 'Escape') logbookCloseOverlay();
     });
 }
 
