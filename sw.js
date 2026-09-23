@@ -1,113 +1,115 @@
 /* ============================================================
-   Service Worker — Bradford Dashboard AW3 Ploeg 5
-   Stratégie :
-   - App shell (html/js/icônes) → cache-first avec mise à jour en fond
-   - Firebase / API externes → toujours réseau (jamais de cache)
-   - Bump CACHE_VERSION à chaque déploiement pour forcer la mise à jour
+   Service Worker - Bradford Dashboard AW3 Ploeg 5
+   Strategie :
+   - App shell (html/js/icones) -> cache-first avec mise a jour en fond
+   - Firebase / API externes -> toujours reseau (jamais de cache)
+   - Bump CACHE_VERSION a chaque deploiement pour forcer la mise a jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v88';
+const CACHE_VERSION = 'bradford-v89';
 const APP_SHELL = [
-  './',
-  './index.html',
-  './js/core/format.js?v=1',
-  './js/core/ui.js?v=1',
-  './js/core/firebase.js?v=1',
-  './js/core/auth.js?v=2',
-  './js/metier/bradford.js?v=2',
-  './js/vues/bradford.js?v=3',
-  './js/metier/arrets.js?v=1',
-  './js/vues/arrets-inpak.js?v=1',
-  './js/imports/base.js?v=3',
-  './js/imports/grafana.js?v=1',
-  './js/imports/protime.js?v=2',
-  './js/imports/ncp.js?v=2',
-  './js/metier/ncp.js?v=2',
-  './js/vues/ncp.js?v=1',
-  './js/metier/bulk.js?v=1',
-  './js/vues/bulk.js?v=2',
-  './js/vues/planning.js?v=6',
-  './js/vues/formations.js?v=1',
-  './js/vues/pointages.js?v=2',
-  './js/vues/admin.js?v=1',
-  './js/vues/recrutement.js?v=1',
-  './js/vues/espace.js?v=1',
-  './js/vues/absences.js?v=3',
-  './js/vues/ov-resume.js?v=6',
-  './js/app.js?v=85',
-  './css/styles.css?v=86',
-  './manifest.json',
-  './icons/icon-180.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
-];
+     './',
+     './index.html',
+     './js/core/format.js?v=1',
+     './js/core/ui.js?v=1',
+     './js/core/firebase.js?v=1',
+     './js/core/auth.js?v=3',
+     './js/metier/bradford.js?v=2',
+     './js/vues/bradford.js?v=3',
+     './js/metier/arrets.js?v=1',
+     './js/vues/arrets-inpak.js?v=1',
+     './js/imports/base.js?v=3',
+     './js/imports/grafana.js?v=1',
+     './js/imports/protime.js?v=2',
+     './js/imports/ncp.js?v=2',
+     './js/metier/ncp.js?v=2',
+     './js/vues/ncp.js?v=1',
+     './js/metier/logbook.js?v=1',
+     './js/vues/logbook.js?v=1',
+     './js/metier/bulk.js?v=1',
+     './js/vues/bulk.js?v=2',
+     './js/vues/planning.js?v=6',
+     './js/vues/formations.js?v=1',
+     './js/vues/pointages.js?v=2',
+     './js/vues/admin.js?v=1',
+     './js/vues/recrutement.js?v=1',
+     './js/vues/espace.js?v=1',
+     './js/vues/absences.js?v=3',
+     './js/vues/ov-resume.js?v=6',
+     './js/app.js?v=86',
+     './css/styles.css?v=87',
+     './manifest.json',
+     './icons/icon-180.png',
+     './icons/icon-192.png',
+     './icons/icon-512.png'
+   ];
 
-// Domaines à ne JAMAIS mettre en cache (données live)
+// Domaines a ne JAMAIS mettre en cache (donnees live)
 const NEVER_CACHE = [
-  'firebaseio.com',
-  'googleapis.com',
-  'gstatic.com',
-  'cloudflare.com'
-];
+     'firebaseio.com',
+     'googleapis.com',
+     'gstatic.com',
+     'cloudflare.com'
+   ];
 
 self.addEventListener('install', function(event){
-  event.waitUntil(
-    caches.open(CACHE_VERSION).then(function(cache){
-      // addAll échoue en bloc si UNE seule ressource 404 → on ajoute une par une
-      // pour ne jamais bloquer l'installation du service worker
-      return Promise.all(
-        APP_SHELL.map(function(url){
-          return cache.add(url).catch(function(e){
-            console.warn('[SW] Impossible de mettre en cache : ' + url, e);
-          });
-        })
-      );
-    }).then(function(){
-      return self.skipWaiting();
-    })
-  );
+     event.waitUntil(
+            caches.open(CACHE_VERSION).then(function(cache){
+                     // addAll echoue en bloc si UNE seule ressource 404 -> on ajoute une par une
+                                                  // pour ne jamais bloquer l'installation du service worker
+                                                  return Promise.all(
+                                                             APP_SHELL.map(function(url){
+                                                                          return cache.add(url).catch(function(e){
+                                                                                         console.warn('[SW] Impossible de mettre en cache : ' + url, e);
+                                                                          });
+                                                             })
+                                                           );
+            }).then(function(){
+                     return self.skipWaiting();
+            })
+          );
 });
 
 self.addEventListener('activate', function(event){
-  event.waitUntil(
-    caches.keys().then(function(keys){
-      return Promise.all(
-        keys.filter(function(k){ return k !== CACHE_VERSION; })
-            .map(function(k){ return caches.delete(k); })
-      );
-    }).then(function(){
-      return self.clients.claim();
-    })
-  );
+     event.waitUntil(
+            caches.keys().then(function(keys){
+                     return Promise.all(
+                                keys.filter(function(k){ return k !== CACHE_VERSION; })
+                                    .map(function(k){ return caches.delete(k); })
+                              );
+            }).then(function(){
+                     return self.clients.claim();
+            })
+          );
 });
 
 self.addEventListener('fetch', function(event){
-  var url = event.request.url;
+     var url = event.request.url;
 
-  // Ne jamais intercepter Firebase / CDN externes → laisser passer normalement
-  if(NEVER_CACHE.some(function(d){ return url.indexOf(d) !== -1; })){
-    return;
-  }
+                        // Ne jamais intercepter Firebase / CDN externes -> laisser passer normalement
+                        if(NEVER_CACHE.some(function(d){ return url.indexOf(d) !== -1; })){
+                               return;
+                        }
 
-  // Seulement GET
-  if(event.request.method !== 'GET') return;
+                        // Seulement GET
+                        if(event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then(function(cached){
-      var fetchPromise = fetch(event.request).then(function(networkResp){
-        if(networkResp && networkResp.status === 200){
-          var respClone = networkResp.clone();
-          caches.open(CACHE_VERSION).then(function(cache){
-            cache.put(event.request, respClone);
-          });
-        }
-        return networkResp;
-      }).catch(function(){
-        return cached; // offline → on retombe sur le cache si dispo
-      });
+                        event.respondWith(
+                               caches.match(event.request).then(function(cached){
+                                        var fetchPromise = fetch(event.request).then(function(networkResp){
+                                                   if(networkResp && networkResp.status === 200){
+                                                                var respClone = networkResp.clone();
+                                                                caches.open(CACHE_VERSION).then(function(cache){
+                                                                               cache.put(event.request, respClone);
+                                                                });
+                                                   }
+                                                   return networkResp;
+                                        }).catch(function(){
+                                                   return cached; // offline -> on retombe sur le cache si dispo
+                                        });
 
-      // Cache-first : réponse immédiate si en cache, sinon on attend le réseau
-      return cached || fetchPromise;
-    })
-  );
+                                                                      // Cache-first : reponse immediate si en cache, sinon on attend le reseau
+                                                                      return cached || fetchPromise;
+                               })
+                             );
 });
