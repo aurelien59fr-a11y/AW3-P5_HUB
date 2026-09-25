@@ -149,6 +149,74 @@ function logbookBadge(cls, texte){
     return '<span class="badge ' + cls + '">* ' + texte + '</span>';
 }
 
+/* ---------- Notes SharePoint : champs affiches + traduction ---------- */
+var LOGBOOK_SP_INDEX = {};
+var LOGBOOK_SP_MASQUES = ['ID', 'Ploeg', 'Balise de couleur', 'Tag', 'Datum'];
+function logbookEsc(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function logbookSpChamps(n){
+    var out = {};
+    Object.keys(n.valeurs || {}).forEach(function(k){
+          if(LOGBOOK_SP_MASQUES.indexOf(k) !== -1 || /^Datum\s*\(/.test(k)) return;
+          if(String(n.valeurs[k]).trim() !== '') out[k] = String(n.valeurs[k]);
+    });
+    return out;
+}
+function logbookSpLignesHtml(champs){
+    return Object.keys(champs).map(function(k){
+          return '<div><span class="lb-sp-k">' + logbookEsc(k) + ' :</span> ' + logbookEsc(champs[k]) + '</div>';
+    }).join('');
+}
+// Champs a ne pas traduire : noms de personnes, choix de ploeg.
+var LOGBOOK_SP_NON_TRAD = ['Ploegchef', 'Title', 'Titre'];
+
+/* Traduction sur l'appareil (API Translator du navigateur : rien n'est
+   envoye a un service externe, les notes restent confidentielles).
+   Chaque traduction est gardee dans sharepoint_trad/<cle>/<id>/<langue>
+   (admin seul) : une note n'est traduite qu'une fois. */
+var LOGBOOK_TRADUCTEURS = {};
+function logbookTraducteur(src, dst){
+    var k = src + '>' + dst;
+    if(!LOGBOOK_TRADUCTEURS[k]) LOGBOOK_TRADUCTEURS[k] = Translator.create({ sourceLanguage: src, targetLanguage: dst })
+          .catch(function(e){ delete LOGBOOK_TRADUCTEURS[k]; throw e; });
+    return LOGBOOK_TRADUCTEURS[k];
+}
+var LOGBOOK_DETECTEUR = null;
+function logbookLangueDe(texte){
+    if(typeof LanguageDetector === 'undefined') return Promise.resolve('nl');
+    if(!LOGBOOK_DETECTEUR) LOGBOOK_DETECTEUR = LanguageDetector.create();
+    return LOGBOOK_DETECTEUR.then(function(d){ return d.detect(texte); }).then(function(r){
+          var l = r && r[0] && r[0].detectedLanguage;
+          return ['fr','nl','en'].indexOf(l) !== -1 ? l : 'nl';
+    }).catch(function(){ return 'nl'; });
+}
+function logbookTraduireNote(n, dst){
+    var chemin = 'sharepoint_trad/' + n.cle + '/' + n.id + '/' + dst;
+    return db.ref(chemin).once('value').then(function(s){
+          if(s.val()) return s.val();
+          if(typeof Translator === 'undefined') throw new Error('Traduction non disponible dans ce navigateur (utilise Chrome ou Edge a jour).');
+          var champs = logbookSpChamps(n), cles = Object.keys(champs);
+          var tout = cles.map(function(k){ return champs[k]; }).join('\n');
+          return logbookLangueDe(tout).then(function(src){
+                if(src === dst) return champs;
+                return logbookTraducteur(src, dst).then(function(tr){
+                      var res = {};
+                      return cles.reduce(function(p, k){
+                            return p.then(function(){
+                                  if(LOGBOOK_SP_NON_TRAD.indexOf(k) !== -1){ res[k] = champs[k]; return; }
+                                  // ligne par ligne pour garder la mise en forme
+                                  return Promise.all(champs[k].split('\n').map(function(l){ return l.trim() ? tr.translate(l) : Promise.resolve(l); }))
+                                        .then(function(ls){ res[k] = ls.join('\n'); });
+                            });
+                      }, Promise.resolve()).then(function(){ return res; });
+                });
+          }).then(function(res){
+                var propre = {};
+                Object.keys(res).forEach(function(k){ propre[k.replace(/[.#$\[\]\/]/g, ' ')] = res[k]; });
+                return db.ref(chemin).set(propre).then(function(){ return propre; });
+          });
+    });
+}
+
 function logbookPosteCardHtml(resume, debut, fin){
     if(!resume) return '';
     var isAdmin = typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin';
@@ -174,11 +242,9 @@ function logbookPosteCardHtml(resume, debut, fin){
   }).join('');
 
   var spHtml = (resume.notesSP || []).map(function(n){
-        var esc = function(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
-        var MASQUES = ['ID', 'Ploeg', 'Balise de couleur', 'Tag'];
-        var lignes = Object.keys(n.valeurs || {}).filter(function(k){ return MASQUES.indexOf(k) === -1 && !/^Datum\s*\(/.test(k); }).map(function(k){
-              return '<div><span class="lb-sp-k">' + esc(k) + ' :</span> ' + esc(n.valeurs[k]) + '</div>';
-        }).join('');
+        var esc = logbookEsc;
+        LOGBOOK_SP_INDEX[n.cle + '/' + n.id] = n;
+        var lignes = logbookSpLignesHtml(logbookSpChamps(n));
         var quand = (n.date !== resume.date ? n.date.split('-').reverse().slice(0,2).join('/') + ' ' : '') + (n.heure || '');
         var fichiers = (n.fichiers || []).map(function(f){
               return '<a class="lb-sp-fichier" href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.nom) + '</a>';
@@ -186,6 +252,9 @@ function logbookPosteCardHtml(resume, debut, fin){
         var photos = n.nbPhotos ? '<button class="lb-sp-photos-btn" data-cle="' + esc(n.cle) + '" data-id="' + esc(n.id) + '">Voir ' + n.nbPhotos + ' photo' + (n.nbPhotos > 1 ? 's' : '') + '</button><div class="lb-photos"></div>' : '';
         return '<div class="note lb-sp-note"><b>' + esc(n.auteur || 'SharePoint') + (quand ? ' - ' + quand : '') + (n.ploeg ? ' - ' + esc(n.ploeg) : '') + '</b>'
               + '<span class="lb-sp-src">' + esc(n.liste || 'SharePoint') + '</span>'
+              + '<div class="lb-sp-trad" data-k="' + esc(n.cle + '/' + n.id) + '">'
+              +   '<button data-l="orig" class="on">Original</button><button data-l="fr">FR</button><button data-l="nl">NL</button><button data-l="en">EN</button>'
+              +   '<span class="lb-sp-trad-etat"></span></div>'
               + '<div class="lb-note-txt">' + lignes + '</div>'
               + (fichiers ? '<div class="lb-sp-fichiers">' + fichiers + '</div>' : '')
               + photos + '</div>';
@@ -265,6 +334,25 @@ function logbookWireNoteButtons(){
                       box.querySelectorAll('.lb-photo').forEach(function(img){ img.addEventListener('click', function(){ logbookVoirPhoto(img.src); }); });
                       b.style.display = 'none';
                 }).catch(function(e){ b.disabled = false; b.textContent = 'Erreur - reessayer'; console.error(e); });
+          });
+    });
+    document.querySelectorAll('#lb-panel .lb-sp-trad button').forEach(function(b){
+          b.addEventListener('click', function(){
+                var barre = b.parentNode, n = LOGBOOK_SP_INDEX[barre.dataset.k];
+                var txt = barre.nextElementSibling, etat = barre.querySelector('.lb-sp-trad-etat');
+                if(!n) return;
+                barre.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+                if(b.dataset.l === 'orig'){ txt.innerHTML = logbookSpLignesHtml(logbookSpChamps(n)); etat.textContent = ''; return; }
+                etat.textContent = 'Traduction...';
+                // Lance tout de suite (pendant le clic) le telechargement des
+                // modeles : le navigateur l'exige au premier usage.
+                try {
+                      ['fr','nl','en'].forEach(function(src){ if(src !== b.dataset.l && typeof Translator !== 'undefined') logbookTraducteur(src, b.dataset.l).catch(function(){}); });
+                      if(typeof LanguageDetector !== 'undefined' && !LOGBOOK_DETECTEUR) LOGBOOK_DETECTEUR = LanguageDetector.create();
+                } catch(e){}
+                logbookTraduireNote(n, b.dataset.l).then(function(res){
+                      txt.innerHTML = logbookSpLignesHtml(res); etat.textContent = '';
+                }).catch(function(e){ console.error('[Logbook] traduction', e); etat.textContent = e.message || 'Erreur de traduction'; });
           });
     });
     document.querySelectorAll('#lb-panel .lb-photo').forEach(function(img){
