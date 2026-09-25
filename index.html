@@ -35,7 +35,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-<link rel="stylesheet" href="css/styles.css?v=89">
+<link rel="stylesheet" href="css/styles.css?v=90">
 </head>
 <body>
 <div id="splash-screen">
@@ -283,6 +283,25 @@
           <button onclick="openImportBulkModal()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Bulk &amp; Bijlijn</button>
           <button onclick="openImportPointages()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; Pointages (Protime)</button>
           <button onclick="openImportNCPModal()" style="padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#8659; NCP Qualite</button>
+        </div>
+      </div>
+
+      <!-- NOTES SHAREPOINT -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct">Notes SharePoint (logboeken AW3 Inpak + Productie)</div></div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:10px">
+          1. Sur le PC de travail, ouvre le site SharePoint Wielsbeke-AW3 dans Edge, F12 &gt; Console, colle le script
+          <b>extraction_sharepoint_notes.js</b> et appuie sur Entree (il lit AW3 Inpak et AW3 Productie).<br>
+          2. A la fin, le fichier <b>sharepoint_notes_AW3_...json</b> se cree tout seul dans Telechargements.<br>
+          3. Choisis ce fichier ci-dessous. Les notes apparaissent dans l'onglet Logbook, sur le bon jour et le bon poste
+          (lisibles par l'admin seul). Re-importer met a jour les notes sans doublon.
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="padding:8px 18px;border-radius:var(--r);background:var(--blue);color:#fff;font-size:13px;font-weight:600;cursor:pointer">
+            Importer notes SharePoint
+            <input type="file" accept=".json,application/json" multiple style="display:none" onchange="importerSharepointNotesFichier(this)">
+          </label>
+          <div id="sp-import-etat" style="font-size:12px"></div>
         </div>
       </div>
 
@@ -1063,14 +1082,15 @@
   <script src="js/vues/bradford.js?v=3"></script>
   <script src="js/metier/arrets.js?v=1"></script>
   <script src="js/vues/arrets-inpak.js?v=1"></script>
-  <script src="js/imports/base.js?v=3"></script>
+  <script src="js/imports/base.js?v=4"></script>
   <script src="js/imports/grafana.js?v=1"></script>
   <script src="js/imports/protime.js?v=2"></script>
   <script src="js/imports/ncp.js?v=2"></script>
+  <script src="js/imports/sharepoint.js?v=1"></script>
   <script src="js/metier/ncp.js?v=2"></script>
   <script src="js/vues/ncp.js?v=1"></script>
-        <script src="js/metier/logbook.js?v=2"></script>
-        <script src="js/vues/logbook.js?v=3"></script>
+        <script src="js/metier/logbook.js?v=3"></script>
+        <script src="js/vues/logbook.js?v=4"></script>
   <script src="js/metier/bulk.js?v=1"></script>
   <script src="js/vues/bulk.js?v=2"></script>
   <script src="js/vues/planning.js?v=6"></script>
