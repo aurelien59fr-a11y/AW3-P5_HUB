@@ -513,6 +513,18 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 .lb-sp-trad button{background:transparent;border:1px solid var(--bd2);border-radius:5px;color:var(--tx3);font-size:10.5px;padding:2px 7px;cursor:pointer;font-family:var(--mo)}
 .lb-sp-trad button.on{border-color:var(--blue);color:var(--blue)}
 .lb-sp-trad-etat{font-size:10.5px;color:var(--tx3);margin-left:4px}
+.lb-sp-meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.lb-sp-chip{font-size:11.5px;background:var(--bg2);border:1px solid var(--bd2);border-radius:99px;padding:3px 10px;color:var(--tx)}
+.lb-sp-chip .lb-sp-k{color:var(--tx3);margin-right:2px}
+.lb-sp-bloc{margin-top:10px;position:relative}
+.lb-sp-titre{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
+.lb-sp-corps{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.5;color:var(--tx);max-width:78ch}
+.lb-sp-ligne{display:grid;grid-template-columns:48px 1fr;gap:8px}
+.lb-sp-h{font:600 11.5px var(--mo);color:var(--blue);padding-top:2px}
+.lb-sp-replie .lb-sp-corps{max-height:190px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent)}
+.lb-sp-plus{margin-top:4px;background:none;border:0;color:var(--blue);font-size:12px;cursor:pointer;padding:0}
+#lb-overlay .panel.lb-wide{width:min(980px,96vw)}
+#lb-overlay .lb-sp-note{padding:12px 14px}
 .lb-day.lb-today{outline:1px solid var(--blue);outline-offset:-1px}
 .lb-day.lb-cmp-picked{outline:2px solid var(--blue);outline-offset:-2px;color:var(--tx)}
 
