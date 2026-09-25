@@ -22,7 +22,8 @@ function buildLogbook(){
     var root = document.getElementById('lb-root');
     if(!root) return;
 
-  if(LOGBOOK_ANNEE < 2026) LOGBOOK_ANNEE = 2026; // rien avant LOGBOOK_DATE_DEBUT
+  var anneeMin = logbookAnneeMin();
+  if(LOGBOOK_ANNEE < anneeMin) LOGBOOK_ANNEE = anneeMin;
 
   var indicateurs = logbookIndicateursAnnee(LOGBOOK_ANNEE);
     var today = new Date();
@@ -30,7 +31,7 @@ function buildLogbook(){
   var html = ''
       + '<div class="lb-yearbar">'
       +   '<div class="lb-yearnav">'
-      +     '<button id="lb-prev-y"' + (LOGBOOK_ANNEE <= 2026 ? ' disabled' : '') + '>&#8592;</button>'
+      +     '<button id="lb-prev-y"' + (LOGBOOK_ANNEE <= anneeMin ? ' disabled' : '') + '>&#8592;</button>'
       +     '<span class="lb-yr">' + LOGBOOK_ANNEE + '</span>'
       +     '<button id="lb-next-y">&#8594;</button>'
       +   '</div>'
@@ -67,8 +68,8 @@ function buildLogbook(){
           for(var d = 1; d <= nbJours; d++){
                   (function(m, d){
                             var dateISO = logbookIso(LOGBOOK_ANNEE, m, d);
-                            var avantDebut = !logbookApresDebut(dateISO);
                             var ev = indicateurs[dateISO];
+                            var avantDebut = !logbookApresDebut(dateISO) && !(ev && ev.notes);
                             var el = document.createElement('div');
                             el.className = 'lb-day' + (avantDebut ? ' lb-disabled' : ' lb-worked');
                             el.textContent = d;
@@ -90,7 +91,7 @@ function buildLogbook(){
 
   var prevBtn = document.getElementById('lb-prev-y');
     var nextBtn = document.getElementById('lb-next-y');
-    if(prevBtn) prevBtn.addEventListener('click', function(){ if(LOGBOOK_ANNEE > 2026){ LOGBOOK_ANNEE--; buildLogbook(); } });
+    if(prevBtn) prevBtn.addEventListener('click', function(){ if(LOGBOOK_ANNEE > anneeMin){ LOGBOOK_ANNEE--; buildLogbook(); } });
     if(nextBtn) nextBtn.addEventListener('click', function(){ LOGBOOK_ANNEE++; buildLogbook(); });
 
   var cmpToggle = document.getElementById('lb-cmp-toggle');
@@ -174,13 +175,20 @@ function logbookPosteCardHtml(resume, debut, fin){
 
   var spHtml = (resume.notesSP || []).map(function(n){
         var esc = function(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
-        var lignes = Object.keys(n.valeurs || {}).map(function(k){
+        var MASQUES = ['ID', 'Ploeg', 'Balise de couleur', 'Tag'];
+        var lignes = Object.keys(n.valeurs || {}).filter(function(k){ return MASQUES.indexOf(k) === -1 && !/^Datum\s*\(/.test(k); }).map(function(k){
               return '<div><span class="lb-sp-k">' + esc(k) + ' :</span> ' + esc(n.valeurs[k]) + '</div>';
         }).join('');
         var quand = (n.date !== resume.date ? n.date.split('-').reverse().slice(0,2).join('/') + ' ' : '') + (n.heure || '');
-        return '<div class="note lb-sp-note"><b>' + esc(n.auteur || 'SharePoint') + (quand ? ' - ' + quand : '') + '</b>'
+        var fichiers = (n.fichiers || []).map(function(f){
+              return '<a class="lb-sp-fichier" href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.nom) + '</a>';
+        }).join(' ');
+        var photos = n.nbPhotos ? '<button class="lb-sp-photos-btn" data-cle="' + esc(n.cle) + '" data-id="' + esc(n.id) + '">Voir ' + n.nbPhotos + ' photo' + (n.nbPhotos > 1 ? 's' : '') + '</button><div class="lb-photos"></div>' : '';
+        return '<div class="note lb-sp-note"><b>' + esc(n.auteur || 'SharePoint') + (quand ? ' - ' + quand : '') + (n.ploeg ? ' - ' + esc(n.ploeg) : '') + '</b>'
               + '<span class="lb-sp-src">' + esc(n.liste || 'SharePoint') + '</span>'
-              + '<div class="lb-note-txt">' + lignes + '</div></div>';
+              + '<div class="lb-note-txt">' + lignes + '</div>'
+              + (fichiers ? '<div class="lb-sp-fichiers">' + fichiers + '</div>' : '')
+              + photos + '</div>';
   }).join('');
 
   var addNoteHtml = isAdmin
@@ -243,6 +251,20 @@ function logbookWireNoteButtons(){
           f.addEventListener('change', function(){
                 var c = f.closest('.lb-addnote-wrap').querySelector('.lb-addnote-count');
                 if(c) c.textContent = f.files.length ? (f.files.length + ' photo(s) choisie(s)') : '';
+          });
+    });
+    // Photos SharePoint : chargees a la demande (elles sont stockees a part).
+    document.querySelectorAll('#lb-panel .lb-sp-photos-btn').forEach(function(b){
+          b.addEventListener('click', function(){
+                var box = b.nextElementSibling;
+                b.disabled = true; b.textContent = 'Chargement...';
+                db.ref('sharepoint_photos/' + b.dataset.cle + '/' + b.dataset.id).once('value').then(function(s){
+                      var liste = s.val() || [];
+                      if(!Array.isArray(liste)) liste = Object.keys(liste).map(function(k){ return liste[k]; });
+                      box.innerHTML = liste.length ? liste.map(function(src){ return '<img class="lb-photo" src="' + src + '" alt="Photo">'; }).join('') : '<span style="font-size:11px;color:var(--tx3)">Photos non importees</span>';
+                      box.querySelectorAll('.lb-photo').forEach(function(img){ img.addEventListener('click', function(){ logbookVoirPhoto(img.src); }); });
+                      b.style.display = 'none';
+                }).catch(function(e){ b.disabled = false; b.textContent = 'Erreur - reessayer'; console.error(e); });
           });
     });
     document.querySelectorAll('#lb-panel .lb-photo').forEach(function(img){
