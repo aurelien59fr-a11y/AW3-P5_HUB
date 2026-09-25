@@ -75,6 +75,8 @@ function importerSharepointNotesFichier(input){
   msg('Lecture de ' + fichiers.length + ' fichier(s)...');
   Promise.all(fichiers.map(function(f){ return f.text().then(JSON.parse); }))
     .then(function(envs){
+      // un fichier peut contenir une liste ou un tableau de listes (Inpak + Productie)
+      envs = [].concat.apply([], envs.map(function(e){ return Array.isArray(e) ? e : [e]; }));
       return envs.reduce(function(p, env){
         return p.then(function(acc){ return importerSharepointNotes(env).then(function(r){ acc.push(r); return acc; }); });
       }, Promise.resolve([]));
