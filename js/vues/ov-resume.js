@@ -81,6 +81,8 @@ function ovWeekendAbsences(weekend){
     }
     dayAbs.forEach(function(a){
       if(!byPerson[a.n]) byPerson[a.n]=[];
+      // une personne peut avoir 2 absences qui se chevauchent : un seul jour affiche
+      if(byPerson[a.n].some(function(e){return e.date===ddmm(day);})) return;
       byPerson[a.n].push({jour:DOW[day.getDay()],date:ddmm(day),t:a.t});
     });
   });
