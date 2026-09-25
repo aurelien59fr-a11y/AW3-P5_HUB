@@ -23,7 +23,7 @@ function ptKey(nom, date, type, heure){
    (une par script lance) : colle-les toutes en une seule fois dans un
    tableau JSON, ou une par une, chaque "Importer tout" les traite. */
 
-var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk', 'protime_pointages', 'ncp'];
+var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk', 'protime_pointages', 'ncp', 'sharepoint_notes'];
 
 function importerGlobal(){
   var txt = document.getElementById('global-import-txt');
@@ -70,6 +70,10 @@ function importerGlobal(){
       document.getElementById('ncp-import-txt').value = JSON.stringify(env.data || []);
       importerNCP();
       traites.push('NCP Qualite');
+    } else if(env.source === 'sharepoint_notes'){
+      if(typeof importerSharepointNotes !== 'function'){ ignores.push('sharepoint_notes (module non charge)'); return; }
+      importerSharepointNotes(env).catch(function(e){ err.style.color = '#ef4444'; err.textContent = 'Notes SharePoint : ' + e.message; });
+      traites.push('Notes SharePoint (' + ((env.data || []).length) + ')');
     }
   });
 
