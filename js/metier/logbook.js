@@ -16,6 +16,7 @@
 
 var LOGBOOK_DATE_DEBUT = '2026-01-01';
 var LOGBOOK_NOTES = {}; // {id: {poste, date, auteur, texte, horodatage_saisie}}
+var LOGBOOK_SP_NOTES = []; // notes importees des listes SharePoint (imports/sharepoint.js)
 
 function logbookApresDebut(dateISO){
     return !!dateISO && dateISO >= LOGBOOK_DATE_DEBUT;
@@ -31,6 +32,20 @@ function loadLogbookNotes(){
     // La regle Firebase (database.rules.json) bloque deja les autres roles ;
     // on n'ecoute meme pas le noeud pour eviter une erreur "permission denied".
     if(!currentUser || currentUser.role !== 'admin'){ LOGBOOK_NOTES = {}; return; }
+    db.ref('sharepoint_notes').on('value', function(snap){
+          var tout = snap.val() || {}, liste = [];
+          Object.keys(tout).forEach(function(cle){
+                var l = tout[cle] || {}, titre = (l.info && l.info.titre) || cle;
+                Object.keys(l.items || {}).forEach(function(id){
+                      var n = l.items[id];
+                      if(n && n.date) liste.push(Object.assign({ liste: titre }, n));
+                });
+          });
+          LOGBOOK_SP_NOTES = liste;
+          if(typeof buildLogbook === 'function' && document.getElementById('pane-lb') && document.getElementById('pane-lb').classList.contains('on')) buildLogbook();
+    }, function(error){
+          console.error('[Logbook] Erreur de lecture notes SharePoint :', error);
+    });
     db.ref('logbook_notes').on('value', function(snap){
           LOGBOOK_NOTES = snap.val() || {};
           if(typeof buildLogbook === 'function') buildLogbook();
@@ -182,6 +197,28 @@ function logbookNotesDuPoste(dateISO, poste){
       .sort(function(x, y){ return String(y.horodatage_saisie).localeCompare(String(x.horodatage_saisie)); });
 }
 
+/* Notes SharePoint (operateurs / coordinateurs) rattachees a ce poste :
+   date + heure de la note -> poste via equipeReelle(), comme les NCP.
+   Une note de 02h le dimanche appartient a la nuit du samedi.
+   Sans heure : mise sur le premier poste du jour. */
+function logbookJourProduction(dateISO, heure){
+    // Avant 05h, on est encore dans la nuit commencee la veille.
+    var hh = heure ? parseInt(String(heure).split(':')[0], 10) : NaN;
+    if(!(hh < 5)) return dateISO;
+    var d = new Date(dateISO + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function logbookSpNotesDuPoste(dateISO, poste){
+    return LOGBOOK_SP_NOTES.filter(function(n){
+          if(logbookJourProduction(n.date, n.heure) !== dateISO) return false;
+          var p = n.heure ? logbookPosteDe(n.date, n.heure) : null;
+          if(!p){ var postes = logbookPostesDuJour(dateISO); p = postes.length ? postes[0].poste : null; }
+          return p === poste;
+    }).sort(function(a, b){ return (a.date + a.heure).localeCompare(b.date + b.heure); });
+}
+
 /* ============================================================
    Fiche complete d'un poste : point d'entree unique pour la vue. */
 function logbookPosteResume(dateISO, poste){
@@ -197,7 +234,8 @@ function logbookPosteResume(dateISO, poste){
           arretsAvecRaison: arrets.avecRaison,
           arretsMicro: arrets.microstops,
           arretsDureeTotale: arrets.dureeTotale,
-          notes: logbookNotesDuPoste(dateISO, poste)
+          notes: logbookNotesDuPoste(dateISO, poste),
+          notesSP: logbookSpNotesDuPoste(dateISO, poste)
     };
 }
 
@@ -246,6 +284,15 @@ function logbookIndicateursAnnee(annee){
                 out[k].ncp++;
         });
   }
+
+  // Jours avec au moins une note (manuelle ou SharePoint) -> marque bleue.
+  function marquerNote(k){
+        if(!k || k < debutEffectif || k > finAnnee) return;
+        if(!out[k]) out[k] = { abs: false, ncp: 0 };
+        out[k].notes = (out[k].notes || 0) + 1;
+  }
+  Object.keys(LOGBOOK_NOTES).forEach(function(id){ marquerNote((LOGBOOK_NOTES[id] || {}).date); });
+  LOGBOOK_SP_NOTES.forEach(function(n){ marquerNote(logbookJourProduction(n.date, n.heure)); });
 
   return out;
 }
