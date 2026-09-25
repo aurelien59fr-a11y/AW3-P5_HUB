@@ -37,6 +37,7 @@ function buildLogbook(){
       +   '<div class="lb-legend">'
       +     '<span><span class="lb-dot lb-dot-red"></span> absence</span>'
       +     '<span><span class="lb-dot lb-dot-amber"></span> NCP</span>'
+      +     '<span><span class="lb-note-mark"></span> note</span>'
       +   '</div>'
       +   '<button id="lb-cmp-toggle" class="lb-cmp-btn' + (LOGBOOK_CMP_MODE ? ' active' : '') + '">Comparer 2 jours</button>'
       + '</div>'
@@ -75,6 +76,7 @@ function buildLogbook(){
                                         if(ev.abs && ev.ncp) el.classList.add('lb-has-both');
                                         else if(ev.abs) el.classList.add('lb-has-abs');
                                         else if(ev.ncp) el.classList.add('lb-has-ncp');
+                                        if(ev.notes) el.classList.add('lb-has-note');
                             }
                             var dateObj = new Date(LOGBOOK_ANNEE, m, d);
                             if(dateObj.toDateString() === today.toDateString()) el.classList.add('lb-today');
@@ -170,6 +172,17 @@ function logbookPosteCardHtml(resume, debut, fin){
               + '</div>';
   }).join('');
 
+  var spHtml = (resume.notesSP || []).map(function(n){
+        var esc = function(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
+        var lignes = Object.keys(n.valeurs || {}).map(function(k){
+              return '<div><span class="lb-sp-k">' + esc(k) + ' :</span> ' + esc(n.valeurs[k]) + '</div>';
+        }).join('');
+        var quand = (n.date !== resume.date ? n.date.split('-').reverse().slice(0,2).join('/') + ' ' : '') + (n.heure || '');
+        return '<div class="note lb-sp-note"><b>' + esc(n.auteur || 'SharePoint') + (quand ? ' - ' + quand : '') + '</b>'
+              + '<span class="lb-sp-src">' + esc(n.liste || 'SharePoint') + '</span>'
+              + '<div class="lb-note-txt">' + lignes + '</div></div>';
+  }).join('');
+
   var addNoteHtml = isAdmin
       ? '<div class="lb-addnote-wrap">'
           + '<textarea class="lb-addnote-input" placeholder="Ajouter une note / observation..." data-date="' + resume.date + '" data-poste="' + resume.poste + '"></textarea>'
@@ -182,6 +195,7 @@ function logbookPosteCardHtml(resume, debut, fin){
   return '<div class="poste">'
       + '<div class="poste-head"><span class="poste-tag">' + resume.poste + '</span><span class="poste-heure">' + debut + '-' + fin + '</span></div>'
       + '<div class="badges">' + badges.join('') + '</div>'
+      + spHtml
       + notesHtml
       + addNoteHtml
       + '</div>';
