@@ -497,6 +497,11 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 .lb-day.lb-has-abs::after{background:var(--red)}
 .lb-day.lb-has-ncp::after{background:var(--amber)}
 .lb-day.lb-has-both::after{background:var(--red);box-shadow:3px 0 0 var(--amber)}
+.lb-day.lb-has-note::before{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:1px;background:var(--blue)}
+.lb-note-mark{display:inline-block;width:7px;height:7px;border-radius:1px;background:var(--blue)}
+#lb-overlay .lb-sp-note{border-style:solid;border-left:3px solid var(--blue)}
+.lb-sp-src{float:right;font-size:10.5px;color:var(--tx3);font-family:var(--mo)}
+.lb-sp-k{color:var(--tx3)}
 .lb-day.lb-today{outline:1px solid var(--blue);outline-offset:-1px}
 .lb-day.lb-cmp-picked{outline:2px solid var(--blue);outline-offset:-2px;color:var(--tx)}
 
