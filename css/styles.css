@@ -386,6 +386,9 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
     display:none;position:absolute;left:56px;top:0;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;
     padding:6px;flex-direction:column;gap:2px;min-width:190px;box-shadow:0 8px 28px rgba(0,0,0,.45);z-index:60;
   }
+  /* Dernier groupe (Plus : Recrutement, Admin) en bas de la barre : le
+     panneau s'ouvre vers le HAUT, sinon il sort de l'ecran. */
+  .rail-group:last-child .rail-panel{top:auto;bottom:0}
   .rail-panel-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;color:var(--tx2);font-size:13px;cursor:pointer}
   .rail-panel-item:hover{background:var(--bg2);color:var(--tx)}
   .rail-panel-item.on{color:var(--blue)}
