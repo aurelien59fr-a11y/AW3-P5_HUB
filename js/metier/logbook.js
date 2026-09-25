@@ -38,7 +38,7 @@ function loadLogbookNotes(){
                 var l = tout[cle] || {}, titre = (l.info && l.info.titre) || cle;
                 Object.keys(l.items || {}).forEach(function(id){
                       var n = l.items[id];
-                      if(n && n.date) liste.push(Object.assign({ liste: titre }, n));
+                      if(n && n.date) liste.push(Object.assign({ liste: titre, cle: cle }, n));
                 });
           });
           LOGBOOK_SP_NOTES = liste;
@@ -221,8 +221,23 @@ function logbookSpNotesDuPoste(dateISO, poste){
 
 /* ============================================================
    Fiche complete d'un poste : point d'entree unique pour la vue. */
+/* Premiere annee affichable : 2026, ou plus tot si des notes SharePoint
+   plus anciennes ont ete importees (historique depuis 2022). */
+function logbookAnneeMin(){
+    var min = Number(LOGBOOK_DATE_DEBUT.slice(0, 4));
+    LOGBOOK_SP_NOTES.forEach(function(n){ var a = Number(String(n.date).slice(0, 4)); if(a && a < min) min = a; });
+    return min;
+}
+
 function logbookPosteResume(dateISO, poste){
-    if(!logbookApresDebut(dateISO)) return null;
+    // Avant LOGBOOK_DATE_DEBUT : seulement les notes (pas d'agregats
+    // absences/NCP/arrets, juges pas fiables avant 2026).
+    if(!logbookApresDebut(dateISO)) return {
+          date: dateISO, poste: poste, absences: [], ncp: [], ncpSansPostePrecis: [],
+          arretsAvecRaison: [], arretsMicro: [], arretsDureeTotale: 0, avantDebut: true,
+          notes: logbookNotesDuPoste(dateISO, poste),
+          notesSP: logbookSpNotesDuPoste(dateISO, poste)
+    };
     var ncp = logbookNcpDuPoste(dateISO, poste);
     var arrets = logbookArretsDuPoste(dateISO, poste);
     return {
@@ -255,6 +270,15 @@ function logbookIndicateursAnnee(annee){
     var out = {}; // { 'YYYY-MM-DD': {abs:bool, ncp:number} }
   var debutAnnee = annee + '-01-01', finAnnee = annee + '-12-31';
     var debutEffectif = debutAnnee > LOGBOOK_DATE_DEBUT ? debutAnnee : LOGBOOK_DATE_DEBUT;
+    // Notes (manuelles + SharePoint) : marquees sur toute l'annee, y compris
+    // avant LOGBOOK_DATE_DEBUT (l'historique SharePoint remonte a 2022).
+    function marquerNote(k){
+          if(!k || k < debutAnnee || k > finAnnee) return;
+          if(!out[k]) out[k] = { abs: false, ncp: 0 };
+          out[k].notes = (out[k].notes || 0) + 1;
+    }
+    Object.keys(LOGBOOK_NOTES).forEach(function(id){ marquerNote((LOGBOOK_NOTES[id] || {}).date); });
+    LOGBOOK_SP_NOTES.forEach(function(n){ marquerNote(logbookJourProduction(n.date, n.heure)); });
     if(debutEffectif > finAnnee) return out;
 
   if(typeof ABS !== 'undefined'){
@@ -284,15 +308,6 @@ function logbookIndicateursAnnee(annee){
                 out[k].ncp++;
         });
   }
-
-  // Jours avec au moins une note (manuelle ou SharePoint) -> marque bleue.
-  function marquerNote(k){
-        if(!k || k < debutEffectif || k > finAnnee) return;
-        if(!out[k]) out[k] = { abs: false, ncp: 0 };
-        out[k].notes = (out[k].notes || 0) + 1;
-  }
-  Object.keys(LOGBOOK_NOTES).forEach(function(id){ marquerNote((LOGBOOK_NOTES[id] || {}).date); });
-  LOGBOOK_SP_NOTES.forEach(function(n){ marquerNote(logbookJourProduction(n.date, n.heure)); });
 
   return out;
 }
