@@ -81,7 +81,7 @@ function ovWeekendAbsences(weekend){
     }
     dayAbs.forEach(function(a){
       if(!byPerson[a.n]) byPerson[a.n]=[];
-      byPerson[a.n].push({jour:DOW[day.getDay()],t:a.t});
+      byPerson[a.n].push({jour:DOW[day.getDay()],date:ddmm(day),t:a.t});
     });
   });
   return byPerson;
@@ -185,14 +185,17 @@ function ovBuildWeekendAbs(){
   if(!names.length){ el.innerHTML=ovVideMsg('\u2713 \u00c9quipe compl\u00e8te'); return; }
   el.innerHTML = names.sort().map(function(n){
     var entries=byPerson[n];
-    var jours=entries.map(function(e){return e.jour;});
+    // Jour + date a cote du nom (ex. "Sam. 26/09 + Dim. 27/09").
+    var jours=entries.map(function(e){return e.jour.slice(0,3)+'. '+(e.date||'');});
     var t0=entries[0].t;
     var tc = t0==='ziek'?'#ef4444':t0==='verlof'?'#3b82f6':'#10b981';
     var tl = t0==='ziek'?'Maladie':t0==='verlof'?'Cong\u00e9':'R\u00e9cup';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd2)">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+n+'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--tx1)">'+n+'</span>'
+      +'<span style="font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums">'+jours.join(' + ')+'</span>'
+      +'</div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<span style="font-size:12px;color:var(--tx3)">'+jours.join(' + ')+'</span>'
       +'<span style="font-size:11px;padding:2px 9px;border-radius:99px;background:'+tc+'22;color:'+tc+';border:1px solid '+tc+'44">'+tl+'</span>'
       +'</div></div>';
   }).join('');
