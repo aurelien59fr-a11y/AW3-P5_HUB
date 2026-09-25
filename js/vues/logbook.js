@@ -189,30 +189,44 @@ function logbookLangueDe(texte){
           return ['fr','nl','en'].indexOf(l) !== -1 ? l : 'nl';
     }).catch(function(){ return 'nl'; });
 }
+// Reponses courtes des listes de choix (trop courtes pour le traducteur).
+var LOGBOOK_SP_COURTS = {
+    'ja': { fr: 'Oui', nl: 'Ja', en: 'Yes' }, 'oui': { fr: 'Oui', nl: 'Ja', en: 'Yes' }, 'yes': { fr: 'Oui', nl: 'Ja', en: 'Yes' },
+    'nee': { fr: 'Non', nl: 'Nee', en: 'No' }, 'non': { fr: 'Non', nl: 'Nee', en: 'No' }, 'no': { fr: 'Non', nl: 'Nee', en: 'No' },
+    'ok': { fr: 'OK', nl: 'OK', en: 'OK' }, 'niet ok': { fr: 'Pas OK', nl: 'Niet OK', en: 'Not OK' }, 'pas ok': { fr: 'Pas OK', nl: 'Niet OK', en: 'Not OK' },
+    'andere': { fr: 'Autre', nl: 'Andere', en: 'Other' }, 'autre': { fr: 'Autre', nl: 'Andere', en: 'Other' }
+};
+function logbookTraduireTexte(texte, src, dst){
+    if(src === dst) return Promise.resolve(texte);
+    return logbookTraducteur(src, dst).then(function(tr){
+          // ligne par ligne pour garder la mise en forme
+          return Promise.all(String(texte).split('\n').map(function(l){ return l.trim() ? tr.translate(l) : Promise.resolve(l); }))
+                .then(function(ls){ return ls.join('\n'); });
+    });
+}
 function logbookTraduireNote(n, dst){
-    var chemin = 'sharepoint_trad/' + n.cle + '/' + n.id + '/' + dst;
+    var chemin = 'sharepoint_trad2/' + n.cle + '/' + n.id + '/' + dst;
     return db.ref(chemin).once('value').then(function(s){
           if(s.val()) return s.val();
           if(typeof Translator === 'undefined') throw new Error('Traduction non disponible dans ce navigateur (utilise Chrome ou Edge a jour).');
-          var champs = logbookSpChamps(n), cles = Object.keys(champs);
-          var tout = cles.map(function(k){ return champs[k]; }).join('\n');
-          return logbookLangueDe(tout).then(function(src){
-                if(src === dst) return champs;
-                return logbookTraducteur(src, dst).then(function(tr){
-                      var res = {};
-                      return cles.reduce(function(p, k){
-                            return p.then(function(){
-                                  if(LOGBOOK_SP_NON_TRAD.indexOf(k) !== -1){ res[k] = champs[k]; return; }
-                                  // ligne par ligne pour garder la mise en forme
-                                  return Promise.all(champs[k].split('\n').map(function(l){ return l.trim() ? tr.translate(l) : Promise.resolve(l); }))
-                                        .then(function(ls){ res[k] = ls.join('\n'); });
-                            });
-                      }, Promise.resolve()).then(function(){ return res; });
+          var champs = logbookSpChamps(n), cles = Object.keys(champs), res = {};
+          // Chaque champ a sa propre langue (les notes melangent FR et NL).
+          // Les valeurs tres courtes ("Non", "OK", chiffres) restent telles quelles.
+          return cles.reduce(function(p, k){
+                return p.then(function(){
+                      var v = champs[k];
+                      var libelle = logbookTraduireTexte(k, 'nl', dst).catch(function(){ return k; });
+                      var court = LOGBOOK_SP_COURTS[v.trim().toLowerCase()];
+                      var valeur = court ? Promise.resolve(court[dst])
+                            : (LOGBOOK_SP_NON_TRAD.indexOf(k) !== -1 || v.replace(/[^A-Za-zÀ-ÿ]/g, '').length < 12)
+                            ? Promise.resolve(v)
+                            : logbookLangueDe(v).then(function(src){ return logbookTraduireTexte(v, src, dst); });
+                      return Promise.all([libelle, valeur]).then(function(x){
+                            res[String(x[0]).replace(/[.#$\[\]\/]/g, ' ').trim() || k] = x[1];
+                      });
                 });
-          }).then(function(res){
-                var propre = {};
-                Object.keys(res).forEach(function(k){ propre[k.replace(/[.#$\[\]\/]/g, ' ')] = res[k]; });
-                return db.ref(chemin).set(propre).then(function(){ return propre; });
+          }, Promise.resolve()).then(function(){
+                return db.ref(chemin).set(res).then(function(){ return res; });
           });
     });
 }
@@ -352,7 +366,12 @@ function logbookWireNoteButtons(){
                 } catch(e){}
                 logbookTraduireNote(n, b.dataset.l).then(function(res){
                       txt.innerHTML = logbookSpLignesHtml(res); etat.textContent = '';
-                }).catch(function(e){ console.error('[Logbook] traduction', e); etat.textContent = e.message || 'Erreur de traduction'; });
+                }).catch(function(e){
+                      console.error('[Logbook] traduction', e);
+                      etat.textContent = /create translator|download/i.test(e.message || '')
+                            ? 'Premiere utilisation : le navigateur telecharge la langue, reclique dans quelques secondes.'
+                            : (e.message || 'Erreur de traduction');
+                });
           });
     });
     document.querySelectorAll('#lb-panel .lb-photo').forEach(function(img){
