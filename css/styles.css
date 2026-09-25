@@ -502,6 +502,10 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 #lb-overlay .lb-sp-note{border-style:solid;border-left:3px solid var(--blue)}
 .lb-sp-src{float:right;font-size:10.5px;color:var(--tx3);font-family:var(--mo)}
 .lb-sp-k{color:var(--tx3)}
+.lb-sp-fichiers{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px}
+.lb-sp-fichier{color:var(--blue)}
+.lb-sp-photos-btn{margin-top:8px;background:transparent;border:1px solid var(--bd2);border-radius:6px;color:var(--tx2);font-size:11.5px;padding:4px 10px;cursor:pointer}
+.lb-sp-photos-btn:hover{border-color:var(--blue);color:var(--tx)}
 .lb-day.lb-today{outline:1px solid var(--blue);outline-offset:-1px}
 .lb-day.lb-cmp-picked{outline:2px solid var(--blue);outline-offset:-2px;color:var(--tx)}
 
