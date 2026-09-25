@@ -161,10 +161,43 @@ function logbookSpChamps(n){
     });
     return out;
 }
+/* Mise en forme lisible d'une note SharePoint :
+   - champs courts (Afgehandeld, Operator...) -> petites etiquettes en ligne
+   - champs longs -> bloc titre + texte, une ligne par horodatage
+     ("*14u28 ...", "05h45: ...") pour que le deroule du poste se lise
+     comme une chronologie, et repli au-dela de ~8 lignes. */
+function logbookSpDecouper(v){
+    return String(v)
+          .replace(/\s*\*\s*(?=\d{1,2}\s*[uUhH:.]\s*\d{2})/g, '\n')
+          .replace(/([^\n])\s*(?=\b\d{1,2}[hHuU]\d{2}\s*[:\-])/g, '$1\n')
+          .split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+}
 function logbookSpLignesHtml(champs){
-    return Object.keys(champs).map(function(k){
-          return '<div><span class="lb-sp-k">' + logbookEsc(k) + ' :</span> ' + logbookEsc(champs[k]) + '</div>';
-    }).join('');
+    var courts = [], longs = [];
+    Object.keys(champs).forEach(function(k){
+          var v = String(champs[k]);
+          (v.length <= 45 && v.indexOf('\n') === -1 ? courts : longs).push(k);
+    });
+    var html = '';
+    if(courts.length){
+          html += '<div class="lb-sp-meta">' + courts.map(function(k){
+                return '<span class="lb-sp-chip"><span class="lb-sp-k">' + logbookEsc(k) + '</span> ' + logbookEsc(champs[k]) + '</span>';
+          }).join('') + '</div>';
+    }
+    longs.forEach(function(k){
+          var lignes = logbookSpDecouper(champs[k]);
+          var corps = lignes.map(function(l){
+                var m = l.match(/^(\d{1,2}\s*[uUhH:.]\s*\d{2})\s*(?::|-\s)?\s*(.*)$/);
+                return m ? '<div class="lb-sp-ligne"><span class="lb-sp-h">' + logbookEsc(m[1].replace(/\s/g, '')) + '</span><span>' + logbookEsc(m[2]) + '</span></div>'
+                         : '<div class="lb-sp-ligne"><span></span><span>' + logbookEsc(l) + '</span></div>';
+          }).join('');
+          var long = lignes.length > 8 || String(champs[k]).length > 700;
+          html += '<div class="lb-sp-bloc' + (long ? ' lb-sp-replie' : '') + '"><div class="lb-sp-titre">' + logbookEsc(k) + '</div>'
+                + '<div class="lb-sp-corps">' + corps + '</div>'
+                + (long ? '<button class="lb-sp-plus" onclick="this.parentNode.classList.toggle(\'lb-sp-replie\');this.textContent=this.parentNode.classList.contains(\'lb-sp-replie\')?\'Lire la suite\':\'Replier\'">Lire la suite</button>' : '')
+                + '</div>';
+    });
+    return html;
 }
 // Champs a ne pas traduire : noms de personnes, choix de ploeg.
 var LOGBOOK_SP_NON_TRAD = ['Ploegchef', 'Title', 'Titre'];
@@ -304,6 +337,7 @@ function logbookOpenDay(dateISO){
           return logbookPosteCardHtml(resume, p.debut, p.fin);
     }).join('');
     document.getElementById('lb-panel-body').innerHTML = '<div class="postes">' + body + '</div>';
+    document.getElementById('lb-panel').classList.toggle('lb-wide', body.indexOf('lb-sp-note') !== -1);
 
   logbookWireNoteButtons();
     document.getElementById('lb-overlay').classList.add('open');
