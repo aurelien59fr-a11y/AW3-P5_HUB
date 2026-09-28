@@ -23,7 +23,28 @@ function ptKey(nom, date, type, heure){
    (une par script lance) : colle-les toutes en une seule fois dans un
    tableau JSON, ou une par une, chaque "Importer tout" les traite. */
 
-var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk', 'protime_pointages', 'ncp', 'sharepoint_notes'];
+var IMPORT_GLOBAL_SOURCES_CONNUES = ['grafana_arrets_inpak', 'grafana_bulk', 'protime_pointages', 'ncp', 'sharepoint_notes', 'protime_planning'];
+
+/* ---- Detection automatique de la source ---------------------------------
+   Permet de coller un JSON "brut" (tel quel, sans l'enveloppe {source,data})
+   dans Import global : on devine le type a partir des cles presentes, en se
+   basant sur les memes signatures que chaque import verifie deja de son
+   cote (importerArretsInpak, importerBulk, importerPointages, importerNCP,
+   applyProtimeImport). Ne devine que si le format est sans ambiguite ;
+   retourne null si rien ne correspond, l'appelant garde alors son message
+   "non reconnu" habituel. */
+function detecterSourceImport(obj){
+  if(Array.isArray(obj)){
+    if(obj.length && obj[0] && typeof obj[0] === 'object' && obj[0].notification !== undefined) return 'ncp';
+    return null;
+  }
+  if(!obj || typeof obj !== 'object') return null;
+  if(obj.avecRaison !== undefined || obj.microstops !== undefined) return 'grafana_arrets_inpak';
+  if(obj.standaard !== undefined || obj.noodafvoer !== undefined || obj.bijlijn1 !== undefined) return 'grafana_bulk';
+  if(obj.retards !== undefined || obj.pointages !== undefined || obj.anomaliesPointage !== undefined || obj.absences !== undefined) return 'protime_pointages';
+  if(obj.employees !== undefined) return 'protime_planning';
+  return null;
+}
 
 function importerGlobal(){
   var txt = document.getElementById('global-import-txt');
@@ -37,19 +58,40 @@ function importerGlobal(){
   try { parsed = JSON.parse(raw); }
   catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
 
-  var enveloppes = Array.isArray(parsed) ? parsed : [parsed];
+  // Un tableau peut etre soit une liste d'enveloppes {source,data} (on garde
+  // le comportement existant), soit directement une liste brute de fiches
+  // NCP (pas d'enveloppe) : dans ce dernier cas on la traite comme un seul
+  // bloc, pas comme un tableau d'enveloppes a iterer.
+  var enveloppes;
+  if(Array.isArray(parsed) && parsed.length && parsed.every(function(x){ return x && typeof x === 'object' && typeof x.source === 'string'; })){
+    enveloppes = parsed;
+  } else {
+    enveloppes = [{ source: (parsed && parsed.source) || null, data: (parsed && parsed.source && parsed.data !== undefined) ? parsed.data : parsed }];
+  }
   if(!enveloppes.length){ err.textContent = 'Fichier vide.'; return; }
 
   var traites = [];
   var ignores = [];
 
   enveloppes.forEach(function(env){
-    if(!env || !env.source){ ignores.push('(enveloppe sans champ "source")'); return; }
+    if(!env) return;
+    if(!env.source){
+      var devine = detecterSourceImport(env.data);
+      if(!devine){ ignores.push('(format non reconnu -- colle le JSON tel qu\'il sort du script, sans le modifier)'); return; }
+      env = { source: devine, data: env.data };
+    }
     if(IMPORT_GLOBAL_SOURCES_CONNUES.indexOf(env.source) === -1){
       ignores.push(env.source + ' (source non geree par l\'import global pour l\'instant)');
       return;
     }
-    if(env.source === 'grafana_arrets_inpak'){
+    if(env.source === 'protime_planning'){
+      if(typeof previewProtimeImport !== 'function'){ ignores.push('protime_planning (module Protime non charge)'); return; }
+      document.getElementById('protime-paste').value = JSON.stringify(env.data || {});
+      previewProtimeImport();
+      var box = document.getElementById('protime-import-box');
+      if(box && box.scrollIntoView) box.scrollIntoView({behavior:'smooth', block:'start'});
+      traites.push('Planning Protime (apercu a verifier plus bas avant de confirmer)');
+    } else if(env.source === 'grafana_arrets_inpak'){
       if(typeof importerArretsInpak !== 'function'){ ignores.push('grafana_arrets_inpak (module Arrets Inpak non charge)'); return; }
       document.getElementById('arrets-import-txt').value = JSON.stringify(env.data || {});
       importerArretsInpak();
