@@ -253,7 +253,7 @@ var I18N={
     arr_bulk_m_rec:'Jour le plus charge en bulk', arr_bulk_m_eq:'Filtre equipe actif',
     arr_bulk_m_eq2:'seuls les releves des heures ou la selection etait en poste sont comptes.',
     arr_bulk_popup:'Autorise les fenetres pop-up pour imprimer le tableau.',
-    arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana',
+    arr_btn_diag:'Diagnostiquer les doublons', arr_btn_clean:'Nettoyer les doublons', arr_btn_import:'Importer Grafana', go_admin_import:'Importer (Admin)',
     filter_all_fem:'Toutes', arr_p5_moi:'P5 (moi)', col_operator:'Operateur',
     arr_search_title:'Recherche precise', arr_search_from:'Du',
     arr_search_to:'Au (optionnel — laisse vide pour un seul jour)',
@@ -372,7 +372,7 @@ var I18N={
     comptes_emp_title:'Comptes employés',
     ncp_subtitle:'Non-conformités Inpak et Production — AW1, AW2, AW3', ncp_btn_import:'⇓ Importer données NCP',
     ncp_empty_title:'Aucune donnée NCP pour le moment',
-    ncp_empty_desc:'Clique sur "Importer données NCP" ci-dessus et colle le contenu du fichier NCP_dataset_complet.json pour remplir cet onglet.',
+    ncp_empty_desc:'Va dans Admin et colle le contenu du fichier NCP_dataset_complet.json pour remplir cet onglet.',
     ncp_kpi_total:'Total NCP', ncp_kpi_prod:'Production', ncp_kpi_tonnes:'Tonnage bloqué', ncp_kpi_tonnes_meta:'total période filtrée',
     ncp_kpi_debloque:'NCP débloqués', ncp_kpi_sl_inpak:'NCP hors shift · Inpak', ncp_kpi_sl_prod:'NCP hors shift · Prod',
     ncp_periode_label:'Période', ncp_preset_tout:'Tout', ncp_preset_mois:'Mois en cours', ncp_preset_30:'30 jours',
@@ -515,7 +515,7 @@ var I18N={
     arr_bulk_m_rec:'Zwaarste bulkdag', arr_bulk_m_eq:'Actieve ploegfilter',
     arr_bulk_m_eq2:'enkel de metingen van de uren waarop de selectie aan het werk was worden geteld.',
     arr_bulk_popup:'Sta pop-upvensters toe om de tabel af te drukken.',
-    arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren',
+    arr_btn_diag:'Duplicaten diagnosticeren', arr_btn_clean:'Duplicaten opruimen', arr_btn_import:'Grafana importeren', go_admin_import:'Importeren (Admin)',
     filter_all_fem:'Alle', arr_p5_moi:'P5 (ik)', col_operator:'Operator',
     arr_search_title:'Precieze zoekopdracht', arr_search_from:'Van',
     arr_search_to:'Tot (optioneel — laat leeg voor één dag)',
@@ -634,7 +634,7 @@ var I18N={
     comptes_emp_title:'Medewerkersaccounts',
     ncp_subtitle:'Non-conformiteiten Inpak en Productie — AW1, AW2, AW3', ncp_btn_import:'⇓ NCP-gegevens importeren',
     ncp_empty_title:'Nog geen NCP-gegevens',
-    ncp_empty_desc:'Klik hierboven op "NCP-gegevens importeren" en plak de inhoud van het bestand NCP_dataset_complet.json om dit tabblad te vullen.',
+    ncp_empty_desc:'Ga naar Admin en plak de inhoud van het bestand NCP_dataset_complet.json om dit tabblad te vullen.',
     ncp_kpi_total:'Totaal NCP', ncp_kpi_prod:'Productie', ncp_kpi_tonnes:'Geblokkeerde tonnage', ncp_kpi_tonnes_meta:'totaal gefilterde periode',
     ncp_kpi_debloque:'Vrijgegeven NCP', ncp_kpi_sl_inpak:'NCP buiten shift · Inpak', ncp_kpi_sl_prod:'NCP buiten shift · Prod',
     ncp_periode_label:'Periode', ncp_preset_tout:'Alles', ncp_preset_mois:'Deze maand', ncp_preset_30:'30 dagen',
@@ -777,7 +777,7 @@ var I18N={
     arr_bulk_m_rec:'Busiest bulk day', arr_bulk_m_eq:'Active team filter',
     arr_bulk_m_eq2:'only readings from hours when the selection was on shift are counted.',
     arr_bulk_popup:'Allow pop-up windows to print the table.',
-    arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana',
+    arr_btn_diag:'Diagnose duplicates', arr_btn_clean:'Clean up duplicates', arr_btn_import:'Import Grafana', go_admin_import:'Import (Admin)',
     filter_all_fem:'All', arr_p5_moi:'P5 (me)', col_operator:'Operator',
     arr_search_title:'Precise search', arr_search_from:'From',
     arr_search_to:'To (optional — leave empty for a single day)',
@@ -896,7 +896,7 @@ var I18N={
     comptes_emp_title:'Employee accounts',
     ncp_subtitle:'Inpak and Production non-conformities — AW1, AW2, AW3', ncp_btn_import:'⇓ Import NCP data',
     ncp_empty_title:'No NCP data yet',
-    ncp_empty_desc:'Click "Import NCP data" above and paste the content of the NCP_dataset_complet.json file to fill this tab.',
+    ncp_empty_desc:'Go to Admin and paste the content of the NCP_dataset_complet.json file to fill this tab.',
     ncp_kpi_total:'Total NCP', ncp_kpi_prod:'Production', ncp_kpi_tonnes:'Blocked tonnage', ncp_kpi_tonnes_meta:'total filtered period',
     ncp_kpi_debloque:'Released NCP', ncp_kpi_sl_inpak:'NCP outside shift · Inpak', ncp_kpi_sl_prod:'NCP outside shift · Prod',
     ncp_periode_label:'Period', ncp_preset_tout:'All', ncp_preset_mois:'Current month', ncp_preset_30:'30 days',
@@ -2128,6 +2128,10 @@ var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','lb','formation
 // 23/09/2026 -- calendrier de synthese par poste (P1-P5), voir metier/logbook.js
 // et vues/logbook.js (Calendrier logbook - design.md dans Obsidian).
 var NAV_DIRECT = ['ov','pl','espace'];
+// Admin en rail desktop : ajoute a NAV_DIRECT uniquement pour le rail desktop
+// (voir buildDesktopRail) pour remonter l'icone en haut, sans toucher aux 5
+// emplacements fixes de la barre mobile (admin y reste dans "Plus").
+var NAV_DIRECT_RAIL = NAV_DIRECT.concat(['admin']);
 var NAV_GROUP_EQUIPE = ['br','formations','pt'];
 var NAV_GROUP_PROD = ['arrets','bulk','ncp','lb'];
 var NAV_GROUP_PLUS = ['recrutement','admin'];
@@ -2182,10 +2186,14 @@ function buildDesktopRail(){
       + '</div>';
   }
 
-  var direct = navGroupVisible(NAV_DIRECT).map(itemHtml).join('');
+  var direct = navGroupVisible(NAV_DIRECT_RAIL).map(itemHtml).join('');
   var equipe = groupHtml('equipe', NAV_GROUP_EQUIPE, MNAV_ICONS.group_equipe, t('rail_group_equipe'));
   var prod = groupHtml('prod', NAV_GROUP_PROD, MNAV_ICONS.group_prod, t('rail_group_prod'));
-  var plus = groupHtml('plus', NAV_GROUP_PLUS, MNAV_ICONS.group_plus, t('rail_group_plus'));
+  // 'admin' est deja affiche en direct ci-dessus (rail desktop) ; on l'exclut
+  // du panneau "Plus" pour ne pas le dupliquer. Reste dans NAV_GROUP_PLUS pour
+  // la barre mobile (buildMobileNav), ou il n'y a pas de rail direct pour lui.
+  var plusIdsRail = NAV_GROUP_PLUS.filter(function(id){ return id !== 'admin'; });
+  var plus = groupHtml('plus', plusIdsRail, MNAV_ICONS.group_plus, t('rail_group_plus'));
 
   rail.innerHTML =
     '<div class="rail-logo">AW3</div>'
