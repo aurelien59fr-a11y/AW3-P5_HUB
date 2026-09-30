@@ -6,7 +6,7 @@
    - Bump CACHE_VERSION a chaque deploiement pour forcer la mise a jour
 ============================================================ */
 
-const CACHE_VERSION = 'bradford-v100';
+const CACHE_VERSION = 'bradford-v101';
 const APP_SHELL = [
      './',
      './index.html',
@@ -30,7 +30,8 @@ const APP_SHELL = [
      './js/metier/bulk.js?v=1',
      './js/vues/bulk.js?v=2',
      './js/vues/planning.js?v=6',
-     './js/vues/formations.js?v=1',
+     './js/vues/formations.js?v=2',
+     './js/vues/attestation.js?v=1',
      './js/vues/pointages.js?v=2',
      './js/vues/admin.js?v=1',
      './js/vues/recrutement.js?v=1',
@@ -42,7 +43,8 @@ const APP_SHELL = [
      './manifest.json',
      './icons/icon-180.png',
      './icons/icon-192.png',
-     './icons/icon-512.png'
+     './icons/icon-512.png',
+     './icons/agristo-logo.png'
    ];
 
 // Domaines a ne JAMAIS mettre en cache (donnees live)
