@@ -280,18 +280,39 @@ function attImprimer(){
   var choisis = [];
   document.querySelectorAll('.att-cb:checked').forEach(function(cb){ choisis.push(membres[parseInt(cb.getAttribute('data-i'), 10)]); });
   if(!choisis.length){ document.getElementById('att-err').textContent = 'Coche au moins un participant.'; return; }
-  var w = window.open('', '_blank');
-  if(!w){ document.getElementById('att-err').textContent = 'Le navigateur a bloqué la fenêtre : autorise les pop-ups pour le dashboard.'; return; }
-  w.document.open();
-  w.document.write(attHtmlPage({
+  document.getElementById('att-err').textContent = '';
+  var html = attHtmlPage({
     titre: document.getElementById('att-titre').value.trim(),
     date: attDateFr(document.getElementById('att-date').value),
     service: document.getElementById('att-service').value.trim(),
     resp: document.getElementById('att-resp').value.trim(),
     dateCol: document.getElementById('att-date-col').checked,
     membres: choisis
-  }));
-  w.document.close();
+  });
+  // Impression via un cadre cache dans la page : pas de pop-up, donc jamais bloque
+  var old = document.getElementById('att-print-frame');
+  if(old) old.parentNode.removeChild(old);
+  var fr = document.createElement('iframe');
+  fr.id = 'att-print-frame';
+  fr.setAttribute('aria-hidden', 'true');
+  fr.style.cssText = 'position:fixed;left:-10000px;top:0;width:210mm;height:297mm;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  var d = fr.contentWindow.document;
+  d.open(); d.write(html); d.close();
+  var lance = false;
+  var imprimer = function(){
+    if(lance) return; lance = true;
+    try { fr.contentWindow.focus(); fr.contentWindow.print(); }
+    catch(e){ document.getElementById('att-err').textContent = 'Impression impossible : ' + e.message; }
+  };
+  var attendre = function(){
+    var img = d.querySelector('img');
+    var pImg = (img && !img.complete) ? new Promise(function(r){ img.onload = img.onerror = r; }) : Promise.resolve();
+    var pFont = (d.fonts && d.fonts.ready) ? d.fonts.ready : Promise.resolve();
+    Promise.all([pImg, pFont]).then(function(){ setTimeout(imprimer, 250); });
+    setTimeout(imprimer, 4000); // filet de securite si une police ne charge pas
+  };
+  if(d.readyState === 'complete') attendre(); else fr.contentWindow.addEventListener('load', attendre);
 }
 
 function attHtmlPage(o){
