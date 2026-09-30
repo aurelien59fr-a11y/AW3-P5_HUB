@@ -65,6 +65,7 @@ function buildFormationsListe(){
       +(f.heureDebut?' &middot; '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')
       +(f.lieu?' &middot; '+f.lieu:'')
       +'<div style="margin-top:6px">'+(badges||"<span style='color:var(--tx3)'>"+t('formations_all_team')+"</span>")+'</div>'
+      +'<div style="margin-top:8px"><button onclick="event.stopPropagation();openAttestationModal(\''+f.id+'\')" style="padding:4px 10px;border-radius:14px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; Attestation</button></div>'
       +(f.notes?'<div style="margin-top:6px;color:var(--tx2);font-size:12px">'+f.notes+'</div>':'')
       +'</div></div></div>';
   }
