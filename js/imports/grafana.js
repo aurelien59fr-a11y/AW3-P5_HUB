@@ -12,15 +12,14 @@ function importerArretsInpak(){
   var err = document.getElementById('arrets-import-err');
   err.textContent = '';
   var raw = document.getElementById('arrets-import-txt').value.trim();
-  if(!raw){ err.textContent = 'Colle le JSON genere par le script.'; return; }
+  if(!raw){ return echecImport(err, 'Colle le JSON genere par le script.'); }
 
   var parsed;
   try { parsed = JSON.parse(raw); }
-  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+  catch(e){ return echecImport(err, 'JSON invalide : ' + e.message); }
 
   if(!parsed.avecRaison && !parsed.microstops){
-    err.textContent = 'Format inattendu (cles "avecRaison"/"microstops" manquantes).';
-    return;
+    return echecImport(err, 'Format inattendu (cles "avecRaison"/"microstops" manquantes).');
   }
 
   var now = new Date().toLocaleString('fr-BE');
@@ -38,8 +37,8 @@ function importerArretsInpak(){
     entries.push([key, { ligne: a.ligne, date: a.date, nombre: a.nombre, type: 'microstop', auteur: auteur, ts: Date.now(), importeLe: now }]);
   });
 
-  if(!entries.length){ err.textContent = 'Aucune ligne valide trouvee dans le JSON.'; return; }
-  if(!db){ err.textContent = 'Connexion Firebase non disponible.'; return; }
+  if(!entries.length){ return echecImport(err, 'Aucune ligne valide trouvee dans le JSON.'); }
+  if(!db){ return echecImport(err, 'Connexion Firebase non disponible.'); }
 
   var TAILLE_LOT = 100;
   var lots = [];
@@ -48,6 +47,8 @@ function importerArretsInpak(){
   err.style.color = '#3b82f6';
   err.textContent = 'Import en cours… 0 / ' + entries.length;
   var fait = 0;
+  var terminer;
+  var resultat = new Promise(function(r){ terminer = r; });
 
   function envoyerLot(idx){
     if(idx >= lots.length){
@@ -56,6 +57,8 @@ function importerArretsInpak(){
       err.style.color = '#ef4444';
       err.textContent = '';
       toast(entries.length + ' arret(s) importe(s)', '#10b981');
+      journaliser('import_arrets_inpak', { lignes: entries.length });
+      terminer(succesImport('Arrets Inpak : ' + entries.length + ' arret(s) importe(s)'));
       return;
     }
     var updates = {};
@@ -77,8 +80,10 @@ function importerArretsInpak(){
       console.error('[Arrets Inpak] Erreur import lot ' + idx + ' :', e);
       err.style.color = '#ef4444';
       err.textContent = 'Erreur Firebase (lot ' + (idx+1) + '/' + lots.length + ') : ' + e.message;
+      terminer({ ok: false, message: 'Arrets Inpak : ' + err.textContent + ' (' + fait + ' / ' + entries.length + ' deja ecrits)' });
     });
   }
   envoyerLot(0);
+  return resultat;
 }
 

@@ -46,6 +46,16 @@ function detecterSourceImport(obj){
   return null;
 }
 
+/* Resultat d'un import : chaque importeur renvoie une promesse qui se resout
+   toujours avec {ok, message} (jamais de rejet non gere au clic sur un bouton).
+   Utilise par l'import global pour un compte rendu reel, une fois les
+   ecritures terminees. */
+function echecImport(el, message){
+  if(el){ el.style.color = '#ef4444'; el.textContent = message; }
+  return Promise.resolve({ ok: false, message: message });
+}
+function succesImport(message){ return { ok: true, message: message }; }
+
 function importerGlobal(){
   var txt = document.getElementById('global-import-txt');
   var err = document.getElementById('global-import-err');
@@ -72,6 +82,7 @@ function importerGlobal(){
 
   var traites = [];
   var ignores = [];
+  var envois = []; // {libelle, promesse} : imports qui ecrivent dans Firebase
 
   enveloppes.forEach(function(env){
     if(!env) return;
@@ -94,34 +105,50 @@ function importerGlobal(){
     } else if(env.source === 'grafana_arrets_inpak'){
       if(typeof importerArretsInpak !== 'function'){ ignores.push('grafana_arrets_inpak (module Arrets Inpak non charge)'); return; }
       document.getElementById('arrets-import-txt').value = JSON.stringify(env.data || {});
-      importerArretsInpak();
-      traites.push('Arrets Inpak');
+      envois.push({ libelle: 'Arrets Inpak', promesse: importerArretsInpak() });
     } else if(env.source === 'grafana_bulk'){
       if(typeof importerBulk !== 'function'){ ignores.push('grafana_bulk (module Bulk non charge)'); return; }
       document.getElementById('bulk-import-txt').value = JSON.stringify(env.data || {});
-      importerBulk();
-      traites.push('Bulk & Bijlijn');
+      envois.push({ libelle: 'Bulk & Bijlijn', promesse: importerBulk() });
     } else if(env.source === 'protime_pointages'){
       if(typeof importerPointages !== 'function'){ ignores.push('protime_pointages (module Pointages non charge)'); return; }
       document.getElementById('pt-import-txt').value = JSON.stringify(env.data || {});
-      importerPointages();
-      traites.push('Pointages (Protime)');
+      envois.push({ libelle: 'Pointages (Protime)', promesse: importerPointages() });
     } else if(env.source === 'ncp'){
       if(typeof importerNCP !== 'function'){ ignores.push('ncp (module NCP non charge)'); return; }
       // importerNCP() attend directement un tableau JSON (pas un objet {data:...})
       document.getElementById('ncp-import-txt').value = JSON.stringify(env.data || []);
-      importerNCP();
-      traites.push('NCP Qualite');
+      envois.push({ libelle: 'NCP Qualite', promesse: importerNCP() });
     } else if(env.source === 'sharepoint_notes'){
       if(typeof importerSharepointNotes !== 'function'){ ignores.push('sharepoint_notes (module non charge)'); return; }
-      importerSharepointNotes(env).catch(function(e){ err.style.color = '#ef4444'; err.textContent = 'Notes SharePoint : ' + e.message; });
-      traites.push('Notes SharePoint (' + ((env.data || []).length) + ')');
+      envois.push({ libelle: 'Notes SharePoint (' + ((env.data || []).length) + ')', promesse: importerSharepointNotes(env) });
     }
   });
 
-  txt.value = '';
-  var msg = traites.length ? ('Import lance pour : ' + traites.join(', ') + '.') : 'Rien a importer.';
-  if(ignores.length) msg += ' Ignore : ' + ignores.join(' ; ');
-  err.style.color = ignores.length ? '#f59e0b' : '#10b981';
-  err.textContent = msg;
+  if(!envois.length){
+    var msg0 = traites.length ? traites.join(', ') + '.' : 'Rien a importer.';
+    if(ignores.length) msg0 += ' Ignore : ' + ignores.join(' ; ');
+    err.style.color = ignores.length ? '#f59e0b' : '#10b981';
+    err.textContent = msg0;
+    return Promise.resolve();
+  }
+  // Compte rendu REEL : on attend la fin de chaque import (reussi ou non)
+  // avant d'annoncer le resultat, et on ne vide la zone qu'en cas de succes total.
+  err.style.color = '#3b82f6';
+  err.textContent = 'Import en cours : ' + envois.map(function(e){ return e.libelle; }).join(', ') + '...';
+  return Promise.allSettled(envois.map(function(e){ return Promise.resolve(e.promesse); })).then(function(res){
+    var lignes = [], echecs = 0;
+    res.forEach(function(r, i){
+      var v = r.status === 'fulfilled' ? r.value : { ok: false, message: (r.reason && r.reason.message) || String(r.reason) };
+      if(v && v.ok === false){ echecs++; lignes.push('ECHEC ' + envois[i].libelle + ' : ' + v.message); }
+      else lignes.push('OK ' + ((v && v.message) || envois[i].libelle));
+    });
+    traites.forEach(function(x){ lignes.push(x); });
+    ignores.forEach(function(x){ lignes.push('Ignore : ' + x); });
+    if(!echecs) txt.value = '';
+    err.style.color = echecs ? '#ef4444' : (ignores.length ? '#f59e0b' : '#10b981');
+    err.style.whiteSpace = 'pre-line';
+    err.textContent = lignes.join('\n');
+    return { echecs: echecs, lignes: lignes };
+  });
 }
