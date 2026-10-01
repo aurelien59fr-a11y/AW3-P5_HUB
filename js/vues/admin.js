@@ -322,6 +322,14 @@ function posteVersPermissions(poste){
 
 var ALL_TABS = ['ov','br','pl','ab','formations','pt','arrets','ncp','recrutement','espace'];
 
+function mdpProvisoire(){
+  var lettres = 'abcdefghjkmnpqrstuvwxyz', chiffres = '23456789', tous = lettres + lettres.toUpperCase() + chiffres;
+  var r = new Uint32Array(10); (window.crypto || window.msCrypto).getRandomValues(r);
+  var out = lettres[r[0] % lettres.length] + chiffres[r[1] % chiffres.length];
+  for(var i = 2; i < 10; i++) out += tous[r[i] % tous.length];
+  return out;
+}
+
 function genLoginInterne(nomComplet){
   var parts = (nomComplet||'').trim().split(/\s+/);
   var prenom = parts[0] || '';
@@ -331,7 +339,9 @@ function genLoginInterne(nomComplet){
   }
   var p = strip(prenom), n = strip(nom);
   var email = (p||'x')+'.'+(n||'x')+'@aw3p5.local';
-  var pass = (p.charAt(0)||'x')+(p.charAt(p.length-1)||'x')+(n.charAt(0)||'x')+(n.charAt(n.length-1)||'x')+'2026';
+  // Mot de passe PROVISOIRE aleatoire (avant : initiales + 2026, devinable).
+  // L'employe doit le remplacer a sa premiere connexion (core/motdepasse.js).
+  var pass = mdpProvisoire();
   return {email: email, password: pass};
 }
 

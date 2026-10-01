@@ -18,7 +18,7 @@ function updKPI(){
   var wn=BD.filter(function(e){return e.sc>50&&e.sc<=500;});
   var cr=BD.filter(function(e){return e.sc>500;});
   document.getElementById('k-ok').textContent=ok;
-  document.getElementById('k-okp').textContent=Math.round(ok/BD.length*100)+'% OK';
+  document.getElementById('k-okp').textContent=(BD.length?Math.round(ok/BD.length*100):0)+'% OK';
   document.getElementById('k-wn').textContent=wn.length;
   document.getElementById('k-cr').textContent=cr.length;
   document.getElementById('k-crm').textContent=cr.length>0?t('ov_crm_urgent'):t('ov_crm_none');
