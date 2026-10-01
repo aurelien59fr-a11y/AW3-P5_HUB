@@ -58,8 +58,18 @@ function mergerAbsencesEnEpisodes(intervals){
     }
     if(iv.deb<=addDaysBradford(cur.fin,1) || bridgesWeekend){
       // chevauchement, contigu, ou separe uniquement par un week-end : meme episode
+      if(iv.deb<=cur.fin){
+        // Chevauchement (ex. saisie manuelle + meme periode importee de Protime) :
+        // seuls les jours calendaires situes APRES la fin de l'episode en cours
+        // sont nouveaux, plafonnes a la duree declaree de l'absence. Deux
+        // periodes identiques ou une periode incluse n'ajoutent donc rien.
+        var nouveaux=Math.max(0,Math.round((iv.fin-cur.fin)/86400000));
+        cur.days+=Math.min(iv.d,nouveaux);
+      } else {
+        // Contigu ou separe par un week-end : aucun jour commun, on ajoute tout.
+        cur.days+=iv.d;
+      }
       if(iv.fin>cur.fin) cur.fin=iv.fin;
-      cur.days+=iv.d;
     } else {
       episodes.push(cur);
       cur={deb:iv.deb, fin:iv.fin, days:iv.d};
@@ -69,7 +79,21 @@ function mergerAbsencesEnEpisodes(intervals){
   return episodes;
 }
 
+/* La liste Bradford suit la liste des employes : un employe ajoute dans
+   l'Admin obtient sa ligne (avant : jamais de score), un employe retire
+   disparait. Les scores sont ensuite recalcules par recalc(). */
+function synchroniserBD(){
+  if(!EMP || !EMP.length) return;
+  var noms = {};
+  EMP.forEach(function(e){ noms[e.n] = true; });
+  for(var i = BD.length - 1; i >= 0; i--){ if(!noms[BD[i].n]) BD.splice(i, 1); }
+  EMP.forEach(function(e){
+    if(!BD.some(function(b){ return b.n === e.n; })) BD.push({ n: e.n, D: 0, S: 0, sc: 0, T: [0,0,0,0] });
+  });
+}
+
 function recalc(){
+  synchroniserBD();
   var now=new Date(),cut=new Date(now);cut.setFullYear(cut.getFullYear()-1);
   var pFR=pFRBradford;
 

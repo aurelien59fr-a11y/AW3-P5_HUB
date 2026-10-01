@@ -53,7 +53,7 @@ var sel = document.getElementById('espace-emp-select');
 if(sel && sel.dataset.rempli !== LANG){
 var options = EMP.filter(function(e){ return e.id; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
 sel.innerHTML = '<option value="">' + t('espace_select_placeholder') + '</option>' + options.map(function(e){
-return '<option value="'+e.id+'">'+e.n+'</option>';
+return '<option value="'+escHtml(e.id)+'">'+escHtml(e.n)+'</option>';
 }).join('');
 sel.dataset.rempli = LANG;
 }
@@ -73,12 +73,12 @@ return;
 
 var cible = normNomEspace(emp.n);
 
-var ptEntries = Object.values(PT_DATA || {}).filter(function(a){ return normNomEspace(a.nom) === cible; });
+var ptEntries = Object.values(espacePointages()).filter(function(a){ return normNomEspace(a.nom) === cible; });
 ptEntries.sort(function(a,b){ return (b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')); });
 var retards = ptEntries.filter(function(a){ return a.type === 'retard'; });
 var ecarts = ptEntries.filter(function(a){ return a.type === 'pointage' && a.ecart && !pointageEcartAvantShift(a); });
 
-var absEntries = Object.values(ABS || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
+var absEntries = Object.values(espaceAbsences() || {}).filter(function(a){ return normNomEspace(a.n) === cible; });
 absEntries.sort(function(a,b){
 function keyAbs(x){ var p=(x.a||'').split('/'); return p.length===3 ? p[2]+p[1]+p[0] : (x.a||''); }
 return keyAbs(b).localeCompare(keyAbs(a));
@@ -122,12 +122,12 @@ formAvenir.sort(function(a,b){ return (a.date+(a.heureDebut||'')).localeCompare(
 formPassees.sort(function(a,b){ return (b.date+(b.heureDebut||'')).localeCompare(a.date+(a.heureDebut||'')); });
 var formSorted = formAvenir.concat(formPassees);
 
-var bd = (typeof BD !== 'undefined' ? BD : []).find(function(b){ return normNomEspace(b.n) === cible; });
+var bd = espaceBradford(cible); // donnees completes ou espace/<uid> selon les droits
 
 var TYPE_ABS_LABEL = {recup:t('espace_type_recup'), ziek:t('espace_type_ziek'), verlof:t('espace_type_verlof')};
 var TYPE_ABS_PILL = {recup:'ok', ziek:'cr', verlof:'wn'};
 
-var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">' + t('espace_of') + ' <b>'+emp.n+'</b></div>' : '';
+var titreHtml = isAdminView ? '<div style="margin-bottom:16px;font-size:13px;color:var(--tx2)">' + t('espace_of') + ' <b>'+escHtml(emp.n)+'</b></div>' : '';
 
 var html = titreHtml;
 
@@ -148,7 +148,7 @@ html += '<div class="cc" style="margin-bottom:16px;background:linear-gradient(13
 + '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
 + '<div style="width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex:none">'+initiales+'</div>'
 + '<div style="flex:1;min-width:200px">'
-+ '<div style="font-size:17px;font-weight:700">'+emp.n+'</div>'
++ '<div style="font-size:17px;font-weight:700">'+escHtml(emp.n)+'</div>'
 + '<div style="font-size:12px;color:var(--tx2);margin-top:3px">'+msgPositif+'</div>'
 + '</div>'
 + '<div style="text-align:center">'
@@ -178,8 +178,8 @@ formBody = formSorted.slice(0,100).map(function(f){
 var estAvenir = new Date(f.date+'T00:00:00') >= todayEspace;
 var badge = estAvenir ? '<span class="pill ok">' + t('espace_form_upcoming') + '</span>' : '<span style="font-size:11px;color:var(--tx3)">' + t('espace_form_past') + '</span>';
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(f.date)+'</div>'
-+ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px"><b>'+(f.titre||t('espace_sec_formations'))+'</b>'+(f.heureDebut?' · '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')+(f.lieu?' · '+f.lieu:'')+'</div>'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+escHtml(dFR(f.date))+'</div>'
++ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px"><b>'+escHtml(f.titre||t('espace_sec_formations'))+'</b>'+(f.heureDebut?' · '+escHtml(f.heureDebut)+(f.heureFin?'-'+escHtml(f.heureFin):''):'')+(f.lieu?' · '+escHtml(f.lieu):'')+'</div>'
 + badge
 + '</div>';
 }).join('');
@@ -192,8 +192,8 @@ retardsBody = '<div style="color:var(--green);font-size:13px;padding:8px 0">' + 
 } else {
 retardsBody = retards.slice(0,100).map(function(a){
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
-+ '<span class="pill cr">'+(a.detail||((a.retardMin||0)+' min'))+'</span>'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+escHtml(dFR(a.date))+'</div>'
++ '<span class="pill cr">'+escHtml(a.detail||((a.retardMin||0)+' min'))+'</span>'
 + '</div>';
 }).join('');
 }
@@ -205,8 +205,8 @@ ecartsBody = '<div style="color:var(--green);font-size:13px;padding:8px 0">' + t
 } else {
 ecartsBody = ecarts.slice(0,100).map(function(a){
 return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(a.date)+'</div>'
-+ '<div style="font-size:13px;color:var(--tx1)">'+(a.detail||((a.ecart||0)+' min'))+'</div>'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+escHtml(dFR(a.date))+'</div>'
++ '<div style="font-size:13px;color:var(--tx1)">'+escHtml(a.detail||((a.ecart||0)+' min'))+'</div>'
 + '</div>';
 }).join('');
 }
@@ -249,10 +249,10 @@ opPrecis = getOperateur(n.created_date_iso, n.created_heure, ln);
 var badgeEquipe = (n.type_ncp === 'Inpak' && !opPrecis)
 ? '<span class="pill" style="background:rgba(139,92,246,.12);color:#8b5cf6">' + t('espace_ncp_equipe') + '</span>'
 : '';
-return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" onclick="ncpDetail(\'' + n.notification + '\')">'
-+ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+dFR(n.created_date_iso)+' '+(n.created_heure||'')+'</div>'
-+ '<div style="font-size:12px;font-weight:600">'+(n.ligne||'-')+'</div>'
-+ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+(n.description||n.code_produit||'-')+'</div>'
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" onclick="ncpDetail(\'' + escJsAttr(n.notification) + '\')">'
++ '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+escHtml(dFR(n.created_date_iso))+' '+escHtml(n.created_heure||'')+'</div>'
++ '<div style="font-size:12px;font-weight:600">'+escHtml(n.ligne||'-')+'</div>'
++ '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+escHtml(n.description||n.code_produit||'-')+'</div>'
 + badge + badgeEquipe
 + '</div>';
 }).join('');

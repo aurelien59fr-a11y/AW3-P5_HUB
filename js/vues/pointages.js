@@ -46,11 +46,11 @@ function openImportPointages(){
 function importerPointages(){
   var raw = document.getElementById('pt-import-txt').value.trim();
   var err = document.getElementById('pt-import-err');
-  if(!raw){ err.textContent = 'Colle le JSON ici.'; return; }
+  if(!raw){ return echecImport(err, 'Colle le JSON ici.'); }
 
   var data;
   try { data = JSON.parse(raw); }
-  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+  catch(e){ return echecImport(err, 'JSON invalide : ' + e.message); }
 
   // Tolere aussi l'enveloppe {source:'protime_pointages', data:{...}} generee
   // par le script Protime pour Admin -> "Import global" -- meme JSON, colle
@@ -59,7 +59,7 @@ function importerPointages(){
   if(data && data.source === 'protime_pointages' && data.data) data = data.data;
 
   if(!data || (!data.retards && !data.pointages && !data.anomaliesPointage && !data.absences)){
-    err.textContent = 'Format non reconnu. Utilise exportEnrichiJSON() dans la console Protime.'; return;
+    return echecImport(err, 'Format non reconnu. Utilise exportEnrichiJSON() dans la console Protime.');
   }
 
   var ajoutes = 0, doublons = 0;
@@ -101,13 +101,12 @@ function importerPointages(){
   }
 
   if(!ajoutes && !doublons && !resultatAbsences){
-    err.textContent = 'Aucune anomalie ni absence trouvée dans ce JSON.'; return;
+    return echecImport(err, 'Aucune anomalie ni absence trouvée dans ce JSON.');
   }
 
   // Sauvegarder dans Firebase
   if(!db){
-    err.textContent = 'Connexion Firebase non disponible. Recharge la page et réessaie.';
-    return;
+    return echecImport(err, 'Connexion Firebase non disponible. Recharge la page et réessaie.');
   }
 
   var toutesLesEcritures = Promise.resolve();
@@ -122,11 +121,13 @@ function importerPointages(){
     updPlanning['planning/shifts2026'] = d26;
     updPlanning['planning/shifts2025'] = d25;
     updPlanning['planning/shifts2027'] = d27;
-    updPlanning['planning/absences'] = ABS;
-    toutesLesEcritures = toutesLesEcritures.then(function(){ return db.ref().update(updPlanning); });
+    // Absences reecrites en entier (import d'administration), sans les cles
+    // locales _k, et seulement si la liste du serveur a bien ete chargee.
+    if(ABS_CHARGEES) updPlanning['planning/absences'] = absSansCles();
+    toutesLesEcritures = toutesLesEcritures.then(function(){ return db.ref().update(updPlanning); }).then(function(){ if(ABS_CHARGEES) absNumeroter(); });
   }
 
-  toutesLesEcritures.then(function(){
+  return toutesLesEcritures.then(function(){
     document.getElementById('pt-import-modal').style.display = 'none';
     var msg = ajoutes + ' anomalie(s) importée(s)' + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : '');
     if(resultatAbsences){
@@ -138,11 +139,14 @@ function importerPointages(){
       if(resultatAbsences.typesInconnus){
         msg += ' · ' + resultatAbsences.typesInconnus + ' type(s) d\'absence non reconnu(s)';
       }
+      if(!ABS_CHARGEES) msg += ' · ATTENTION : absences non enregistrees (liste du serveur non chargee)';
     }
-    toast(msg, '#10b981');
+    toast(msg, ABS_CHARGEES || !resultatAbsences ? '#10b981' : '#f59e0b');
+    journaliser('import_pointages', { anomalies: ajoutes, doublons: doublons, periodesAbsence: resultatAbsences ? resultatAbsences.periodesCreees : 0 });
+    return { ok: ABS_CHARGEES || !resultatAbsences, message: 'Pointages : ' + msg };
   }).catch(function(e){
     console.error('[Pointages] Erreur import Firebase :', e);
-    err.textContent = 'Erreur Firebase : ' + e.message;
+    return echecImport(err, 'Erreur Firebase : ' + e.message);
   });
 }
 
@@ -195,7 +199,7 @@ if(pointageEcartAvantShift(a)) return false;
         ? '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#ef444422;color:#ef4444;border:1px solid #ef444455">'+t('pt_status_open')+'</span>'
         : '<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#10b98122;color:#10b981;border:1px solid #10b98155">'+t('pt_status_done')+'</span>';
       var cmIcon = a.commentaire
-        ? '<span style="color:#f59e0b;font-size:14px" title="' + a.commentaire.replace(/"/g,'&quot;') + '">&#9997;</span>'
+        ? '<span style="color:#f59e0b;font-size:14px" title="' + escHtml(a.commentaire) + '">&#9997;</span>'
         : '<span style="color:var(--tx3);font-size:14px">&#9998;</span>';
       // Garde-fou : anomalie pointage matinale (00h-05h59) SANS mention (J+1)
       // = pattern du bug de comparaison avec le tourniquet de la veille sur shift de nuit
@@ -210,12 +214,12 @@ if(pointageEcartAvantShift(a)) return false;
         ? '<span style="color:#f59e0b;font-size:13px;margin-left:6px;cursor:help" title="'+t('pt_suspect_tooltip')+'">&#9888;</span>'
         : '';
       return '<tr style="' + (isOpen ? '' : 'opacity:.6') + '">'
-        + '<td><b style="font-size:13px">' + a.nom + '</b></td>'
-        + '<td style="font-family:var(--mo);font-size:12px">' + dFR(a.date) + '</td>'
+        + '<td><b style="font-size:13px">' + escHtml(a.nom) + '</b></td>'
+        + '<td style="font-family:var(--mo);font-size:12px">' + escHtml(dFR(a.date)) + '</td>'
         + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
-        + '<td style="font-size:12px;color:var(--tx2)">' + a.detail + suspectIcon + '</td>'
+        + '<td style="font-size:12px;color:var(--tx2)">' + escHtml(a.detail) + suspectIcon + '</td>'
         + '<td>' + statutBadge + '</td>'
-        + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + k + '\')">' + cmIcon + '</span></td>'
+        + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + escJsAttr(k) + '\')">' + cmIcon + '</span></td>'
         + '</tr>';
     }).join('');
 
@@ -300,6 +304,7 @@ function markAllPtDone(){
     Promise.all([db.ref().update(updates)].concat(pushPromises)).then(function(){
       console.log('[markAllPtDone] Mise à jour Firebase réussie.');
       toast(toMark.length + t('pt_marked_done_suffix'), '#10b981');
+      journaliser('pointages_traites_en_masse', { nb: toMark.length });
     }).catch(function(e){
       console.error('[markAllPtDone] Erreur Firebase :', e);
       toast(t('pt_firebase_error_prefix') + e.message, '#ef4444');
@@ -317,8 +322,8 @@ function openPtComment(key){
   var histHtml = hist.length
     ? hist.slice().reverse().map(function(h){
         return '<div style="padding:8px 10px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:8px;margin-bottom:6px">'
-          + '<div style="font-size:11px;color:var(--tx3);margin-bottom:3px">' + (h.date||'') + (h.auteur?' · '+h.auteur:'') + '</div>'
-          + '<div style="font-size:13px;color:var(--tx1);white-space:pre-wrap">' + (h.texte||'').replace(/</g,'&lt;') + '</div>'
+          + '<div style="font-size:11px;color:var(--tx3);margin-bottom:3px">' + escHtml(h.date||'') + (h.auteur?' · '+escHtml(h.auteur):'') + '</div>'
+          + '<div style="font-size:13px;color:var(--tx1);white-space:pre-wrap">' + escHtml(h.texte||'') + '</div>'
           + '</div>';
       }).join('')
     : '<div style="font-size:12px;color:var(--tx3);font-style:italic">Aucun commentaire pour le moment</div>';
@@ -326,11 +331,11 @@ function openPtComment(key){
   d.id = 'pt-comment-popup';
   d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.innerHTML = '<div style="background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:440px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column">'
-    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + a.nom + '</div>'
-    + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + dFR(a.date) + ' — ' + a.detail + '</div>'
+    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + escHtml(a.nom) + '</div>'
+    + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + escHtml(dFR(a.date)) + ' — ' + escHtml(a.detail) + '</div>'
     + '<div style="display:flex;gap:8px;margin-bottom:14px">'
-    + '<button onclick="setPtStatut(\'' + key + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
-    + '<button onclick="setPtStatut(\'' + key + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
+    + '<button onclick="setPtStatut(\'' + escJsAttr(key) + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
+    + '<button onclick="setPtStatut(\'' + escJsAttr(key) + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
     + '</div>'
     + '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>'
     + '<div style="overflow-y:auto;max-height:200px;margin-bottom:14px">' + histHtml + '</div>'
@@ -338,7 +343,7 @@ function openPtComment(key){
     + '<textarea id="pt-cm-txt" placeholder="Ecrire un nouveau commentaire..." style="width:100%;height:70px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical"></textarea>'
     + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
     + '<button onclick="document.getElementById(\'pt-comment-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Fermer</button>'
-    + '<button onclick="savePtComment(\'' + key + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
+    + '<button onclick="savePtComment(\'' + escJsAttr(key) + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
     + '</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click', function(e){ if(e.target===d) d.remove(); });

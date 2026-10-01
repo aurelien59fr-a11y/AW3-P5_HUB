@@ -63,8 +63,8 @@ function ovWeekendAbsences(weekend){
   var byPerson={};
   (weekend||[]).forEach(function(day){
     var yr=String(day.getFullYear());
-    var weeks=yr==='2027'?(typeof WEEKS27!=='undefined'?WEEKS27:null):yr==='2026'?(typeof WEEKS26!=='undefined'?WEEKS26:null):(typeof WEEKS25!=='undefined'?WEEKS25:null);
-    var shifts=yr==='2027'?(typeof SHIFTS27!=='undefined'?SHIFTS27:null):yr==='2026'?(typeof SHIFTS26!=='undefined'?SHIFTS26:null):(typeof SHIFTS25!=='undefined'?SHIFTS25:null);
+    var weeks=weeksPourAnnee(yr);
+    var shifts=shiftsPourAnnee(yr);
     var dayAbs=[];
     if(typeof ABS!=='undefined') ABS.forEach(function(a){
       var deb=pFR(a.a),fin=pFR(a.b),td=new Date(day.getFullYear(),day.getMonth(),day.getDate());
@@ -162,7 +162,7 @@ function ovBuildWatchlist(){
   el.innerHTML = items.map(function(it,i){
     return '<div onclick="window._ovWatchActions['+i+']()" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--bd2)">'
       +'<span style="font-size:16px">'+it.icon+'</span>'
-      +'<span style="font-size:13px;color:var(--tx1)">'+it.txt+'</span>'
+      +'<span style="font-size:13px;color:var(--tx1)">'+escHtml(it.txt)+'</span>'
       +'</div>';
   }).join('');
 }
@@ -278,7 +278,7 @@ function ovBuildRappels(){
       var thisYear=new Date(now2.getFullYear(),b.month-1,b.day);
       var nextYear=new Date(now2.getFullYear()+1,b.month-1,b.day);
       var next = thisYear>=today02 ? thisYear : nextYear;
-      return {n:b.n, daysUntil:Math.floor((next-today02)/86400000)};
+      return {n:b.n, daysUntil:Math.round((next-today02)/86400000)}; // round : correct aussi au changement d'heure
     }).sort(function(a,b){return a.daysUntil-b.daysUntil;})[0];
     if(upcoming) parts.push({txt:'\uD83C\uDF82 '+upcoming.n.split(' ')[0]+' \u2014 '+(upcoming.daysUntil===0?'aujourd\u2019hui':('dans '+upcoming.daysUntil+' j')), tab:null});
   }
@@ -287,7 +287,7 @@ function ovBuildRappels(){
     return function(){ if(p.tab){ var t=document.querySelector('.tab[data-tab="'+p.tab+'"]'); if(t) t.click(); } };
   });
   el.innerHTML = parts.map(function(p,i){
-    return '<span'+(p.tab?' onclick="window._ovRappelsActions['+i+']()" style="cursor:pointer"':'')+'>'+p.txt+'</span>';
+    return '<span'+(p.tab?' onclick="window._ovRappelsActions['+i+']()" style="cursor:pointer"':'')+'>'+escHtml(p.txt)+'</span>';
   }).join('');
 }
 

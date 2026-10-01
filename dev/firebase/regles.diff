@@ -1,0 +1,262 @@
+--- ../database.rules.json	2026-09-28 09:19:38.274500830 +0200
++++ firebase/database.rules.proposition.json	2026-10-01 10:30:52.262970354 +0200
+@@ -1,169 +1,131 @@
+ {
+   // =====================================================================
+-  //  AW3-P5 HUB — Regles de securite Realtime Database
+-  //  Principe :  admin = tout ;  sous-chef = le planning ;  les autres = lecture seule.
+-  //  Rappel Firebase : un droit accorde sur un noeud est herite par tous ses
+-  //  enfants et ne peut PAS etre repris plus bas. On part donc du plus
+-  //  restrictif (la racine) et on ouvre ensuite noeud par noeud.
++  //  PROPOSITION (phase 2) -- NE PAS PUBLIER SANS VALIDATION D'AURELIEN.
++  //  Base : database.rules.json deploye le 30/09/2026 (identique au depot).
++  //  Changements :
++  //   1. "Membre" = compte connecte ET present dans /users (un compte cree via
++  //      l'inscription publique n'a plus acces a rien).
++  //   2. Absences : lecture admin / sous-chef / visiteur / editPlanning.
++  //   3. Pointages, commentaires Bradford : admin / sous-chef / visiteur.
++  //   4. Recrutement : admin seul (lecture ouverte retiree).
++  //   5. .validate sur planning, absences, formations, roles.
++  //   6. pointages/_test_connexion : admin seul (le test ne sert qu'a l'admin).
++  //   7. attestation_equipes : lecture admin + sous-chef (attestations).
++  //   8. Index pour les futures requetes par date (arrets, NCP).
++  //  10. espace/<uid> : chaque employe lit uniquement ses propres donnees.
++  //   9. audit_log : ajout seul par tout membre, lecture admin, aucune
++  //      modification d'une entree existante (suppression : admin seul).
+   // =====================================================================
+   "rules": {
++    ".read":  "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin')",
++    ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin')",
+ 
+-    // -----------------------------------------------------------------
+-    // RACINE — l'admin, et lui seul, lit et ecrit partout.
+-    // Cette seule ligne remplace toutes les autorisations "admin" du
+-    // fichier : inutile de les repeter en dessous. Elle couvre aussi les
+-    // noeuds futurs que tu ajouterais sans penser aux regles.
+-    // Pour tous les autres roles (subchef, visiteur, custom, employe) la
+-    // racine repond "non" : ils n'ont que ce qui est explicitement ouvert
+-    // plus bas.
+-    // -----------------------------------------------------------------
+-    ".read":  "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+-    ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+-
+-    // -----------------------------------------------------------------
+-    // COMPTES — chaque utilisateur doit pouvoir lire SA propre fiche au
+-    // moment de la connexion (c'est la que l'app va chercher son role).
+-    // Il ne voit que la sienne ; la liste complete reste reservee a l'admin
+-    // par la regle de racine. L'ecriture (creation / modification de compte)
+-    // reste admin uniquement.
+-    // -----------------------------------------------------------------
+     "users": {
+       "$uid": {
+-        ".read": "auth != null && auth.uid === $uid"
++        ".read": "auth != null && auth.uid === $uid",
++        // Ecriture : admin seul (racine). Un utilisateur ne peut pas changer son role.
++        "role": { ".validate": "newData.isString() && newData.val().matches(/^(admin|subchef|visiteur|custom|employe)$/)" },
++        "editPlanning": { ".validate": "newData.isBoolean()" }
+       }
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // EMPLOYES — lecture pour tout compte connecte (noms, groupes, roles
+-    // affiches partout dans l'app). Ecriture : admin seul (racine).
+-    // -----------------------------------------------------------------
+     "employees": {
+-      ".read": "auth != null"
++      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
++      "$id": {
++        ".validate": "newData.hasChildren(['name'])",
++        "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80" },
++        "birthday": { ".validate": "newData.isString() && newData.val().length <= 10" }
++      }
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // PLANNING — le seul endroit ou le sous-chef peut ecrire.
+-    //
+-    // ATTENTION, point technique non negociable : la fonction save() de
+-    // l'app envoie shifts2026 + shifts2025 + absences + extraHistorique +
+-    // lastUpdate dans UN SEUL update() atomique. Firebase applique tout ou
+-    // rien : s'il manque le droit sur une seule de ces cles, la sauvegarde
+-    // entiere echoue. Les six noeuds doivent donc porter exactement le meme
+-    // droit d'ecriture.
+-    //
+-    // Troisieme cas autorise : les comptes "custom" portant le drapeau
+-    // editPlanning (les Coordinateurs). La regle reprend exactement la
+-    // condition de canEdit() dans l'app : admin, subchef, ou editPlanning.
+-    // Ce drapeau ne peut etre pose que par l'admin dans /users, il n'est
+-    // donc pas falsifiable par l'utilisateur lui-meme.
+-    // -----------------------------------------------------------------
+     "planning": {
+       "shifts2025": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        "$nom": { "$i": { ".validate": "newData.isString() && newData.val().length <= 2000" } }
+       },
+       "shifts2026": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        "$nom": { "$i": { ".validate": "newData.isString() && newData.val().length <= 2000" } }
+       },
+       "shifts2027": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        "$nom": { "$i": { ".validate": "newData.isString() && newData.val().length <= 2000" } }
+       },
+       "absences": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('role').val() === 'visiteur') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        "$k": {
++          ".validate": "newData.hasChildren(['n','a','b','d','t'])",
++          "n": { ".validate": "newData.isString() && newData.val().length <= 80" },
++          "a": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$/)" },
++          "b": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$/)" },
++          "d": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 366" },
++          "t": { ".validate": "newData.isString() && newData.val().matches(/^(ziek|verlof|recup)$/)" },
++          "y": { ".validate": "newData.isString() && newData.val().matches(/^20[0-9]{2}$/)" },
++          "ts": { ".validate": "newData.isNumber()" },
++          "$autre": { ".validate": false }
++        }
+       },
+       "extraHistorique": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        "$i": { ".validate": "newData.isString() && newData.val().length <= 100" }
+       },
+       "lastUpdate": {
+-        ".read":  "auth != null",
+-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('editPlanning').val() === true)"
++        ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".write": "auth != null && ((root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef') || root.child('users').child(auth.uid).child('editPlanning').val() === true)",
++        ".validate": "newData.hasChildren(['at','by'])"
+       }
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // FORMATIONS — inchange par rapport a l'existant : admin + sous-chef.
+-    // -----------------------------------------------------------------
+     "formations": {
+-      ".read":  "auth != null",
+-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')"
++      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
++      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')",
++      "$id": {
++        ".validate": "newData.hasChildren(['titre','date'])",
++        "titre": { ".validate": "newData.isString() && newData.val().length <= 200" },
++        "date": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
++        "lieu": { ".validate": "newData.isString() && newData.val().length <= 200" },
++        "notes": { ".validate": "newData.isString() && newData.val().length <= 2000" }
++      }
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // POINTAGES — lecture pour tous, ecriture admin seule (racine).
+-    // Seule exception : le noeud jetable _test_connexion, ecrit puis efface
+-    // par le bouton "Tester la connexion Firebase". Sans cette ligne, le
+-    // diagnostic afficherait une erreur rouge chez les non-admins alors que
+-    // tout va bien. Il ne contient qu'un horodatage et un email.
+-    // -----------------------------------------------------------------
+     "pointages": {
+-      ".read": "auth != null",
+-      "_test_connexion": {
+-        ".write": "auth != null"
+-      }
++      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('role').val() === 'visiteur')"
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // ARRETS INPAK — 51 000 releves importes par script. Lecture seule pour
+-    // tout le monde dans l'app ; l'import passe par ton compte admin.
+-    // -----------------------------------------------------------------
+-    "arrets_inpak": {
+-      ".read": "auth != null"
+-    },
+-
+-    // -----------------------------------------------------------------
+-    // NCP QUALITE — l'onglet contient des boutons d'ecriture (mise de cote,
+-    // commentaire, controle, override equipe). Avec ces regles ils ne
+-    // fonctionnent que pour toi : les autres verront une erreur s'ils
+-    // essaient. C'est le comportement demande.
+-    // -----------------------------------------------------------------
+-    "ncp_data": {
+-      ".read": "auth != null"
+-    },
+-
+-    // -----------------------------------------------------------------
+-    // BULK / BIJLIJN — noeud ABSENT du fichier de regles jusqu'ici alors
+-    // qu'il existe en base : il tournait donc sur des regles deployees a la
+-    // main, jamais versionnees. Il est desormais declare.
+-    // -----------------------------------------------------------------
+-    "bulk_data": {
+-      ".read": "auth != null"
+-    },
+-
+-    // -----------------------------------------------------------------
+-    // LOGBOOK (logbook_notes) -- volontairement NON declare ici : lecture
+-    // ET ecriture heritees de la racine == admin seul. Les notes peuvent
+-    // contenir des noms, des signalements et des photos (confidentiel).
+-    // Changement du 23/09/2026 : la lecture etait ouverte a tout compte
+-    // connecte, elle est desormais reservee a l'admin.
+-    // -----------------------------------------------------------------
+-
+-    // -----------------------------------------------------------------
+-    // BRADFORD — commentaires et horodatage du dernier import.
+-    // -----------------------------------------------------------------
++    "arrets_inpak": { ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".indexOn": ["date"] },
++    "ncp_data":     { ".read": "auth != null && root.child('users').child(auth.uid).exists()", ".indexOn": ["created_date_iso"] },
++    "bulk_data":    { ".read": "auth != null && root.child('users').child(auth.uid).exists()" },
++
+     "bradford": {
+-      "comments": {
+-        ".read": "auth != null"
+-      },
+-      "import_ts": {
+-        ".read": "auth != null"
+-      }
++      "comments":  { ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef' || root.child('users').child(auth.uid).child('role').val() === 'visiteur')" },
++      "import_ts": { ".read": "auth != null && root.child('users').child(auth.uid).exists()" }
+     },
+ 
+-    // -----------------------------------------------------------------
+-    // RECRUTEMENT — donnees de candidats. Lecture laissee ouverte aux
+-    // comptes connectes pour ne rien casser, mais l'onglet n'est de toute
+-    // facon affiche qu'a l'admin. Si tu veux fermer aussi la lecture,
+-    // supprime simplement les trois lignes ci-dessous : la regle de racine
+-    // reservera alors tout le noeud a l'admin.
+-    // -----------------------------------------------------------------
+-    "recrutement": {
+-      "candidats": {
+-        ".read": "auth != null"
++    // MON ESPACE : chaque employe lit SEULEMENT ses propres donnees
++    // (absences, pointages, score Bradford), publiees par l'admin.
++    // Ecriture : admin seul (racine).
++    "espace": {
++      "$uid": { ".read": "auth != null && auth.uid === $uid" }
++    },
++
++    // Journal des actions sensibles : chaque membre peut AJOUTER une entree a
++    // son nom ; personne ne peut MODIFIER une entree existante (le .validate
++    // s'applique aussi a l'admin). Seul l'admin peut en supprimer (droit de
++    // la racine, qu'un sous-noeud ne peut pas retirer). Lecture : admin seul.
++    "audit_log": {
++      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
++      "$id": {
++        ".write": "auth != null && root.child('users').child(auth.uid).exists() && !data.exists()",
++        ".validate": "!data.exists() && newData.hasChildren(['action','par','uid','at']) && newData.child('uid').val() === auth.uid",
++        "action": { ".validate": "newData.isString() && newData.val().length <= 60" },
++        "at": { ".validate": "newData.isString() && newData.val().length <= 40" }
+       }
++    },
++
++    "attestation_equipes": {
++      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'subchef')"
+     }
++
++    // recrutement, logbook_notes, sharepoint_*, production : admin seul (racine).
+   }
+ }

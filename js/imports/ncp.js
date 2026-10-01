@@ -11,7 +11,7 @@ function openImportNCPModal(){
   var txt = document.getElementById('ncp-import-txt').value.trim();
   var errEl = document.getElementById('ncp-import-err');
   errEl.textContent = '';
-  if(!txt){ errEl.textContent = 'Colle le JSON avant d\'importer.'; return; }
+  if(!txt){ return echecImport(errEl, 'Colle le JSON avant d\'importer.'); }
   var arr;
   try {
     arr = JSON.parse(txt);
@@ -22,8 +22,7 @@ function openImportNCPModal(){
     if(arr && !Array.isArray(arr) && arr.source === 'ncp' && Array.isArray(arr.data)) arr = arr.data;
     if(!Array.isArray(arr)) throw new Error('Le JSON doit etre un tableau (liste de NCP).');
   } catch(e){
-    errEl.textContent = 'JSON invalide : ' + e.message;
-    return;
+    return echecImport(errEl, 'JSON invalide : ' + e.message);
   }
   // Deduplication par numero de notification : si le meme NCP apparait
   // plusieurs fois (ex: exports qui se chevauchent), on garde la version
@@ -49,8 +48,7 @@ function openImportNCPModal(){
   // tout (aucune entree n'a de champ "notification", ex: fichier degustations
   // Mendix colle par erreur ici). On bloque plutot que d'ecraser avec du vide.
   if(Object.keys(parNotif).length === 0){
-    errEl.textContent = 'Aucune entree valide trouvee (champ "notification" absent partout, ' + sansNotification + ' ligne(s) ignoree(s)). Ce n\'est probablement pas le bon fichier pour cet import -- rien n\'a ete modifie.';
-    return;
+    return echecImport(errEl, 'Aucune entree valide trouvee (champ "notification" absent partout, ' + sansNotification + ' ligne(s) ignoree(s)). Ce n\'est probablement pas le bon fichier pour cet import -- rien n\'a ete modifie.');
   }
 
   var obj = {};
@@ -58,7 +56,7 @@ function openImportNCPModal(){
     var key = notif.toString().replace(/[.#$/\[\]]/g, '_');
     obj[key] = parNotif[notif];
   });
-  if(!db){ errEl.textContent = 'Pas de connexion Firebase.'; return; }
+  if(!db){ return echecImport(errEl, 'Pas de connexion Firebase.'); }
 
   // IMPORT FUSIONNE (non destructeur) : on ne remplace plus jamais tout le
   // noeud ncp_data d'un coup. On relit l'existant, on fusionne champ par
@@ -68,7 +66,7 @@ function openImportNCPModal(){
   // manuellement par le passe sur plusieurs centaines de fiches) n'est
   // jamais ecrase silencieusement s'il differe : on le protege et on
   // liste les conflits pour verification avant d'ecrire.
-  db.ref('ncp_data').once('value').then(function(snap){
+  return db.ref('ncp_data').once('value').then(function(snap){
     var actuel = snap.val() || {};
     var delta = {};
     var conflitsTypeNcp = [];
@@ -87,25 +85,41 @@ function openImportNCPModal(){
       // valeur deja presente en base (ex: unite ou ligne vides dans un export brut).
       // Les champs absents de l'import (equipe_override, de_cote, degustationsLiees...)
       // sont conserves d'office puisquon part d'une copie de l'existant.
-      var fusion = Object.assign({}, existant);
+      // Ecriture CHAMP PAR CHAMP : seuls les champs importes non vides et
+      // differents de la base sont envoyes. Une correction manuelle faite
+      // pendant l'import sur un autre champ (equipe, mise de cote,
+      // commentaire) n'est donc plus ecrasee par l'ancienne valeur.
+      var champs = {};
       Object.keys(importe).forEach(function(champ){
         var v = importe[champ];
         if(v === undefined || v === null || v === '') return;
         if(Array.isArray(v) && v.length === 0) return;
-        fusion[champ] = v;
+        if(JSON.stringify(existant[champ]) === JSON.stringify(v)) return;
+        champs[champ] = v;
       });
       if(existant.type_ncp && importe.type_ncp && existant.type_ncp !== importe.type_ncp){
-        fusion.type_ncp = existant.type_ncp; // on garde la valeur corrigee/existante en base
+        delete champs.type_ncp; // on garde la valeur corrigee/existante en base
         conflitsTypeNcp.push(importe.notification + ' (garde "' + existant.type_ncp + '", import proposait "' + importe.type_ncp + '")');
       }
-      delta[key] = fusion;
+      if(!Object.keys(champs).length) return; // rien de nouveau pour cette fiche
+      delta[key] = { champs: champs };
       majNotifs++;
     });
 
     function ecrire(){
       var updates = {};
-      Object.keys(delta).forEach(function(key){ updates['ncp_data/' + key] = delta[key]; });
-      db.ref().update(updates).then(function(){
+      Object.keys(delta).forEach(function(key){
+        if(delta[key].champs){
+          Object.keys(delta[key].champs).forEach(function(champ){ updates['ncp_data/' + key + '/' + champ] = delta[key].champs[champ]; });
+        } else {
+          updates['ncp_data/' + key] = delta[key]; // nouvelle fiche : ecrite entiere
+        }
+      });
+      if(!Object.keys(updates).length){
+        toast('NCP : rien de nouveau a importer', '#10b981');
+        return Promise.resolve(succesImport('NCP : rien de nouveau'));
+      }
+      return db.ref().update(updates).then(function(){
         document.getElementById('ncp-import-modal').style.display = 'none';
         document.getElementById('ncp-import-txt').value = '';
         var msg = nouveauxNotifs + ' nouveau(x), ' + majNotifs + ' mis a jour';
@@ -116,8 +130,10 @@ function openImportNCPModal(){
         if(conflitsTypeNcp.length > 0){
           console.warn('Conflits type_ncp non ecrases lors de l\'import :', conflitsTypeNcp);
         }
+        journaliser('import_ncp', { nouveaux: nouveauxNotifs, misAJour: majNotifs, conflitsType: conflitsTypeNcp.length });
+        return succesImport('NCP : ' + msg);
       }).catch(function(err){
-        errEl.textContent = 'Erreur Firebase : ' + err.message;
+        return echecImport(errEl, 'Erreur Firebase : ' + err.message);
       });
     }
 
@@ -129,10 +145,10 @@ function openImportNCPModal(){
         + (conflitsTypeNcp.length > 15 ? '\n... (' + (conflitsTypeNcp.length - 15) + ' de plus, voir la console)' : '')
         + '\n\nContinuer l\'import (le reste des champs sera quand meme mis a jour) ?'
       );
-      if(!ok){ errEl.textContent = 'Import annule -- aucune donnee modifiee.'; return; }
+      if(!ok){ return echecImport(errEl, 'Import annule -- aucune donnee modifiee.'); }
     }
-    ecrire();
+    return ecrire();
   }).catch(function(err){
-    errEl.textContent = 'Erreur lecture Firebase : ' + err.message;
+    return echecImport(errEl, 'Erreur lecture Firebase : ' + err.message);
   });
 }

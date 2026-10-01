@@ -1,0 +1,8 @@
+# Fichiers internes : jamais publies sur le site (outillage, tests, regles, notes).
+dev/
+database.rules.json
+TODO_PHASE_FUTURE.md
+drafts/
+data/
+.github/
+README.md

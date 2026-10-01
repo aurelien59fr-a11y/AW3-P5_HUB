@@ -50,8 +50,8 @@ function buildTodayAbs(){
     var deb=pFR(a.a),fin=pFR(a.b),td=new Date(targetDate.getFullYear(),targetDate.getMonth(),targetDate.getDate());
     if(deb<=td&&fin>=td) absToday.push(a);
   });
-  var shifts=yr==='2027'?SHIFTS27:yr==='2026'?SHIFTS26:SHIFTS25;
-  var weeks=yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:WEEKS25;
+  var shifts=shiftsPourAnnee(yr)||[]; // annee hors planning : aucune case a lire
+  var weeks=weeksPourAnnee(yr)||[];
   var allD=weeks.reduce(function(a,w){return a.concat(w.d);},[]);
   var ti=allD.indexOf(today);
   if(ti!==-1) shifts.forEach(function(emp){

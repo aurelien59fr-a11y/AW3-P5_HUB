@@ -64,27 +64,14 @@ function ncpOperateurs(r){
   return getOperateur(dateISO, heure, ligneNum);
 }
 
-function ncpEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Delegue a escHtml (core/ui.js) : echappe aussi " et ', car ncpEsc sert dans des attributs.
+function ncpEsc(s){ return escHtml(s); }
 
+/* Traduction vers le francais, INTERNE (core/traduction.js : API du
+   navigateur, rien n'est envoye a un service externe). Rejette si
+   indisponible. */
 function ncpTraduireTexte(txt){
-  if(!txt || !txt.trim()) return Promise.resolve(txt);
-  var morceaux = [];
-  var reste = txt;
-  while(reste.length > 480){
-    var coupe = reste.lastIndexOf('\n', 480);
-    if(coupe < 50) coupe = 480;
-    morceaux.push(reste.slice(0, coupe));
-    reste = reste.slice(coupe);
-  }
-  morceaux.push(reste);
-  return Promise.all(morceaux.map(function(m){
-    if(!m.trim()) return m;
-    var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(m) + '&langpair=autodetect|fr';
-    return fetch(url).then(function(r){ return r.json(); }).then(function(d){
-      var t = d && d.responseData && d.responseData.translatedText;
-      return t || m;
-    }).catch(function(){ return m; });
-  })).then(function(parts){ return parts.join(''); });
+  return traduireLocal(txt, 'fr');
 }
 
 function ncpISO(dt){
@@ -196,7 +183,7 @@ function ncpFenetre(r){                            // fenetre debut -> fin du de
     var span = mins(h2) - mins(h1); if(span < 0) span += 1440;
     if(hs.length > 1 && span > 0 && span <= NCP_MAX_PLAGE_TEXTE_H*60){
       var fin = mins(h2) < mins(h1)
-        ? new Date(new Date(r.created_date_iso+'T00:00:00').getTime()+86400000).toISOString().slice(0,10)
+        ? isoLocal(ajouterJours(new Date(r.created_date_iso+'T12:00:00'),1))
         : r.created_date_iso;
       return { dateDebut:r.created_date_iso, heureDebut:h1, dateFin:fin, heureFin:h2,
                duree:span, src:'texte-plage', n:hs.length };
@@ -289,13 +276,13 @@ function ncpBlocShift(dateISO, heure){
   if(hh >= 5){
     if(we){
       if(hh < 17) return { d: mk(dateISO,5), f: mk(dateISO,17), b: '05h-17h' };
-      return { d: mk(dateISO,17), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '17h-05h' };
+      return { d: mk(dateISO,17), f: mk(jour(ajouterJours(d,1)),5), b: '17h-05h' };
     }
     if(hh < 13) return { d: mk(dateISO,5),  f: mk(dateISO,13), b: '05h-13h' };
     if(hh < 21) return { d: mk(dateISO,13), f: mk(dateISO,21), b: '13h-21h' };
-    return { d: mk(dateISO,21), f: mk(jour(new Date(d.getTime()+86400000)),5), b: '21h-05h' };
+    return { d: mk(dateISO,21), f: mk(jour(ajouterJours(d,1)),5), b: '21h-05h' };
   }
-  var v = new Date(d.getTime() - 86400000), vs = jour(v), vdow = v.getDay();
+  var v = ajouterJours(d,-1), vs = jour(v), vdow = v.getDay(); // jours calendaires : juste aussi les jours de changement d'heure
   if(vdow === 0 || vdow === 6) return { d: mk(vs,17), f: mk(dateISO,5), b: '17h-05h' };
   return { d: mk(vs,21), f: mk(dateISO,5), b: '21h-05h' };
 }

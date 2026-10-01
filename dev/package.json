@@ -1,0 +1,19 @@
+{
+  "name": "aw3-p5-hub-dev",
+  "private": true,
+  "description": "Outillage de developpement (tests, lint). Non deploye : le site reste statique a la racine.",
+  "type": "module",
+  "scripts": {
+    "test": "TZ=Europe/Brussels vitest run",
+    "lint": "cd .. && dev/node_modules/.bin/eslint -c dev/eslint.config.js js sw.js",
+    "fumee": "node tests/e2e/fumee.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "jsdom": "^25.0.0",
+    "jszip": "^3.10.1",
+    "playwright-core": "^1.63.0",
+    "vitest": "^2.1.0"
+  }
+}

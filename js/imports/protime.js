@@ -135,7 +135,10 @@ function purgeAllProtimeAbsences(){
   recalc(); buildBT(); updKPI(); refreshCharts();
   if(document.querySelector('.fb.on')) buildAbs(document.querySelector('.fb.on').dataset.f);
   updAbsLbl(); buildMiniCal(); save();
-  toast(removed + ' absences supprimées — relance maintenant l\'import Protime', '#f59e0b');
+  absEnregistrerTout().then(function(){
+    journaliser('absences_protime_purgees', { nb: removed });
+    toast(removed + ' absences supprimées — relance maintenant l\'import Protime', '#f59e0b');
+  }, function(e){ toast('Absences non enregistrees : '+e.message,'#ef4444'); });
 }
 
 function purgeUntypedAbsences(){
@@ -151,7 +154,7 @@ function purgeUntypedAbsences(){
   recalc(); buildBT(); updKPI(); refreshCharts();
   if(document.querySelector('.fb.on')) buildAbs(document.querySelector('.fb.on').dataset.f);
   updAbsLbl();
-  save();
+  save(); absEnregistrerTout().catch(function(e){ toast('Absences non enregistrees : '+e.message,'#ef4444'); });
 
   toast(removed + ' entrees sans type supprimees - relance maintenant un import Protime propre', '#f59e0b');
 }
@@ -169,7 +172,7 @@ function purgeProtimeAbsences(){
   recalc(); buildBT(); updKPI(); refreshCharts();
   if(document.querySelector('.fb.on')) buildAbs(document.querySelector('.fb.on').dataset.f);
   updAbsLbl();
-  save();
+  save(); absEnregistrerTout().catch(function(e){ toast('Absences non enregistrees : '+e.message,'#ef4444'); });
 
   toast(removed + ' entrees d\'un jour supprimees - relance maintenant un import Protime propre', '#f59e0b');
 }
@@ -179,6 +182,7 @@ function applyProtimeImport(){
   if(!canEdit()){ return; }
 
   var applied = 0;
+  var anneesIgnorees = {};
   var ALLOWED_VALUES = ['ziek','verlof','recup'];
 
   protimeImportData.employees.forEach(function(emp){
@@ -196,8 +200,9 @@ function applyProtimeImport(){
 
       var year = protimeDateToYear(d.date);
       var ddmm = protimeDateToDDMM(d.date);
-      var shifts = year==='2027' ? SHIFTS27 : year==='2026' ? SHIFTS26 : SHIFTS25;
-      var weeks = year==='2027' ? WEEKS27 : year==='2026' ? WEEKS26 : WEEKS25;
+      var shifts = shiftsPourAnnee(year);
+      var weeks = weeksPourAnnee(year);
+      if(!shifts || !weeks){ anneesIgnorees[year] = true; return; } // annee hors 2025-2027 : ignoree
       var allDatesYear = weeks.reduce(function(a,w){return a.concat(w.d);},[]);
       var dayIdx = allDatesYear.indexOf(ddmm);
       if(dayIdx === -1) return; // date hors planning (ex: 24/12, 31/12 exclus)
@@ -228,21 +233,22 @@ function applyProtimeImport(){
     var allPlannedDates2026 = WEEKS26.reduce(function(a,w){return a.concat(w.d);},[]);
     var allPlannedDates2027 = WEEKS27.reduce(function(a,w){return a.concat(w.d);},[]);
     function isPlannedDay(isoDate){
-      var dt = new Date(isoDate);
+      var dt = new Date(isoDate + 'T12:00:00');
       var dd = String(dt.getDate()).padStart(2,'0');
       var mm = String(dt.getMonth()+1).padStart(2,'0');
       var ddmm = dd+'/'+mm;
       var yr = String(dt.getFullYear());
-      var arr = yr==='2027'?allPlannedDates2027:yr==='2026'?allPlannedDates2026:allPlannedDates2025;
-      return arr.indexOf(ddmm) !== -1;
+      var arr = yr==='2027'?allPlannedDates2027:yr==='2026'?allPlannedDates2026:yr==='2025'?allPlannedDates2025:null;
+      return !!arr && arr.indexOf(ddmm) !== -1;
     }
     function gapContainsWorkDay(isoA, isoB){
       // Retourne true si au moins un jour planifie existe ENTRE isoA et isoB (exclus)
-      var d = new Date(isoA); d.setDate(d.getDate()+1);
-      var end = new Date(isoB);
+      // Dates locales a midi : aucun decalage UTC ni effet du changement d'heure.
+      var d = ajouterJours(new Date(isoA + 'T12:00:00'), 1);
+      var end = new Date(isoB + 'T12:00:00');
       while(d < end){
-        if(isPlannedDay(d.toISOString().slice(0,10))) return true;
-        d.setDate(d.getDate()+1);
+        if(isPlannedDay(isoLocal(d))) return true;
+        d = ajouterJours(d, 1);
       }
       return false;
     }
@@ -279,30 +285,48 @@ function applyProtimeImport(){
   recalc(); buildBT(); updKPI(); refreshCharts(); buildPT();
   if(document.querySelector('.fb.on')) buildAbs(document.querySelector('.fb.on').dataset.f);
   updAbsLbl();
-  save();
-
-  var nowTs=new Date().toISOString();
-  if(db) db.ref('bradford/import_ts').set(nowTs);
-  document.getElementById('protime-status').textContent = applied + ' jours importes le ' + new Date().toLocaleString('fr-BE');
-  document.getElementById('protime-status').style.color = 'var(--green)';
-  detectMissingWeeks(protimeImportData);
-  buildMiniCal();
-  document.getElementById('protime-paste').value = '';
-  document.getElementById('protime-preview').style.display = 'none';
-  document.getElementById('protime-apply-btn').disabled = true;
-  document.getElementById('protime-apply-btn').style.opacity = '.5';
-  protimeImportData = null;
-
-  toast(applied + ' jours mis a jour depuis Protime', '#10b981');
+  var btnApply = document.getElementById('protime-apply-btn');
+  btnApply.disabled = true; btnApply.style.opacity = '.5';
+  var donneesImport = protimeImportData;
+  protimeImportData = null; // un seul envoi, meme en cas de double clic
+  // Le succes n'est annonce qu'apres confirmation des deux ecritures.
+  return Promise.all([
+    save(),
+    absEnregistrerTout().then(function(){ return true; }, function(e){ toast('Absences non enregistrees : '+e.message,'#ef4444'); return false; })
+  ]).then(function(res){
+    var ok = res[0] && res[1];
+    if(ok){
+      var nowTs=new Date().toISOString();
+      if(db) db.ref('bradford/import_ts').set(nowTs).catch(function(){});
+      document.getElementById('protime-status').textContent = applied + ' jours importes le ' + new Date().toLocaleString('fr-BE');
+      document.getElementById('protime-status').style.color = 'var(--green)';
+      document.getElementById('protime-paste').value = '';
+      document.getElementById('protime-preview').style.display = 'none';
+      toast(applied + ' jours mis a jour depuis Protime', '#10b981');
+      journaliser('import_protime_planning', { jours: applied });
+    } else {
+      document.getElementById('protime-status').textContent = 'Import incomplet : verifie le message d\'erreur puis relance la verification.';
+      document.getElementById('protime-status').style.color = 'var(--red, #ef4444)';
+    }
+    detectMissingWeeks(donneesImport);
+    buildMiniCal();
+    if(Object.keys(anneesIgnorees).length) toast('Annee(s) hors planning ignoree(s) : ' + Object.keys(anneesIgnorees).join(', '), '#f59e0b');
+    return ok;
+  });
 }
 
 // Charger depuis Firebase au démarrage
 
 function loadPointages(){
   if(!db) return;
+  // Seuls admin, sous-chef et visiteur lisent les pointages de toute l'equipe ;
+  // un employe recoit les siens dans espace/<uid> (voir metier/espace-perso.js).
+  if(typeof lecturePointagesComplete === 'function' && !lecturePointagesComplete()) return;
   db.ref('pointages').on('value', function(snap){
     var data = snap.val();
     PT_DATA = data || {};
+    ESPACE_PT_CHARGES = true;
+    planifierPublicationEspaces();
     buildPT2();
     updPointagesBanner();
   }, function(error){
@@ -353,7 +377,7 @@ function importerAbsencesProtime(absences){
     // Remplir directement la case du planning ce jour-la
     var pos = indexPourDate(a.date);
     if(pos.idx !== -1){
-      var shiftsAnnee = pos.year==='2027'?SHIFTS27:pos.year==='2026'?SHIFTS26:SHIFTS25;
+      var shiftsAnnee = shiftsPourAnnee(pos.year) || [];
       var empShift = shiftsAnnee.find(function(e){ return e.n === nomDashboard; });
       if(empShift){ empShift.s[pos.idx] = type; casesRemplies++; }
     }

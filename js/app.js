@@ -292,7 +292,7 @@ var I18N={
     br_col_role:'Role', br_col_periods:'Periodes', br_col_status:'Statut',
     br_tooltip_history:'Voir historique', br_tooltip_comment:'Commentaire',
     br_comment_prefix:'Commentaire — ', br_comment_last_mod:'Derniere modif : ', br_comment_by:' par ',
-    btn_save:'Enregistrer', br_comment_saved:'Commentaire enregistre', br_comment_deleted:'Commentaire supprime',
+    btn_save:'Enregistrer', br_comment_trop_long:'Commentaire trop long (2000 caracteres maximum).', br_comment_saved:'Commentaire enregistre', br_comment_deleted:'Commentaire supprime',
     br_days_suffix_1:' jour', br_days_suffix_n:' jours', br_episode_badge:'Episode',
     br_no_episode:'Aucun episode maladie dans les 365 derniers jours',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Jours',
@@ -303,6 +303,25 @@ var I18N={
     adm_fb_rules_title:'Roles utilisateurs Firebase',
     adm_migration_title:'Migration initiale Firebase', adm_migration_status_none:'Non effectuee',
     adm_migration_btn:'Lancer la migration',
+    a11y_mois_prec:'Mois precedent',
+    a11y_mois_suiv:'Mois suivant',
+    a11y_annee_prec:'Annee precedente',
+    a11y_annee_suiv:'Annee suivante',
+    a11y_fermer:'Fermer',
+    a11y_filtre_bradford:'Filtrer le tableau Bradford',
+    a11y_choix_employe:'Choisir un employe',
+    a11y_rapport_mois:'Mois du rapport',
+    a11y_rapport_annee:'Annee du rapport',
+    a11y_pt_personne:'Filtrer par personne',
+    a11y_pt_type:'Filtrer par type',
+    a11y_pt_statut:'Filtrer par statut',
+    a11y_arrets_raison:'Filtrer par raison d\'arret',
+    a11y_import_json:'Fichier JSON a importer',
+    a11y_pt_import:'JSON des pointages Protime',
+    a11y_role_compte:'Role du compte',
+    a11y_onglets:'Sections du tableau de bord',
+    trad_indisponible:'Traduction interne indisponible dans ce navigateur (utilise Chrome ou Edge a jour).',
+    adm_migration_desactivee:'Ancienne migration desactivee : aucune donnee modifiee.',
     adm_session_title:'Session active', adm_session_connected_as:'Connecte en tant que : ', adm_session_role:'Role : ',
     adm_excel_report_title:'Rapport mensuel Excel', adm_excel_report_btn:'Generer rapport Excel',
     adm_protime_import_title:'Importer depuis Protime', adm_protime_status_none:'Aucun import',
@@ -314,7 +333,7 @@ var I18N={
     adm_emp_modal_add_title:'Ajouter un employe', adm_emp_modal_edit_prefix:'Modifier ',
     adm_field_fullname:'Nom complet', adm_field_group:'Groupe', adm_field_role:'Role', adm_field_birthday:'Date de naissance',
     adm_placeholder_name:'Prenom Nom', adm_placeholder_role:'ex: Operateur',
-    adm_err_name_required:'Le nom est obligatoire.', adm_err_role_required:'Le role est obligatoire.',
+    adm_err_name_required:'Le nom est obligatoire.', adm_err_role_required:'Le role est obligatoire.', adm_err_birthday:'Date de naissance invalide.', adm_err_emp_exists:'Un employe avec ce nom existe deja (eventuellement retire). Rien n\'a ete modifie.',
     adm_err_firebase_disconnected:'Firebase non connecte.', adm_saving:'Enregistrement...',
     adm_toast_saved_suffix:' enregistre !',
     adm_confirm_remove1:'Retirer ', adm_confirm_remove2:' de l’equipe ? Son historique Bradford sera conserve.',
@@ -366,7 +385,7 @@ var I18N={
     formations_field_employes:'Employés concernés', formations_field_notes:'Notes (optionnel)',
     formations_placeholder_titre:'Ex: Formation sécurité incendie', formations_placeholder_lieu:'Ex: Salle de réunion, formateur externe...',
     formations_placeholder_notes:'Détails, matériel à prévoir...', formations_btn_delete:'Supprimer', formations_btn_save:'Enregistrer',
-    formations_err_titre:'Le titre est obligatoire.', formations_err_date:'La date est obligatoire.',
+    formations_err_titre:'Le titre est obligatoire.', formations_err_heures:'L\'heure de fin doit etre apres l\'heure de debut.', formations_err_longueur:'Texte trop long (titre et lieu : 200 caracteres, notes : 2000).', formations_err_date:'La date est obligatoire.',
     formations_toast_saved:'Formation enregistrée', formations_toast_deleted:'Formation supprimée',
     formations_confirm_delete:'Supprimer cette formation ?', formations_err_generic:'Erreur : ',
     comptes_emp_title:'Comptes employés',
@@ -423,7 +442,7 @@ var I18N={
     ncp_truncated:'Affichage limité aux {n} plus récents sur {total}',
     rec_subtitle:'Grille d\u2019entretien mentalité — sécurité, fiabilité, motivation',
     modal_close:'Fermer', ncp_detail_title:'Détail du NCP',
-    comptes_emp_empty:'Aucun employé Firebase trouvé.', role_admin:'Administrateur', role_subchef:'Sous-chef', role_custom:'Accès personnalisé',
+    comptes_emp_empty:'Aucun employé Firebase trouvé.', role_admin:'Administrateur', acc_confirm_admin:'Donner les droits ADMINISTRATEUR a ce compte ? Il pourra tout lire, modifier et supprimer.', role_subchef:'Sous-chef', role_custom:'Accès personnalisé',
     comptes_actif:'Compte actif', comptes_btn_modif_acces:"Modifier l'accès", comptes_btn_creer:'Créer un compte',
     comptes_edit_planning:'Peut modifier le planning', comptes_btn_enregistrer:'Enregistrer', comptes_btn_annuler:'Annuler',
     comptes_loading:'Chargement...', comptes_confirm_creer:'Créer le compte pour ', comptes_confirm_email:'Email : ',
@@ -554,7 +573,7 @@ var I18N={
     br_col_role:'Rol', br_col_periods:'Periodes', br_col_status:'Status',
     br_tooltip_history:'Geschiedenis bekijken', br_tooltip_comment:'Opmerking',
     br_comment_prefix:'Opmerking — ', br_comment_last_mod:'Laatst gewijzigd: ', br_comment_by:' door ',
-    btn_save:'Opslaan', br_comment_saved:'Opmerking opgeslagen', br_comment_deleted:'Opmerking verwijderd',
+    btn_save:'Opslaan', br_comment_trop_long:'Commentaar te lang (maximaal 2000 tekens).', br_comment_saved:'Opmerking opgeslagen', br_comment_deleted:'Opmerking verwijderd',
     br_days_suffix_1:' dag', br_days_suffix_n:' dagen', br_episode_badge:'Episode',
     br_no_episode:'Geen ziekte-episode in de laatste 365 dagen',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Dagen',
@@ -565,6 +584,25 @@ var I18N={
     adm_fb_rules_title:'Firebase-gebruikersrollen',
     adm_migration_title:'Initiële Firebase-migratie', adm_migration_status_none:'Niet uitgevoerd',
     adm_migration_btn:'Migratie starten',
+    a11y_mois_prec:'Vorige maand',
+    a11y_mois_suiv:'Volgende maand',
+    a11y_annee_prec:'Vorig jaar',
+    a11y_annee_suiv:'Volgend jaar',
+    a11y_fermer:'Sluiten',
+    a11y_filtre_bradford:'Bradford-tabel filteren',
+    a11y_choix_employe:'Kies een medewerker',
+    a11y_rapport_mois:'Maand van het rapport',
+    a11y_rapport_annee:'Jaar van het rapport',
+    a11y_pt_personne:'Filteren op persoon',
+    a11y_pt_type:'Filteren op type',
+    a11y_pt_statut:'Filteren op status',
+    a11y_arrets_raison:'Filteren op stilstandreden',
+    a11y_import_json:'JSON-bestand om te importeren',
+    a11y_pt_import:'JSON van Protime-prikkingen',
+    a11y_role_compte:'Rol van het account',
+    a11y_onglets:'Secties van het dashboard',
+    trad_indisponible:'Interne vertaling niet beschikbaar in deze browser (gebruik een recente Chrome of Edge).',
+    adm_migration_desactivee:'Oude migratie uitgeschakeld: geen gegevens gewijzigd.',
     adm_session_title:'Actieve sessie', adm_session_connected_as:'Aangemeld als: ', adm_session_role:'Rol: ',
     adm_excel_report_title:'Maandelijks Excel-rapport', adm_excel_report_btn:'Excel-rapport genereren',
     adm_protime_import_title:'Importeren vanuit Protime', adm_protime_status_none:'Geen import',
@@ -576,7 +614,7 @@ var I18N={
     adm_emp_modal_add_title:'Medewerker toevoegen', adm_emp_modal_edit_prefix:'Wijzigen ',
     adm_field_fullname:'Volledige naam', adm_field_group:'Groep', adm_field_role:'Rol', adm_field_birthday:'Geboortedatum',
     adm_placeholder_name:'Voornaam Naam', adm_placeholder_role:'bv: Operator',
-    adm_err_name_required:'De naam is verplicht.', adm_err_role_required:'De rol is verplicht.',
+    adm_err_name_required:'De naam is verplicht.', adm_err_role_required:'De rol is verplicht.', adm_err_birthday:'Ongeldige geboortedatum.', adm_err_emp_exists:'Er bestaat al een medewerker met deze naam (eventueel verwijderd). Er is niets gewijzigd.',
     adm_err_firebase_disconnected:'Firebase niet verbonden.', adm_saving:'Bezig met opslaan...',
     adm_toast_saved_suffix:' opgeslagen!',
     adm_confirm_remove1:'', adm_confirm_remove2:' uit het team verwijderen? De Bradford-geschiedenis blijft bewaard.',
@@ -628,7 +666,7 @@ var I18N={
     formations_field_employes:'Betrokken medewerkers', formations_field_notes:'Notities (optioneel)',
     formations_placeholder_titre:'Bv: Brandveiligheidsopleiding', formations_placeholder_lieu:'Bv: Vergaderzaal, externe lesgever...',
     formations_placeholder_notes:'Details, benodigd materiaal...', formations_btn_delete:'Verwijderen', formations_btn_save:'Opslaan',
-    formations_err_titre:'De titel is verplicht.', formations_err_date:'De datum is verplicht.',
+    formations_err_titre:'De titel is verplicht.', formations_err_heures:'Het einduur moet na het beginuur liggen.', formations_err_longueur:'Tekst te lang (titel en plaats: 200 tekens, notities: 2000).', formations_err_date:'De datum is verplicht.',
     formations_toast_saved:'Opleiding opgeslagen', formations_toast_deleted:'Opleiding verwijderd',
     formations_confirm_delete:'Deze opleiding verwijderen?', formations_err_generic:'Fout: ',
     comptes_emp_title:'Medewerkersaccounts',
@@ -685,7 +723,7 @@ var I18N={
     ncp_truncated:'Weergave beperkt tot de {n} meest recente van {total}',
     rec_subtitle:'Beoordelingsraster mentaliteit — veiligheid, betrouwbaarheid, motivatie',
     modal_close:'Sluiten', ncp_detail_title:'NCP-detail',
-    comptes_emp_empty:'Geen Firebase-medewerker gevonden.', role_admin:'Beheerder', role_subchef:'Onderploegbaas', role_custom:'Aangepaste toegang',
+    comptes_emp_empty:'Geen Firebase-medewerker gevonden.', role_admin:'Beheerder', acc_confirm_admin:'Dit account BEHEERDERsrechten geven? Het kan dan alles lezen, wijzigen en verwijderen.', role_subchef:'Onderploegbaas', role_custom:'Aangepaste toegang',
     comptes_actif:'Account actief', comptes_btn_modif_acces:'Toegang wijzigen', comptes_btn_creer:'Account aanmaken',
     comptes_edit_planning:'Mag de planning wijzigen', comptes_btn_enregistrer:'Opslaan', comptes_btn_annuler:'Annuleren',
     comptes_loading:'Laden...', comptes_confirm_creer:'Account aanmaken voor ', comptes_confirm_email:'E-mail: ',
@@ -816,7 +854,7 @@ var I18N={
     br_col_role:'Role', br_col_periods:'Periods', br_col_status:'Status',
     br_tooltip_history:'View history', br_tooltip_comment:'Comment',
     br_comment_prefix:'Comment — ', br_comment_last_mod:'Last modified: ', br_comment_by:' by ',
-    btn_save:'Save', br_comment_saved:'Comment saved', br_comment_deleted:'Comment deleted',
+    btn_save:'Save', br_comment_trop_long:'Comment too long (2000 characters maximum).', br_comment_saved:'Comment saved', br_comment_deleted:'Comment deleted',
     br_days_suffix_1:' day', br_days_suffix_n:' days', br_episode_badge:'Episode',
     br_no_episode:'No sick episode in the last 365 days',
     br_stat_score:'Score', br_stat_episodes:'Episodes', br_stat_days:'Days',
@@ -827,6 +865,25 @@ var I18N={
     adm_fb_rules_title:'Firebase user roles',
     adm_migration_title:'Initial Firebase migration', adm_migration_status_none:'Not done',
     adm_migration_btn:'Start migration',
+    a11y_mois_prec:'Previous month',
+    a11y_mois_suiv:'Next month',
+    a11y_annee_prec:'Previous year',
+    a11y_annee_suiv:'Next year',
+    a11y_fermer:'Close',
+    a11y_filtre_bradford:'Filter the Bradford table',
+    a11y_choix_employe:'Choose an employee',
+    a11y_rapport_mois:'Report month',
+    a11y_rapport_annee:'Report year',
+    a11y_pt_personne:'Filter by person',
+    a11y_pt_type:'Filter by type',
+    a11y_pt_statut:'Filter by status',
+    a11y_arrets_raison:'Filter by stop reason',
+    a11y_import_json:'JSON file to import',
+    a11y_pt_import:'Protime clocking JSON',
+    a11y_role_compte:'Account role',
+    a11y_onglets:'Dashboard sections',
+    trad_indisponible:'Built-in translation unavailable in this browser (use an up-to-date Chrome or Edge).',
+    adm_migration_desactivee:'Legacy migration disabled: no data changed.',
     adm_session_title:'Active session', adm_session_connected_as:'Logged in as: ', adm_session_role:'Role: ',
     adm_excel_report_title:'Monthly Excel report', adm_excel_report_btn:'Generate Excel report',
     adm_protime_import_title:'Import from Protime', adm_protime_status_none:'No import',
@@ -838,7 +895,7 @@ var I18N={
     adm_emp_modal_add_title:'Add an employee', adm_emp_modal_edit_prefix:'Edit ',
     adm_field_fullname:'Full name', adm_field_group:'Group', adm_field_role:'Role', adm_field_birthday:'Date of birth',
     adm_placeholder_name:'First Last', adm_placeholder_role:'e.g.: Operator',
-    adm_err_name_required:'Name is required.', adm_err_role_required:'Role is required.',
+    adm_err_name_required:'Name is required.', adm_err_role_required:'Role is required.', adm_err_birthday:'Invalid birth date.', adm_err_emp_exists:'An employee with this name already exists (possibly removed). Nothing was changed.',
     adm_err_firebase_disconnected:'Firebase not connected.', adm_saving:'Saving...',
     adm_toast_saved_suffix:' saved!',
     adm_confirm_remove1:'Remove ', adm_confirm_remove2:' from the team? Their Bradford history will be kept.',
@@ -890,7 +947,7 @@ var I18N={
     formations_field_employes:'Employees involved', formations_field_notes:'Notes (optional)',
     formations_placeholder_titre:'E.g: Fire safety training', formations_placeholder_lieu:'E.g: Meeting room, external trainer...',
     formations_placeholder_notes:'Details, equipment needed...', formations_btn_delete:'Delete', formations_btn_save:'Save',
-    formations_err_titre:'Title is required.', formations_err_date:'Date is required.',
+    formations_err_titre:'Title is required.', formations_err_heures:'End time must be after start time.', formations_err_longueur:'Text too long (title and place: 200 characters, notes: 2000).', formations_err_date:'Date is required.',
     formations_toast_saved:'Training saved', formations_toast_deleted:'Training deleted',
     formations_confirm_delete:'Delete this training?', formations_err_generic:'Error: ',
     comptes_emp_title:'Employee accounts',
@@ -947,7 +1004,7 @@ var I18N={
     ncp_truncated:'Display limited to the {n} most recent out of {total}',
     rec_subtitle:'Mindset interview grid — safety, reliability, motivation',
     modal_close:'Close', ncp_detail_title:'NCP detail',
-    comptes_emp_empty:'No Firebase employee found.', role_admin:'Administrator', role_subchef:'Sub-chief', role_custom:'Custom access',
+    comptes_emp_empty:'No Firebase employee found.', role_admin:'Administrator', acc_confirm_admin:'Give ADMINISTRATOR rights to this account? It will be able to read, change and delete everything.', role_subchef:'Sub-chief', role_custom:'Custom access',
     comptes_actif:'Account active', comptes_btn_modif_acces:'Edit access', comptes_btn_creer:'Create an account',
     comptes_edit_planning:'Can edit planning', comptes_btn_enregistrer:'Save', comptes_btn_annuler:'Cancel',
     comptes_loading:'Loading...', comptes_confirm_creer:'Create the account for ', comptes_confirm_email:'Email: ',
@@ -991,6 +1048,11 @@ function applyI18n(){ try { if(window.recAppliquerLangue) window.recAppliquerLan
   document.querySelectorAll('[data-i18n-title]').forEach(function(el){
     var k=el.getAttribute('data-i18n-title');el.title=t(k);
   });
+  document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+    el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+  });
+  document.documentElement.lang = LANG; // lecteurs d'ecran : langue reelle de la page
+  if(typeof lierLibellesChamps === 'function') lierLibellesChamps();
   var lb=document.getElementById('lang-toggle');
   if(lb){
     lb.innerHTML=(LANG_FLAG_SVG[LANG]||'')+'<span>'+LANG.toUpperCase()+'</span>';
@@ -1109,8 +1171,13 @@ var SHIFTS27 = [
 ];
 
 var H2025={"01/01": "17h-05h", "04/01": "05h-17h", "05/01": "05h-17h", "11/01": "17h-05h", "12/01": "17h-05h", "18/01": "05h-17h", "19/01": "05h-17h", "25/01": "17h-05h", "26/01": "17h-05h", "01/02": "05h-17h", "02/02": "05h-17h", "08/02": "17h-05h", "09/02": "17h-05h", "15/02": "05h-17h", "16/02": "05h-17h", "22/02": "17h-05h", "23/02": "17h-05h", "01/03": "05h-17h", "02/03": "05h-17h", "08/03": "17h-05h", "09/03": "17h-05h", "15/03": "05h-17h", "16/03": "05h-17h", "22/03": "17h-05h", "23/03": "17h-05h", "29/03": "05h-17h", "30/03": "05h-17h", "05/04": "17h-05h", "06/04": "17h-05h", "12/04": "05h-17h", "13/04": "05h-17h", "19/04": "17h-05h", "20/04": "17h-05h", "21/04": "17h-05h", "26/04": "05h-17h", "27/04": "05h-17h", "01/05": "17h-05h", "02/05": "17h-05h", "03/05": "17h-05h", "04/05": "17h-05h", "10/05": "05h-17h", "11/05": "05h-17h", "17/05": "17h-05h", "18/05": "17h-05h", "24/05": "05h-17h", "25/05": "05h-17h", "29/05": "17h-05h", "30/05": "17h-05h", "31/05": "17h-05h", "01/06": "17h-05h", "07/06": "05h-17h", "08/06": "05h-17h", "09/06": "05h-17h", "14/06": "17h-05h", "15/06": "17h-05h", "21/06": "05h-17h", "22/06": "05h-17h", "28/06": "17h-05h", "29/06": "17h-05h", "05/07": "05h-17h", "06/07": "05h-17h", "12/07": "17h-05h", "13/07": "17h-05h", "19/07": "05h-17h", "20/07": "05h-17h", "21/07": "05h-17h", "26/07": "17h-05h", "27/07": "17h-05h", "02/08": "05h-17h", "03/08": "05h-17h", "09/08": "17h-05h", "10/08": "17h-05h", "15/08": "05h-17h", "16/08": "05h-17h", "17/08": "05h-17h", "23/08": "17h-05h", "24/08": "17h-05h", "30/08": "05h-17h", "31/08": "05h-17h", "06/09": "17h-05h", "07/09": "17h-05h", "13/09": "05h-17h", "14/09": "05h-17h", "20/09": "17h-05h", "21/09": "17h-05h", "27/09": "05h-17h", "28/09": "05h-17h", "04/10": "17h-05h", "05/10": "17h-05h", "11/10": "05h-17h", "12/10": "05h-17h", "18/10": "17h-05h", "19/10": "17h-05h", "25/10": "05h-17h", "26/10": "05h-17h", "01/11": "17h-05h", "02/11": "17h-05h", "08/11": "05h-17h", "09/11": "05h-17h", "10/11": "05h-17h", "11/11": "05h-17h", "15/11": "17h-05h", "16/11": "17h-05h", "22/11": "05h-17h", "23/11": "05h-17h", "29/11": "17h-05h", "30/11": "17h-05h", "06/12": "05h-17h", "07/12": "05h-17h", "13/12": "17h-05h", "14/12": "17h-05h", "20/12": "05h-17h", "21/12": "05h-17h", "25/12": "17h-05h", "26/12": "17h-05h", "27/12": "17h-05h", "28/12": "17h-05h"};
-var H2026={"01/01": "05h-17h", "02/01": "05h-17h", "03/01": "05h-17h", "04/01": "05h-17h", "10/01": "17h-05h", "11/01": "17h-05h", "17/01": "05h-17h", "18/01": "05h-17h", "24/01": "17h-05h", "25/01": "17h-05h", "31/01": "05h-17h", "01/02": "05h-17h", "07/02": "17h-05h", "08/02": "17h-05h", "14/02": "05h-17h", "15/02": "05h-17h", "21/02": "17h-05h", "22/02": "17h-05h", "28/02": "05h-17h", "01/03": "05h-17h", "07/03": "17h-05h", "08/03": "17h-05h", "14/03": "05h-17h", "15/03": "05h-17h", "21/03": "17h-05h", "22/03": "17h-05h", "28/03": "05h-17h", "29/03": "05h-17h", "04/04": "17h-05h", "05/04": "17h-05h", "06/04": "17h-05h", "11/04": "05h-17h", "12/04": "05h-17h", "18/04": "17h-05h", "19/04": "17h-05h", "25/04": "05h-17h", "26/04": "05h-17h", "01/05": "17h-05h", "02/05": "17h-05h", "03/05": "17h-05h", "09/05": "05h-17h", "10/05": "05h-17h", "14/05": "17h-05h", "15/05": "17h-05h", "16/05": "17h-05h", "17/05": "17h-05h", "23/05": "05h-17h", "24/05": "05h-17h", "25/05": "05h-17h", "30/05": "17h-05h", "31/05": "17h-05h", "06/06": "05h-17h", "07/06": "05h-17h", "13/06": "17h-05h", "14/06": "17h-05h", "20/06": "05h-17h", "21/06": "05h-17h", "27/06": "17h-05h", "28/06": "17h-05h", "04/07": "05h-17h", "05/07": "05h-17h", "11/07": "17h-05h", "12/07": "17h-05h", "18/07": "05h-17h", "19/07": "05h-17h", "20/07": "05h-17h", "21/07": "05h-17h", "25/07": "17h-05h", "26/07": "17h-05h", "01/08": "05h-17h", "02/08": "05h-17h", "08/08": "17h-05h", "09/08": "17h-05h", "15/08": "05h-17h", "16/08": "05h-17h", "22/08": "17h-05h", "23/08": "17h-05h", "29/08": "05h-17h", "30/08": "05h-17h", "05/09": "17h-05h", "06/09": "17h-05h", "12/09": "05h-17h", "13/09": "05h-17h", "19/09": "17h-05h", "20/09": "17h-05h", "26/09": "05h-17h", "27/09": "05h-17h", "03/10": "17h-05h", "04/10": "17h-05h", "10/10": "05h-17h", "11/10": "05h-17h", "17/10": "17h-05h", "18/10": "17h-05h", "24/10": "05h-17h", "25/10": "05h-17h", "31/10": "17h-05h", "01/11": "17h-05h", "07/11": "05h-17h", "08/11": "05h-17h", "11/11": "17h-05h", "14/11": "17h-05h", "15/11": "17h-05h", "21/11": "05h-17h", "22/11": "05h-17h", "28/11": "17h-05h", "29/11": "17h-05h", "05/12": "05h-17h", "06/12": "05h-17h", "12/12": "17h-05h", "13/12": "17h-05h", "19/12": "05h-17h", "20/12": "05h-17h", "25/12": "05h-17h", "26/12": "17h-05h", "27/12": "17h-05h"};
-var H2027={"01/01": "17h-05h", "02/01": "17h-05h", "03/01": "17h-05h", "09/01": "05h-17h", "10/01": "05h-17h", "16/01": "17h-05h", "17/01": "17h-05h", "23/01": "05h-17h", "24/01": "05h-17h", "30/01": "17h-05h", "31/01": "17h-05h", "06/02": "05h-17h", "07/02": "05h-17h", "13/02": "17h-05h", "14/02": "17h-05h", "20/02": "05h-17h", "21/02": "05h-17h", "27/02": "17h-05h", "28/02": "17h-05h", "06/03": "05h-17h", "07/03": "05h-17h", "13/03": "17h-05h", "14/03": "17h-05h", "20/03": "05h-17h", "21/03": "05h-17h", "27/03": "17h-05h", "28/03": "17h-05h", "03/04": "05h-17h", "04/04": "05h-17h", "05/04": "05h-17h", "10/04": "17h-05h", "11/04": "17h-05h", "17/04": "05h-17h", "18/04": "05h-17h", "24/04": "17h-05h", "25/04": "17h-05h", "01/05": "05h-17h", "02/05": "05h-17h", "08/05": "17h-05h", "09/05": "17h-05h", "13/05": "05h-17h", "14/05": "05h-17h", "15/05": "05h-17h", "16/05": "05h-17h", "22/05": "17h-05h", "23/05": "17h-05h", "24/05": "17h-05h", "29/05": "05h-17h", "30/05": "05h-17h", "05/06": "17h-05h", "06/06": "17h-05h", "12/06": "05h-17h", "13/06": "05h-17h", "19/06": "17h-05h", "20/06": "17h-05h", "26/06": "05h-17h", "27/06": "05h-17h", "03/07": "17h-05h", "04/07": "17h-05h", "10/07": "05h-17h", "11/07": "05h-17h", "17/07": "17h-05h", "18/07": "17h-05h", "21/07": "05h-17h", "24/07": "17h-05h", "25/07": "17h-05h", "31/07": "05h-17h", "01/08": "05h-17h", "07/08": "17h-05h", "08/08": "17h-05h", "14/08": "05h-17h", "15/08": "05h-17h", "21/08": "17h-05h", "22/08": "17h-05h", "28/08": "05h-17h", "29/08": "05h-17h", "04/09": "17h-05h", "05/09": "17h-05h", "11/09": "05h-17h", "12/09": "05h-17h", "18/09": "17h-05h", "19/09": "17h-05h", "25/09": "05h-17h", "26/09": "05h-17h", "02/10": "17h-05h", "03/10": "17h-05h", "09/10": "05h-17h", "10/10": "05h-17h", "16/10": "17h-05h", "17/10": "17h-05h", "23/10": "05h-17h", "24/10": "05h-17h", "30/10": "17h-05h", "31/10": "17h-05h", "01/11": "17h-05h", "06/11": "05h-17h", "07/11": "05h-17h", "11/11": "17h-05h", "12/11": "17h-05h", "13/11": "17h-05h", "14/11": "17h-05h", "20/11": "05h-17h", "21/11": "05h-17h", "27/11": "17h-05h", "28/11": "17h-05h", "04/12": "05h-17h", "05/12": "05h-17h", "11/12": "17h-05h", "12/12": "17h-05h", "18/12": "05h-17h", "19/12": "05h-17h", "25/12": "17h-05h", "26/12": "17h-05h"};
+var H2026={"01/01": "05h-17h", "02/01": "05h-17h", "03/01": "05h-17h", "04/01": "05h-17h", "10/01": "17h-05h", "11/01": "17h-05h", "17/01": "05h-17h", "18/01": "05h-17h", "24/01": "17h-05h", "25/01": "17h-05h", "31/01": "05h-17h", "01/02": "05h-17h", "07/02": "17h-05h", "08/02": "17h-05h", "14/02": "05h-17h", "15/02": "05h-17h", "21/02": "17h-05h", "22/02": "17h-05h", "28/02": "05h-17h", "01/03": "05h-17h", "07/03": "17h-05h", "08/03": "17h-05h", "14/03": "05h-17h", "15/03": "05h-17h", "21/03": "17h-05h", "22/03": "17h-05h", "28/03": "05h-17h", "29/03": "05h-17h", "04/04": "17h-05h", "05/04": "17h-05h", "06/04": "17h-05h", "11/04": "05h-17h", "12/04": "05h-17h", "18/04": "17h-05h", "19/04": "17h-05h", "25/04": "05h-17h", "26/04": "05h-17h", "01/05": "17h-05h", "02/05": "17h-05h", "03/05": "17h-05h", "09/05": "05h-17h", "10/05": "05h-17h", "14/05": "17h-05h", "15/05": "17h-05h", "16/05": "17h-05h", "17/05": "17h-05h", "23/05": "05h-17h", "24/05": "05h-17h", "25/05": "05h-17h", "30/05": "17h-05h", "31/05": "17h-05h", "06/06": "05h-17h", "07/06": "05h-17h", "13/06": "17h-05h", "14/06": "17h-05h", "20/06": "05h-17h", "21/06": "05h-17h", "27/06": "17h-05h", "28/06": "17h-05h", "04/07": "05h-17h", "05/07": "05h-17h", "11/07": "17h-05h", "12/07": "17h-05h", "18/07": "05h-17h", "19/07": "05h-17h", "20/07": "05h-17h", "21/07": "05h-17h", "25/07": "17h-05h", "26/07": "17h-05h", "01/08": "05h-17h", "02/08": "05h-17h", "08/08": "17h-05h", "09/08": "17h-05h", "15/08": "05h-17h", "16/08": "05h-17h", "22/08": "17h-05h", "23/08": "17h-05h", "29/08": "05h-17h", "30/08": "05h-17h", "05/09": "17h-05h", "06/09": "17h-05h", "12/09": "05h-17h", "13/09": "05h-17h", "19/09": "17h-05h", "20/09": "17h-05h", "26/09": "05h-17h", "27/09": "05h-17h", "03/10": "17h-05h", "04/10": "17h-05h", "10/10": "05h-17h", "11/10": "05h-17h", "17/10": "17h-05h", "18/10": "17h-05h", "24/10": "05h-17h", "25/10": "05h-17h", "31/10": "17h-05h", "01/11": "17h-05h", "07/11": "05h-17h", "08/11": "05h-17h", "11/11": "17h-05h", "14/11": "17h-05h", "15/11": "17h-05h", "21/11": "05h-17h", "22/11": "05h-17h", "28/11": "17h-05h", "29/11": "17h-05h", "05/12": "05h-17h", "06/12": "05h-17h", "12/12": "17h-05h", "13/12": "17h-05h", "19/12": "05h-17h", "20/12": "05h-17h", "25/12": "17h-05h", "26/12": "17h-05h", "27/12": "17h-05h"};
+/* H2027 : du 01/01 au 18/07/2027 les blocs etaient inverses dans la saisie d'origine (P5 aurait fait
+   deux week-ends de nuit d'affilee, 26/12/2026 puis 02/01/2027, et de meme 17/07 puis 24/07/2027).
+   Regle confirmee par Aurelien : une equipe ne fait jamais deux fois le meme horaire d'affilee.
+   Corrige le 01/10/2026 ; les feries suivent le week-end auquel ils sont rattaches
+   (de meme, H2026 25/12 : vendredi ferie rattache au week-end du 26-27/12, donc 17h-05h). */
+var H2027={"01/01": "05h-17h", "02/01": "05h-17h", "03/01": "05h-17h", "09/01": "17h-05h", "10/01": "17h-05h", "16/01": "05h-17h", "17/01": "05h-17h", "23/01": "17h-05h", "24/01": "17h-05h", "30/01": "05h-17h", "31/01": "05h-17h", "06/02": "17h-05h", "07/02": "17h-05h", "13/02": "05h-17h", "14/02": "05h-17h", "20/02": "17h-05h", "21/02": "17h-05h", "27/02": "05h-17h", "28/02": "05h-17h", "06/03": "17h-05h", "07/03": "17h-05h", "13/03": "05h-17h", "14/03": "05h-17h", "20/03": "17h-05h", "21/03": "17h-05h", "27/03": "05h-17h", "28/03": "05h-17h", "03/04": "17h-05h", "04/04": "17h-05h", "05/04": "17h-05h", "10/04": "05h-17h", "11/04": "05h-17h", "17/04": "17h-05h", "18/04": "17h-05h", "24/04": "05h-17h", "25/04": "05h-17h", "01/05": "17h-05h", "02/05": "17h-05h", "08/05": "05h-17h", "09/05": "05h-17h", "13/05": "17h-05h", "14/05": "17h-05h", "15/05": "17h-05h", "16/05": "17h-05h", "22/05": "05h-17h", "23/05": "05h-17h", "24/05": "05h-17h", "29/05": "17h-05h", "30/05": "17h-05h", "05/06": "05h-17h", "06/06": "05h-17h", "12/06": "17h-05h", "13/06": "17h-05h", "19/06": "05h-17h", "20/06": "05h-17h", "26/06": "17h-05h", "27/06": "17h-05h", "03/07": "05h-17h", "04/07": "05h-17h", "10/07": "17h-05h", "11/07": "17h-05h", "17/07": "05h-17h", "18/07": "05h-17h", "21/07": "05h-17h", "24/07": "17h-05h", "25/07": "17h-05h", "31/07": "05h-17h", "01/08": "05h-17h", "07/08": "17h-05h", "08/08": "17h-05h", "14/08": "05h-17h", "15/08": "05h-17h", "21/08": "17h-05h", "22/08": "17h-05h", "28/08": "05h-17h", "29/08": "05h-17h", "04/09": "17h-05h", "05/09": "17h-05h", "11/09": "05h-17h", "12/09": "05h-17h", "18/09": "17h-05h", "19/09": "17h-05h", "25/09": "05h-17h", "26/09": "05h-17h", "02/10": "17h-05h", "03/10": "17h-05h", "09/10": "05h-17h", "10/10": "05h-17h", "16/10": "17h-05h", "17/10": "17h-05h", "23/10": "05h-17h", "24/10": "05h-17h", "30/10": "17h-05h", "31/10": "17h-05h", "01/11": "17h-05h", "06/11": "05h-17h", "07/11": "05h-17h", "11/11": "17h-05h", "12/11": "17h-05h", "13/11": "17h-05h", "14/11": "17h-05h", "20/11": "05h-17h", "21/11": "05h-17h", "27/11": "17h-05h", "28/11": "17h-05h", "04/12": "05h-17h", "05/12": "05h-17h", "11/12": "17h-05h", "12/12": "17h-05h", "18/12": "05h-17h", "19/12": "05h-17h", "25/12": "17h-05h", "26/12": "17h-05h"};
 
 /* Vrai des l'instant ou un instantane de planning/absences a ete recu de
    Firebase. Tant qu'il est faux, ABS ne contient que la valeur de secours
@@ -1127,6 +1194,51 @@ var BD=[{n:'Aurelien Turchi',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Nicolas Fettu',D:3,S:
 
 
 
+/* --- Chargement des gros noeuds a la demande (phase 4) ---
+   arrets_inpak (~13 Mo ; la Vue d'ensemble n'en lit que les 45 derniers jours), sharepoint_notes + logbook_notes (~11 Mo), ncp_data
+   (~4 Mo) et bulk_data ne sont plus tous charges au demarrage : chaque noeud
+   est ecoute la premiere fois qu'un onglet qui s'en sert est ouvert (ou s'il
+   est l'onglet affiche au demarrage). Un compte qui n'a pas ces onglets ne les
+   telecharge jamais. Les ecouteurs restent ensuite actifs (temps reel). */
+var DONNEES_PAR_ONGLET = {
+  ov: ['arretsRecents', 'ncp'],
+  arrets: ['arrets'],
+  bulk: ['bulk'],
+  ncp: ['ncp'],
+  lb: ['arrets', 'ncp', 'logbook'],
+  espace: ['ncp']
+};
+var CHARGEURS_DONNEES = { arretsRecents: 'loadArretsRecents', arrets: 'loadArretsInpak', ncp: 'loadNCPData', bulk: 'loadBulkData', logbook: 'loadLogbookNotes' };
+var DONNEES_DEMARREES = {};
+var DONNEES_BASE_OK = false;
+function chargerDonneesOnglet(id){
+  if(!DONNEES_BASE_OK || !db) return; // donnees de base pas encore pretes : donneesBasePretes() s'en charge
+  (DONNEES_PAR_ONGLET[id] || []).forEach(function(cle){
+    if(DONNEES_DEMARREES[cle]) return;
+    var f = window[CHARGEURS_DONNEES[cle]];
+    if(typeof f !== 'function') return;
+    DONNEES_DEMARREES[cle] = true;
+    f();
+  });
+}
+function ongletActif(){
+  var b = document.querySelector('.tab.on[data-tab]');
+  return b ? b.dataset.tab : 'ov';
+}
+if(typeof majAriaOnglets === 'function') majAriaOnglets();
+if(typeof lierLibellesChamps === 'function') lierLibellesChamps();
+function donneesBasePretes(){
+  DONNEES_BASE_OK = true;
+  chargerDonneesOnglet(ongletActif());
+}
+document.querySelectorAll('.tab[data-tab]').forEach(function(b){
+  b.addEventListener('click', function(){
+    chargerDonneesOnglet(b.dataset.tab);
+    if(typeof majAriaOnglets === 'function') majAriaOnglets();
+    // Exports Excel (Bradford, rapport admin) : JSZip prechargee en arriere-plan.
+    if((b.dataset.tab === 'br' || b.dataset.tab === 'admin') && typeof chargerJSZip === 'function') chargerJSZip().catch(function(){});
+  });
+});
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('pane-'+b.dataset.tab).classList.add('on');
   if(b.dataset.tab === 'cmp2' && typeof buildComparaisonTab === 'function') buildComparaisonTab();
   if(b.dataset.tab === 'bulk' && typeof buildBulkSections === 'function') buildBulkSections();
@@ -1386,7 +1498,7 @@ function startApp(){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
-        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();loadLogbookNotes();
+        recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();chargerEspacePerso();donneesBasePretes();
         buildEmpTable();
       }
     }
@@ -1444,6 +1556,7 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
         if(u && u.employeId) ACCOUNTS[u.employeId] = {uid: uid, role: u.role, email: u.email};
       });
       buildComptesEmpListe();
+      planifierPublicationEspaces(); // comptes connus : espaces personnels a jour
     });
   }
 // Charger shifts 2025
@@ -1475,25 +1588,22 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
       loaded.s27=true;tryBuild();
     }).catch(function(){loaded.s27=true;tryBuild();});
     // Charger absences — admin seulement
-    if(currentUser && (currentUser.role === 'admin' || currentUser.role === 'visiteur')){
+    // Absences : admin, visiteur, et comptes qui modifient le planning (sous-chef,
+    // coordinateurs) -- ces derniers en ont besoin pour ajouter/retirer une maladie.
+    if(peutLireAbsences()){
       db.ref('planning/absences').once('value').then(function(snap){
-        var data=snap.val();
-        if(data){
-          var arr=Array.isArray(data)?data:Object.values(data);
-          ABS.splice(0,ABS.length);
-          arr.forEach(function(a){if(a)ABS.push(a);});
-        }
-        /* Instantane recu : ABS reflete desormais le serveur, meme si le
-           noeud etait vide. save() peut ecrire ce noeud. */
-        ABS_CHARGEES=true;
+        /* Instantane recu : ABS reflete desormais le serveur (meme vide),
+           chaque absence garde sa cle (_k) pour les ecritures unitaires. */
         loaded.abs=true;tryBuild();
       }).catch(function(){loaded.abs=true;tryBuild();});
     } else {
-      // Sous-chef : pas besoin des absences
+      // Pas d'acces aux absences : on vide la liste codee en dur au lieu de
+      // l'afficher comme si elle venait du serveur.
+      ABS.splice(0,ABS.length);
       loaded.abs=true;tryBuild();
     }
   } else {
-    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();loadArretsInpak();loadBulkData();loadNCPData();loadLogbookNotes();
+    recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildEmpTable();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();chargerEspacePerso();donneesBasePretes();
   }
 }
 
@@ -1531,7 +1641,7 @@ function buildBirthdayNotif(){
     +'<div style="font-size:13px;color:var(--tx2)">'
     +bdToday.map(function(b){
       var age = new Date().getFullYear()-b.year;
-      return '<b>'+b.n.split(' ')[0]+'</b>'+t('ov_birthday_turns1')+age+t('ov_birthday_turns2');
+      return '<b>'+escHtml(b.n.split(' ')[0])+'</b>'+t('ov_birthday_turns1')+age+t('ov_birthday_turns2');
     }).join(' &nbsp;·&nbsp; ')
     +'</div></div>';
 }
@@ -1550,8 +1660,12 @@ function buildBirthdayCal(){
   var upcoming = bdAll.map(function(b){
     var thisYear = new Date(now.getFullYear(), b.month-1, b.day);
     var nextYear = new Date(now.getFullYear()+1, b.month-1, b.day);
-    var next = thisYear >= now ? thisYear : nextYear;
-    var daysUntil = Math.floor((next - now)/(1000*60*60*24));
+    // Comparaison en jours calendaires (minuit local) : avant, l'anniversaire
+    // du jour partait a l'annee suivante et celui du lendemain s'affichait
+    // « aujourd'hui » des 00:01.
+    var aujourdhui = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var next = thisYear >= aujourdhui ? thisYear : nextYear;
+    var daysUntil = Math.round((next - aujourdhui)/(1000*60*60*24));
     var age = next.getFullYear() - b.year;
     return {n:b.n, next:next, daysUntil:daysUntil, age:age, month:b.month, day:b.day};
   }).sort(function(a,b){return a.daysUntil - b.daysUntil;});
@@ -1559,7 +1673,7 @@ function buildBirthdayCal(){
   // Trouver le prochain jour de travail (dans WEEKS)
   function nextWorkDay(date){
     var yr = String(date.getFullYear());
-    var weeks = yr==='2027'?WEEKS27:yr==='2026'?WEEKS26:WEEKS25;
+    var weeks = weeksPourAnnee(yr) || [];
     var allD = weeks.reduce(function(a,w){return a.concat(w.d);},[]);
     // Chercher à partir de cette date
     for(var offset=0; offset<=7; offset++){
@@ -1588,7 +1702,7 @@ function buildBirthdayCal(){
       +'<div style="display:flex;align-items:center;gap:10px">'
       +(isToday?'<span style="font-size:18px">🎂</span>':'<span style="font-size:16px">🎁</span>')
       +'<div>'
-      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+b.n.split(' ')[0]+'<span style="font-weight:400;color:var(--tx3);font-size:12px"> '+b.n.split(' ').slice(1).join(' ')+'</span></div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--tx1)">'+escHtml(b.n.split(' ')[0])+'<span style="font-weight:400;color:var(--tx3);font-size:12px"> '+escHtml(b.n.split(' ').slice(1).join(' '))+'</span></div>'
       +'<div style="font-size:11px;color:var(--tx3)">'+b.day+' '+MOIS[b.month-1]+' &mdash; '+b.age+' '+t('ov_birthday_years')+workInfo+'</div>'
       +'</div></div>'
       +'<div style="text-align:right">'
@@ -1952,9 +2066,8 @@ var COULEURS_EQUIPE = { P1:'#8b5cf6', P2:'#06b6d4', P3:'#3b82f6', P4:'#f59e0b', 
 
 
 
-// Traduction a la demande (bouton) via l'API gratuite MyMemory (pas de cle,
-// limite ~500 caracteres par requete, ~5000 caract/jour en anonyme -- largement
-// suffisant pour un usage manuel fiche par fiche).
+// Traduction a la demande (bouton), INTERNE : API Translator du navigateur
+// (core/traduction.js), aucun texte n'est envoye a un service externe.
 
 
 

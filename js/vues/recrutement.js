@@ -152,7 +152,7 @@ function sauvegarderCandidat(data){
 
 function supprimerCandidatFB(id){
   if(!firebaseAvailable()) return Promise.reject(new Error('no-db'));
-  return db.ref('recrutement/candidats/'+id).remove();
+  return db.ref('recrutement/candidats/'+id).remove().then(function(){ journaliser('candidat_supprime', { id: id }); });
 }
 
 var AXES_POIDS = { securite: 2.5, rigueur: 2.5, fiabilite: 1.5, equipe: 1, feedback: 1, stress: 1, hierarchie: 0.75, motivation: 1 }; var AXES_CRITIQUES = ['securite', 'rigueur']; var _recDistribChart = null, _recPredChart = null, _recFunnelChart = null, _recMoisChart = null; function recVal(id){ var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; } function recSet(id, v){ var e = document.getElementById(id); if(e) e.value = v || ''; } function recScorePondere(c){ var s = c.scores || {}; var num = 0, den = 0; Object.keys(AXES_POIDS).forEach(function(k){ if(s[k]){ num += s[k] * AXES_POIDS[k]; den += AXES_POIDS[k]; } }); return den ? (num / den) : null; } function recAlerte(c){ var s = c.scores || {}; for(var i = 0; i < AXES_CRITIQUES.length; i++){ if(s[AXES_CRITIQUES[i]] && s[AXES_CRITIQUES[i]] <= 2) return AXES_CRITIQUES[i]; } return null; } function recLibelleAxe(k){ for(var i = 0; i < AXES.length; i++){ if(AXES[i].key === k) return AXES[i].titre.replace(/^[0-9]+\. /, ''); } return k; } function recIssueLabel(v){ return recT(v === 'non_retenu' ? 'non retenu' : v === 'embauche' ? 'embauche' : v === 'confirme' ? 'confirme apres essai' : v === 'parti' ? 'parti pendant l essai' : 'en cours'); } function recCouleurNote(n){ return n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : n === 4 ? '#34d399' : '#10b981'; } function recBarres(c){ var s = c.scores || {}; var h = '<div style="display:flex;gap:3px;margin-top:6px">'; AXES.forEach(function(a){ var n = s[a.key] || 0; h += '<div title="' + a.titre.replace(/"/g, '') + ' : ' + (n || '-') + '/5" style="width:24px;height:6px;border-radius:3px;background:' + (n ? recCouleurNote(n) : 'var(--bd2)') + '"></div>'; }); return h + '</div>'; } function recSauverBrouillon(){ try { localStorage.setItem('rec_brouillon', JSON.stringify({ id: editId, nom: recVal('rec-f-nom'), scores: currentScores, notes: currentNotes, verdict: currentVerdict, ts: Date.now() })); } catch(e){} } function recEffacerBrouillon(){ try { localStorage.removeItem('rec_brouillon'); } catch(e){} } function recRestaurerBrouillon(){ var b = null; try { b = JSON.parse(localStorage.getItem('rec_brouillon') || 'null'); } catch(e){} if(!b || !b.scores || !Object.keys(b.scores).length) return; if(!confirm(recT('Un entretien non enregistre a ete retrouve') + (b.nom ? ' (' + b.nom + ')' : '') + recT('. Le reprendre ?'))){ recEffacerBrouillon(); return; } editId = b.id || null; currentScores = b.scores || {}; currentNotes = b.notes || {}; currentVerdict = b.verdict || null; recSet('rec-f-nom', b.nom); syncFormulaireDepuisState(); } function recRemplirEmployes(){ var sel = document.getElementById('rec-f-empid'); if(!sel || sel.getAttribute('data-fill')) return; sel.setAttribute('data-fill', '1'); var h = '<option value="">-</option>'; (window.EMP || []).forEach(function(e){ if(e.id) h += '<option value="' + e.id + '">' + e.n + '</option>'; }); sel.innerHTML = h; } function recBradford(c){ if(!c.empId) return null; var emp = (window.EMP || []).filter(function(e){ return e.id === c.empId; })[0]; if(!emp) return null; var b = (window.BD || []).filter(function(x){ return x.n === emp.n; })[0]; return (b && typeof b.sc === 'number') ? b.sc : null; } function verdictLabel(v){
@@ -257,7 +257,7 @@ function resetFormulaire(){
   currentNotes = {};
   currentVerdict = null;
   $('rec-f-nom').value = '';
-  $('rec-f-date').value = new Date().toISOString().slice(0,10);
+  $('rec-f-date').value = isoLocal(new Date());
   $('rec-f-suivi').value = '';
   $('rec-f-ref-statut').value = '';
   $('rec-f-ref-notes').value = '';  ['rec-f-poste','rec-f-unite','rec-f-shift','rec-f-evaluateur','rec-f-issue','rec-f-empid'].forEach(function(id){ recSet(id, ''); });
@@ -313,7 +313,7 @@ function renderListe(){
     var div = document.createElement('div');
     div.className = 'rec-liste-item';
     div.innerHTML =
-      '<div style="flex:1"><div class="rec-nom">'+c.nom+(recAlerte(c) ? ' <span title="'+recT('Note eliminatoire sur')+' '+recLibelleAxe(recAlerte(c))+'" style="color:#ef4444;font-size:11px;font-weight:700">&#9888; '+recT('ALERTE SECURITE')+'</span>' : '')+'</div><div class="rec-meta">'+c.date+' &middot; pondere '+(recScorePondere(c)!==null?recScorePondere(c).toFixed(1):'-')+'/5 &middot; brut '+moyenne+'/5'+(c.poste?' &middot; '+c.poste:'')+(c.unite?' '+c.unite:'')+' &middot; '+recIssueLabel(c.issue)+'</div>'+recBarres(c)+'</div>'+
+      '<div style="flex:1"><div class="rec-nom">'+escHtml(c.nom)+(recAlerte(c) ? ' <span title="'+recT('Note eliminatoire sur')+' '+recLibelleAxe(recAlerte(c))+'" style="color:#ef4444;font-size:11px;font-weight:700">&#9888; '+recT('ALERTE SECURITE')+'</span>' : '')+'</div><div class="rec-meta">'+escHtml(c.date)+' &middot; pondere '+(recScorePondere(c)!==null?recScorePondere(c).toFixed(1):'-')+'/5 &middot; brut '+moyenne+'/5'+(c.poste?' &middot; '+escHtml(c.poste):'')+(c.unite?' '+escHtml(c.unite):'')+' &middot; '+recIssueLabel(c.issue)+'</div>'+recBarres(c)+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
       (c.reference && c.reference.statut==='surveiller' ? '<span title="'+recT('Point d\u2019attention assiduité')+'" style="font-size:14px">\u26a0\ufe0f</span>' : '')+
       '<span class="pill '+verdictPillClass(c.verdict)+'">'+verdictLabel(c.verdict)+'</span>'+
@@ -370,18 +370,18 @@ function exporterFichePDF(){
   var rows = AXES.map(function(a){
     var score = (c.scores && c.scores[a.key]) ? c.scores[a.key] : '-';
     var note = (c.notes && c.notes[a.key]) ? c.notes[a.key] : '';
-    return '<tr><td>'+a.titre+'</td><td style="text-align:center">'+score+'/5</td><td>'+note+'</td></tr>';
+    return '<tr><td>'+a.titre+'</td><td style="text-align:center">'+escHtml(score)+'/5</td><td>'+escHtml(note)+'</td></tr>';
   }).join('');
   var refLabels = {positif:"Retour positif sur l'assiduité", surveiller:"Point d'attention signalé", injoignable:"Ancien employeur injoignable / refus"};
   var refLabel = (c.reference && c.reference.statut) ? refLabels[c.reference.statut] : 'Non vérifié';
   var corps =
-    '<h1>Évaluation mentalité — '+c.nom+'</h1>'+
-    '<div class="pa-meta">Entretien du '+c.date+' &middot; Ploeg 5 — AW3</div>'+
+    '<h1>Évaluation mentalité — '+escHtml(c.nom)+'</h1>'+
+    '<div class="pa-meta">Entretien du '+escHtml(c.date)+' &middot; Ploeg 5 — AW3</div>'+
     '<div class="pa-verdict">Verdict global : '+verdictLabel(c.verdict)+'</div>'+
     '<table><tr><th>Critère</th><th>Score</th><th>Exemple concret / notes</th></tr>'+rows+'</table>'+
-    '<div style="margin-bottom:10px"><strong>Vérification référence — assiduité :</strong> '+refLabel+(c.reference && c.reference.notes ? '<br>'+c.reference.notes : '')+'</div>'+
-    (c.suivi ? '<div><strong>Point à vérifier en période d\u2019essai :</strong><br>'+c.suivi+'</div>' : '');
-  var html = enveloppeImprimable('Fiche — '+c.nom, corps);
+    '<div style="margin-bottom:10px"><strong>Vérification référence — assiduité :</strong> '+refLabel+(c.reference && c.reference.notes ? '<br>'+escHtml(c.reference.notes) : '')+'</div>'+
+    (c.suivi ? '<div><strong>Point à vérifier en période d\u2019essai :</strong><br>'+escHtml(c.suivi)+'</div>' : '');
+  var html = enveloppeImprimable('Fiche — '+escHtml(c.nom), corps);
   var nomFichier = 'fiche-'+c.nom.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'.html';
   telechargerHTML(nomFichier, html);
 }
@@ -453,7 +453,7 @@ function renderCompareChecklist(){ recBuildGraphiques();
   candidats.forEach(function(c){
     var div = document.createElement('label');
     div.className = 'rec-cc-item';
-    div.innerHTML = '<input type="checkbox" value="'+c.id+'" class="rec-cc-check"><span>'+c.nom+'</span>';
+    div.innerHTML = '<input type="checkbox" value="'+escHtml(c.id)+'" class="rec-cc-check"><span>'+escHtml(c.nom)+'</span>';
     wrap.appendChild(div);
   });
   wrap.querySelectorAll('.rec-cc-check').forEach(function(chk){
@@ -512,12 +512,12 @@ function recBuildGraphiques(){ if(typeof Chart === 'undefined') return; var all 
   }
 
   var table = $('rec-tableau-scores');
-  var html = '<thead><tr><th>'+recT('Critère')+'</th>'+selected.map(function(c){ return '<th>'+c.nom+'</th>'; }).join('')+'</tr></thead><tbody>';
+  var html = '<thead><tr><th>'+recT('Critère')+'</th>'+selected.map(function(c){ return '<th>'+escHtml(c.nom)+'</th>'; }).join('')+'</tr></thead><tbody>';
   AXES.forEach(function(a){
     html += '<tr><td>'+a.titre.replace(/^[0-9]+\. /,'')+'</td>';
     selected.forEach(function(c){
       var v = c.scores && c.scores[a.key];
-      html += v ? '<td><span class="rec-score-cell rec-s'+v+'">'+v+'</span></td>' : '<td>-</td>';
+      html += v ? '<td><span class="rec-score-cell rec-s'+escHtml(v)+'">'+escHtml(v)+'</span></td>' : '<td>-</td>';
     });
     html += '</tr>';
   });
@@ -557,7 +557,7 @@ function attachListenersOnce(){
     var data = {
       id: editId || (Date.now()+''),
       nom: nom,
-      date: $('rec-f-date').value || new Date().toISOString().slice(0,10),
+      date: $('rec-f-date').value || isoLocal(new Date()),
       scores: Object.assign({}, currentScores),
       notes: Object.assign({}, currentNotes),
       verdict: currentVerdict,
@@ -665,7 +665,7 @@ function initRecrutementUI(){
   buildAxes();
   initSubnav();
   attachListenersOnce(); recRemplirEmployes(); window.recAppliquerLangue(); setTimeout(recRestaurerBrouillon, 900);
-  $('rec-f-date').value = new Date().toISOString().slice(0,10);
+  $('rec-f-date').value = isoLocal(new Date());
 }
 
 // Hook global appelé au clic sur l'onglet "Recrutement"

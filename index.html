@@ -6,7 +6,6 @@
 <title>Bradford Dashboard - AW3 Ploeg 5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -35,7 +34,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-<link rel="stylesheet" href="css/styles.css?v=94">
+<link rel="stylesheet" href="css/styles.css?v=95">
 </head>
 <body>
 <div id="splash-screen">
@@ -114,7 +113,7 @@
   <aside class="rail" id="desktop-rail"></aside>
   <div class="app-main-col">
   <div class="tabs-wrap">
-  <nav class="tabs">
+  <nav class="tabs" role="tablist" aria-label="Sections du tableau de bord" data-i18n-aria="a11y_onglets">
     <button class="tab on" data-tab="ov">&#9672; <span data-i18n="tab_ov">Vue d&rsquo;ensemble</span></button>
     <button class="tab" data-tab="br">&#9673; <span data-i18n="tab_br">Bradford</span></button>
     <button class="tab" data-tab="pl">&#9638; <span data-i18n="tab_pl">Planning</span></button>
@@ -164,7 +163,7 @@
       <div id="ov-rappels" style="margin-top:16px;font-size:12px;color:var(--tx3);display:flex;gap:18px;flex-wrap:wrap"></div>
     </div>
     <div class="pane" id="pane-br">
-      <div class="sh"><div class="st" data-i18n="br_title">Score Bradford</div><div class="ss" data-i18n="br_subtitle">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all" data-i18n="plan_all">Tous</option><option value="ok" data-i18n="status_ok">OK</option><option value="wn" data-i18n="status_wn">A surveiller</option><option value="al" data-i18n="status_al">Preoccupant</option><option value="cr" data-i18n="status_cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
+      <div class="sh"><div class="st" data-i18n="br_title">Score Bradford</div><div class="ss" data-i18n="br_subtitle">S&sup2; &times; D &mdash; temps r&eacute;el</div><div style="display:flex;gap:8px;margin-left:auto;align-items:center"><select id="bd-filter" aria-label="Filtrer le tableau Bradford" data-i18n-aria="a11y_filtre_bradford" onchange="buildBT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px"><option value="all" data-i18n="plan_all">Tous</option><option value="ok" data-i18n="status_ok">OK</option><option value="wn" data-i18n="status_wn">A surveiller</option><option value="al" data-i18n="status_al">Preoccupant</option><option value="cr" data-i18n="status_cr">Critique</option></select><button onclick="exportBradfordExcel()" style="padding:6px 14px;border-radius:var(--r);border:none;background:#1e40af;color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">&#11123; Excel</button></div></div>
       <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bd);font-size:12px;color:var(--tx2);display:flex;gap:24px;flex-wrap:wrap">
         <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px"></span>0-50 <span data-i18n="status_ok">OK</span></span>
         <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:5px"></span>51-200 <span data-i18n="legend_watch_short">Surveiller</span></span>
@@ -183,9 +182,9 @@
       <div class="ptb">
         <div class="ytabs"><button class="ytab" data-yr="2025">2025</button><button class="ytab on" data-yr="2026">2026</button><button class="ytab" data-yr="2027">2027</button></div>
         <div style="display:flex;align-items:center;gap:6px">
-          <button onclick="prevMonth()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8249;</button>
+          <button onclick="prevMonth()" aria-label="Mois precedent" data-i18n-aria="a11y_mois_prec" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8249;</button>
           <span id="month-label" style="font-size:13px;font-weight:600;color:var(--tx1);min-width:90px;text-align:center" data-i18n="plan_all">Tous</span>
-          <button onclick="nextMonth()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8250;</button>
+          <button onclick="nextMonth()" aria-label="Mois suivant" data-i18n-aria="a11y_mois_suiv" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:13px;cursor:pointer">&#8250;</button>
           <button onclick="curMonth=null;buildPT()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx3);font-family:var(--fn);font-size:11px;cursor:pointer" data-i18n="plan_all_btn">Tout</button>
         </div>
         <button onclick="goToday()" style="display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:rgba(59,130,246,.12);color:var(--blue);font-family:var(--fn);font-size:12px;font-weight:500;cursor:pointer">
@@ -231,7 +230,7 @@
 
     <div class="cc" id="espace-picker-wrap" style="display:none;margin-bottom:16px">
     <div class="cch"><div class="cct" data-i18n="espace_emp_label">Employé</div></div>
-    <select id="espace-emp-select" onchange="buildMonEspace()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+    <select id="espace-emp-select" aria-label="Choisir un employe" data-i18n-aria="a11y_choix_employe" onchange="buildMonEspace()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
     <option value="">-- Choisir un employé --</option>
     </select>
     </div>
@@ -367,26 +366,8 @@
         </div>
       </div>
 
-      <!-- MIGRATION -->
-      <div class="cc" id="migration-box">
-        <div class="cch">
-          <div class="cct" data-i18n="adm_migration_title">Migration initiale Firebase</div>
-          <span id="migr-status" style="font-size:11px;color:var(--tx3)" data-i18n="adm_migration_status_none">Non effectuee</span>
-        </div>
-        <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;line-height:1.7">
-          Transfere toutes les donnees de base vers Firebase :<br>
-          15 employes · shifts 2025 et 2026 · 26 absences historiques.<br>
-          <strong style="color:var(--amber)">A faire une seule fois.</strong> Les donnees existantes dans Firebase seront ecrasees.
-        </div>
-        <div id="migr-log" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;font-size:11px;font-family:var(--mo);line-height:2;margin-bottom:16px;max-height:200px;overflow-y:auto"></div>
-        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:16px;display:none" id="migr-prog">
-          <div id="migr-bar" style="height:100%;background:var(--blue);border-radius:2px;transition:width .3s;width:0%"></div>
-        </div>
-        <button onclick="runMigration()" id="migr-btn" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-          <span data-i18n="adm_migration_btn">Lancer la migration</span>
-        </button>
-      </div>
+      <!-- MIGRATION : ancienne migration initiale (2026) retiree le 30/09/2026.
+           Elle ecrasait 6 noeuds Firebase sans sauvegarde. Voir runMigration() dans js/vues/admin.js. -->
 
       <!-- INFO UTILISATEUR -->
       <div class="cc" style="margin-top:16px">
@@ -402,13 +383,13 @@
         <div class="cc" style="margin-bottom:20px">
           <div class="cch"><div class="cct" data-i18n="adm_excel_report_title">Rapport mensuel Excel</div></div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-            <select id="rapport-mois" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
+            <select id="rapport-mois" aria-label="Mois du rapport" data-i18n-aria="a11y_rapport_mois" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
               <option value="0" data-i18n="month_0">Janvier</option><option value="1" data-i18n="month_1">Fevrier</option><option value="2" data-i18n="month_2">Mars</option>
               <option value="3" data-i18n="month_3">Avril</option><option value="4" data-i18n="month_4">Mai</option><option value="5" data-i18n="month_5">Juin</option>
               <option value="6" data-i18n="month_6">Juillet</option><option value="7" data-i18n="month_7">Aout</option><option value="8" data-i18n="month_8">Septembre</option>
               <option value="9" data-i18n="month_9">Octobre</option><option value="10" data-i18n="month_10">Novembre</option><option value="11" data-i18n="month_11">Decembre</option>
             </select>
-            <select id="rapport-annee" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
+            <select id="rapport-annee" aria-label="Annee du rapport" data-i18n-aria="a11y_rapport_annee" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px">
               <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
             </select>
             <button onclick="genererRapportExcel()" style="padding:9px 18px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-size:13px;font-weight:600;cursor:pointer">&#11123; <span data-i18n="adm_excel_report_btn">Generer rapport Excel</span></button>
@@ -505,15 +486,15 @@
         <div class="st" data-i18n="tab_pt">Pointages</div>
         <div class="ss" data-i18n="pt_subtitle">Retards &amp; anomalies tourniquet/pointeuse</div>
         <div style="display:flex;gap:8px;margin-left:auto;align-items:center">
-          <select id="pt-filter-person" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+          <select id="pt-filter-person" aria-label="Filtrer par personne" data-i18n-aria="a11y_pt_personne" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
             <option value="all" data-i18n="plan_all">Tous</option>
           </select>
-          <select id="pt-filter-type" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+          <select id="pt-filter-type" aria-label="Filtrer par type" data-i18n-aria="a11y_pt_type" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
             <option value="all" data-i18n="pt_opt_all_types">Tous types</option>
             <option value="retard" data-i18n="pt_opt_retards">Retards</option>
             <option value="pointage" data-i18n="pt_opt_anomalies_tourniquet">Anomalies tourniquet</option>
           </select>
-          <select id="pt-filter-status" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
+          <select id="pt-filter-status" aria-label="Filtrer par statut" data-i18n-aria="a11y_pt_statut" onchange="buildPT2()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:12px">
             <option value="all" data-i18n="pt_opt_all_status">Tous statuts</option>
             <option value="open" data-i18n="pt_opt_open">Non traités</option>
             <option value="done" data-i18n="pt_opt_done">Traités</option>
@@ -635,7 +616,7 @@
 
       <!-- Raison (filtre partage avec les graphiques ci-dessous) -->
 <div style="margin-bottom:12px">
-          <select id="arrets-raison-select" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
+          <select id="arrets-raison-select" aria-label="Filtrer par raison d&#39;arret" data-i18n-aria="a11y_arrets_raison" onchange="filtrerArretsRaison()" style="padding:7px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx1);font-family:var(--fn);font-size:13px;min-width:280px">
             <option value="all" data-i18n="arr_all_reasons">Toutes les raisons</option>
           </select>
         </div>
@@ -958,7 +939,7 @@
           <button class="tbtn" id="rec-btn-export-json">&#11015; Exporter (JSON)</button>
           <button class="tbtn" id="rec-btn-import-json">&#11014; Importer</button>
         </div>
-        <input type="file" id="rec-file-import" accept=".json,application/json" style="display:none">
+        <input type="file" id="rec-file-import" aria-label="Fichier JSON a importer" data-i18n-aria="a11y_import_json" accept=".json,application/json" style="display:none">
         <div class="cc">
           <div class="cch"><div class="cct">Candidats évalués</div></div>
           <div id="rec-liste-vide" class="rec-empty" style="display:none">
@@ -1050,7 +1031,7 @@
 
       <div class="rec-io-overlay rec-hidden" id="rec-io-overlay">
   <div class="rec-io-top">
-    <button class="rec-io-close" id="rec-io-close">&times;</button>
+    <button class="rec-io-close" id="rec-io-close" aria-label="Fermer" data-i18n-aria="a11y_fermer">&times;</button>
     <div class="rec-io-progress" id="rec-io-progress">1 / 8</div>
     <div style="width:24px"></div>
   </div>
@@ -1067,7 +1048,7 @@
   </div>
   <nav class="mobile-nav" id="mobile-nav"></nav>
   <div class="mobile-menu-sheet" id="mobile-menu-sheet">
-    <div class="mms-backdrop" onclick="closeMobileMenu()"></div>
+    <div class="mms-backdrop" onclick="closeMobileMenu()" aria-hidden="true"></div>
     <div class="mms-panel">
       <div class="mms-handle"></div>
       <div class="mms-title" id="mobile-menu-title">Menu</div>
@@ -1079,35 +1060,37 @@
 <div class="popup" id="popup"></div>
 
 
-  <script src="js/core/format.js?v=1"></script>
-  <script src="js/core/ui.js?v=1"></script>
-  <script src="js/core/firebase.js?v=1"></script>
-    <script src="js/core/auth.js?v=3"></script>
-  <script src="js/metier/bradford.js?v=2"></script>
-  <script src="js/vues/bradford.js?v=3"></script>
-  <script src="js/metier/arrets.js?v=1"></script>
+  <script src="js/core/format.js?v=4"></script>
+  <script src="js/core/ui.js?v=3"></script>
+  <script src="js/core/traduction.js?v=1"></script>
+  <script src="js/core/firebase.js?v=3"></script>
+    <script src="js/core/auth.js?v=4"></script>
+  <script src="js/metier/bradford.js?v=4"></script>
+  <script src="js/vues/bradford.js?v=5"></script>
+  <script src="js/metier/arrets.js?v=2"></script>
   <script src="js/vues/arrets-inpak.js?v=1"></script>
-  <script src="js/imports/base.js?v=4"></script>
-  <script src="js/imports/grafana.js?v=1"></script>
-  <script src="js/imports/protime.js?v=2"></script>
-  <script src="js/imports/ncp.js?v=2"></script>
+  <script src="js/imports/base.js?v=5"></script>
+  <script src="js/imports/grafana.js?v=2"></script>
+  <script src="js/imports/protime.js?v=4"></script>
+  <script src="js/imports/ncp.js?v=3"></script>
   <script src="js/imports/sharepoint.js?v=2"></script>
-  <script src="js/metier/ncp.js?v=2"></script>
-  <script src="js/vues/ncp.js?v=1"></script>
+  <script src="js/metier/ncp.js?v=5"></script>
+  <script src="js/vues/ncp.js?v=3"></script>
         <script src="js/metier/logbook.js?v=4"></script>
-        <script src="js/vues/logbook.js?v=8"></script>
+        <script src="js/vues/logbook.js?v=10"></script>
   <script src="js/metier/bulk.js?v=1"></script>
-  <script src="js/vues/bulk.js?v=2"></script>
-  <script src="js/vues/planning.js?v=6"></script>
-  <script src="js/vues/formations.js?v=2"></script>
-  <script src="js/vues/attestation.js?v=2"></script>
-  <script src="js/vues/pointages.js?v=2"></script>
-  <script src="js/vues/admin.js?v=1"></script>
-  <script src="js/vues/recrutement.js?v=1"></script>
-  <script src="js/vues/espace.js?v=1"></script>
-  <script src="js/vues/absences.js?v=3"></script>
-  <script src="js/vues/ov-resume.js?v=8"></script>
-    <script src="js/app.js?v=86"></script>
+  <script src="js/vues/bulk.js?v=3"></script>
+  <script src="js/vues/planning.js?v=9"></script>
+  <script src="js/vues/formations.js?v=4"></script>
+  <script src="js/vues/attestation.js?v=4"></script>
+  <script src="js/vues/pointages.js?v=4"></script>
+  <script src="js/vues/admin.js?v=4"></script>
+  <script src="js/vues/recrutement.js?v=3"></script>
+  <script src="js/metier/espace-perso.js?v=1"></script>
+  <script src="js/vues/espace.js?v=3"></script>
+  <script src="js/vues/absences.js?v=4"></script>
+  <script src="js/vues/ov-resume.js?v=10"></script>
+    <script src="js/app.js?v=91"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
@@ -1123,7 +1106,7 @@
   <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:500px;max-width:95vw">
     <div style="font-weight:700;font-size:15px;margin-bottom:12px">&#8659; <span data-i18n="pt_modal_title">Importer pointages Protime</span></div>
     <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Colle ici le JSON généré par le script <b>exportEnrichi()</b> dans la console Protime</div>
-    <textarea id="pt-import-txt" style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:12px;padding:10px;resize:vertical"></textarea>
+    <textarea id="pt-import-txt" aria-label="JSON des pointages Protime" data-i18n-aria="a11y_pt_import" style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:12px;padding:10px;resize:vertical"></textarea>
     <div id="pt-import-err" style="font-size:12px;color:#ef4444;min-height:16px;margin-top:6px"></div>
     <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
       <button onclick="document.getElementById('pt-import-modal').style.display='none'" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer" data-i18n="modal_cancel">Annuler</button>

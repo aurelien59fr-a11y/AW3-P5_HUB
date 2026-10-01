@@ -1,0 +1,39 @@
+# Verifications automatiques : tests, lint et test de fumee (faux Firebase,
+# donnees fictives, aucun acces a la base de production ni a Vercel).
+name: Verifications
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: dev/package-lock.json
+      - run: npm ci
+      - name: Tests unitaires
+        run: npm test
+      - name: Lint
+        run: npm run lint
+      - name: Navigateur pour le test de fumee
+        run: npx playwright-core install --with-deps chromium
+      - name: Test de fumee (6 roles)
+        run: TZ=Europe/Brussels npm run fumee > fumee.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultat-test-de-fumee
+          path: dev/fumee.json
