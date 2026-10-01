@@ -34,23 +34,24 @@ function detectMissingWeeks(importedData){
 // Table de correspondance personReference Protime -> nom exact dans EMP/SHIFTS.
 // A completer/corriger au fil des imports si Protime ajoute des personnes
 // ou si une orthographe ne correspond pas.
-var PROTIME_PERSON_MAP = {
-  118959: "Aurelien Turchi",
-  133788: "Ramazani Abdulhassan",
-  152746: "Anthony Raimondi",
-  131719: "Brahim Akdim",
-  140059: "Hakkim Akkouh",
-  131713: "Halima Laadi",
-  111217: "Julien Demuyter",
-  116256: "Lachen Baraik",
-  130245: "Larissa Fratutescu",
-  126491: "Lyse Musik",
-  120965: "Balan Marius",
-  91855:  "Max Secember",
-  156883: "Mohamed Lalaoui",
-  101076: "Monir Salmi",
-  125602: "Nicolas Fettu"
-};
+var PROTIME_PERSON_MAP = {};
+/* La correspondance n'est plus ecrite dans ce fichier (public) : elle est
+   lue dans Firebase, noeud config/protime_map (lecture admin seul). Si une
+   reference n'y est pas, on retrouve la personne par son prenom + nom
+   (dans les deux ordres, accents et casse ignores). */
+function chargerProtimeMap(){
+  if(typeof db === 'undefined' || !db || !currentUser || currentUser.role !== 'admin') return Promise.resolve();
+  return db.ref('config/protime_map').once('value').then(function(s){ PROTIME_PERSON_MAP = s.val() || {}; }, function(){});
+}
+function protimeNorm(x){ return String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, ''); }
+function protimeNomDashboard(emp){
+  var m = PROTIME_PERSON_MAP[emp.personReference];
+  if(m) return m;
+  var a = protimeNorm(emp.firstName) + protimeNorm(emp.lastName), b = protimeNorm(emp.lastName) + protimeNorm(emp.firstName);
+  if(!a) return null;
+  var trouve = (typeof EMP !== 'undefined' ? EMP : []).find(function(e){ var n = protimeNorm(e.n); return n === a || n === b; });
+  return trouve ? trouve.n : null;
+}
 
 var protimeImportData = null;
 
@@ -87,7 +88,7 @@ function previewProtimeImport(){
   var unmappedShortLabels = [];
 
   data.employees.forEach(function(emp){
-    var dashName = PROTIME_PERSON_MAP[emp.personReference];
+    var dashName = protimeNomDashboard(emp);
     if(!dashName){
       unmatched.push(emp.firstName + ' ' + emp.lastName + ' (ref ' + emp.personReference + ')');
       return;
@@ -186,7 +187,7 @@ function applyProtimeImport(){
   var ALLOWED_VALUES = ['ziek','verlof','recup'];
 
   protimeImportData.employees.forEach(function(emp){
-    var dashName = PROTIME_PERSON_MAP[emp.personReference];
+    var dashName = protimeNomDashboard(emp);
     if(!dashName) return;
 
     // Etape 1 : appliquer chaque jour au planning (SHIFTS), comme avant.
@@ -337,7 +338,7 @@ function loadPointages(){
 
 // Générer une clé unique pour une anomalie
 // Rapproche un nom Protime ("Abdulhassan Ramazani") avec un nom du
-// dashboard ("Ramazani Abdulhassan") — l'ordre prenom/nom differe entre
+// dashboard ("<employe>") — l'ordre prenom/nom differe entre
 // les deux systemes, donc on compare les mots un par un, peu importe l'ordre.
 function matchNomProtime(nomProtime){
   var motsProtime = nomProtime.toLowerCase().split(/\s+/).sort().join(' ');
@@ -356,7 +357,7 @@ function classifierTypeAbsence(titre, detail, groupe){
   if(/verlof|cong|vacation|vakantie/.test(texte)) return 'verlof';
   // "Absent" (libelle Protime generique, sans plus de detail) : confirme avec
   // l'utilisateur le 20/09/2026 -- compte comme conge (verlof), plutot que
-  // d'ignorer ces jours comme avant. Cas reel : Mohamed Lalaoui, plusieurs
+  // d'ignorer ces jours comme avant. Cas reel : <employe>, plusieurs
   // jours futurs d'octobre 2026 etiquetes juste "Absent" cote Protime.
   if(/\babsent\b/.test(texte)) return 'verlof';
   return null; // type inconnu : on ignore plutot que de deviner
