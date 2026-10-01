@@ -622,3 +622,14 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 .mdp-secondaire{background:none;color:var(--tx2);border:1px solid var(--bd2);border-radius:8px;padding:9px 14px;cursor:pointer;font-family:var(--fn)}
 .mdp-erreur{min-height:18px;font-size:12.5px;color:#ef4444;margin-top:6px}.mdp-erreur.mdp-ok{color:var(--green)}
 .mdp-sep{border:none;border-top:1px solid var(--bd);margin:20px 0 14px}
+
+/* Avertissement de deconnexion automatique (core/session.js) */
+.session-avertissement{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10001;display:flex;gap:12px;align-items:center;background:var(--bg2);border:1px solid #f59e0b;color:var(--tx);border-radius:10px;padding:10px 14px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.session-avertissement button{background:#f59e0b;color:#111;border:none;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer}
+/* Journal de securite (vues/journal.js) */
+.journal-zone{max-height:420px;overflow:auto}
+.journal-table{width:100%;border-collapse:collapse;font-size:12px}
+.journal-table th{text-align:left;color:var(--tx3);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg2)}
+.journal-table td{padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:top;word-break:break-word}
+.journal-table tr.journal-sensible td:nth-child(3){color:#f59e0b;font-weight:600}
+.journal-vide{font-size:12px;color:var(--tx3);padding:8px 0}
