@@ -29,6 +29,9 @@ const serveur = http.createServer((req, res) => {
   const f = fs.existsSync(p) && fs.statSync(p).isDirectory() ? path.join(p, 'index.html') : p;
   if (!f.startsWith(site) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream', ...ENTETES });
+  // Le faux Firebase remplace les scripts du CDN : on retire leurs empreintes
+  // SRI (en production, elles sont verifiees par le navigateur).
+  if (f.endsWith('index.html')) return res.end(fs.readFileSync(f, 'utf8').replace(/ integrity="[^"]*" crossorigin="anonymous"/g, ''));
   fs.createReadStream(f).pipe(res);
 });
 await new Promise((r) => serveur.listen(0, '127.0.0.1', r));
@@ -43,7 +46,7 @@ const recent = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
 function donnees(uid, fiche) {
   const jours = Array.from({ length: 400 }, (_, i) => (i % 7 < 5 ? 'V' : ''));
   return {
-    users: { [uid]: fiche },
+    users: { [uid]: fiche },  // mdpChangeLe absent pour le compte « premiere connexion »
     employees: EMPLOYES,
     planning: {
       shifts2025: { 'Alex Exemple': jours, 'Sam Fictif': jours, 'Chef Test': jours },
@@ -62,10 +65,11 @@ function donnees(uid, fiche) {
   };
 }
 const SCENARIOS = [
-  ['admin', { role: 'admin', email: 'admin@exemple.test' }],
-  ['sous-chef', { role: 'subchef', email: 'souschef@exemple.test' }],
-  ['visiteur', { role: 'visiteur', email: 'visiteur@exemple.test' }],
-  ['employe (personnalise)', { role: 'custom', email: 'employe@exemple.test', nom: 'Alex Exemple', tabs: { pl: true, espace: true, formations: true } }],
+  ['admin', { role: 'admin', email: 'admin@exemple.test', mdpChangeLe: 1 }],
+  ['sous-chef', { role: 'subchef', email: 'souschef@exemple.test', mdpChangeLe: 1 }],
+  ['visiteur', { role: 'visiteur', email: 'visiteur@exemple.test', mdpChangeLe: 1 }],
+  ['employe (personnalise)', { role: 'custom', email: 'employe@exemple.test', nom: 'Alex Exemple', tabs: { pl: true, espace: true, formations: true }, mdpChangeLe: 1 }],
+  ['premiere connexion', { role: 'custom', email: 'nouveau@exemple.test', nom: 'Sam Fictif', tabs: { pl: true, espace: true } }],
   ['compte sans fiche /users', null],
   ['non connecte', undefined],
 ];
@@ -152,6 +156,7 @@ for (const [nom, fiche] of SCENARIOS) {
     ecritures: (window.__ecritures || []).map((e) => e.op + ' ' + e.chemin),
     pwned: !!window.__pwned,
     migration: !!document.getElementById('migr-btn'),
+    mdpObligatoire: !!document.getElementById('mdp-fenetre') && !document.getElementById('mdp-annuler'),
     arretsEnMemoire: Object.keys(window.ARRETS_DATA || {}).length,
     espace: (() => { const b = document.querySelector('.tab[data-tab="espace"]'); if (b) b.click(); const c = document.getElementById('espace-content'); return c ? c.textContent.replace(/\s+/g, ' ').slice(0, 4000) : null; })(),
   }));
@@ -166,12 +171,13 @@ console.log(JSON.stringify(resultats, null, 2));
 // Echec (code 1) si un role montre une erreur JS, une injection reussie, le
 // bouton de migration, un champ/bouton sans nom accessible, ou une ecriture
 // en base pour un role qui ne doit rien ecrire.
-const ROLES_LECTURE = ['visiteur', 'employe (personnalise)', 'compte sans fiche /users', 'non connecte'];
+const ROLES_LECTURE = ['visiteur', 'employe (personnalise)', 'premiere connexion', 'compte sans fiche /users', 'non connecte'];
 const problemes = [];
 for (const r of resultats) {
   if (r.erreurs.length) problemes.push(`${r.nom} : ${r.erreurs.length} erreur(s) JS`);
   if (r.pwned) problemes.push(`${r.nom} : injection HTML executee`);
   if (r.migration) problemes.push(`${r.nom} : bouton de migration present`);
+  if (r.mdpObligatoire !== (r.nom === 'premiere connexion')) problemes.push(`${r.nom} : fenetre mot de passe ${r.mdpObligatoire ? 'affichee a tort' : 'absente'}`);
   if (r.accessibilite.boutonsSansNom.length || r.accessibilite.champsSansNom.length) problemes.push(`${r.nom} : elements sans nom accessible`);
   if (ROLES_LECTURE.includes(r.nom) && r.ecritures.some((e) => !/^push audit_log/.test(e))) problemes.push(`${r.nom} : ecriture inattendue ${r.ecritures.join(', ')}`);
 }
