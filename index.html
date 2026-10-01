@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bradford Dashboard - AW3 Ploeg 5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" integrity="sha384-ajMUFBUFMCyjh8uxJg6bkGcKe9RTolyjwbxB3yES0QQMenP3Oztj/W9vA2SJPcIh" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" integrity="sha384-xD1t9dGSVKobUztxDkv6xUI0H4AnFz0NxwlgDJJ7FDlblG9xxr1Z9iauCZuJYj6p" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" integrity="sha384-f6/UpzjTjIXASlp20cArQsaRh1EvHVJd5kegy/gYR9W2D0a32TnEqUEiW4Zm/5O0" crossorigin="anonymous"></script>
 
   <link rel="manifest" href="manifest.json?v=2">
   <meta name="theme-color" content="#FFC20F">
@@ -34,7 +34,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-<link rel="stylesheet" href="css/styles.css?v=95">
+<link rel="stylesheet" href="css/styles.css?v=97">
 </head>
 <body>
 <div id="splash-screen">
@@ -105,6 +105,7 @@
       <span class="badge">15 <span data-i18n="ov_badge_employees">employ&eacute;s</span></span>
       <span style="font-size:11px;color:var(--tx3)" id="user-email"></span>
       <button id="lang-toggle" onclick="toggleLang()" title="Changer de langue" style="display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fn)">NL</button>
+      <button onclick="mdpOuvrir()" style="padding:3px 10px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--tx3);font-size:11px;cursor:pointer;font-family:var(--fn)" data-i18n="mdp_bouton">Mon mot de passe</button>
       <button onclick="doLogout()" style="padding:3px 10px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--tx3);font-size:11px;cursor:pointer;font-family:var(--fn)" data-i18n="topbar_logout">Deconnexion</button>
       <span class="chip" id="dchip"></span>
     </div>
@@ -244,8 +245,6 @@
         <button class="fb on" data-f="all" data-i18n="plan_all">Tous</button>
         <button class="fb" data-f="2025">2025</button>
         <button class="fb" data-f="2026">2026</button>
-        <button class="fb" data-f="Anthony Raimondi">A. Raimondi</button>
-        <button class="fb" data-f="Mohamed Lalaoui">M. Lalaoui</button>
       </div>
       <div class="ascroll">
         <div class="ahdr"><span data-i18n="ab_col_emp">Employe</span><span data-i18n="ab_col_start">Debut</span><span data-i18n="ab_col_end">Fin</span><span data-i18n="ab_col_days">Jours</span><span data-i18n="ab_col_intensity">Intensite</span><span style="text-align:right" data-i18n="ab_col_year">Annee</span></div>
@@ -1061,36 +1060,37 @@
 
 
   <script src="js/core/format.js?v=4"></script>
-  <script src="js/core/ui.js?v=3"></script>
+  <script src="js/core/ui.js?v=4"></script>
   <script src="js/core/traduction.js?v=1"></script>
+  <script src="js/core/motdepasse.js?v=1"></script>
   <script src="js/core/firebase.js?v=3"></script>
-    <script src="js/core/auth.js?v=4"></script>
+    <script src="js/core/auth.js?v=5"></script>
   <script src="js/metier/bradford.js?v=4"></script>
-  <script src="js/vues/bradford.js?v=5"></script>
+  <script src="js/vues/bradford.js?v=6"></script>
   <script src="js/metier/arrets.js?v=2"></script>
   <script src="js/vues/arrets-inpak.js?v=1"></script>
   <script src="js/imports/base.js?v=5"></script>
   <script src="js/imports/grafana.js?v=2"></script>
-  <script src="js/imports/protime.js?v=4"></script>
+  <script src="js/imports/protime.js?v=5"></script>
   <script src="js/imports/ncp.js?v=3"></script>
   <script src="js/imports/sharepoint.js?v=2"></script>
   <script src="js/metier/ncp.js?v=5"></script>
   <script src="js/vues/ncp.js?v=3"></script>
-        <script src="js/metier/logbook.js?v=4"></script>
-        <script src="js/vues/logbook.js?v=10"></script>
+        <script src="js/metier/logbook.js?v=5"></script>
+        <script src="js/vues/logbook.js?v=11"></script>
   <script src="js/metier/bulk.js?v=1"></script>
   <script src="js/vues/bulk.js?v=3"></script>
   <script src="js/vues/planning.js?v=9"></script>
   <script src="js/vues/formations.js?v=4"></script>
   <script src="js/vues/attestation.js?v=4"></script>
   <script src="js/vues/pointages.js?v=4"></script>
-  <script src="js/vues/admin.js?v=4"></script>
+  <script src="js/vues/admin.js?v=5"></script>
   <script src="js/vues/recrutement.js?v=3"></script>
   <script src="js/metier/espace-perso.js?v=1"></script>
   <script src="js/vues/espace.js?v=3"></script>
   <script src="js/vues/absences.js?v=4"></script>
   <script src="js/vues/ov-resume.js?v=10"></script>
-    <script src="js/app.js?v=91"></script>
+    <script src="js/app.js?v=94"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
