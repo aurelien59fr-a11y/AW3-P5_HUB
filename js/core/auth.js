@@ -214,4 +214,13 @@ function doForgotPassword(){
      });
 }
 
-function doLogout(){firebase.auth().signOut();}
+/* Deconnexion : on recharge la page une fois la session fermee. Cela detache
+   tous les ecouteurs Firebase (.on) et les intercepteurs poses par applyRole,
+   et vide les donnees du compte precedent restees en memoire (ABS, PT_DATA...).
+   Sans rechargement, une reconnexion dans le meme onglet doublait les ecouteurs. */
+function doLogout(){
+  return firebase.auth().signOut().then(rechargerApresDeconnexion).catch(function(e){
+    toast('Deconnexion impossible : '+(e&&e.message?e.message:e),'#ef4444');
+  });
+}
+function rechargerApresDeconnexion(){ location.reload(); }
