@@ -599,3 +599,8 @@ body{background-color:#05070c;background-image:linear-gradient(rgba(5,7,12,.5),r
 #lb-overlay .cmp-delta b{color:var(--tx)}
 #lb-overlay .cmp-delta .up{color:var(--red)}
 #lb-overlay .cmp-delta .down{color:var(--green)}
+
+/* Accessibilite : focus clavier toujours visible (souris non concernee). */
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ncp-date-input:focus-visible,.li-input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
