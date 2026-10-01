@@ -74,17 +74,63 @@ var ARRETS_REF_RAISON = {
   '10.06': ['Geen personeel', 'Pas de personnel', 'No staff']
 };
 
-function loadArretsInpak(){
-  if(!db) return;
-  db.ref('arrets_inpak').on('value', function(snap){
-    ARRETS_DATA = snap.val() || {};
-    buildArretsInpak();
-    if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
-    if(typeof buildOvResume === 'function') buildOvResume();
-  }, function(error){
-    console.error('[Arrets Inpak] Erreur de lecture Firebase :', error);
-  });
+/* Deux modes d'ecoute (phase 4) :
+   - 'recent' (Vue d'ensemble) : seulement les ARRETS_JOURS_RECENTS derniers
+     jours. Les cles sont de la forme arret-<ligne>_<AAAA-MM-JJ>_..., donc une
+     plage de cles par ligne suffit : aucun index Firebase n'est necessaire et
+     seuls quelques centaines de Ko transitent au lieu de ~13 Mo.
+   - complet (onglets Arrets et Logbook) : tout l'historique, comme avant. */
+var ARRETS_JOURS_RECENTS = 45;
+var ARRETS_LIGNES = ['31', '32', '33', '34', '35', '36'];
+var ARRETS_ECOUTES = [];     // references Firebase ecoutees (pour les couper)
+var ARRETS_MODE = null;      // null, 'recent' ou 'complet'
+
+function arretsSurDonnees(){
+  buildArretsInpak();
+  if(typeof buildComparaisonTab === 'function') buildComparaisonTab();
+  if(typeof buildOvResume === 'function') buildOvResume();
 }
+function arretsErreur(error){ console.error('[Arrets Inpak] Erreur de lecture Firebase :', error); }
+
+function arretsCouperEcoutes(){
+  ARRETS_ECOUTES.forEach(function(r){ r.off('value'); });
+  ARRETS_ECOUTES = [];
+}
+
+function loadArretsInpak(mode){
+  if(!db) return;
+  if(mode === 'recent'){
+    if(ARRETS_MODE) return; // recent ou complet deja en place
+    ARRETS_MODE = 'recent';
+    var debut = isoLocal(ajouterJours(new Date(), -ARRETS_JOURS_RECENTS));
+    var parLigne = {};
+    ARRETS_DATA = {};
+    ARRETS_LIGNES.forEach(function(l){
+      var prefixe = 'arret-' + l + '_';
+      var r = db.ref('arrets_inpak').orderByKey().startAt(prefixe + debut).endAt(prefixe + '\uf8ff');
+      ARRETS_ECOUTES.push(r);
+      r.on('value', function(snap){
+        if(ARRETS_MODE !== 'recent') return;
+        parLigne[l] = snap.val() || {};
+        var tout = {};
+        Object.keys(parLigne).forEach(function(k){ Object.assign(tout, parLigne[k]); });
+        ARRETS_DATA = tout;
+        arretsSurDonnees();
+      }, arretsErreur);
+    });
+    return;
+  }
+  if(ARRETS_MODE === 'complet') return;
+  arretsCouperEcoutes();
+  ARRETS_MODE = 'complet';
+  var ref = db.ref('arrets_inpak');
+  ARRETS_ECOUTES.push(ref);
+  ref.on('value', function(snap){
+    ARRETS_DATA = snap.val() || {};
+    arretsSurDonnees();
+  }, arretsErreur);
+}
+function loadArretsRecents(){ loadArretsInpak('recent'); }
 
 function arretsLangIdx(){
   var l = (typeof LANG !== 'undefined') ? LANG : 'fr';
@@ -191,6 +237,7 @@ function nettoyerDoublonsArrets(){
   function envoyerLot(idx){
     if(idx >= lots.length){
       toast(aSupprimer.length + t('arr_toast_deleted_suffix'), '#10b981');
+      journaliser('doublons_arrets_supprimes', { nb: aSupprimer.length });
       console.log('[Nettoyage doublons] Termine :', aSupprimer.length, 'doublon(s) supprime(s)');
       return;
     }
