@@ -25,7 +25,16 @@
         ".read": "auth != null && auth.uid === $uid",
         // Ecriture : admin seul (racine). Un utilisateur ne peut pas changer son role.
         "role": { ".validate": "newData.isString() && newData.val().matches(/^(admin|subchef|visiteur|custom|employe)$/)" },
-        "editPlanning": { ".validate": "newData.isBoolean()" }
+        "editPlanning": { ".validate": "newData.isBoolean()" },
+        // Date du dernier changement de mot de passe : chacun note la sienne
+        // (fenetre « choisis ton mot de passe » de la premiere connexion).
+        "mdpChangeLe": {
+          // Fiche existante (avec un role) obligatoire : sinon un compte cree par
+          // l'inscription publique pourrait se fabriquer une fiche /users/<uid>
+          // et devenir « membre ».
+          ".write": "auth != null && auth.uid === $uid && root.child('users').child($uid).child('role').exists()",
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        }
       }
     },
 
