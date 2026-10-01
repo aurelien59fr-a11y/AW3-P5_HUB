@@ -204,6 +204,7 @@ function doForgotPassword(){
      var email=document.getElementById('li-email').value.trim();
      var err=document.getElementById('li-err');
      if(!email){ err.style.color='#ef4444'; err.textContent='Renseigne ton email dans le champ ci-dessus, puis clique a nouveau sur "Mot de passe oublie ?".'; return; }
+     if(typeof mdpCompteSansEmail==='function' && mdpCompteSansEmail(email)){ err.style.color='#f59e0b'; err.textContent=t('mdp_oubli_sans_email'); return; }
      err.style.color='var(--tx3)'; err.textContent='Envoi en cours...';
      firebase.auth().sendPasswordResetEmail(email).then(function(){
             err.style.color='#10b981';

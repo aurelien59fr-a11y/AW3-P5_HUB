@@ -13,6 +13,8 @@ function chargerJSZip(){
     PROMESSE_JSZIP = new Promise(function(ok, ko){
       var sc = document.createElement('script');
       sc.src = URL_JSZIP;
+      sc.integrity = 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'; // empreinte : un fichier modifie sur le CDN est refuse
+      sc.crossOrigin = 'anonymous';
       sc.onload = function(){ typeof JSZip !== 'undefined' ? ok() : ko(new Error('JSZip absent')); };
       sc.onerror = function(){ PROMESSE_JSZIP = null; ko(new Error('JSZip non charge')); };
       document.head.appendChild(sc);
