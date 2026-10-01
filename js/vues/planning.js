@@ -56,7 +56,64 @@ function todayStr(){var n=new Date();return String(n.getDate()).padStart(2,'0')+
 
 function allDates(){return(curYear==='2027'?WEEKS27:curYear==='2026'?WEEKS26:WEEKS25).reduce(function(a,w){return a.concat(w.d);},[]);}
 
-function save(){if(!db)return;isSyncing=true;var d26={};SHIFTS26.forEach(function(e){d26[e.n]=e.s;});var d25={};SHIFTS25.forEach(function(e){d25[e.n]=e.s;});var upd={};upd['planning/shifts2026']=d26;upd['planning/shifts2025']=d25;if(ABS_CHARGEES)upd['planning/absences']=ABS;upd['planning/extraHistorique']=EXTRA_HIST;upd['planning/lastUpdate']={at:new Date().toISOString(),by:currentUser?currentUser.email:'anonyme'};db.ref().update(upd).then(function(){isSyncing=false;updSlbl(new Date().toISOString());}).catch(function(err){isSyncing=false;toast('Erreur: '+err.message,'#ef4444');});}
+/* ---------------------------------------------------------------------------
+   ABSENCES : ecritures unitaires.
+   Chaque absence chargee garde sa cle Firebase dans le champ _k (jamais
+   ecrit en base). Une nouvelle absence est ajoutee par push(), une absence
+   retiree par remove() sur sa cle : on ne reecrit plus toute la liste a chaque
+   clic. absEnregistrerTout() reste reserve aux imports d'administration.
+--------------------------------------------------------------------------- */
+function peutLireAbsences(){
+  return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='visiteur'||currentUser.role==='subchef'||currentUser.editPlanning));
+}
+function absChargerDepuis(data){
+  ABS.splice(0,ABS.length);
+  if(data) Object.keys(data).forEach(function(k){ if(data[k]) ABS.push(Object.assign({},data[k],{_k:k})); });
+  ABS_CHARGEES=true;
+  if(typeof planifierPublicationEspaces==='function') planifierPublicationEspaces();
+}
+function absPropre(a){ var c={}; Object.keys(a).forEach(function(k){ if(k!=='_k') c[k]=a[k]; }); return c; }
+function absSansCles(){ return ABS.map(absPropre); }
+function absNumeroter(){ ABS.forEach(function(a,i){ a._k=String(i); }); }
+function absAjouter(a){
+  ABS.push(a);
+  if(!db||!ABS_CHARGEES) return Promise.reject(new Error('Absences non chargees : ajout non enregistre'));
+  var r=db.ref('planning/absences').push(absPropre(a));
+  a._k=r.key;
+  return Promise.resolve(r).then(function(){ return a; });
+}
+function absSupprimer(a){
+  var i=ABS.indexOf(a); if(i!==-1) ABS.splice(i,1);
+  if(!db||!a||!a._k) return Promise.resolve();
+  return db.ref('planning/absences/'+a._k).remove();
+}
+/* Import d'administration : remplace toute la liste (sans les cles _k),
+   puis renumerote les cles locales comme Firebase les stocke (0..n-1). */
+function absEnregistrerTout(){
+  if(!db) return Promise.resolve();
+  if(!ABS_CHARGEES) return Promise.reject(new Error('Absences non chargees : ecriture refusee'));
+  return db.ref('planning/absences').set(absSansCles()).then(absNumeroter);
+}
+
+/* Sauvegarde complete du planning (noeuds entiers). Reservee aux operations
+   globales (imports Protime, travailleurs extra, notes). Une modification de
+   cellule passe par saveCell() : elle n'ecrit que la cellule concernee.
+   Les absences ne sont plus ecrites ici (absAjouter / absSupprimer /
+   absEnregistrerTout).
+   2027 est inclus (il manquait : les changements 2027 etaient perdus). */
+function save(){if(!db)return Promise.resolve();isSyncing=true;var d26={};SHIFTS26.forEach(function(e){d26[e.n]=e.s;});var d25={};SHIFTS25.forEach(function(e){d25[e.n]=e.s;});var d27={};SHIFTS27.forEach(function(e){d27[e.n]=e.s;});var upd={};upd['planning/shifts2026']=d26;upd['planning/shifts2025']=d25;upd['planning/shifts2027']=d27;upd['planning/extraHistorique']=EXTRA_HIST;upd['planning/lastUpdate']={at:new Date().toISOString(),by:currentUser?currentUser.email:'anonyme'};return db.ref().update(upd).then(function(){isSyncing=false;updSlbl(new Date().toISOString());return true;}).catch(function(err){isSyncing=false;toast('Erreur: '+err.message,'#ef4444');return false;});}
+
+/* Ecriture ciblee d'UNE cellule : planning/shifts<annee>/<employe>/<index>,
+   plus planning/lastUpdate. Deux personnes qui modifient des cellules
+   differentes en meme temps ne s'ecrasent plus. */
+function saveCell(annee, nom, index, valeur){
+  if(!db) return Promise.resolve();
+  if(ANNEES_PLANNING.indexOf(String(annee))===-1) return Promise.reject(new Error('Annee non prise en charge : '+annee));
+  var upd={};
+  upd['planning/shifts'+annee+'/'+nom+'/'+index]=valeur;
+  upd['planning/lastUpdate']={at:new Date().toISOString(),by:currentUser?currentUser.email:'anonyme'};
+  return db.ref().update(upd).then(function(){updSlbl(new Date().toISOString());}).catch(function(err){toast('Erreur: '+err.message,'#ef4444');throw err;});
+}
 
 function updSlbl(iso){var el=document.getElementById('slbl');if(!el)return;var d=new Date(iso),now=new Date(),dm=Math.round((now-d)/60000);el.textContent=dm<1?'Synchronise':'Sync il y a '+dm+' min';el.style.color='var(--green)';}
 
@@ -190,27 +247,27 @@ function buildPT(){
         var nCls=sv==='Oui'?'sp-nett-oui':sv==='Non'?'sp-nett-non':'sp-nett-empty';
         var nLbl=sv==='Oui'?'Oui':sv==='Non'?'Non':'+';
         h+='<td class="'+(col===ti?'td-td':'')+'">'
-          +'<span class="sp-nett '+nCls+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+nLbl+'</span>'
+          +'<span class="sp-nett '+nCls+'" data-n="'+escHtml(emp.n)+'" data-i="'+x.i+'" data-s="'+escHtml(sv)+'">'+nLbl+'</span>'
           +'</td>';
       } else if(isNote){
       if(sv)noteEntries.push({d:x.d,i:x.i,txt:sv});
       var noteEsc=escHtml(sv);
       var noteLbl=sv?escHtml(noteBadgeLabel(sv)):'+';
       h+='<td class="'+(col===ti?'td-td':'')+'">'
-        +'<span class="sp-note-dot'+(sv?' filled':'')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+noteEsc+'" title="'+noteEsc+'">'+noteLbl+'</span>'
+        +'<span class="sp-note-dot'+(sv?' filled':'')+'" data-n="'+escHtml(emp.n)+'" data-i="'+x.i+'" data-s="'+noteEsc+'" title="'+noteEsc+'">'+noteLbl+'</span>'
         +'</td>';
       } else {
       var list=parseExtraList(sv);
-      var esc=(sv||'').replace(/"/g,'&quot;');
-      var lbl=extraBadgeLabel(list);
-      var ttl=list.length?list.map(function(w){return w.n+(w.p?' ('+w.p+')':'');}).join(', ').replace(/"/g,'&quot;'):'';
+      var esc=escHtml(sv||'');
+      var lbl=escHtml(extraBadgeLabel(list));
+      var ttl=list.length?escHtml(list.map(function(w){return w.n+(w.p?' ('+w.p+')':'');}).join(', ')):'';
       h+='<td class="'+(col===ti?'td-td':'')+'">'
-        +'<span class="sp-extra'+(list.length?' filled':' empty')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+esc+'" title="'+ttl+'">'+lbl+'</span>'
+        +'<span class="sp-extra'+(list.length?' filled':' empty')+'" data-n="'+escHtml(emp.n)+'" data-i="'+x.i+'" data-s="'+esc+'" title="'+ttl+'">'+lbl+'</span>'
         +'</td>';
       }
     } else {
     h+='<td class="'+(col===ti?'td-td':'')+'">'
-      +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+emp.n+'" data-i="'+x.i+'" data-s="'+sv+'">'+(sv?sLbl(sv):'-')+'</span>'
+      +'<span class="sp '+(sv?sCls(sv):'s-em')+'" data-n="'+escHtml(emp.n)+'" data-i="'+x.i+'" data-s="'+escHtml(sv)+'">'+(sv?escHtml(sLbl(sv)):'-')+'</span>'
       +(isBdToday?'<span style="font-size:10px;margin-left:2px" title="Anniversaire de '+emp.n.split(' ')[0]+'">⭐</span>':'')
       +'</td>';
     }});h+='</tr>';});});h+='</tbody>';tbl.innerHTML=h;tbl.querySelectorAll('.sp[data-n]').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openPopup(p);});});tbl.querySelectorAll('.sp-extra').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openExtraEdit(p);});});tbl.querySelectorAll('.sp-nett').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();toggleNettoyeur(p);});});tbl.querySelectorAll('.sp-note-dot').forEach(function(p){p.addEventListener('click',function(e){e.stopPropagation();openNoteEdit(p);});});window.__allNoteEntries = noteEntries;
@@ -292,17 +349,16 @@ function translateNoteEntry(i,target,btn){
   var prevHTML=btn.innerHTML;
   btn.disabled=true;
   btn.innerHTML='<span style="font-size:10px;color:var(--tx3)">…</span>';
-  fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt)+'&langpair=fr|'+target)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var out=data&&data.responseData&&data.responseData.translatedText?data.responseData.translatedText:null;
+  // Traduction interne (core/traduction.js) : la note ne quitte pas le PC.
+  traduireLocal(txt,target,'fr')
+    .then(function(out){
       if(!out)throw new Error('empty translation');
       NOTE_TRANSLATE_CACHE[cacheKey]=out;
       showNoteTranslation(box,target,out);
       btn.innerHTML=prevHTML;btn.disabled=false;
     })
-    .catch(function(){
-      toast(t('note_translate_error'),'#ef4444');
+    .catch(function(e){
+      toast(traductionLocaleDisponible()?t('note_translate_error'):((e&&e.message)||t('note_translate_error')),'#ef4444');
       btn.innerHTML=prevHTML;btn.disabled=false;
     });
 }
@@ -370,9 +426,9 @@ function updateNoteCell(nm,i){
   var txt=row.s[i]||'';
   var esc=escHtml(txt);
   var lbl=txt?escHtml(noteBadgeLabel(txt)):'+';
-  document.querySelectorAll('.sp-note-dot[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
-    p.dataset.s=esc;
-    p.title=esc;
+  document.querySelectorAll('.sp-note-dot[data-n="'+CSS.escape(nm)+'"][data-i="'+i+'"]').forEach(function(p){
+    p.dataset.s=txt; // proprietes DOM : texte brut, pas d'entites
+    p.title=txt;
     p.innerHTML=lbl;
     p.className='sp-note-dot'+(txt?' filled':'');
   });
@@ -387,7 +443,7 @@ function toggleNettoyeur(span){
   if(!row)return;
   while(row.s.length<=i)row.s.push('');
   row.s[i]=next;
-  document.querySelectorAll('.sp-nett[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
+  document.querySelectorAll('.sp-nett[data-n="'+CSS.escape(nm)+'"][data-i="'+i+'"]').forEach(function(p){
     p.dataset.s=next;
     p.textContent=next==='Oui'?'Oui':next==='Non'?'Non':'+';
     p.className='sp-nett '+(next==='Oui'?'sp-nett-oui':next==='Non'?'sp-nett-non':'sp-nett-empty');
@@ -468,7 +524,7 @@ function renderExtraList(){
   box.innerHTML=list.length?list.map(function(w,idx){
     var isEditing=(idx===EXTRA_EDIT_IDX);
     return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid '+(isEditing?'var(--blue)':'var(--bd2)')+';border-radius:8px;padding:6px 10px">'
-      +'<span style="font-size:13px;color:var(--tx1)">'+w.n+(w.p?' <span style="color:var(--tx3);font-size:11px">('+sLbl(w.p)+')</span>':'')+'</span>'
+      +'<span style="font-size:13px;color:var(--tx1)">'+escHtml(w.n)+(w.p?' <span style="color:var(--tx3);font-size:11px">('+escHtml(sLbl(w.p))+')</span>':'')+'</span>'
       +'<span style="display:flex;gap:10px">'
       +'<span data-idx="'+idx+'" class="extra-edit" title="'+t('extra_edit_title')+'" style="cursor:pointer;color:var(--tx3);font-size:13px;line-height:1;padding:0 2px">&#9998;</span>'
       +'<span data-idx="'+idx+'" class="extra-rm" title="'+t('extra_remove_title')+'" style="cursor:pointer;color:var(--tx3);font-size:16px;line-height:1;padding:0 2px">&times;</span>'
@@ -547,12 +603,12 @@ function updateExtraBadge(nm,i){
   var row=shifts.find(function(e){return e.n===nm;});
   var sv=row.s[i]||'';
   var list=parseExtraList(sv);
-  var esc=sv.replace(/"/g,'&quot;');
+  // Proprietes DOM (dataset, title, textContent) : aucune interpretation HTML.
   var lbl=extraBadgeLabel(list);
-  var ttl=list.length?list.map(function(w){return w.n+(w.p?' ('+w.p+')':'');}).join(', ').replace(/"/g,'&quot;'):'';
-  document.querySelectorAll('.sp-extra[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
-    p.dataset.s=esc;p.title=ttl;
-    p.innerHTML=lbl;
+  var ttl=list.length?list.map(function(w){return w.n+(w.p?' ('+w.p+')':'');}).join(', '):'';
+  document.querySelectorAll('.sp-extra[data-n="'+CSS.escape(nm)+'"][data-i="'+i+'"]').forEach(function(p){
+    p.dataset.s=sv;p.title=ttl;
+    p.textContent=lbl;
     p.className='sp-extra'+(list.length?' filled':' empty');
   });
 }
@@ -597,14 +653,16 @@ function applyShift(nv){
   if(!canEdit())return;
   var nm=activePill.dataset.n,i=parseInt(activePill.dataset.i),old=activePill.dataset.s;
   closePopup();
-  var shifts=curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25;
+  var shifts=shiftsPourAnnee(curYear);
+  if(!shifts)return;
   var emp=shifts.find(function(e){return e.n===nm;});
   if(!emp)return;
   while(emp.s.length<=i)emp.s.push('');
   emp.s[i]=nv;
-  document.querySelectorAll('.sp[data-n="'+nm+'"][data-i="'+i+'"]').forEach(function(p){
+  document.querySelectorAll('.sp[data-n="'+CSS.escape(nm)+'"][data-i="'+i+'"]').forEach(function(p){
     p.className='sp '+(nv?sCls(nv):'s-em');p.textContent=nv?sLbl(nv):'-';p.dataset.s=nv;
   });
+  saveCell(curYear,nm,i,nv);
   var all=allDates(),dateStr=all[i];
 
   // --- AUTOMATISME Lyse -> Larissa ---
@@ -619,6 +677,7 @@ function applyShift(nv){
       else if(wasAbs&&!isAbs){ newLarissa='Prod'; toast('Larissa automatiquement en Prod','#10b981'); }
       if(newLarissa){
         larissa.s[i]=newLarissa;
+        saveCell(curYear,larissa.n,i,newLarissa);
         document.querySelectorAll('.sp[data-n="Larissa Fratutescu"][data-i="'+i+'"]').forEach(function(p){
           p.className='sp '+sCls(newLarissa);p.textContent=sLbl(newLarissa);p.dataset.s=newLarissa;
         });
@@ -629,20 +688,21 @@ function applyShift(nv){
   if(nv==='ziek'&&old!=='ziek'){
     var fd=dateStr+'/'+curYear;
     if(!ABS.find(function(a){return a.n===nm&&a.a===fd&&a.d===1;})){
-      ABS.push({n:nm,a:fd,b:fd,d:1,y:curYear,t:'ziek',ts:Date.now()});
-      buildAbs(document.querySelector('.fb.on').dataset.f);updAbsLbl();
+      absAjouter({n:nm,a:fd,b:fd,d:1,y:curYear,t:'ziek',ts:Date.now()}).catch(function(e){toast('Absence non enregistree : '+e.message,'#ef4444');});
+      if(document.querySelector('.fb.on'))buildAbs(document.querySelector('.fb.on').dataset.f);updAbsLbl();
     }
-    recalc();buildBT();updKPI();refreshCharts();save();
+    recalc();buildBT();updKPI();refreshCharts();
     var bd=BD.find(function(e){return e.n===nm;});
     toast(nm.split(' ')[0]+' malade - Bradford: '+(bd?bd.sc:0),scColor(bd?bd.sc:0));
   } else if(old==='ziek'&&nv!=='ziek'){
     var fd2=dateStr+'/'+curYear;
-    for(var k=ABS.length-1;k>=0;k--){if(ABS[k].n===nm&&ABS[k].a===fd2&&ABS[k].d===1){ABS.splice(k,1);break;}}
-    buildAbs(document.querySelector('.fb.on').dataset.f);updAbsLbl();
-    recalc();buildBT();updKPI();refreshCharts();save();
+    var aRetirer=ABS.find(function(a){return a.n===nm&&a.a===fd2&&a.d===1;});
+    if(aRetirer)absSupprimer(aRetirer).catch(function(e){toast('Absence non retiree : '+e.message,'#ef4444');});
+    if(document.querySelector('.fb.on'))buildAbs(document.querySelector('.fb.on').dataset.f);updAbsLbl();
+    recalc();buildBT();updKPI();refreshCharts();
     toast(nm.split(' ')[0]+' -> '+sLbl(nv),'#10b981');
   } else {
-    save();toast(nm.split(' ')[0]+' -> '+sLbl(nv),'#3b82f6');
+    toast(nm.split(' ')[0]+' -> '+sLbl(nv),'#3b82f6');
   }
 }
 

@@ -56,17 +56,17 @@ function buildFormationsListe(){
     var badges = (f.employes||[]).map(function(idOrName){
       var e = EMP.find(function(x){ return x.id===idOrName || x.n===idOrName; });
       var nom = e ? e.n : idOrName;
-      return '<span class="pill ok" style="margin:2px 4px 2px 0">'+nom+'</span>';
+      return '<span class="pill ok" style="margin:2px 4px 2px 0">'+escHtml(nom)+'</span>';
     }).join('');
-    var clickAttr = canEditFormations ? ' onclick="openFormationModal(\''+f.id+'\')" style="cursor:pointer"' : '';
+    var clickAttr = canEditFormations ? ' onclick="openFormationModal(\''+escJsAttr(f.id)+'\')" style="cursor:pointer"' : '';
     return '<div class="note-card"'+clickAttr+' style="border-left-color:var(--blue)">'
-      +'<div class="note-card-row"><div class="note-card-date">'+fmtDateFormation(f.date)+'</div>'
-      +'<div class="note-card-txt"><b>'+(f.titre||'Formation')+'</b>'
-      +(f.heureDebut?' &middot; '+f.heureDebut+(f.heureFin?'-'+f.heureFin:''):'')
-      +(f.lieu?' &middot; '+f.lieu:'')
+      +'<div class="note-card-row"><div class="note-card-date">'+escHtml(fmtDateFormation(f.date))+'</div>'
+      +'<div class="note-card-txt"><b>'+escHtml(f.titre||'Formation')+'</b>'
+      +(f.heureDebut?' &middot; '+escHtml(f.heureDebut)+(f.heureFin?'-'+escHtml(f.heureFin):''):'')
+      +(f.lieu?' &middot; '+escHtml(f.lieu):'')
       +'<div style="margin-top:6px">'+(badges||"<span style='color:var(--tx3)'>"+t('formations_all_team')+"</span>")+'</div>'
-      +'<div style="margin-top:8px"><button onclick="event.stopPropagation();openAttestationModal(\''+f.id+'\')" style="padding:4px 10px;border-radius:14px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; Attestation</button></div>'
-      +(f.notes?'<div style="margin-top:6px;color:var(--tx2);font-size:12px">'+f.notes+'</div>':'')
+      +'<div style="margin-top:8px"><button onclick="event.stopPropagation();openAttestationModal(\''+escJsAttr(f.id)+'\')" style="padding:4px 10px;border-radius:14px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; Attestation</button></div>'
+      +(f.notes?'<div style="margin-top:6px;color:var(--tx2);font-size:12px">'+escHtml(f.notes)+'</div>':'')
       +'</div></div></div>';
   }
   elAvenir.innerHTML = avenir.length ? avenir.map(carte).join('') : '<div class="empty">'+t('formations_empty_upcoming')+'</div>';
@@ -86,9 +86,9 @@ function buildMiniCalFormations(){
   el.innerHTML = upcoming.map(function(f){
     var noms = formationEmployesLabel(f);
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--bd)">'
-      +'<div style="font-family:var(--mo);font-size:12px;font-weight:700;color:var(--blue);min-width:70px">'+fmtDateFormation(f.date)+'</div>'
-      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+(f.titre||'Formation')+(f.heureDebut?' &middot; '+f.heureDebut:'')+'</div>'
-      +'<div style="font-size:11px;color:var(--tx3)">'+noms+'</div></div>'
+      +'<div style="font-family:var(--mo);font-size:12px;font-weight:700;color:var(--blue);min-width:70px">'+escHtml(fmtDateFormation(f.date))+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:500">'+escHtml(f.titre||'Formation')+(f.heureDebut?' &middot; '+escHtml(f.heureDebut):'')+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+escHtml(noms)+'</div></div>'
       +'</div>';
   }).join('');
 }
@@ -105,7 +105,7 @@ function checkFormationNotif(){
   if(!proches.length){ el.style.display='none'; el.innerHTML=''; return; }
   el.style.display='flex';
   el.innerHTML = '<div style="font-size:22px">&#127891;</div><div style="flex:1"><div style="font-weight:600;margin-bottom:4px">'+(proches.length>1?t('formations_notif_plural'):t('formations_notif_singular'))+'</div><div style="font-size:12px;color:var(--tx2)">'
-    + proches.map(function(f){ return fmtDateFormation(f.date)+' : '+(f.titre||'Formation')+' &mdash; '+formationEmployesLabel(f); }).join('<br>')
+    + proches.map(function(f){ return escHtml(fmtDateFormation(f.date))+' : '+escHtml(f.titre||'Formation')+' &mdash; '+escHtml(formationEmployesLabel(f)); }).join('<br>')
     + '</div></div>';
 }
 
@@ -140,7 +140,9 @@ function closeFormationModal(){
   formationEditId = null;
 }
 
+var FORMATION_ENVOI_EN_COURS=false;
 function saveFormation(){
+  if(FORMATION_ENVOI_EN_COURS) return; // double clic : un seul envoi
   var titre = document.getElementById('form-f-titre').value.trim();
   var date = document.getElementById('form-f-date').value;
   var heureDebut = document.getElementById('form-f-heure-debut').value;
@@ -148,24 +150,38 @@ function saveFormation(){
   var lieu = document.getElementById('form-f-lieu').value.trim();
   var notes = document.getElementById('form-f-notes').value.trim();
   var errEl = document.getElementById('formation-modal-err');
+  errEl.textContent = '';
   if(!titre){ errEl.textContent = t('formations_err_titre'); return; }
   if(!date){ errEl.textContent = t('formations_err_date'); return; }
+  if(heureDebut && heureFin && heureFin <= heureDebut){ errEl.textContent = t('formations_err_heures'); return; }
+  if(titre.length > 200 || lieu.length > 200 || notes.length > 2000){ errEl.textContent = t('formations_err_longueur'); return; }
   var employes = Array.prototype.slice.call(document.querySelectorAll('.form-f-emp-cb:checked')).map(function(cb){ return cb.value; });
-  var payload = { titre:titre, date:date, heureDebut:heureDebut||'', heureFin:heureFin||'', lieu:lieu||'', notes:notes||'', employes:employes, statut:'planifiee', creeLe:new Date().toISOString() };
+  var payload = { titre:titre, date:date, heureDebut:heureDebut||'', heureFin:heureFin||'', lieu:lieu||'', notes:notes||'', employes:employes };
+  // creeLe et statut ne sont poses qu'a la creation (avant : ecrases a chaque modification)
+  if(formationEditId){ payload.modifieLe = new Date().toISOString(); }
+  else { payload.statut = 'planifiee'; payload.creeLe = new Date().toISOString(); }
   var ref = formationEditId ? db.ref('formations/'+formationEditId) : db.ref('formations').push();
+  var estCreation = !formationEditId;
+  FORMATION_ENVOI_EN_COURS = true;
   ref.update(payload).then(function(){
+    FORMATION_ENVOI_EN_COURS = false;
+    journaliser(estCreation ? 'formation_creee' : 'formation_modifiee', { id: ref.key });
     toast(t('formations_toast_saved'), '#3b82f6');
     closeFormationModal();
   }).catch(function(e){
+    FORMATION_ENVOI_EN_COURS = false;
     errEl.textContent = t('formations_err_generic') + e.message;
   });
 }
-
 function deleteFormation(){
   if(!formationEditId) return;
   if(!confirm(t('formations_confirm_delete'))) return;
-  db.ref('formations/'+formationEditId).remove().then(function(){
+  var id = formationEditId;
+  db.ref('formations/'+id).remove().then(function(){
+    journaliser('formation_supprimee', { id: id });
     toast(t('formations_toast_deleted'), '#ef4444');
     closeFormationModal();
+  }).catch(function(e){
+    document.getElementById('formation-modal-err').textContent = t('formations_err_generic') + e.message;
   });
 }

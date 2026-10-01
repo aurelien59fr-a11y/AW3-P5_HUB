@@ -31,7 +31,7 @@ var ATT_SECTEURS = {
 var ATT_ORDRE_SECTEURS = ['INPAK','PROD','UNIT','AUTRE'];
 
 function attEsc(s){
-  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return escHtml(s); // echappement unique (core/ui.js)
 }
 
 /* Secteur d'un employe EMP (groupe dashboard -> secteur de la feuille). */
@@ -243,6 +243,7 @@ function attEnregistrerEquipe(){
   var id = ATT_EDIT_ID || nom.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') || ('equipe_' + Date.now());
   db.ref('attestation_equipes/' + id).set({ nom:nom, membres:membres, maj:new Date().toISOString() }).then(function(){
     ATT_EQUIPES[id] = { nom:nom, membres:membres };
+    journaliser('equipe_attestation_enregistree', { id: id, membres: membres.length });
     ATT_EQUIPE_COURANTE = id;
     attFermerEditeur();
     attRemplirSelect();
@@ -258,6 +259,7 @@ function attSupprimerEquipe(){
   var id = ATT_EDIT_ID;
   db.ref('attestation_equipes/' + id).remove().then(function(){
     delete ATT_EQUIPES[id];
+    journaliser('equipe_attestation_supprimee', { id: id });
     attFermerEditeur();
     ATT_EQUIPE_COURANTE = 'p5';
     attRemplirSelect();

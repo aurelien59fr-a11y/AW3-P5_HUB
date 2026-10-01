@@ -42,17 +42,16 @@ function importerBulk(){
   var err = document.getElementById('bulk-import-err');
   err.textContent = '';
   var raw = document.getElementById('bulk-import-txt').value.trim();
-  if(!raw){ err.textContent = 'Colle le JSON genere par le script.'; return; }
+  if(!raw){ return echecImport(err, 'Colle le JSON genere par le script.'); }
 
   var parsed;
   try { parsed = JSON.parse(raw); }
-  catch(e){ err.textContent = 'JSON invalide : ' + e.message; return; }
+  catch(e){ return echecImport(err, 'JSON invalide : ' + e.message); }
 
   if(!parsed.standaard && !parsed.noodafvoer && !parsed.bijlijn1){
-    err.textContent = 'Format inattendu (cles "standaard"/"noodafvoer"/"bijlijn1" manquantes).';
-    return;
+    return echecImport(err, 'Format inattendu (cles "standaard"/"noodafvoer"/"bijlijn1" manquantes).');
   }
-  if(!db){ err.textContent = 'Connexion Firebase non disponible.'; return; }
+  if(!db){ return echecImport(err, 'Connexion Firebase non disponible.'); }
 
   // On garde l'unite deja enregistree si le fichier importe n'en precise pas
   if(!parsed.unite && BULK_DATA && BULK_DATA.unite) parsed.unite = BULK_DATA.unite;
@@ -67,15 +66,17 @@ function importerBulk(){
 
   err.style.color = '#3b82f6';
   err.textContent = 'Import en cours...';
-  db.ref('bulk_data').set(fusionne).then(function(){
+  return db.ref('bulk_data').set(fusionne).then(function(){
     document.getElementById('bulk-import-modal').style.display = 'none';
     document.getElementById('bulk-import-txt').value = '';
     err.style.color = '#ef4444';
     err.textContent = '';
     var n = (parsed.standaard||[]).length + (parsed.noodafvoer||[]).length + (parsed.bijlijn1||[]).length;
     toast(n + ' point(s) importe(s) et fusionne(s) (Bulkopvang + Bijlijn)', '#10b981');
+    journaliser('import_bulk', { points: n });
+    return succesImport('Bulk & Bijlijn : ' + n + ' point(s)');
   }).catch(function(e){
-    err.textContent = 'Erreur Firebase : ' + e.message;
+    return echecImport(err, 'Erreur Firebase : ' + e.message);
   });
 }
 

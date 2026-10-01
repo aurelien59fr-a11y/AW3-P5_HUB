@@ -31,9 +31,9 @@ function buildLogbook(){
   var html = ''
       + '<div class="lb-yearbar">'
       +   '<div class="lb-yearnav">'
-      +     '<button id="lb-prev-y"' + (LOGBOOK_ANNEE <= anneeMin ? ' disabled' : '') + '>&#8592;</button>'
+      +     '<button id="lb-prev-y" aria-label="' + escHtml(t('a11y_annee_prec')) + '"' + (LOGBOOK_ANNEE <= anneeMin ? ' disabled' : '') + '>&#8592;</button>'
       +     '<span class="lb-yr">' + LOGBOOK_ANNEE + '</span>'
-      +     '<button id="lb-next-y">&#8594;</button>'
+      +     '<button id="lb-next-y" aria-label="' + escHtml(t('a11y_annee_suiv')) + '">&#8594;</button>'
       +   '</div>'
       +   '<div class="lb-legend">'
       +     '<span><span class="lb-dot lb-dot-red"></span> absence</span>'
@@ -152,7 +152,8 @@ function logbookBadge(cls, texte){
 /* ---------- Notes SharePoint : champs affiches + traduction ---------- */
 var LOGBOOK_SP_INDEX = {};
 var LOGBOOK_SP_MASQUES = ['ID', 'Ploeg', 'Balise de couleur', 'Tag', 'Datum'];
-function logbookEsc(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+// Delegue a escHtml (core/ui.js) : logbookEsc sert aussi dans des attributs (href, data-*).
+function logbookEsc(x){ return escHtml(x); }
 function logbookSpChamps(n){
     var out = {};
     Object.keys(n.valeurs || {}).forEach(function(k){
@@ -294,7 +295,7 @@ function logbookPosteCardHtml(resume, debut, fin){
         var lignes = logbookSpLignesHtml(logbookSpChamps(n));
         var quand = (n.date !== resume.date ? n.date.split('-').reverse().slice(0,2).join('/') + ' ' : '') + (n.heure || '');
         var fichiers = (n.fichiers || []).map(function(f){
-              return '<a class="lb-sp-fichier" href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.nom) + '</a>';
+              return '<a class="lb-sp-fichier" href="' + safeUrl(f.url) + '" target="_blank" rel="noopener">' + esc(f.nom) + '</a>';
         }).join(' ');
         var photos = n.nbPhotos ? '<button class="lb-sp-photos-btn" data-cle="' + esc(n.cle) + '" data-id="' + esc(n.id) + '">Voir ' + n.nbPhotos + ' photo' + (n.nbPhotos > 1 ? 's' : '') + '</button><div class="lb-photos"></div>' : '';
         return '<div class="note lb-sp-note"><b>' + esc(n.auteur || 'SharePoint') + (quand ? ' - ' + quand : '') + (n.ploeg ? ' - ' + esc(n.ploeg) : '') + '</b>'

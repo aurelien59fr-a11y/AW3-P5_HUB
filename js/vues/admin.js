@@ -87,15 +87,28 @@ function saveEmp(){
   if(!db){ err.textContent = t('adm_err_firebase_disconnected'); return; }
 
   var id = editingEmpId || name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
-  var order = editingEmpId ? (EMP.find(function(e){return e.id===editingEmpId;})||{}).order||99 : EMP.length;
+  if(!id){ err.textContent = t('adm_err_name_required'); return; }
 
   var bday = document.getElementById('emp-birthday')?document.getElementById('emp-birthday').value:'';
-  var empData = {name:name, group:group, role:role, active:true, order:order};
-  empData.birthday = bday || '';
-  document.getElementById('emp-save-btn').disabled = true;
-  document.getElementById('emp-save-btn').textContent = t('adm_saving');
+  if(bday && !/^\d{4}-\d{2}-\d{2}$/.test(bday)){ err.textContent = t('adm_err_birthday'); return; }
+  // update() et non set() : on ne remplace que les champs du formulaire, les
+  // autres (accountUid, order...) sont conserves. L'ordre n'est fixe qu'a la creation.
+  var empData = {name:name, group:group, role:role, active:true, birthday: bday || ''};
+  if(!editingEmpId) empData.order = EMP.length;
+  var btn = document.getElementById('emp-save-btn');
+  if(btn.disabled) return; // double clic
+  btn.disabled = true;
+  btn.textContent = t('adm_saving');
+  function reactiver(){ btn.disabled = false; btn.textContent = t('btn_save'); }
 
-  db.ref('employees/'+id).set(empData).then(function(){
+  // Creation : refuser un identifiant deja pris (homonyme, ou employe retire)
+  // au lieu d'ecraser sa fiche en silence.
+  var verif = editingEmpId ? Promise.resolve(null) : db.ref('employees/'+id).once('value');
+  verif.then(function(snap){
+    if(snap && snap.exists()){ var e = new Error(t('adm_err_emp_exists')); e.dejaPris = true; throw e; }
+    return db.ref('employees/'+id).update(empData);
+  }).then(function(){
+    journaliser('employe_' + (editingEmpId ? 'modifie' : 'cree'), { id: id });
     // Mettre a jour EMP local
     var existing = EMP.findIndex(function(e){return (e.id||e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_'))===id;});
     if(existing !== -1){
@@ -118,12 +131,10 @@ function saveEmp(){
     buildBirthdayNotif();
     buildBirthdayCal();
     toast(name + t('adm_toast_saved_suffix'), '#10b981');
-    document.getElementById('emp-save-btn').disabled = false;
-    document.getElementById('emp-save-btn').textContent = t('btn_save');
+    reactiver();
   }).catch(function(e){
-    err.textContent = t('err_generic_prefix') + e.message;
-    document.getElementById('emp-save-btn').disabled = false;
-    document.getElementById('emp-save-btn').textContent = t('btn_save');
+    err.textContent = e.dejaPris ? e.message : t('err_generic_prefix') + e.message;
+    reactiver();
   });
 }
 
@@ -134,6 +145,7 @@ function deactivateEmp(idx){
   var id = e.id || e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
   if(!db){ toast(t('adm_err_firebase_disconnected'),'#ef4444'); return; }
   db.ref('employees/'+id+'/active').set(false).then(function(){
+    journaliser('employe_retire', { id: id });
     EMP.splice(parseInt(idx), 1);
     SHIFTS26.splice(SHIFTS26.findIndex(function(s){return s.n===e.n;}), 1);
     SHIFTS25.splice(SHIFTS25.findIndex(function(s){return s.n===e.n;}), 1);
@@ -164,58 +176,17 @@ function migrProg(pct){
   if(bar)bar.style.width=pct+'%';
 }
 
+/* ANCIENNE MIGRATION INITIALE : DESACTIVEE (30/09/2026).
+   Elle remplacait en un seul update() planning/shifts2025/2026/2027,
+   planning/absences, employees et planning/lastUpdate a partir de la memoire
+   du navigateur, sans confirmation ni sauvegarde (perte des dates de
+   naissance, des liens compte-employe et des employes inactifs).
+   La migration a ete faite en 2026 ; le bouton a ete retire de l'Admin.
+   La fonction est conservee uniquement pour qu'un ancien appel ne plante pas :
+   elle n'ecrit plus rien. Ne pas la reactiver. */
 function runMigration(){
-  if(!db){toast('Firebase non connecte','#ef4444');return;}
-  var btn=document.getElementById('migr-btn');
-  var status=document.getElementById('migr-status');
-  btn.disabled=true;btn.textContent='Migration en cours...';
-  migrLog('Debut de la migration...','#3b82f6');
-  migrProg(5);
-
-  // Construire les objets shifts
-  var d26={},d25={};
-  SHIFTS26.forEach(function(e){d26[e.n]=e.s;});
-  SHIFTS25.forEach(function(e){d25[e.n]=e.s;});
-
-  // Construire les employes pour Firebase
-  var empData={};
-  EMP.forEach(function(e,idx){
-    var id=e.n.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/__+/g,'_');
-    empData[id]={name:e.n,group:e.g,role:e.r,active:true,order:idx};
-  });
-
-  var updates={};
-  var d27m={};SHIFTS27.forEach(function(e){d27m[e.n]=e.s;});
-  updates['planning/shifts2026']=d26;
-  updates['planning/shifts2025']=d25;
-  updates['planning/shifts2027']=d27m;
-  updates['planning/absences']=ABS;
-  updates['employees']=empData;
-  updates['planning/lastUpdate']={
-    at:new Date().toISOString(),
-    by:currentUser?currentUser.email:'admin',
-    version:'3.0-migration'
-  };
-
-  migrLog('Ecriture de '+Object.keys(d26).length+' employes (2026)...','#8b90a4');
-  migrProg(30);
-
-  db.ref().update(updates).then(function(){
-    migrProg(100);
-    migrLog('Shifts 2026 OK ('+Object.keys(d26).length+' employes)','#10b981');
-    migrLog('Shifts 2025 OK ('+Object.keys(d25).length+' employes)','#10b981');
-    migrLog('Absences OK ('+ABS.length+' entrees)','#10b981');
-    migrLog('Migration terminee avec succes !','#10b981');
-    if(status)status.textContent='Effectuee le '+new Date().toLocaleDateString('fr-BE');
-    if(status)status.style.color='var(--green)';
-    btn.textContent='Migration effectuee ✓';
-    btn.style.background='var(--green)';
-    toast('Migration Firebase reussie !','#10b981');
-  }).catch(function(err){
-    migrLog('ERREUR: '+err.message,'#ef4444');
-    btn.disabled=false;btn.textContent='Reessayer';
-    toast('Erreur migration: '+err.message,'#ef4444');
-  });
+  toast(t('adm_migration_desactivee'),'#ef4444');
+  return false;
 }
 
 function calcStatsTrimestreNvsN1(){
@@ -231,7 +202,7 @@ function calcStatsTrimestreNvsN1(){
 }
 
 function genererRapportExcel(){
-  if(typeof JSZip==='undefined'){toast('JSZip non charge','#ef4444');return;}
+  if(attendreJSZip(genererRapportExcel, arguments)) return; // JSZip charge a la demande
   var mois=parseInt(document.getElementById('rapport-mois').value);
   var annee=parseInt(document.getElementById('rapport-annee').value);
   var MN=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
@@ -391,7 +362,7 @@ function buildComptesEmpListe(){
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">'
       +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<select id="'+rowId+'-role" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
+      +'<select id="'+rowId+'-role" aria-label="'+escHtml(t('a11y_role_compte')+' : '+(e.n||''))+'" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
       +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
       +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
       +'<option value="visiteur"'+(perm.role==='visiteur'?' selected':'')+'>'+t('role_visiteur')+'</option>'
@@ -439,6 +410,7 @@ function creerCompteEmployeUI(empId){
   if(!confirm(recap)) return;
   creerCompteEmploye(emp, role, login, tabs, editPlanning).then(function(res){
     toast(t('comptes_toast_cree')+emp.n, '#10b981');
+    journaliser('compte_cree', { employeId: emp.id || null, role: role });
     alert(t('comptes_alert_cree')+res.email+t('comptes_alert_pass')+res.password+t('comptes_alert_communique')+emp.n+'.');
   }).catch(function(err){
     console.error('[COMPTES] Erreur creation compte :', err);
@@ -491,6 +463,7 @@ function toggleAccesEdit(empId){
     var selHtml = '<select id="acc-edit-role-'+empId+'" style="padding:6px 10px;border-radius:6px;background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd);color:var(--tx1);font-size:12px;margin-bottom:10px">'
       +'<option value="custom"'+(role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
       +'<option value="subchef"'+(role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
+      +'<option value="visiteur"'+(role==='visiteur'?' selected':'')+'>'+t('role_visiteur')+'</option>'
       +'<option value="admin"'+(role==='admin'?' selected':'')+'>'+t('role_admin')+'</option>'
       +'</select>';
     var tabsHtml = ALL_TABS.map(function(tk){
@@ -528,7 +501,11 @@ function enregistrerAccesEmploye(empId){
     upd.tabs = null;
     upd.editPlanning = null;
   }
+  // Donner les droits administrateur est irreversible en pratique : confirmation.
+  if(role === 'admin' && acc.role !== 'admin' && !confirm(t('acc_confirm_admin'))) return;
+  var ancienRole = acc.role;
   db.ref('users/'+acc.uid).update(upd).then(function(){
+    journaliser('acces_modifie', { uid: acc.uid, ancienRole: ancienRole || null, nouveauRole: role });
     alert('Accès mis à jour.');
     var box = document.getElementById('acc-edit-'+empId);
     if(box){ box.style.display='none'; box.innerHTML=''; }

@@ -22,7 +22,7 @@ function updKPI(){
   document.getElementById('k-wn').textContent=wn.length;
   document.getElementById('k-cr').textContent=cr.length;
   document.getElementById('k-crm').textContent=cr.length>0?t('ov_crm_urgent'):t('ov_crm_none');
-  function chip(e,color){var fn=e.n.split(' ')[0];return '<span onclick="goToBradford(\''+e.n.replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:12px;padding:3px 9px;border-radius:99px;background:'+color+'22;color:'+color+';border:1px solid '+color+'55;white-space:nowrap">'+fn+'</span>';}
+  function chip(e,color){var fn=e.n.split(' ')[0];return '<span onclick="goToBradford(\''+escJsAttr(e.n)+'\')" style="cursor:pointer;font-size:12px;padding:3px 9px;border-radius:99px;background:'+color+'22;color:'+color+';border:1px solid '+color+'55;white-space:nowrap">'+escHtml(fn)+'</span>';}
   document.getElementById('k-wn-names').innerHTML=wn.map(function(e){return chip(e,'#f59e0b');}).join('');
   document.getElementById('k-cr-names').innerHTML=cr.map(function(e){return chip(e,'#ef4444');}).join('');
   // Détection franchissement de seuil
@@ -33,7 +33,7 @@ function updKPI(){
     var prev=BD_PREV_STATUS[e.n];
     var curr=scSt(e.sc).l;
     if(prev&&prev!==curr&&e.sc>50){
-      alerts.push('<b>'+e.n.split(' ')[0]+'</b>'+t('ov_alert_from')+'<i>'+prev+'</i>'+t('ov_alert_to')+'<i>'+curr+'</i>');
+      alerts.push('<b>'+escHtml(e.n.split(' ')[0])+'</b>'+t('ov_alert_from')+'<i>'+prev+'</i>'+t('ov_alert_to')+'<i>'+curr+'</i>');
     }
     BD_PREV_STATUS[e.n]=curr;
   });
@@ -44,8 +44,8 @@ function updKPI(){
   var crDet = document.getElementById('k-cr-detail');
   var wnDet = document.getElementById('k-wn-detail');
   function ovRowDetail(e, color){
-    var nomEsc = e.n.split("'").join("\\'");
-    return '<div onclick="goToBradford(\'' + nomEsc + '\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:' + color + '12;border:1px solid ' + color + '33"><span style="font-size:13px;font-weight:600;color:var(--tx1)">' + e.n + '</span><span style="font-size:12px;font-weight:600;color:' + color + '">Bradford ' + e.sc + '</span></div>';
+    var nomEsc = escJsAttr(e.n);
+    return '<div onclick="goToBradford(\'' + nomEsc + '\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:' + color + '12;border:1px solid ' + color + '33"><span style="font-size:13px;font-weight:600;color:var(--tx1)">' + escHtml(e.n) + '</span><span style="font-size:12px;font-weight:600;color:' + color + '">Bradford ' + e.sc + '</span></div>';
   }
   if(crDet) crDet.innerHTML = cr.length ? cr.map(function(e){ return ovRowDetail(e, '#ef4444'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford critique</div>';
   if(wnDet) wnDet.innerHTML = wn.length ? wn.map(function(e){ return ovRowDetail(e, '#f59e0b'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford a surveiller</div>';
@@ -94,15 +94,15 @@ function buildBT(){
       var emp=EMP.find(function(x){return x.n===e.n;});
       var st=scSt(e.sc),col=scColor(e.sc),pct=Math.round(e.sc/mx*100);
       var cm=BD_COMMENTS[e.n];
-      var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+cm.text.replace(/"/g,"&quot;")+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
-      h+='<tr id="bdrow-'+e.n.replace(/\s+/g,'-')+'">';
-      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+e.n.replace(/'/g,"\\'")+'\')" title="'+t('br_tooltip_history')+'">'+e.n+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
-      h+='<td style="color:var(--tx3);font-size:12px">'+(emp?emp.r:'')+'</td>';
+      var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+escHtml(cm.text)+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
+      h+='<tr id="bdrow-'+escHtml(e.n.replace(/\s+/g,'-'))+'">';
+      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_history')+'">'+escHtml(e.n)+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
+      h+='<td style="color:var(--tx3);font-size:12px">'+escHtml(emp?emp.r:'')+'</td>';
       h+='<td><span style="font-family:var(--mo)">'+e.D+'</span></td>';
       h+='<td><span style="font-family:var(--mo)">'+e.S+'</span></td>';
       h+='<td><div class="sbw"><div class="sbt"><div class="sbf" style="width:'+pct+'%;background:'+col+'"></div></div><span class="sv" style="color:'+col+'">'+e.sc+'</span></div></td>';
       h+='<td><span class="pill '+st.c+'">'+st.l+'</span></td>';
-      h+='<td style="text-align:center"><span style="cursor:pointer" onclick="openComment(\''+e.n.replace(/'/g,"\\'")+'\')" title="'+t('br_tooltip_comment')+'">'+cmIcon+'</span></td>';
+      h+='<td style="text-align:center"><span style="cursor:pointer" onclick="openComment(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_comment')+'">'+cmIcon+'</span></td>';
       h+='</tr>';
     });
   });
@@ -115,27 +115,42 @@ function openComment(name){
   var d=document.createElement('div');
   d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
   d.id='cm-popup';d.innerHTML='<div style="background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:12px;padding:24px;width:420px;max-width:95vw">'
-    +'<div style="font-weight:700;font-size:15px;margin-bottom:4px">'+t('br_comment_prefix')+name+'</div>'
-    +(cm.date?'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">'+t('br_comment_last_mod')+cm.date+(cm.author?t('br_comment_by')+cm.author:'')+'</div>':'<div style="margin-bottom:12px"></div>')
-    +'<textarea id="cm-txt" style="width:100%;height:110px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+prev+'</textarea>'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:4px">'+t('br_comment_prefix')+escHtml(name)+'</div>'
+    +(cm.date?'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">'+t('br_comment_last_mod')+escHtml(cm.date)+(cm.author?t('br_comment_by')+escHtml(cm.author):'')+'</div>':'<div style="margin-bottom:12px"></div>')
+    +'<textarea id="cm-txt" style="width:100%;height:110px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+escHtml(prev)+'</textarea>'
     +'<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
     +'<button onclick="document.getElementById(\'cm-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">'+t('modal_cancel')+'</button>'
-    +'<button onclick="saveComment(\''+name.replace(/'/g,"\\'")+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('btn_save')+'</button>'
+    +'<button onclick="saveComment(\''+escJsAttr(name)+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('btn_save')+'</button>'
     +'</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
   document.getElementById('cm-txt').focus();
 }
 
+var BD_COMMENT_ENVOI=false;
 function saveComment(name){
+  if(BD_COMMENT_ENVOI) return; // double clic
   var txt=document.getElementById('cm-txt').value.trim();
+  if(txt.length>2000){ toast(t('br_comment_trop_long'),'#ef4444'); return; }
   var now=new Date().toLocaleString('fr-BE');
   var author=currentUser?currentUser.name||currentUser.email||'':'';
-  BD_COMMENTS[name]={text:txt,date:now,author:author};
-  if(db) db.ref('bradford/comments/'+name.replace(/[.#$/\[\]]/g,'_')).set(BD_COMMENTS[name]);
-  var cmPop=document.getElementById('cm-popup');if(cmPop)cmPop.remove();
-  buildBT();
-  toast(txt?t('br_comment_saved'):t('br_comment_deleted'),'#10b981');
+  var cle=name.replace(/[.#$/\[\]]/g,'_');
+  var valeur={text:txt,date:now,author:author};
+  if(!db){ toast(t('adm_err_firebase_disconnected'),'#ef4444'); return; }
+  BD_COMMENT_ENVOI=true;
+  // Le succes n'est annonce qu'une fois l'ecriture confirmee par Firebase.
+  var ecriture = txt ? db.ref('bradford/comments/'+cle).set(valeur) : db.ref('bradford/comments/'+cle).remove();
+  ecriture.then(function(){
+    BD_COMMENT_ENVOI=false;
+    if(txt) BD_COMMENTS[name]=valeur; else delete BD_COMMENTS[name];
+    journaliser(txt?'commentaire_bradford_enregistre':'commentaire_bradford_supprime', {});
+    var cmPop=document.getElementById('cm-popup');if(cmPop)cmPop.remove();
+    buildBT();
+    toast(txt?t('br_comment_saved'):t('br_comment_deleted'),'#10b981');
+  }).catch(function(e){
+    BD_COMMENT_ENVOI=false;
+    toast(t('err_generic_prefix')+e.message,'#ef4444'); // la fenetre reste ouverte, le texte n'est pas perdu
+  });
 }
 
 function openBradfordPanel(name){
@@ -168,7 +183,7 @@ function openBradfordPanel(name){
   }).join(''):'<div style="color:var(--tx3);font-size:13px;padding:20px 0;text-align:center">'+t('br_no_episode')+'</div>';
 
   d.innerHTML='<div style="padding:20px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center">'
-    +'<div><div style="font-weight:700;font-size:16px">'+name+'</div><span class="pill '+st.c+'" style="margin-top:4px;display:inline-block">'+st.l+'</span></div>'
+    +'<div><div style="font-weight:700;font-size:16px">'+escHtml(name)+'</div><span class="pill '+st.c+'" style="margin-top:4px;display:inline-block">'+st.l+'</span></div>'
     +'<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
     +'</div>'
     +'<div style="padding:16px 20px;display:flex;gap:20px;border-bottom:1px solid var(--bd2)">'
@@ -178,8 +193,8 @@ function openBradfordPanel(name){
     +'</div>'
     +'<div style="padding:16px 20px;border-bottom:1px solid var(--bd2)">'
     +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">'+t('br_comment_label')+'</div>'
-    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);min-height:36px" onclick="openComment(\''+name.replace(/'/g,"\\'")+'\')">'+( cm&&cm.text?cm.text:'<span style="color:var(--tx3)">'+t('br_comment_placeholder')+'</span>')+'</div>'
-    +(cm&&cm.date?'<div style="font-size:10px;color:var(--tx3);margin-top:4px">'+cm.date+(cm.author?' · '+cm.author:'')+'</div>':'')
+    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);min-height:36px" onclick="openComment(\''+escJsAttr(name)+'\')">'+( cm&&cm.text?escHtml(cm.text):'<span style="color:var(--tx3)">'+t('br_comment_placeholder')+'</span>')+'</div>'
+    +(cm&&cm.date?'<div style="font-size:10px;color:var(--tx3);margin-top:4px">'+escHtml(cm.date)+(cm.author?' · '+escHtml(cm.author):'')+'</div>':'')
     +'</div>'
     +'<div style="padding:16px 20px;flex:1;overflow-y:auto">'
     +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">'+t('br_history_title')+'</div>'
@@ -198,7 +213,7 @@ function exportBradfordCSV(){
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='bradford_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.download='bradford_'+isoLocal(new Date())+'.csv';
   a.click();
 }
 
@@ -243,7 +258,7 @@ function marquerDiscute(name){
 }
 
 function exportBradfordExcel(){
-  if(typeof JSZip==='undefined'){toast('JSZip non charge','#ef4444');return;}
+  if(attendreJSZip(exportBradfordExcel, arguments)) return; // JSZip charge a la demande
   function scSty(sc){return sc===0?7:sc<=50?3:sc<=200?4:sc<=500?5:6;}
   function stLbl(sc){return sc===0?'Parfait':sc<=50?'OK':sc<=200?'A surveiller':sc<=500?'Preoccupant':'Critique';}
   var str=[],sm={};
@@ -272,7 +287,7 @@ function exportBradfordExcel(){
   var pR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
   var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
   var zip=new JSZip();zip.file('[Content_Types].xml',ct);zip.file('_rels/.rels',pR);zip.file('xl/workbook.xml',wb);zip.file('xl/_rels/workbook.xml.rels',wbR);zip.file('xl/styles.xml',styles);zip.file('xl/sharedStrings.xml',sst);zip.file('xl/worksheets/sheet1.xml',sheet);
-  zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Bradford_'+new Date().toISOString().slice(0,10)+'.xlsx';a.click();toast('Export Excel genere','#10b981');});
+  zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Bradford_'+isoLocal(new Date())+'.xlsx';a.click();toast('Export Excel genere','#10b981');});
 }
 
 function trendHtml(trend){
