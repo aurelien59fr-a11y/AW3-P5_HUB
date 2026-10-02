@@ -34,7 +34,7 @@
     .splash-txt{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
     body{background:#0f1117}
   </style>
-<link rel="stylesheet" href="css/styles.css?v=97">
+<link rel="stylesheet" href="css/styles.css?v=98">
 </head>
 <body>
 <div id="splash-screen">
@@ -260,6 +260,17 @@
     <!-- ADMIN -->
     <div class="pane" id="pane-admin">
       <div class="sh"><div class="st" data-i18n="adm_title">Administration</div><div class="ss" data-i18n="adm_subtitle">Outils reserves a l'admin</div></div>
+
+      <!-- JOURNAL DE SECURITE -->
+      <div class="cc" style="margin-bottom:16px">
+        <div class="cch"><div class="cct" data-i18n="journal_titre">Journal de securite</div></div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:10px" data-i18n="journal_aide">Les 200 dernieres actions sensibles.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <button type="button" class="tbtn" onclick="chargerJournalSecurite()" data-i18n="journal_charger">Afficher le journal</button>
+          <input type="search" id="journal-filtre" class="li-input" style="max-width:260px" oninput="filtrerJournalSecurite()" placeholder="Filtrer" data-i18n-ph="journal_filtre" aria-label="Filtrer" data-i18n-aria="journal_filtre">
+        </div>
+        <div id="journal-securite" class="journal-zone"></div>
+      </div>
 
       <!-- IMPORT GLOBAL -->
       <div class="cc" style="margin-bottom:16px">
@@ -1063,6 +1074,7 @@
   <script src="js/core/ui.js?v=4"></script>
   <script src="js/core/traduction.js?v=1"></script>
   <script src="js/core/motdepasse.js?v=1"></script>
+  <script src="js/core/session.js?v=1"></script>
   <script src="js/core/firebase.js?v=3"></script>
     <script src="js/core/auth.js?v=5"></script>
   <script src="js/metier/bradford.js?v=4"></script>
@@ -1084,13 +1096,14 @@
   <script src="js/vues/formations.js?v=4"></script>
   <script src="js/vues/attestation.js?v=4"></script>
   <script src="js/vues/pointages.js?v=4"></script>
+  <script src="js/vues/journal.js?v=1"></script>
   <script src="js/vues/admin.js?v=5"></script>
   <script src="js/vues/recrutement.js?v=3"></script>
   <script src="js/metier/espace-perso.js?v=1"></script>
   <script src="js/vues/espace.js?v=3"></script>
   <script src="js/vues/absences.js?v=4"></script>
   <script src="js/vues/ov-resume.js?v=10"></script>
-    <script src="js/app.js?v=94"></script>
+    <script src="js/app.js?v=95"></script>
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load', function(){
