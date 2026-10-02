@@ -216,7 +216,7 @@ function buildPT(){
   LAST_FILTERED_DATES=filtered;
   var noteEntries=[];
   var all=filtered.map(function(x){return x.d;});
-  var ti=all.indexOf(td);var h='<thead><tr><th class="nc">Employe</th>';filtered.forEach(function(x,col){
+  var ti=all.indexOf(td);var prochain=planningProchainBloc(all,curYear,new Date());var h='<thead><tr><th class="nc">Employe</th>';filtered.forEach(function(x,col){
   var d=x.d;
   var parts=d.split('/');
   var dt=new Date(Date.UTC(parseInt(curYear),parseInt(parts[1])-1,parseInt(parts[0])));
@@ -226,13 +226,14 @@ function buildPT(){
   var hMap=curYear==='2027'?H2027:curYear==='2026'?H2026:H2025;
   var hor=hMap[d]||'';
   var horColor=hor==='05h-17h'?'#5eddb7':'#fda96a';
-  h+='<th class="'+(isT?'td-on':'')+'" style="min-width:42px">'
+  var estProchain=prochain.indexOf(col)!==-1;
+  h+='<th class="'+(isT?'td-on':'')+(estProchain?' pl-prochain':'')+'" style="min-width:42px"'+(estProchain?' title="'+escHtml(t('plan_prochain_we'))+'"':'')+'>'
     +(isT?'<div class="td-dot"></div>':'')
     +'<div style="font-size:9px;opacity:.8;color:'+(isT?'#7eb3ff':'var(--tx3)')+'">'+dayLbl+'</div>'
     +d
     +(hor?'<div style="font-size:8px;font-weight:600;color:'+horColor+';margin-top:1px">'+hor+'</div>':'')
     +'</th>';
-});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc"'+(emp.n==='Note'?' style="cursor:pointer" data-on-click="toggleNotesPanelManual()" title="'+t('tooltip_voir_notes')+'"':'')+'>'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
+});h+='</tr></thead><tbody>';['TL','INPAK','Prod','Unit','EXTRA'].forEach(function(g){var shiftsArr=(curYear==='2027'?SHIFTS27:curYear==='2026'?SHIFTS26:SHIFTS25);var emps;if(g==='EXTRA'){emps=shiftsArr.filter(function(e){return e.g==='EXTRA';});}else{emps=shiftsArr.filter(function(e){var f=EMP.find(function(x){return x.n===e.n;});return f&&f.g===g;});}if(!emps.length)return;h+='<tr class="sr"><td colspan="'+(all.length+1)+'"><span class="sr-lbl">'+(g==='EXTRA'?t('plan_section_extra'):g)+'</span></td></tr>';emps.forEach(function(emp){var isExtra=emp.g==='EXTRA';h+='<tr><td class="nc"'+(emp.n==='Note'?' style="cursor:pointer" data-on-click="toggleNotesPanelManual()" title="'+t('tooltip_voir_notes')+'"':'')+'>'+rowLabel(emp.n)+'</td>';filtered.forEach(function(x,col){var sv=emp.s[x.i]||'';var isBdToday=(function(){
       var bd=EMP.find(function(e){return e.n===emp.n;});
       if(!bd||!bd.birthday) return false;
       var parts=bd.birthday.split('-');
@@ -280,7 +281,7 @@ function buildPT(){
     return edt >= todayD;
   });
   renderNotesPanel(window.__notesPanelForced ? window.__allNoteEntries : upcoming);
-})();var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';}else{ntd.style.display='none';requestAnimationFrame(function(){var sc=document.querySelector('.pscroll');var ths=document.querySelectorAll('.ptable thead tr th');var targetTh=ths[ti+1];if(targetTh&&sc){var scRect=sc.getBoundingClientRect();var thRect=targetTh.getBoundingClientRect();sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});}});}}
+})();var ntd=document.getElementById('no-today');if(ti===-1){ntd.style.display='flex';ntd.textContent=prochain.length?t('plan_no_today')+' '+t('plan_prochain').replace('{d}',all[prochain[0]]):t('plan_no_today');}else{ntd.style.display='none';}}
 
 function rowLabel(n){
   if(n==='Commentaire')return t('plan_row_extra_staff');
@@ -707,72 +708,10 @@ function applyShift(nv){
 }
 
 function goToday(){
-  var td=todayStr();
-  var now=new Date();
-  curMonth=now.getMonth(); // se positionner sur le mois actuel
-  var all=allDates();
-  var ti=all.indexOf(td);
-  buildPT(); // rebuild avec le bon mois d'abord
-  // Si aujourd'hui est un jour planifie -> scroll direct
-  if(ti!==-1){
-    setTimeout(function(){
-      var sc=document.querySelector('.pscroll');
-      var ths=document.querySelectorAll('.ptable thead tr th');
-      // Dans la vue mois, chercher la colonne par data-i
-      var targetTh=document.querySelector('.ptable thead tr th.td-on');
-      if(!targetTh) targetTh=ths[1]; // fallback
-      if(targetTh&&sc){
-        var scRect=sc.getBoundingClientRect();
-        var thRect=targetTh.getBoundingClientRect();
-        sc.scrollTo({left:sc.scrollLeft+(thRect.left-scRect.left)-sc.clientWidth/2+thRect.width/2,behavior:'smooth'});
-      }
-    },50);
-    toast('Positionne sur le '+td,'#3b82f6');
-    return;
-  }
-  // Aujourd'hui est un jour de repos -> trouver le prochain shift
-  var now=new Date();
-  var todayMs=now.getTime();
-  var nextDate=null;var nextIdx=-1;var nextYr=curYear;
-  // Chercher dans l'annee courante d'abord
-  var yr=parseInt(curYear);
-  for(var i=0;i<all.length;i++){
-    var parts2=all[i].split('/');
-    var d2=new Date(Date.UTC(yr,parseInt(parts2[1])-1,parseInt(parts2[0])));
-    if(d2.getTime()>todayMs){nextDate=all[i];nextIdx=i;break;}
-  }
-  // Si pas trouvé dans l'année courante, chercher dans l'année suivante
-  if(!nextDate){
-    var nextYear=String(yr+1);
-    var nextWeeks=nextYear==='2027'?WEEKS27:null;
-    if(nextWeeks){
-      var nextAll=nextWeeks.reduce(function(a,w){return a.concat(w.d);},[]);
-      for(var j=0;j<nextAll.length;j++){
-        var parts3=nextAll[j].split('/');
-        var d3=new Date(Date.UTC(yr+1,parseInt(parts3[1])-1,parseInt(parts3[0])));
-        if(d3.getTime()>todayMs){
-          // Switcher vers l'année suivante
-          document.querySelectorAll('.ytab').forEach(function(b){b.classList.remove('on');});
-          var nextBtn=document.querySelector('.ytab[data-yr="'+nextYear+'"]');
-          if(nextBtn){nextBtn.classList.add('on');curYear=nextYear;buildPT();}
-          setTimeout(function(){goToday();},150);return;
-        }
-      }
-    }
-  }
-  if(nextDate){
-    var sc2=document.querySelector('.pscroll');
-    var ths2=document.querySelectorAll('.ptable thead tr th');
-    var targetTh2=ths2[nextIdx+1];
-    if(targetTh2&&sc2){
-      var scRect2=sc2.getBoundingClientRect();
-      var thRect2=targetTh2.getBoundingClientRect();
-      sc2.scrollTo({left:sc2.scrollLeft+(thRect2.left-scRect2.left)-sc2.clientWidth/2+thRect2.width/2,behavior:'smooth'});
-    }
-    toast("Repos aujourd'hui - prochain shift: "+nextDate,'#f59e0b');
-  } else {
-    toast("Aucun shift planifie",'#f59e0b');
-  }
+  planningAllerAuJour();
+  var bloc = planningProchainBloc(LAST_FILTERED_DATES.map(function(x){ return x.d; }), curYear, new Date());
+  if(bloc.length) toast(t('plan_prochain').replace('{d}', LAST_FILTERED_DATES[bloc[0]].d), '#3b82f6');
+  else toast(t('plan_aucun_prochain'), '#f59e0b');
 }
 
 function openPrintModal(){var all=allDates();if(!all.length)return;var overlay=document.createElement('div');overlay.id='print-overlay';overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center';var dateOpts=all.map(function(d,i){return '<option value="'+i+'">'+d+'</option>';}).join('');overlay.innerHTML='<div style="background:#1e2436;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:28px 32px;min-width:min(360px,90vw);max-width:92vw;box-sizing:border-box;box-shadow:0 24px 60px rgba(0,0,0,.6)"><div style="font-size:16px;font-weight:600;margin-bottom:20px;color:#e8eaf0">Imprimer le planning</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px"><div><label style="font-size:11px;color:#8b90a4;display:block;margin-bottom:6px">Du</label><select id="pFrom" style="width:100%;background:#0f1117;color:#e8eaf0;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:8px 10px;font-size:12px">'+dateOpts+'</select></div><div><label style="font-size:11px;color:#8b90a4;display:block;margin-bottom:6px">Au</label><select id="pTo" style="width:100%;background:#0f1117;color:#e8eaf0;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:8px 10px;font-size:12px">'+dateOpts+'</select></div></div><div id="print-preview" style="font-size:11px;color:#555c72;margin-bottom:20px;padding:8px 12px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button data-on-click="closePrintModal()" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.13);background:none;color:#8b90a4;font-family:Inter,sans-serif;font-size:13px;cursor:pointer">Annuler</button><button data-on-click="confirmPrint()" style="padding:8px 18px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:13px;font-weight:500;cursor:pointer">Imprimer</button></div></div>';document.body.appendChild(overlay);overlay.addEventListener('click',function(e){if(e.target===overlay)closePrintModal();});var td=todayStr(),ti=all.indexOf(td);if(ti!==-1)document.getElementById('pFrom').selectedIndex=ti;document.getElementById('pTo').selectedIndex=all.length-1;function updPrev(){var f=parseInt(document.getElementById('pFrom').value);var t=parseInt(document.getElementById('pTo').value);if(t<f){document.getElementById('pTo').selectedIndex=f;t=f;}document.getElementById('print-preview').textContent=(t-f+1)+' colonnes : '+all[f]+' -> '+all[t];}document.getElementById('pFrom').addEventListener('change',updPrev);document.getElementById('pTo').addEventListener('change',updPrev);updPrev();}
@@ -824,3 +763,69 @@ var isSyncing=false,curYear='2026',curMonth=null,activePill=null,popup=null;
 
 /* Bouton « Tout » du planning (appele par data-on-click). */
 function planningToutesPeriodes(){ curMonth = null; buildPT(); }
+
+/* ---------------------------------------------------------------------------
+   OUVERTURE DU PLANNING SUR AUJOURD'HUI
+   A chaque ouverture de l'onglet (et avec le bouton « Aujourd'hui »), le
+   planning se place sur l'annee en cours, vue complete, avec le prochain
+   week-end (ou le week-end en cours) en premiere colonne visible, juste a
+   droite des noms. Les colonnes de ce week-end sont mises en evidence.
+   --------------------------------------------------------------------------- */
+
+/* Indices du prochain bloc de jours planifies (week-end, pont...) : la suite
+   de dates consecutives qui contient le premier jour >= aujourd'hui.
+   dates : ['dd/mm', ...] dans l'ordre ; annee : '2026' ; maintenant : Date. */
+function planningProchainBloc(dates, annee, maintenant){
+  var y = parseInt(annee, 10);
+  var j0 = Date.UTC(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+  function jour(d){ var p = String(d).split('/'); return Date.UTC(y, parseInt(p[1], 10) - 1, parseInt(p[0], 10)); }
+  var i = -1;
+  for(var k = 0; k < dates.length; k++){ if(jour(dates[k]) >= j0){ i = k; break; } }
+  if(i === -1) return [];
+  var debut = i, fin = i, JOUR = 86400000;
+  while(debut > 0 && jour(dates[debut]) - jour(dates[debut - 1]) === JOUR) debut--;
+  while(fin < dates.length - 1 && jour(dates[fin + 1]) - jour(dates[fin]) === JOUR) fin++;
+  var out = [];
+  for(var n = debut; n <= fin; n++) out.push(n);
+  return out;
+}
+
+/* Annee du planning a afficher : l'annee en cours, ou la suivante si
+   l'annee en cours n'a plus aucun jour planifie a venir. */
+function planningAnneeDuJour(maintenant){
+  var tables = { '2025': typeof WEEKS25 !== 'undefined' ? WEEKS25 : null, '2026': typeof WEEKS26 !== 'undefined' ? WEEKS26 : null, '2027': typeof WEEKS27 !== 'undefined' ? WEEKS27 : null };
+  var a = String(maintenant.getFullYear());
+  function dates(an){ return (tables[an] || []).reduce(function(x, w){ return x.concat(w.d); }, []); }
+  if(tables[a] && planningProchainBloc(dates(a), a, maintenant).length) return a;
+  var suiv = String(maintenant.getFullYear() + 1);
+  if(tables[suiv]) return suiv;
+  return tables[a] ? a : curYear;
+}
+
+/* Fait defiler le tableau pour que la colonne d'indice idx (dans la vue
+   affichee) soit la premiere visible a droite de la colonne des noms. */
+function planningDefilerVers(idx, doux){
+  var sc = document.querySelector('.pscroll');
+  var ths = document.querySelectorAll('.ptable thead tr th');
+  var cible = ths[idx + 1];
+  if(!sc || !cible || !sc.clientWidth) return false;
+  var nom = document.querySelector('.ptable td.nc') || ths[0];
+  var largeurNoms = nom ? nom.getBoundingClientRect().width : 0;
+  var gauche = sc.scrollLeft + (cible.getBoundingClientRect().left - sc.getBoundingClientRect().left) - largeurNoms - 4;
+  sc.scrollTo({ left: Math.max(0, gauche), behavior: doux ? 'smooth' : 'auto' });
+  return true;
+}
+
+function planningAllerAuJour(){
+  var maintenant = new Date();
+  var annee = planningAnneeDuJour(maintenant);
+  if(annee !== curYear){
+    curYear = annee;
+    document.querySelectorAll('.ytab').forEach(function(b){ b.classList.toggle('on', b.dataset.yr === annee); });
+  }
+  curMonth = null;
+  buildPT();
+  var bloc = planningProchainBloc(LAST_FILTERED_DATES.map(function(x){ return x.d; }), curYear, maintenant);
+  if(!bloc.length) return;
+  requestAnimationFrame(function(){ planningDefilerVers(bloc[0], false); });
+}
