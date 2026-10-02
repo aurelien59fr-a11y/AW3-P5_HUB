@@ -1,6 +1,6 @@
 # Sécurité — AW3 · Ploeg 5 Dashboard
 
-État au 01/10/2026. Document destiné à la revue IT.
+État au 02/10/2026. Document destiné à la revue IT.
 
 ## Architecture
 
@@ -41,7 +41,8 @@ Journal `audit_log` en **ajout seul** (aucune entrée modifiable) : connexions, 
 ## Protection du site
 
 - Aucune donnée personnelle dans les fichiers publics (contrôlé par un test automatique).
-- Politique de sécurité du contenu (CSP) appliquée : scripts limités au site, à Firebase et à cdnjs.
+- Politique de sécurité du contenu (CSP) stricte : scripts limités au site, à Firebase et à cdnjs, **aucun script inline autorisé** (pas de `'unsafe-inline'`) ; un script injecté dans la page ne s'exécute pas.
+- Aucun code JavaScript dans le HTML : les actions des boutons passent par un répartiteur sans `eval` (`js/core/actions.js`) qui n'accepte qu'un appel de fonction avec des valeurs simples.
 - Empreintes SRI sur les bibliothèques externes (Firebase, Chart.js, JSZip).
 - En-têtes : HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy.
 - Tout texte affiché est échappé (protection contre l'injection HTML), vérifié par des tests.
@@ -49,16 +50,16 @@ Journal `audit_log` en **ajout seul** (aucune entrée modifiable) : connexions, 
 
 ## Qualité et tests
 
-98 tests unitaires, ESLint, test de fumée par rôle (7 profils, faux Firebase, CSP appliquée), exécutés à chaque pull request.
+104 tests unitaires, ESLint, test de fumée par rôle (7 profils, faux Firebase, CSP appliquée), exécutés à chaque pull request.
 
 ## Limites connues et pistes
 
 | Point | État | Piste |
 |---|---|---|
 | Comptes Firebase / Vercel / GitHub personnels | à traiter | migrer vers des comptes de l'entreprise |
+| Dépôt GitHub public, historique contenant d'anciennes données | à traiter | dépôt privé (ou nouveau dépôt sans historique) |
 | Données de santé (absences maladie) — RGPD | à valider avec le DPO | registre de traitement, durée de conservation |
 | Pas d'authentification Microsoft (SSO) ni de double authentification | non fait | Firebase Auth avec Microsoft Entra ID |
 | Sauvegardes manuelles (forfait gratuit) | procédure : `dev/SAUVEGARDE.md` | forfait Blaze + sauvegardes quotidiennes |
-| CSP avec `'unsafe-inline'` (gestionnaires d'événements dans le HTML) | connu | migrer vers `addEventListener` |
 | Inscription publique active (nécessaire à la création de comptes depuis l'onglet Admin) | neutralisée par les règles | création des comptes côté serveur (Cloud Function) |
 | Clé API non restreinte au domaine, App Check non activé | non fait | restriction HTTP referrer + App Check |
