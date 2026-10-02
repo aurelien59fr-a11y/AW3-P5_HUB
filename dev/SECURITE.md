@@ -11,7 +11,7 @@
 | Comptes | Firebase Authentication (e-mail + mot de passe) | créés par l'admin uniquement |
 | Code | GitHub, déploiement automatique après revue (pull request) | vérifications automatiques à chaque PR |
 
-La clé `apiKey` visible dans le code est un identifiant public de projet Firebase (ce n'est pas un secret) : la protection repose sur les règles de la base.
+La clé `apiKey` visible dans le code est un identifiant public de projet Firebase (ce n'est pas un secret) : la protection repose sur les règles de la base. Elle est en plus **limitée** aux API Firebase et aux sites `aw3-p5-hub.vercel.app` et `aw3-p5-hub.firebaseapp.com` (restriction HTTP referrer, Google Cloud).
 
 ## Contrôle d'accès (règles Firebase, côté serveur)
 
@@ -28,7 +28,7 @@ La clé `apiKey` visible dans le code est un identifiant public de projet Fireba
 ## Comptes et mots de passe
 
 - Mot de passe provisoire aléatoire à la création ; **changement obligatoire à la première connexion**.
-- Règles : 8 caractères minimum, lettres et chiffres, sans le nom de la personne.
+- Règles : 8 caractères minimum, lettres et chiffres, sans le nom de la personne. Longueur et chiffre **imposés aussi par Firebase côté serveur** (politique de mot de passe en mode « exiger »).
 - Changement possible à tout moment (« Mon mot de passe »), avec re-vérification du mot de passe actuel.
 - Récupération autonome par e-mail personnel facultatif (lien de confirmation Firebase).
 - Personne (ni l'admin, ni le code) ne voit ni ne stocke les mots de passe.
@@ -57,9 +57,9 @@ Journal `audit_log` en **ajout seul** (aucune entrée modifiable) : connexions, 
 | Point | État | Piste |
 |---|---|---|
 | Comptes Firebase / Vercel / GitHub personnels | à traiter | migrer vers des comptes de l'entreprise |
-| Dépôt GitHub public, historique contenant d'anciennes données | à traiter | dépôt privé (ou nouveau dépôt sans historique) |
+| Historique Git contenant d'anciennes données nominatives | dépôt privé | nouveau dépôt sans historique si le code doit être partagé |
 | Données de santé (absences maladie) — RGPD | à valider avec le DPO | registre de traitement, durée de conservation |
 | Pas d'authentification Microsoft (SSO) ni de double authentification | non fait | Firebase Auth avec Microsoft Entra ID |
 | Sauvegardes manuelles (forfait gratuit) | procédure : `dev/SAUVEGARDE.md` | forfait Blaze + sauvegardes quotidiennes |
 | Inscription publique active (nécessaire à la création de comptes depuis l'onglet Admin) | neutralisée par les règles | création des comptes côté serveur (Cloud Function) |
-| Clé API non restreinte au domaine, App Check non activé | non fait | restriction HTTP referrer + App Check |
+| App Check non activé | non fait | reCAPTCHA + App Check (la clé API est déjà limitée au domaine du site) |
