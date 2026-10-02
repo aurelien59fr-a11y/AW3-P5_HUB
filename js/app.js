@@ -1738,7 +1738,7 @@ window.addEventListener('load',function(){
   var app;
   if(typeof firebase==='undefined'){
     console.error('[Firebase] SDK non charge');
-    try{var el=document.getElementById('splash-screen');if(el){el.innerHTML='<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Connexion a Firebase impossible</div><div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion internet, ou reessaie.</div><button onclick="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button></div>';}}catch(e2){}
+    try{var el=document.getElementById('splash-screen');if(el){el.innerHTML='<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Connexion a Firebase impossible</div><div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion internet, ou reessaie.</div><button data-on-click="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button></div>';}}catch(e2){}
     return;
   }
   try{app=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(cfg);}catch(e){app=firebase.app();}
@@ -2566,7 +2566,7 @@ function buildDesktopRail(){
 
   function itemHtml(id){
     var on = id === activeId ? ' on' : '';
-    return '<div class="rail-item'+on+'" data-rail="'+id+'" onclick="mnavGo(\''+id+'\')">'
+    return '<div class="rail-item'+on+'" data-rail="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
       + (MNAV_ICONS[id] || '') + '<span class="rail-tip">'+navLabel(id)+'</span></div>';
   }
   function groupHtml(groupId, ids, icon, label){
@@ -2575,7 +2575,7 @@ function buildDesktopRail(){
     var groupActive = visible.indexOf(activeId) !== -1;
     var panelItems = visible.map(function(id){
       var on = id === activeId ? ' on' : '';
-      return '<div class="rail-panel-item'+on+'" onclick="mnavGo(\''+id+'\')">'+(MNAV_ICONS[id]||'')+'<span>'+navLabel(id)+'</span></div>';
+      return '<div class="rail-panel-item'+on+'" data-on-click="mnavGo(\''+id+'\')">'+(MNAV_ICONS[id]||'')+'<span>'+navLabel(id)+'</span></div>';
     }).join('');
     return '<div class="rail-group" data-rail-group="'+groupId+'">'
       + '<div class="rail-item'+(groupActive?' on':'')+'">'+icon+'<span class="rail-tip">'+label+'</span></div>'
@@ -2633,15 +2633,15 @@ function buildMobileNav(){
 
   var html = visibleDirect.map(function(id){
     var on = id === activeId ? ' on' : '';
-    return '<div class="mnav-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+    return '<div class="mnav-item'+on+'" data-mnav="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
       + (MNAV_ICONS[id]||'') + '<span>'+t('nav_'+id)+'</span></div>';
   }).join('');
   if(equipeIds.length){
-    html += '<div class="mnav-item'+(activeInEquipe?' on':'')+'" data-mnav="grp-equipe" onclick="openMobileMenu(\'equipe\')">'
+    html += '<div class="mnav-item'+(activeInEquipe?' on':'')+'" data-mnav="grp-equipe" data-on-click="openMobileMenu(\'equipe\')">'
       + MNAV_ICONS.group_equipe + '<span>'+t('nav_equipe')+'</span></div>';
   }
   if(plusIds.length){
-    html += '<div class="mnav-item'+(activeInPlus?' on':'')+'" data-mnav="grp-plus" onclick="openMobileMenu(\'plus\')">'
+    html += '<div class="mnav-item'+(activeInPlus?' on':'')+'" data-mnav="grp-plus" data-on-click="openMobileMenu(\'plus\')">'
       + MNAV_ICONS.group_plus + '<span>'+t('nav_plus')+'</span></div>';
   }
   nav.innerHTML = html;
@@ -2667,7 +2667,7 @@ function openMobileMenu(group){
   if(menuTitle) menuTitle.textContent = group === 'plus' ? t('nav_plus') : t('nav_equipe');
   menuList.innerHTML = ids.map(function(id){
     var on = id === activeId ? ' on' : '';
-    return '<button class="mms-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+    return '<button class="mms-item'+on+'" data-mnav="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
       + (MNAV_ICONS[id] || '') + '<span>'+navLabel(id)+'</span></button>';
   }).join('');
   var sheet = document.getElementById('mobile-menu-sheet');
