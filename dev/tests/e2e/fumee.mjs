@@ -173,6 +173,21 @@ for (const [nom, fiche] of SCENARIOS) {
   });
   // Boutons d'import / suppression : jamais visibles pour un visiteur.
   const boutonsAdminVisibles = await page.evaluate(() => [...document.querySelectorAll('[data-on-click*="openImportPointages"], [data-on-click*="openImportArretsModal"], [data-on-click*="markAllPtDone"], [data-on-click*="nettoyerDoublonsArrets"], [data-on-click*="openImportNCPModal"]')].filter((b) => b.style.display !== 'none').length);
+  // Planning : a l'ouverture, le prochain week-end est la premiere colonne visible.
+  let planningAujourdhui = null;
+  if (onglets.includes('pl')) {
+    await page.evaluate(() => { document.querySelector('.tab[data-tab="ov"]')?.click(); document.querySelector('.tab[data-tab="pl"]').click(); });
+    await page.waitForTimeout(400);
+    planningAujourdhui = await page.evaluate(() => {
+      const th = document.querySelector('.ptable th.pl-prochain');
+      const sc = document.querySelector('.pscroll');
+      if (!th || !sc) return { ok: false, raison: 'colonne du prochain week-end absente' };
+      const nom = document.querySelector('.ptable td.nc') || document.querySelector('.ptable th.nc');
+      const ecart = th.getBoundingClientRect().left - sc.getBoundingClientRect().left - nom.getBoundingClientRect().width;
+      return { ok: ecart >= -2 && ecart <= 60, ecart: Math.round(ecart), date: th.textContent.replace(/\s+/g, ' ').trim().slice(0, 30) };
+    });
+    if (process.env.CAPTURE_PLANNING) await page.screenshot({ path: process.env.CAPTURE_PLANNING.replace('.png', '-' + nom.replace(/\W+/g, '_') + '.png') });
+  }
   const accessibilite = await page.evaluate(auditA11y);
   const etat = await page.evaluate(() => ({
     appVisible: getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none',
@@ -185,7 +200,7 @@ for (const [nom, fiche] of SCENARIOS) {
     espace: (() => { const b = document.querySelector('.tab[data-tab="espace"]'); if (b) b.click(); const c = document.getElementById('espace-content'); return c ? c.textContent.replace(/\s+/g, ' ').slice(0, 4000) : null; })(),
   }));
   const ecoutesFin = await page.evaluate(() => [...new Set(window.__ecoutes || [])].sort());
-  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, ...etat });
+  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, planningAujourdhui, ...etat });
   await ctx.close();
 }
 await navigateur.close();
@@ -201,6 +216,7 @@ for (const r of resultats) {
   if (r.erreurs.length) problemes.push(`${r.nom} : ${r.erreurs.length} erreur(s) JS`);
   if (r.actionsIncomprises && r.actionsIncomprises.length) problemes.push(`${r.nom} : actions incomprises ${r.actionsIncomprises.join(' | ')}`);
   if (r.nom === 'visiteur' && r.boutonsAdminVisibles) problemes.push(`visiteur : ${r.boutonsAdminVisibles} bouton(s) d'import visibles`);
+  if (r.planningAujourdhui && !r.planningAujourdhui.ok) problemes.push(`${r.nom} : planning pas positionne sur le prochain week-end (${JSON.stringify(r.planningAujourdhui)})`);
   if (r.pwned) problemes.push(`${r.nom} : injection HTML executee`);
   if (r.migration) problemes.push(`${r.nom} : bouton de migration present`);
   if (r.mdpObligatoire !== (r.nom === 'premiere connexion')) problemes.push(`${r.nom} : fenetre mot de passe ${r.mdpObligatoire ? 'affichee a tort' : 'absente'}`);
