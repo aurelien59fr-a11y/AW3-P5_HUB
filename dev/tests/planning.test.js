@@ -75,3 +75,31 @@ describe('saveCell() et applyShift()', () => {
     expect(base.ecritures).toHaveLength(0);
   });
 });
+
+describe('Ouverture du planning sur aujourd\'hui', () => {
+  const dates = ['26/09', '27/09', '03/10', '04/10', '10/10', '11/10', '11/11', '14/11'];
+  const app = () => appPlanning().w;
+
+  it('un vendredi : le week-end qui arrive (samedi + dimanche)', () => {
+    expect(app().planningProchainBloc(dates, '2026', new Date(2026, 9, 2, 20, 15))).toEqual([2, 3]);
+  });
+  it('un dimanche : le week-end en cours, depuis le samedi', () => {
+    expect(app().planningProchainBloc(dates, '2026', new Date(2026, 9, 4, 8, 0))).toEqual([2, 3]);
+  });
+  it('un lundi : le week-end suivant', () => {
+    expect(app().planningProchainBloc(dates, '2026', new Date(2026, 9, 5))).toEqual([4, 5]);
+  });
+  it('un ferie isole en semaine est un bloc a lui seul', () => {
+    expect(app().planningProchainBloc(dates, '2026', new Date(2026, 10, 9))).toEqual([6]);
+  });
+  it('plus rien a venir : aucun bloc', () => {
+    expect(app().planningProchainBloc(dates, '2026', new Date(2026, 11, 31))).toEqual([]);
+  });
+  it('annee : l\'annee en cours, ou la suivante si elle est terminee', () => {
+    const w = appPlanning({}).w;
+    w.WEEKS26 = [{ d: ['03/10', '04/10'] }];
+    w.WEEKS27 = [{ d: ['02/01', '03/01'] }];
+    expect(w.planningAnneeDuJour(new Date(2026, 9, 2))).toBe('2026');
+    expect(w.planningAnneeDuJour(new Date(2026, 11, 20))).toBe('2027');
+  });
+});
