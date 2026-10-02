@@ -165,7 +165,7 @@ html += '<div class="cc" style="margin-bottom:16px;background:linear-gradient(13
 
 function meSection(icon, titre, count, bodyHtml){
 return '<div class="cc" style="margin-bottom:16px">'
-+ '<div class="cch" style="cursor:pointer" onclick="monEspaceToggle(this)"><div class="cct" style="display:flex;align-items:center;justify-content:space-between"><span>'+icon+' '+titre+' (' + count + ')</span><span class="me-arrow" style="color:var(--tx3);font-size:12px">▸</span></div></div>'
++ '<div class="cch" style="cursor:pointer" data-on-click="monEspaceToggle(this)"><div class="cct" style="display:flex;align-items:center;justify-content:space-between"><span>'+icon+' '+titre+' (' + count + ')</span><span class="me-arrow" style="color:var(--tx3);font-size:12px">▸</span></div></div>'
 + '<div class="me-body" style="display:none;margin-top:10px">' + bodyHtml + '</div>'
 + '</div>';
 }
@@ -249,7 +249,7 @@ opPrecis = getOperateur(n.created_date_iso, n.created_heure, ln);
 var badgeEquipe = (n.type_ncp === 'Inpak' && !opPrecis)
 ? '<span class="pill" style="background:rgba(139,92,246,.12);color:#8b5cf6">' + t('espace_ncp_equipe') + '</span>'
 : '';
-return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" onclick="ncpDetail(\'' + escJsAttr(n.notification) + '\')">'
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:6px;flex-wrap:wrap;cursor:pointer" data-on-click="ncpDetail(\'' + escJsAttr(n.notification) + '\')">'
 + '<div style="font-family:var(--mo);font-size:12px;color:var(--tx2);white-space:nowrap">'+escHtml(dFR(n.created_date_iso))+' '+escHtml(n.created_heure||'')+'</div>'
 + '<div style="font-size:12px;font-weight:600">'+escHtml(n.ligne||'-')+'</div>'
 + '<div style="font-size:13px;color:var(--tx1);flex:1;min-width:120px">'+escHtml(n.description||n.code_produit||'-')+'</div>'

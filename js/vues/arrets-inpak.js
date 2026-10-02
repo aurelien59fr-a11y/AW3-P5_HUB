@@ -59,9 +59,9 @@ function peuplerOperateursFiltre(){
   var wrap = document.getElementById('arrets-filtre-operateur');
   if(!wrap || wrap.dataset.rempli === LANG) return; // reconstruire seulement si la langue a change
   var operateurs = EMP.filter(function(e){ return e.g === 'INPAK'; }).map(function(e){ return e.n; });
-  var html = '<button class="arrets-operateur-btn" data-operateur="all" onclick="toggleArretsOperateur(\'all\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">' + t('ncp_tous') + '</button>';
+  var html = '<button class="arrets-operateur-btn" data-operateur="all" data-on-click="toggleArretsOperateur(\'all\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer">' + t('ncp_tous') + '</button>';
   html += operateurs.map(function(nom){
-    return '<button class="arrets-operateur-btn" data-operateur="' + nom.replace(/"/g,'&quot;') + '" onclick="toggleArretsOperateur(\'' + nom.replace(/'/g,"\\'") + '\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">' + nom + '</button>';
+    return '<button class="arrets-operateur-btn" data-operateur="' + nom.replace(/"/g,'&quot;') + '" data-on-click="toggleArretsOperateur(\'' + escJsAttr(nom) + '\')" style="padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:12px;cursor:pointer">' + nom + '</button>';
   }).join('');
   wrap.innerHTML = html;
   wrap.dataset.rempli = LANG;
@@ -119,7 +119,7 @@ function buildArretsCauses(liste){
     cumul += c[champ];
     var coul = ARRETS_CAT_COUL[c.cat] || 'var(--tx2)';
     var ouvert = (ARRETS_CAUSES_CAT === c.cat);
-    html += '<tr onclick="arretsCausesOuvrir(\'' + c.cat + '\')" style="border-bottom:1px solid var(--bd2);cursor:pointer'
+    html += '<tr data-on-click="arretsCausesOuvrir(\'' + c.cat + '\')" style="border-bottom:1px solid var(--bd2);cursor:pointer'
       + (ouvert ? ';background:var(--bg3)' : '') + '">'
       + '<td style="padding:8px 6px;white-space:nowrap">'
       + '<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + coul + ';margin-right:8px"></span>'
@@ -164,7 +164,7 @@ function buildArretsCauses(liste){
           + '<td style="padding:7px 6px;text-align:right">' + (totCat ? (r[champ] / totCat * 100).toFixed(1) : '-') + ' %</td>'
           + '<td style="padding:7px 6px;text-align:right">' + r.nombre + '</td>'
           + '<td style="padding:7px 6px;text-align:right;color:var(--tx3)">' + (r.nombre ? Math.round(r.duree / r.nombre) : 0) + ' min</td>'
-          + '<td style="padding:7px 6px;text-align:right"><button onclick="arretsFiltrerRaison(\'' + String(r.raison).replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')" '
+          + '<td style="padding:7px 6px;text-align:right"><button data-on-click="arretsFiltrerRaison(\'' + escJsAttr(String(r.raison)) + '\')" '
           + 'style="padding:3px 9px;border-radius:99px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);font-size:11px;cursor:pointer">'
           + t('arr_ca_filtrer') + '</button></td>'
           + '</tr>';

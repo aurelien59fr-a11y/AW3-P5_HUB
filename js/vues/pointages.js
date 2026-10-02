@@ -219,7 +219,7 @@ if(pointageEcartAvantShift(a)) return false;
         + '<td><span style="font-size:12px;font-weight:600;color:' + typeCol + '">' + typeLabel + '</span></td>'
         + '<td style="font-size:12px;color:var(--tx2)">' + escHtml(a.detail) + suspectIcon + '</td>'
         + '<td>' + statutBadge + '</td>'
-        + '<td style="text-align:center"><span style="cursor:pointer" onclick="openPtComment(\'' + escJsAttr(k) + '\')">' + cmIcon + '</span></td>'
+        + '<td style="text-align:center"><span style="cursor:pointer" data-on-click="openPtComment(\'' + escJsAttr(k) + '\')">' + cmIcon + '</span></td>'
         + '</tr>';
     }).join('');
 
@@ -334,16 +334,16 @@ function openPtComment(key){
     + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + escHtml(a.nom) + '</div>'
     + '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px">' + escHtml(dFR(a.date)) + ' — ' + escHtml(a.detail) + '</div>'
     + '<div style="display:flex;gap:8px;margin-bottom:14px">'
-    + '<button onclick="setPtStatut(\'' + escJsAttr(key) + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
-    + '<button onclick="setPtStatut(\'' + escJsAttr(key) + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
+    + '<button data-on-click="setPtStatut(\'' + escJsAttr(key) + '\',\'open\')" id="btn-open" style="padding:5px 12px;border-radius:var(--r);border:1px solid #ef4444;background:' + (a.statut==='open'?'#ef4444':'none') + ';color:' + (a.statut==='open'?'#fff':'#ef4444') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Non traité</button>'
+    + '<button data-on-click="setPtStatut(\'' + escJsAttr(key) + '\',\'done\')" id="btn-done" style="padding:5px 12px;border-radius:var(--r);border:1px solid #10b981;background:' + (a.statut==='done'?'#10b981':'none') + ';color:' + (a.statut==='done'?'#fff':'#10b981') + ';font-family:var(--fn);font-size:12px;cursor:pointer">Traité ✓</button>'
     + '</div>'
     + '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Historique</div>'
     + '<div style="overflow-y:auto;max-height:200px;margin-bottom:14px">' + histHtml + '</div>'
     + '<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Ajouter un commentaire</div>'
     + '<textarea id="pt-cm-txt" placeholder="Ecrire un nouveau commentaire..." style="width:100%;height:70px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical"></textarea>'
     + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
-    + '<button onclick="document.getElementById(\'pt-comment-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Fermer</button>'
-    + '<button onclick="savePtComment(\'' + escJsAttr(key) + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
+    + '<button data-on-click="retirerElement(\'pt-comment-popup\')" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">Fermer</button>'
+    + '<button data-on-click="savePtComment(\'' + escJsAttr(key) + '\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">Enregistrer</button>'
     + '</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click', function(e){ if(e.target===d) d.remove(); });

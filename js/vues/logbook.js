@@ -207,7 +207,7 @@ function logbookSpLignesHtml(champs, langue){
           var long = lignes.length > 8 || String(champs[k]).length > 700;
           html += '<div class="lb-sp-bloc' + (long ? ' lb-sp-replie' : '') + '"><div class="lb-sp-titre">' + logbookEsc(logbookSpLibelle(k, langue)) + '</div>'
                 + '<div class="lb-sp-corps">' + corps + '</div>'
-                + (long ? '<button class="lb-sp-plus" data-plus="' + logbookEsc(lbT('lb_lire_suite')) + '" data-moins="' + logbookEsc(lbT('lb_replier')) + '" onclick="this.parentNode.classList.toggle(\'lb-sp-replie\');this.textContent=this.parentNode.classList.contains(\'lb-sp-replie\')?this.dataset.plus:this.dataset.moins">' + logbookEsc(lbT('lb_lire_suite')) + '</button>' : '')
+                + (long ? '<button class="lb-sp-plus" data-plus="' + logbookEsc(lbT('lb_lire_suite')) + '" data-moins="' + logbookEsc(lbT('lb_replier')) + '" data-on-click="logbookBasculerSuite(this)">' + logbookEsc(lbT('lb_lire_suite')) + '</button>' : '')
                 + '</div>';
     });
     return html;
@@ -552,4 +552,11 @@ function logbookOpenCompare(dateA, dateB){
       + '</div>';
 
   document.getElementById('lb-overlay').classList.add('open');
+}
+
+/* « Lire la suite » / « Replier » d'une note longue (appele par data-on-click). */
+function logbookBasculerSuite(b){
+    var bloc = b.parentNode;
+    bloc.classList.toggle('lb-sp-replie');
+    b.textContent = bloc.classList.contains('lb-sp-replie') ? b.dataset.plus : b.dataset.moins;
 }

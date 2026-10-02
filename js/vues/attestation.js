@@ -97,20 +97,20 @@ function attCreerModale(){
   d.innerHTML =
     '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;max-width:620px;width:100%;max-height:92vh;overflow:auto;padding:18px 20px;color:var(--tx)">'
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="font-size:16px;font-weight:700">Attestation de formation</div>'
-    +'<button onclick="closeAttestationModal()" style="margin-left:auto;background:none;border:none;color:var(--tx2);font-size:20px;cursor:pointer">&times;</button></div>'
+    +'<button data-on-click="closeAttestationModal()" style="margin-left:auto;background:none;border:none;color:var(--tx2);font-size:20px;cursor:pointer">&times;</button></div>'
     +'<div style="font-size:12px;color:var(--tx3)">La liste se construit depuis l\'équipe choisie. Laisse un champ vide pour le remplir à la main sur papier.</div>'
     +'<label style="'+lab+'">Équipe</label>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><select id="att-equipe" onchange="attChangerEquipe(this.value)" style="'+inp+';flex:1;min-width:200px"></select>'
-    +'<button id="att-btn-new" onclick="attEditerEquipe(null)" style="'+btn+'">+ Autre équipe</button>'
-    +'<button id="att-btn-edit" onclick="attEditerEquipe(ATT_EQUIPE_COURANTE)" style="'+btn+';display:none">Modifier</button></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><select id="att-equipe" data-on-change="attChangerEquipe(this.value)" style="'+inp+';flex:1;min-width:200px"></select>'
+    +'<button id="att-btn-new" data-on-click="attEditerEquipe(null)" style="'+btn+'">+ Autre équipe</button>'
+    +'<button id="att-btn-edit" data-on-click="attEditerEquipeCourante()" style="'+btn+';display:none">Modifier</button></div>'
     +'<div id="att-editeur" style="display:none;margin-top:10px;padding:12px;border:1px dashed var(--bd2);border-radius:10px">'
     +  '<label style="'+lab+';margin-top:0">Nom de l\'équipe</label><input id="att-ed-nom" style="'+inp+'" placeholder="ex : AW3 P3">'
     +  '<label style="'+lab+'">Membres — une personne par ligne : <b>Nom ; Secteur ; Fonction</b> (secteur = INPAK, PROD ou UNIT)</label>'
     +  '<textarea id="att-ed-membres" rows="8" style="'+inp+';font-family:var(--mo);font-size:12px" placeholder="Jean Dupont ; INPAK ; Opérateur Inpak&#10;Marie Martin ; PROD ; Opérateur Production"></textarea>'
-    +  '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button onclick="attCopierP5()" style="'+btn+'">Partir de mon équipe P5</button>'
-    +  '<button onclick="attEnregistrerEquipe()" style="'+btn+';background:var(--blue);color:#fff;border:none">Enregistrer l\'équipe</button>'
-    +  '<button id="att-ed-suppr" onclick="attSupprimerEquipe()" style="'+btn+';color:#ef4444">Supprimer</button>'
-    +  '<button onclick="attFermerEditeur()" style="'+btn+'">Annuler</button></div>'
+    +  '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button data-on-click="attCopierP5()" style="'+btn+'">Partir de mon équipe P5</button>'
+    +  '<button data-on-click="attEnregistrerEquipe()" style="'+btn+';background:var(--blue);color:#fff;border:none">Enregistrer l\'équipe</button>'
+    +  '<button id="att-ed-suppr" data-on-click="attSupprimerEquipe()" style="'+btn+';color:#ef4444">Supprimer</button>'
+    +  '<button data-on-click="attFermerEditeur()" style="'+btn+'">Annuler</button></div>'
     +  '<div id="att-ed-err" style="color:#ef4444;font-size:12px;margin-top:6px"></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">'
@@ -120,14 +120,14 @@ function attCreerModale(){
     +  '<div style="grid-column:1/3"><label style="'+lab+'">Responsable (signature du bas)</label><input id="att-resp" style="'+inp+'"></div>'
     +'</div>'
     +'<label style="'+lab+'">Participants <span id="att-compte" style="color:var(--tx3);font-weight:400"></span> '
-    +'<a href="#" onclick="attToutCocher(true);return false" style="margin-left:8px;color:var(--blue)">tous</a> · '
-    +'<a href="#" onclick="attToutCocher(false);return false" style="color:var(--blue)">aucun</a></label>'
+    +'<a href="#" data-on-click="attToutCocher(true);return false" style="margin-left:8px;color:var(--blue)">tous</a> · '
+    +'<a href="#" data-on-click="attToutCocher(false);return false" style="color:var(--blue)">aucun</a></label>'
     +'<div id="att-membres" style="display:flex;flex-wrap:wrap;gap:6px"></div>'
     +'<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:12px;color:var(--tx2)"><input type="checkbox" id="att-date-col" checked style="width:14px;height:14px">Préremplir la colonne « Date » avec la date de la formation</label>'
     +'<div id="att-err" style="color:#ef4444;font-size:12px;margin-top:8px"></div>'
     +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">'
-    +  '<button onclick="closeAttestationModal()" style="'+btn+'">Fermer</button>'
-    +  '<button onclick="attImprimer()" style="'+btn+';background:var(--blue);color:#fff;border:none">&#128424; Générer et imprimer</button>'
+    +  '<button data-on-click="closeAttestationModal()" style="'+btn+'">Fermer</button>'
+    +  '<button data-on-click="attImprimer()" style="'+btn+';background:var(--blue);color:#fff;border:none">&#128424; Générer et imprimer</button>'
     +'</div></div>';
   document.body.appendChild(d);
 }
@@ -181,7 +181,7 @@ function attChangerEquipe(id, preselection){
   document.getElementById('att-membres').innerHTML = membres.map(function(m, i){
     var sec = ATT_SECTEURS[m.s] || ATT_SECTEURS.AUTRE;
     return '<label style="display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--bd2);border-left:4px solid '+sec.bg+';border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg3)">'
-      +'<input type="checkbox" class="att-cb" data-i="'+i+'" '+(aCocher(m)?'checked':'')+' onchange="attMajCompte()" style="width:14px;height:14px">'+attEsc(m.n)+'</label>';
+      +'<input type="checkbox" class="att-cb" data-i="'+i+'" '+(aCocher(m)?'checked':'')+' data-on-change="attMajCompte()" style="width:14px;height:14px">'+attEsc(m.n)+'</label>';
   }).join('') || '<div style="color:var(--tx3);font-size:12px">Aucun membre dans cette équipe.</div>';
   attMajCompte();
 }
@@ -201,6 +201,7 @@ function attToutCocher(v){
 /* Equipes supplementaires (admin)                                   */
 /* ---------------------------------------------------------------- */
 
+function attEditerEquipeCourante(){ attEditerEquipe(ATT_EQUIPE_COURANTE); }
 function attEditerEquipe(id){
   ATT_EDIT_ID = id;
   var eq = id ? ATT_EQUIPES[id] : null;
@@ -382,7 +383,7 @@ function attHtmlPage(o){
     + '.ft .r{position:absolute;right:0;top:0;bottom:0;width:85mm;background:#f5b800;border-top-left-radius:19mm;display:flex;align-items:center;justify-content:center;font-family:"Brush Script MT","Segoe Script",cursive;font-size:22px;color:#111}'
     + '@media print{html,body{background:#fff}.page{margin:0}.pbtn{display:none}}'
     + '</style></head><body>'
-    + '<button class="pbtn" onclick="window.print()">&#128424; Imprimer</button>'
+    + '<button class="pbtn" data-on-click="window.print()">&#128424; Imprimer</button>'
     + '<div class="page">'
     +   '<div class="hd">'
     +     '<div class="logo"><img src="' + logo + '" alt="Agristo"></div>'
