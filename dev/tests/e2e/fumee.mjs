@@ -125,6 +125,15 @@ for (const [nom, fiche] of SCENARIOS) {
       return window.__ecritures.slice(avant).map((e) => e.op + ' ' + (e.cles ? e.cles.join('+') : e.chemin));
     });
   }
+  // Actions sans code inline : quelques boutons data-on-click sans effet en base.
+  const actions = await page.evaluate(async () => {
+    const res = [];
+    for (const sel of ['[data-on-click^="goToday"]', '[data-on-click^="planningToutesPeriodes"]', '[data-on-click^="allerOnglet"]', '[data-on-click^="prevMonth"]', '[data-on-click^="nextMonth"]']) {
+      const b = document.querySelector(sel);
+      if (b) { b.click(); res.push(sel); await new Promise((r) => setTimeout(r, 100)); }
+    }
+    return res;
+  });
   // Admin : export Excel Bradford (JSZip chargee a la demande)
   let exportExcel = null;
   if (nom === 'admin') {
@@ -149,6 +158,21 @@ for (const [nom, fiche] of SCENARIOS) {
       return { echecs: r && r.echecs, texte: document.getElementById('global-import-err').textContent.slice(0, 160) };
     });
   }
+  // Toutes les actions presentes dans la page doivent etre comprises par core/actions.js.
+  const actionsIncomprises = await page.evaluate(() => {
+    if (typeof actionsAnalyser !== 'function') return [];
+    const ko = [];
+    document.querySelectorAll('[data-on-click],[data-on-change],[data-on-input],[data-on-keydown]').forEach((el) => {
+      for (const t of ['click', 'change', 'input', 'keydown']) {
+        const c = el.getAttribute('data-on-' + t); if (!c) continue;
+        try { actionsAnalyser(c).forEach((o) => { if (o.fonction && typeof window[o.fonction] !== 'function') throw new Error('fonction inconnue ' + o.fonction); (o.args || []).forEach((a) => actionsValeur(a, el, null)); }); }
+        catch (e) { ko.push(c.slice(0, 80) + ' -> ' + e.message); }
+      }
+    });
+    return [...new Set(ko)];
+  });
+  // Boutons d'import / suppression : jamais visibles pour un visiteur.
+  const boutonsAdminVisibles = await page.evaluate(() => [...document.querySelectorAll('[data-on-click*="openImportPointages"], [data-on-click*="openImportArretsModal"], [data-on-click*="markAllPtDone"], [data-on-click*="nettoyerDoublonsArrets"], [data-on-click*="openImportNCPModal"]')].filter((b) => b.style.display !== 'none').length);
   const accessibilite = await page.evaluate(auditA11y);
   const etat = await page.evaluate(() => ({
     appVisible: getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none',
@@ -161,7 +185,7 @@ for (const [nom, fiche] of SCENARIOS) {
     espace: (() => { const b = document.querySelector('.tab[data-tab="espace"]'); if (b) b.click(); const c = document.getElementById('espace-content'); return c ? c.textContent.replace(/\s+/g, ' ').slice(0, 4000) : null; })(),
   }));
   const ecoutesFin = await page.evaluate(() => [...new Set(window.__ecoutes || [])].sort());
-  resultats.push({ nom, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, ...etat });
+  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, ...etat });
   await ctx.close();
 }
 await navigateur.close();
@@ -175,6 +199,8 @@ const ROLES_LECTURE = ['visiteur', 'employe (personnalise)', 'premiere connexion
 const problemes = [];
 for (const r of resultats) {
   if (r.erreurs.length) problemes.push(`${r.nom} : ${r.erreurs.length} erreur(s) JS`);
+  if (r.actionsIncomprises && r.actionsIncomprises.length) problemes.push(`${r.nom} : actions incomprises ${r.actionsIncomprises.join(' | ')}`);
+  if (r.nom === 'visiteur' && r.boutonsAdminVisibles) problemes.push(`visiteur : ${r.boutonsAdminVisibles} bouton(s) d'import visibles`);
   if (r.pwned) problemes.push(`${r.nom} : injection HTML executee`);
   if (r.migration) problemes.push(`${r.nom} : bouton de migration present`);
   if (r.mdpObligatoire !== (r.nom === 'premiere connexion')) problemes.push(`${r.nom} : fenetre mot de passe ${r.mdpObligatoire ? 'affichee a tort' : 'absente'}`);
