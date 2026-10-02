@@ -34,7 +34,7 @@ function applyRole(role){
   // Toujours repartir d'un etat "tout visible" avant d'appliquer les
   // restrictions du role courant - indispensable si on change de compte
   // (ex: visiteur -> admin) sans recharger completement la page.
-  document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
+  document.querySelectorAll('[data-on-click*="openImportPointages"], [data-on-click*="openImportArretsModal"], [data-on-click*="markAllPtDone"], [data-on-click*="nettoyerDoublonsArrets"], [data-on-click*="openImportNCPModal"]').forEach(function(el){
          el.style.display = '';
   });
      ['ov','br'].forEach(function(tab){
@@ -149,7 +149,7 @@ function applyRole(role){
          document.querySelectorAll('.tab[data-tab="admin"]').forEach(function(b){ b.style.display = 'none'; });
 
        // Masquer les boutons d'action principaux, pour une experience propre
-       document.querySelectorAll('[onclick*="openImportPointages"], [onclick*="openImportArretsModal"], [onclick*="markAllPtDone"], [onclick*="nettoyerDoublonsArrets"], [onclick*="openImportNCPModal"]').forEach(function(el){
+       document.querySelectorAll('[data-on-click*="openImportPointages"], [data-on-click*="openImportArretsModal"], [data-on-click*="markAllPtDone"], [data-on-click*="nettoyerDoublonsArrets"], [data-on-click*="openImportNCPModal"]').forEach(function(el){
                 el.style.display = 'none';
        });
 

@@ -44,7 +44,7 @@ function toast(msg,col){
 function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 /* Echappement d'une valeur placee dans une chaine JS entre apostrophes, elle-meme
-   dans un attribut HTML (ex. onclick="f('...')"). */
+   dans un attribut HTML (ex. data-on-click="f('...')"). */
 function escJsAttr(s){return escHtml(String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"));}
 
 /* N'accepte que les liens https:// (ou relatifs au site) ; tout autre schema
