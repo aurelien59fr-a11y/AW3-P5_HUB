@@ -35,6 +35,8 @@ function mdpMessageErreur(e){
   var c = (e && e.code) || '';
   if(c === 'auth/wrong-password' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') return mdpT('mdp_err_actuel');
   if(c === 'auth/weak-password') return mdpT('mdp_err_longueur');
+  // Politique de mot de passe Firebase (8 caracteres min., un chiffre) appliquee cote serveur.
+  if(c === 'auth/password-does-not-meet-requirements') return mdpT('mdp_err_lettre_chiffre');
   if(c === 'auth/too-many-requests') return mdpT('mdp_err_trop');
   if(c === 'auth/invalid-email') return mdpT('mdp_err_email');
   if(c === 'auth/email-already-in-use') return mdpT('mdp_err_email_pris');
