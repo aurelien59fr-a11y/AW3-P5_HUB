@@ -151,7 +151,7 @@ var I18N={
     nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
     nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
-    plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
+    plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.', plan_prochain:'Prochain jour planifié : {d}', plan_prochain_we:'Prochain week-end', plan_aucun_prochain:'Aucun jour planifié à venir',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
     legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup',
     status_ok:'OK', status_wn:'A surveiller', status_al:'Preoccupant', status_cr:'Critique', legend_watch_short:'Surveiller',
@@ -534,7 +534,7 @@ var I18N={
     nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logboek',
     nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
-    plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
+    plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.', plan_prochain:'Volgende geplande dag: {d}', plan_prochain_we:'Volgend weekend', plan_aucun_prochain:'Geen geplande dagen meer',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
     legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie',
     status_ok:'OK', status_wn:'Te volgen', status_al:'Zorgwekkend', status_cr:'Kritiek', legend_watch_short:'Te volgen',
@@ -917,7 +917,7 @@ var I18N={
     nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
     nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
-    plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
+    plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.', plan_prochain:'Next scheduled day: {d}', plan_prochain_we:'Next weekend', plan_aucun_prochain:'No upcoming scheduled day',
     legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
     legend_ziek:'Sick leave', legend_verlof:'Leave', legend_recup:'Recovery',
     status_ok:'OK', status_wn:'To watch', status_al:'Concerning', status_cr:'Critical', legend_watch_short:'To watch',
@@ -1497,6 +1497,8 @@ document.querySelectorAll('.tab[data-tab]').forEach(function(b){
   b.addEventListener('click', function(){
     chargerDonneesOnglet(b.dataset.tab);
     if(typeof majAriaOnglets === 'function') majAriaOnglets();
+    // Planning : arrive toujours sur aujourd'hui / le prochain week-end.
+    if(b.dataset.tab === 'pl' && typeof planningAllerAuJour === 'function') requestAnimationFrame(planningAllerAuJour);
     // Exports Excel (Bradford, rapport admin) : JSZip prechargee en arriere-plan.
     if((b.dataset.tab === 'br' || b.dataset.tab === 'admin') && typeof chargerJSZip === 'function') chargerJSZip().catch(function(){});
   });
