@@ -58,14 +58,14 @@ function buildFormationsListe(){
       var nom = e ? e.n : idOrName;
       return '<span class="pill ok" style="margin:2px 4px 2px 0">'+escHtml(nom)+'</span>';
     }).join('');
-    var clickAttr = canEditFormations ? ' onclick="openFormationModal(\''+escJsAttr(f.id)+'\')" style="cursor:pointer"' : '';
+    var clickAttr = canEditFormations ? ' data-on-click="openFormationModal(\''+escJsAttr(f.id)+'\')" style="cursor:pointer"' : '';
     return '<div class="note-card"'+clickAttr+' style="border-left-color:var(--blue)">'
       +'<div class="note-card-row"><div class="note-card-date">'+escHtml(fmtDateFormation(f.date))+'</div>'
       +'<div class="note-card-txt"><b>'+escHtml(f.titre||'Formation')+'</b>'
       +(f.heureDebut?' &middot; '+escHtml(f.heureDebut)+(f.heureFin?'-'+escHtml(f.heureFin):''):'')
       +(f.lieu?' &middot; '+escHtml(f.lieu):'')
       +'<div style="margin-top:6px">'+(badges||"<span style='color:var(--tx3)'>"+t('formations_all_team')+"</span>")+'</div>'
-      +'<div style="margin-top:8px"><button onclick="event.stopPropagation();openAttestationModal(\''+escJsAttr(f.id)+'\')" style="padding:4px 10px;border-radius:14px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; Attestation</button></div>'
+      +'<div style="margin-top:8px"><button data-on-click="event.stopPropagation();openAttestationModal(\''+escJsAttr(f.id)+'\')" style="padding:4px 10px;border-radius:14px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:var(--fn);font-size:11px;font-weight:600;cursor:pointer">&#128424; Attestation</button></div>'
       +(f.notes?'<div style="margin-top:6px;color:var(--tx2);font-size:12px">'+escHtml(f.notes)+'</div>':'')
       +'</div></div></div>';
   }

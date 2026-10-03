@@ -57,7 +57,7 @@ function loadLogbookNotes(){
 function logbookAjouterNote(dateISO, poste, texte, photos){
     if(!db){ if(typeof toast === 'function') toast(t('pt_firebase_unavailable'), '#ef4444'); return; }
     if(!currentUser || currentUser.role !== 'admin'){
-          if(typeof toast === 'function') toast('Reserve a l\'admin', '#ef4444');
+          if(typeof toast === 'function') toast(t('lb_reserve_admin'), '#ef4444');
           return;
     }
     texte = String(texte || '').trim();

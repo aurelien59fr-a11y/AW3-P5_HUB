@@ -6,6 +6,7 @@ describe('Migration initiale desactivee', () => {
   it("le bouton « Lancer la migration » n'existe plus dans index.html", () => {
     const html = lireFichier('index.html');
     expect(html).not.toContain('onclick="runMigration()"');
+    expect(html).not.toContain('data-on-click="runMigration()"');
     expect(html).not.toContain('id="migr-btn"');
   });
 

@@ -18,11 +18,11 @@ function updKPI(){
   var wn=BD.filter(function(e){return e.sc>50&&e.sc<=500;});
   var cr=BD.filter(function(e){return e.sc>500;});
   document.getElementById('k-ok').textContent=ok;
-  document.getElementById('k-okp').textContent=Math.round(ok/BD.length*100)+'% OK';
+  document.getElementById('k-okp').textContent=(BD.length?Math.round(ok/BD.length*100):0)+'% OK';
   document.getElementById('k-wn').textContent=wn.length;
   document.getElementById('k-cr').textContent=cr.length;
   document.getElementById('k-crm').textContent=cr.length>0?t('ov_crm_urgent'):t('ov_crm_none');
-  function chip(e,color){var fn=e.n.split(' ')[0];return '<span onclick="goToBradford(\''+escJsAttr(e.n)+'\')" style="cursor:pointer;font-size:12px;padding:3px 9px;border-radius:99px;background:'+color+'22;color:'+color+';border:1px solid '+color+'55;white-space:nowrap">'+escHtml(fn)+'</span>';}
+  function chip(e,color){var fn=e.n.split(' ')[0];return '<span data-on-click="goToBradford(\''+escJsAttr(e.n)+'\')" style="cursor:pointer;font-size:12px;padding:3px 9px;border-radius:99px;background:'+color+'22;color:'+color+';border:1px solid '+color+'55;white-space:nowrap">'+escHtml(fn)+'</span>';}
   document.getElementById('k-wn-names').innerHTML=wn.map(function(e){return chip(e,'#f59e0b');}).join('');
   document.getElementById('k-cr-names').innerHTML=cr.map(function(e){return chip(e,'#ef4444');}).join('');
   // Détection franchissement de seuil
@@ -45,7 +45,7 @@ function updKPI(){
   var wnDet = document.getElementById('k-wn-detail');
   function ovRowDetail(e, color){
     var nomEsc = escJsAttr(e.n);
-    return '<div onclick="goToBradford(\'' + nomEsc + '\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:' + color + '12;border:1px solid ' + color + '33"><span style="font-size:13px;font-weight:600;color:var(--tx1)">' + escHtml(e.n) + '</span><span style="font-size:12px;font-weight:600;color:' + color + '">Bradford ' + e.sc + '</span></div>';
+    return '<div data-on-click="goToBradford(\'' + nomEsc + '\')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:' + color + '12;border:1px solid ' + color + '33"><span style="font-size:13px;font-weight:600;color:var(--tx1)">' + escHtml(e.n) + '</span><span style="font-size:12px;font-weight:600;color:' + color + '">Bradford ' + e.sc + '</span></div>';
   }
   if(crDet) crDet.innerHTML = cr.length ? cr.map(function(e){ return ovRowDetail(e, '#ef4444'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford critique</div>';
   if(wnDet) wnDet.innerHTML = wn.length ? wn.map(function(e){ return ovRowDetail(e, '#f59e0b'); }).join('') : '<div style="color:var(--tx3);font-size:13px;padding:8px 0">Aucun Bradford a surveiller</div>';
@@ -96,13 +96,13 @@ function buildBT(){
       var cm=BD_COMMENTS[e.n];
       var cmIcon=cm&&cm.text?'<span style="color:#f59e0b;font-size:15px" title="'+escHtml(cm.text)+'">&#9997;</span>':'<span style="color:var(--tx3);font-size:15px">&#9998;</span>';
       h+='<tr id="bdrow-'+escHtml(e.n.replace(/\s+/g,'-'))+'">';
-      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" onclick="openBradfordPanel(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_history')+'">'+escHtml(e.n)+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
+      h+='<td><b style="font-size:13px;cursor:pointer;text-decoration:none" data-on-click="openBradfordPanel(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_history')+'">'+escHtml(e.n)+' <span style="font-size:10px;color:var(--blue);opacity:.6">&#9432;</span></b></td>';
       h+='<td style="color:var(--tx3);font-size:12px">'+escHtml(emp?emp.r:'')+'</td>';
       h+='<td><span style="font-family:var(--mo)">'+e.D+'</span></td>';
       h+='<td><span style="font-family:var(--mo)">'+e.S+'</span></td>';
       h+='<td><div class="sbw"><div class="sbt"><div class="sbf" style="width:'+pct+'%;background:'+col+'"></div></div><span class="sv" style="color:'+col+'">'+e.sc+'</span></div></td>';
       h+='<td><span class="pill '+st.c+'">'+st.l+'</span></td>';
-      h+='<td style="text-align:center"><span style="cursor:pointer" onclick="openComment(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_comment')+'">'+cmIcon+'</span></td>';
+      h+='<td style="text-align:center"><span style="cursor:pointer" data-on-click="openComment(\''+escJsAttr(e.n)+'\')" title="'+t('br_tooltip_comment')+'">'+cmIcon+'</span></td>';
       h+='</tr>';
     });
   });
@@ -119,8 +119,8 @@ function openComment(name){
     +(cm.date?'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">'+t('br_comment_last_mod')+escHtml(cm.date)+(cm.author?t('br_comment_by')+escHtml(cm.author):'')+'</div>':'<div style="margin-bottom:12px"></div>')
     +'<textarea id="cm-txt" style="width:100%;height:110px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd2);border-radius:8px;color:var(--tx1);font-family:var(--fn);font-size:13px;padding:10px;resize:vertical">'+escHtml(prev)+'</textarea>'
     +'<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">'
-    +'<button onclick="document.getElementById(\'cm-popup\').remove()" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">'+t('modal_cancel')+'</button>'
-    +'<button onclick="saveComment(\''+escJsAttr(name)+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('btn_save')+'</button>'
+    +'<button data-on-click="retirerElement(\'cm-popup\')" style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd2);background:none;color:var(--tx2);font-family:var(--fn);cursor:pointer">'+t('modal_cancel')+'</button>'
+    +'<button data-on-click="saveComment(\''+escJsAttr(name)+'\')" style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--fn);font-weight:600;cursor:pointer">'+t('btn_save')+'</button>'
     +'</div></div>';
   document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d)d.remove();});
@@ -184,7 +184,7 @@ function openBradfordPanel(name){
 
   d.innerHTML='<div style="padding:20px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center">'
     +'<div><div style="font-weight:700;font-size:16px">'+escHtml(name)+'</div><span class="pill '+st.c+'" style="margin-top:4px;display:inline-block">'+st.l+'</span></div>'
-    +'<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
+    +'<button data-on-click="fermerFenetreFixe(this)" style="background:none;border:none;color:var(--tx3);font-size:22px;cursor:pointer;line-height:1">&times;</button>'
     +'</div>'
     +'<div style="padding:16px 20px;display:flex;gap:20px;border-bottom:1px solid var(--bd2)">'
     +'<div style="text-align:center"><div style="font-size:26px;font-weight:700;color:'+col+'">'+e.sc+'</div><div style="font-size:11px;color:var(--tx3)">'+t('br_stat_score')+'</div></div>'
@@ -193,7 +193,7 @@ function openBradfordPanel(name){
     +'</div>'
     +'<div style="padding:16px 20px;border-bottom:1px solid var(--bd2)">'
     +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">'+t('br_comment_label')+'</div>'
-    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);min-height:36px" onclick="openComment(\''+escJsAttr(name)+'\')">'+( cm&&cm.text?escHtml(cm.text):'<span style="color:var(--tx3)">'+t('br_comment_placeholder')+'</span>')+'</div>'
+    +'<div style="font-size:13px;color:var(--tx1);cursor:pointer;padding:8px;border-radius:8px;background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);min-height:36px" data-on-click="openComment(\''+escJsAttr(name)+'\')">'+( cm&&cm.text?escHtml(cm.text):'<span style="color:var(--tx3)">'+t('br_comment_placeholder')+'</span>')+'</div>'
     +(cm&&cm.date?'<div style="font-size:10px;color:var(--tx3);margin-top:4px">'+escHtml(cm.date)+(cm.author?' · '+escHtml(cm.author):'')+'</div>':'')
     +'</div>'
     +'<div style="padding:16px 20px;flex:1;overflow-y:auto">'

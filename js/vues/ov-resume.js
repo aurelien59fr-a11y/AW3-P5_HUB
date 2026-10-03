@@ -160,7 +160,7 @@ function ovBuildWatchlist(){
     };
   });
   el.innerHTML = items.map(function(it,i){
-    return '<div onclick="window._ovWatchActions['+i+']()" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--bd2)">'
+    return '<div data-on-click="ovLancerAction(\'watch\','+i+')" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--bd2)">'
       +'<span style="font-size:16px">'+it.icon+'</span>'
       +'<span style="font-size:13px;color:var(--tx1)">'+escHtml(it.txt)+'</span>'
       +'</div>';
@@ -287,7 +287,7 @@ function ovBuildRappels(){
     return function(){ if(p.tab){ var t=document.querySelector('.tab[data-tab="'+p.tab+'"]'); if(t) t.click(); } };
   });
   el.innerHTML = parts.map(function(p,i){
-    return '<span'+(p.tab?' onclick="window._ovRappelsActions['+i+']()" style="cursor:pointer"':'')+'>'+escHtml(p.txt)+'</span>';
+    return '<span'+(p.tab?' data-on-click="ovLancerAction(\'rappels\','+i+')" style="cursor:pointer"':'')+'>'+escHtml(p.txt)+'</span>';
   }).join('');
 }
 
@@ -309,4 +309,10 @@ function buildOvResume(){
   ovBuildWeekendAbs();
   ovBuildProdAnomaly();
   ovBuildRappels();
+}
+
+/* Appele par data-on-click (core/actions.js) : actions des listes de la Vue d'ensemble. */
+function ovLancerAction(liste, i){
+  var a = (liste === 'watch' ? window._ovWatchActions : window._ovRappelsActions) || [];
+  if(typeof a[i] === 'function') a[i]();
 }

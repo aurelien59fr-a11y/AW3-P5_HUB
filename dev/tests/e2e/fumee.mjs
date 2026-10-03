@@ -29,6 +29,9 @@ const serveur = http.createServer((req, res) => {
   const f = fs.existsSync(p) && fs.statSync(p).isDirectory() ? path.join(p, 'index.html') : p;
   if (!f.startsWith(site) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream', ...ENTETES });
+  // Le faux Firebase remplace les scripts du CDN : on retire leurs empreintes
+  // SRI (en production, elles sont verifiees par le navigateur).
+  if (f.endsWith('index.html')) return res.end(fs.readFileSync(f, 'utf8').replace(/ integrity="[^"]*" crossorigin="anonymous"/g, ''));
   fs.createReadStream(f).pipe(res);
 });
 await new Promise((r) => serveur.listen(0, '127.0.0.1', r));
@@ -43,7 +46,7 @@ const recent = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
 function donnees(uid, fiche) {
   const jours = Array.from({ length: 400 }, (_, i) => (i % 7 < 5 ? 'V' : ''));
   return {
-    users: { [uid]: fiche },
+    users: { [uid]: fiche },  // mdpChangeLe absent pour le compte « premiere connexion »
     employees: EMPLOYES,
     planning: {
       shifts2025: { 'Alex Exemple': jours, 'Sam Fictif': jours, 'Chef Test': jours },
@@ -62,10 +65,11 @@ function donnees(uid, fiche) {
   };
 }
 const SCENARIOS = [
-  ['admin', { role: 'admin', email: 'admin@exemple.test' }],
-  ['sous-chef', { role: 'subchef', email: 'souschef@exemple.test' }],
-  ['visiteur', { role: 'visiteur', email: 'visiteur@exemple.test' }],
-  ['employe (personnalise)', { role: 'custom', email: 'employe@exemple.test', nom: 'Alex Exemple', tabs: { pl: true, espace: true, formations: true } }],
+  ['admin', { role: 'admin', email: 'admin@exemple.test', mdpChangeLe: 1 }],
+  ['sous-chef', { role: 'subchef', email: 'souschef@exemple.test', mdpChangeLe: 1 }],
+  ['visiteur', { role: 'visiteur', email: 'visiteur@exemple.test', mdpChangeLe: 1 }],
+  ['employe (personnalise)', { role: 'custom', email: 'employe@exemple.test', nom: 'Alex Exemple', tabs: { pl: true, espace: true, formations: true }, mdpChangeLe: 1 }],
+  ['premiere connexion', { role: 'custom', email: 'nouveau@exemple.test', nom: 'Sam Fictif', tabs: { pl: true, espace: true } }],
   ['compte sans fiche /users', null],
   ['non connecte', undefined],
 ];
@@ -121,6 +125,15 @@ for (const [nom, fiche] of SCENARIOS) {
       return window.__ecritures.slice(avant).map((e) => e.op + ' ' + (e.cles ? e.cles.join('+') : e.chemin));
     });
   }
+  // Actions sans code inline : quelques boutons data-on-click sans effet en base.
+  const actions = await page.evaluate(async () => {
+    const res = [];
+    for (const sel of ['[data-on-click^="goToday"]', '[data-on-click^="planningToutesPeriodes"]', '[data-on-click^="allerOnglet"]', '[data-on-click^="prevMonth"]', '[data-on-click^="nextMonth"]']) {
+      const b = document.querySelector(sel);
+      if (b) { b.click(); res.push(sel); await new Promise((r) => setTimeout(r, 100)); }
+    }
+    return res;
+  });
   // Admin : export Excel Bradford (JSZip chargee a la demande)
   let exportExcel = null;
   if (nom === 'admin') {
@@ -145,6 +158,53 @@ for (const [nom, fiche] of SCENARIOS) {
       return { echecs: r && r.echecs, texte: document.getElementById('global-import-err').textContent.slice(0, 160) };
     });
   }
+  // Toutes les actions presentes dans la page doivent etre comprises par core/actions.js.
+  const actionsIncomprises = await page.evaluate(() => {
+    if (typeof actionsAnalyser !== 'function') return [];
+    const ko = [];
+    document.querySelectorAll('[data-on-click],[data-on-change],[data-on-input],[data-on-keydown]').forEach((el) => {
+      for (const t of ['click', 'change', 'input', 'keydown']) {
+        const c = el.getAttribute('data-on-' + t); if (!c) continue;
+        try { actionsAnalyser(c).forEach((o) => { if (o.fonction && typeof window[o.fonction] !== 'function') throw new Error('fonction inconnue ' + o.fonction); (o.args || []).forEach((a) => actionsValeur(a, el, null)); }); }
+        catch (e) { ko.push(c.slice(0, 80) + ' -> ' + e.message); }
+      }
+    });
+    return [...new Set(ko)];
+  });
+  // Boutons d'import / suppression : jamais visibles pour un visiteur.
+  const boutonsAdminVisibles = await page.evaluate(() => [...document.querySelectorAll('[data-on-click*="openImportPointages"], [data-on-click*="openImportArretsModal"], [data-on-click*="markAllPtDone"], [data-on-click*="nettoyerDoublonsArrets"], [data-on-click*="openImportNCPModal"]')].filter((b) => b.style.display !== 'none').length);
+  // Planning : a l'ouverture, le prochain week-end est la premiere colonne visible.
+  let planningAujourdhui = null;
+  if (onglets.includes('pl')) {
+    await page.evaluate(() => { document.querySelector('.tab[data-tab="ov"]')?.click(); document.querySelector('.tab[data-tab="pl"]').click(); });
+    await page.waitForTimeout(400);
+    planningAujourdhui = await page.evaluate(() => {
+      const th = document.querySelector('.ptable th.pl-prochain');
+      const sc = document.querySelector('.pscroll');
+      if (!th || !sc) return { ok: false, raison: 'colonne du prochain week-end absente' };
+      const nom = document.querySelector('.ptable td.nc') || document.querySelector('.ptable th.nc');
+      const ecart = th.getBoundingClientRect().left - sc.getBoundingClientRect().left - nom.getBoundingClientRect().width;
+      return { ok: ecart >= -2 && ecart <= 60, ecart: Math.round(ecart), date: th.textContent.replace(/\s+/g, ' ').trim().slice(0, 30) };
+    });
+    if (process.env.CAPTURE_PLANNING) await page.screenshot({ path: process.env.CAPTURE_PLANNING.replace('.png', '-' + nom.replace(/\W+/g, '_') + '.png') });
+  }
+  // Barre laterale : chaque onglet autorise a son bouton (accessible en un clic).
+  const railManquants = await page.evaluate(() => {
+    const appVisible = getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none';
+    if (!appVisible) return [];
+    const dansRail = new Set([...document.querySelectorAll('#desktop-rail .rail-item[data-rail]')].map((b) => b.dataset.rail));
+    return [...document.querySelectorAll('.tab[data-tab]')].filter((b) => b.style.display !== 'none' && b.dataset.tab !== 'ab').map((b) => b.dataset.tab).filter((id) => !dansRail.has(id));
+  });
+  if (process.env.CAPTURE_RAIL && nom === 'admin') {
+    for (const [l, h, mode] of [[1440, 860, null], [1100, 760, null], [1100, 760, 'survol']]) {
+      await page.setViewportSize({ width: l, height: h });
+      await page.evaluate(() => { try { localStorage.removeItem('aw3_rail_ouvert'); } catch (e) {} buildDesktopRail(); });
+      if (mode === 'survol') await page.hover('#desktop-rail .rail-item[data-rail="ncp"]');
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: process.env.CAPTURE_RAIL.replace('.png', '-' + l + (mode ? '-' + mode : '') + '.png') });
+    }
+    await page.setViewportSize({ width: 1280, height: 720 });
+  }
   const accessibilite = await page.evaluate(auditA11y);
   const etat = await page.evaluate(() => ({
     appVisible: getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none',
@@ -152,11 +212,12 @@ for (const [nom, fiche] of SCENARIOS) {
     ecritures: (window.__ecritures || []).map((e) => e.op + ' ' + e.chemin),
     pwned: !!window.__pwned,
     migration: !!document.getElementById('migr-btn'),
+    mdpObligatoire: !!document.getElementById('mdp-fenetre') && !document.getElementById('mdp-annuler'),
     arretsEnMemoire: Object.keys(window.ARRETS_DATA || {}).length,
     espace: (() => { const b = document.querySelector('.tab[data-tab="espace"]'); if (b) b.click(); const c = document.getElementById('espace-content'); return c ? c.textContent.replace(/\s+/g, ' ').slice(0, 4000) : null; })(),
   }));
   const ecoutesFin = await page.evaluate(() => [...new Set(window.__ecoutes || [])].sort());
-  resultats.push({ nom, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, ...etat });
+  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, planningAujourdhui, railManquants, ...etat });
   await ctx.close();
 }
 await navigateur.close();
@@ -166,12 +227,17 @@ console.log(JSON.stringify(resultats, null, 2));
 // Echec (code 1) si un role montre une erreur JS, une injection reussie, le
 // bouton de migration, un champ/bouton sans nom accessible, ou une ecriture
 // en base pour un role qui ne doit rien ecrire.
-const ROLES_LECTURE = ['visiteur', 'employe (personnalise)', 'compte sans fiche /users', 'non connecte'];
+const ROLES_LECTURE = ['visiteur', 'employe (personnalise)', 'premiere connexion', 'compte sans fiche /users', 'non connecte'];
 const problemes = [];
 for (const r of resultats) {
   if (r.erreurs.length) problemes.push(`${r.nom} : ${r.erreurs.length} erreur(s) JS`);
+  if (r.actionsIncomprises && r.actionsIncomprises.length) problemes.push(`${r.nom} : actions incomprises ${r.actionsIncomprises.join(' | ')}`);
+  if (r.nom === 'visiteur' && r.boutonsAdminVisibles) problemes.push(`visiteur : ${r.boutonsAdminVisibles} bouton(s) d'import visibles`);
+  if (r.planningAujourdhui && !r.planningAujourdhui.ok) problemes.push(`${r.nom} : planning pas positionne sur le prochain week-end (${JSON.stringify(r.planningAujourdhui)})`);
+  if (r.railManquants && r.railManquants.length) problemes.push(`${r.nom} : onglets absents de la barre laterale ${r.railManquants.join(', ')}`);
   if (r.pwned) problemes.push(`${r.nom} : injection HTML executee`);
   if (r.migration) problemes.push(`${r.nom} : bouton de migration present`);
+  if (r.mdpObligatoire !== (r.nom === 'premiere connexion')) problemes.push(`${r.nom} : fenetre mot de passe ${r.mdpObligatoire ? 'affichee a tort' : 'absente'}`);
   if (r.accessibilite.boutonsSansNom.length || r.accessibilite.champsSansNom.length) problemes.push(`${r.nom} : elements sans nom accessible`);
   if (ROLES_LECTURE.includes(r.nom) && r.ecritures.some((e) => !/^push audit_log/.test(e))) problemes.push(`${r.nom} : ecriture inattendue ${r.ecritures.join(', ')}`);
 }

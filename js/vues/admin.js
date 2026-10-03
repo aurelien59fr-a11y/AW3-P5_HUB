@@ -42,8 +42,8 @@ function buildEmpTable(){
       +'<td style="padding:10px 12px;border-bottom:1px solid var(--bd)"><span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:'+bg+';color:'+col+'">'+e.g+'</span></td>'
       +'<td style="padding:10px 12px;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--bd)">'+e.r+'</td>'
       +'<td style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--bd)">'
-      +'<button onclick="editEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;cursor:pointer;font-family:var(--fn);margin-right:4px">'+t('adm_btn_edit')+'</button>'
-      +'<button onclick="deactivateEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:none;color:var(--red);font-size:11px;cursor:pointer;font-family:var(--fn)">'+t('adm_btn_remove')+'</button>'
+      +'<button data-on-click="editEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--tx2);font-size:11px;cursor:pointer;font-family:var(--fn);margin-right:4px">'+t('adm_btn_edit')+'</button>'
+      +'<button data-on-click="deactivateEmp('+i+')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:none;color:var(--red);font-size:11px;cursor:pointer;font-family:var(--fn)">'+t('adm_btn_remove')+'</button>'
       +'</td></tr>';
   }).join('');
 }
@@ -322,6 +322,14 @@ function posteVersPermissions(poste){
 
 var ALL_TABS = ['ov','br','pl','ab','formations','pt','arrets','ncp','recrutement','espace'];
 
+function mdpProvisoire(){
+  var lettres = 'abcdefghjkmnpqrstuvwxyz', chiffres = '23456789', tous = lettres + lettres.toUpperCase() + chiffres;
+  var r = new Uint32Array(10); (window.crypto || window.msCrypto).getRandomValues(r);
+  var out = lettres[r[0] % lettres.length] + chiffres[r[1] % chiffres.length];
+  for(var i = 2; i < 10; i++) out += tous[r[i] % tous.length];
+  return out;
+}
+
 function genLoginInterne(nomComplet){
   var parts = (nomComplet||'').trim().split(/\s+/);
   var prenom = parts[0] || '';
@@ -331,7 +339,9 @@ function genLoginInterne(nomComplet){
   }
   var p = strip(prenom), n = strip(nom);
   var email = (p||'x')+'.'+(n||'x')+'@aw3p5.local';
-  var pass = (p.charAt(0)||'x')+(p.charAt(p.length-1)||'x')+(n.charAt(0)||'x')+(n.charAt(n.length-1)||'x')+'2026';
+  // Mot de passe PROVISOIRE aleatoire (avant : initiales + 2026, devinable).
+  // L'employe doit le remplacer a sa premiere connexion (core/motdepasse.js).
+  var pass = mdpProvisoire();
   return {email: email, password: pass};
 }
 
@@ -349,7 +359,7 @@ function buildComptesEmpListe(){
       return '<div class="cc" style="margin-bottom:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
         +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+' &middot; '+accLabel+'</div></div>'
         +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--green)">&#9679; '+t('comptes_actif')+'</span><span style="font-size:11px;color:var(--tx3);font-family:var(--mo)">'+acc.email+'</span>'
-        +'<button onclick="toggleAccesEdit(\''+e.id+'\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:11px;cursor:pointer">'+t('comptes_btn_modif_acces')+'</button>'
+        +'<button data-on-click="toggleAccesEdit(\''+e.id+'\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:11px;cursor:pointer">'+t('comptes_btn_modif_acces')+'</button>'
         +'</div>'
         +'</div>'
         +'<div id="acc-edit-'+e.id+'" style="display:none;margin:-4px 0 8px;padding:12px 16px;background:rgba(255,255,255,.03);border-radius:8px"></div>';
@@ -362,13 +372,13 @@ function buildComptesEmpListe(){
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">'
       +'<div><div style="font-weight:600">'+e.n+'</div><div style="font-size:12px;color:var(--tx2)">'+e.r+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<select id="'+rowId+'-role" aria-label="'+escHtml(t('a11y_role_compte')+' : '+(e.n||''))+'" onchange="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
+      +'<select id="'+rowId+'-role" aria-label="'+escHtml(t('a11y_role_compte')+' : '+(e.n||''))+'" data-on-change="toggleComptePermPanel(\''+e.id+'\')" style="background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:12px">'
       +'<option value="custom"'+(perm.role==='custom'?' selected':'')+'>'+t('role_custom')+'</option>'
       +'<option value="subchef"'+(perm.role==='subchef'?' selected':'')+'>'+t('role_subchef')+'</option>'
       +'<option value="visiteur"'+(perm.role==='visiteur'?' selected':'')+'>'+t('role_visiteur')+'</option>'
       +'<option value="admin"'+(perm.role==='admin'?' selected':'')+'>'+t('role_admin')+'</option>'
       +'</select>'
-      +'<button onclick="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);font-size:12px;cursor:pointer">'+t('comptes_btn_creer')+'</button>'
+      +'<button data-on-click="creerCompteEmployeUI(\''+e.id+'\')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--bd2);background:var(--bg3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--tx);font-size:12px;cursor:pointer">'+t('comptes_btn_creer')+'</button>'
       +'</div></div>'
       +'<div id="'+rowId+'-permpanel" style="display:'+(perm.role==='custom'?'block':'none')+';padding-top:8px;border-top:1px solid var(--bd)">'
       +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
@@ -475,8 +485,8 @@ function toggleAccesEdit(empId){
       +'<div style="margin-bottom:6px">'+tabsHtml+'</div>'
       +editPlanHtml
       +'<div style="margin-top:8px;display:flex;gap:8px">'
-      +'<button onclick="enregistrerAccesEmploye(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-size:12px;cursor:pointer">Enregistrer</button>'
-      +'<button onclick="toggleAccesEdit(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:12px;cursor:pointer">Annuler</button>'
+      +'<button data-on-click="enregistrerAccesEmploye(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-size:12px;cursor:pointer">Enregistrer</button>'
+      +'<button data-on-click="toggleAccesEdit(\''+empId+'\')" style="padding:6px 14px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--tx2);font-size:12px;cursor:pointer">Annuler</button>'
       +'</div>';
   });
 }

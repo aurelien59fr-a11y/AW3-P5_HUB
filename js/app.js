@@ -122,43 +122,13 @@ var WEEKS25 = [
   {d:["25/12", "26/12", "27/12", "28/12"]},
 ];
 
-var SHIFTS26 = [
-  {n:"Aurelien Turchi",g:"TL",s:["TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","verlof","verlof","verlof","verlof","verlof","verlof","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL","TL"]},
-  {n:"Nicolas Fettu",g:"INPAK",s:["coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","ziek","ziek","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","verlof","verlof","coordinateur","coordinateur","coordinateur","coordinateur","verlof","verlof","verlof","verlof","verlof","verlof","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur"]},
-  {n:"Julien Demuyter",g:"INPAK",s:["coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","ziek","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","ziek","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","ziek","ziek","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","verlof","verlof","verlof","verlof","verlof","verlof","verlof","verlof","verlof","verlof","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur","coordinateur"]},
-  {n:"Mohamed Lalaoui",g:"INPAK",s:["35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","ziek","ziek","ziek","ziek","extra","31/32","33/34","extra","35/36","ziek","ziek","ziek","ziek","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","verlof","verlof","verlof","verlof","verlof","verlof","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32"]},
-  {n:"Ramazani Abdulhassan",g:"INPAK",s:["extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","ziek","ziek","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","verlof","35/36","33/34","31/32","33/34","extra","35/36","extra","verlof","verlof","verlof","verlof","verlof","verlof","33/34","verlof","35/36","verlof","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34"]},
-  {n:"Halima Laadi",g:"INPAK",s:["31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","ziek","ziek","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","verlof","verlof","verlof","verlof","verlof","verlof","verlof","35/36","verlof","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra"]},
-  {n:"Hakkim Akkouh",g:"INPAK",s:["33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","extra","extra","ziek","ziek","verlof","verlof","verlof","verlof","verlof","verlof","verlof","verlof","35/36","extra","31/32","33/34","verlof","35/36","verlof","31/32","33/34","verlof","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36"]},
-  {n:"Balan Marius",g:"INPAK",s:["extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","verlof","verlof","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","verlof","verlof","verlof","verlof","verlof","verlof","verlof","31/32","33/34","verlof","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra","31/32","33/34","extra","35/36","extra"]},
-  {n:"Lyse Musik",g:"INPAK",s:["Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","verlof","verlof","Labo","Labo","Labo","Labo","Labo","Labo","Labo","verlof","verlof","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","verlof","verlof","verlof","verlof","Labo","Labo","Labo","Labo","verlof","verlof","verlof","verlof","verlof","verlof","Labo","Labo","Labo","Labo","Labo","verlof","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo","Labo"]},
-  {n:"Max Secember",g:"Prod",s:["Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","verlof","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","verlof","verlof","verlof","verlof","verlof","verlof","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod"]},
-  {n:"Larissa Fratutescu",g:"Prod",s:["Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Labo","Labo","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Labo","Labo","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Labo","Labo","Labo","Labo","Prod","Prod","Prod","Prod","verlof","verlof","verlof","verlof","verlof","verlof","Prod","Prod","Prod","Prod","Prod","Labo","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod","Prod"]},
-  {n:"Monir Salmi",g:"Unit",s:["Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","verlof","verlof","verlof","verlof","verlof","verlof","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning"]},
-  {n:"Anthony Raimondi",g:"Unit",s:["Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","ziek","ziek","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","ziek","ziek","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","ziek","ziek","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","verlof","verlof","verlof","verlof","verlof","verlof","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","verlof","verlof","verlof","verlof","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak","Inpak"]},
-  {n:"Brahim Akdim",g:"Unit",s:["Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","verlof","Cleaning","verlof","verlof","verlof","verlof","verlof","verlof","verlof","verlof","Batter","verlof","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter","Cleaning","Batter"]},
-  {n:"Lachen Baraik",g:"Unit",s:["Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","ziek","ziek","ziek","ziek","ziek","ziek","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","verlof","verlof","verlof","verlof","verlof","verlof","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk","Bulk"]},
+var SHIFTS26 = [  // lignes des employes : chargees depuis Firebase (aucune donnee personnelle dans ce fichier public)
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
   {n:"Note",g:"EXTRA",s:[]},
 ];
 
-var SHIFTS25 = [
-  {n:"Aurelien Turchi",g:"TL",s:["TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL"]},
-  {n:"Nicolas Fettu",g:"INPAK",s:["coordinateur", "ziek", "ziek", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "ziek", "ziek", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "ziek", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur"]},
-  {n:"Julien Demuyter",g:"INPAK",s:["coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur"]},
-  {n:"Mohamed Lalaoui",g:"INPAK",s:["35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "ziek", "ziek", "33/34", "35/36", "extra", "31/32", "33/34", "35/36", "extra", "31/32", "33/34", "35/36"]},
-  {n:"Ramazani Abdulhassan",g:"INPAK",s:["extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "ziek", "ziek", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32"]},
-  {n:"Halima Laadi",g:"INPAK",s:["31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "33/34", "ziek", "ziek", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "ziek", "ziek", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "extra", "35/36", "31/32", "33/34", "ziek", "35/36", "31/32", "33/34", "extra", "35/36", "31/32"]},
-  {n:"Hakkim Akkouh",g:"INPAK",s:["33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra"]},
-  {n:"Balan Marius",g:"INPAK",s:["extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "33/34", "extra", "35/36", "extra", "31/32", "ziek", "ziek", "35/36", "extra", "31/32", "33/34", "extra", "35/36"]},
-  {n:"Lyse Musik",g:"INPAK",s:["Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "ziek", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo"]},
-  {n:"Max Secember",g:"Prod",s:["Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "ziek", "ziek", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod"]},
-  {n:"Larissa Fratutescu",g:"Prod",s:["Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Labo", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod"]},
-  {n:"Monir Salmi",g:"Unit",s:["Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "ziek", "ziek", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter"]},
-  {n:"Anthony Raimondi",g:"Unit",s:["Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "ziek", "ziek", "ziek", "ziek", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak"]},
-  {n:"Brahim Akdim",g:"Unit",s:["Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning", "Batter", "Cleaning"]},
-  {n:"Lachen Baraik",g:"Unit",s:["Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk"]},
+var SHIFTS25 = [  // lignes des employes : chargees depuis Firebase (aucune donnee personnelle dans ce fichier public)
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
   {n:"Note",g:"EXTRA",s:[]},
@@ -179,9 +149,9 @@ var I18N={
     tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Accueil', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Espace', nav_ab:'Absences',
     nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
-    nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus',
+    nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus', rail_group_gestion:'Gestion', rail_reduire:'Réduire le menu', rail_deplier:'Afficher les noms du menu', rail_navigation:'Navigation principale', rail_menu:'Menu',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
-    plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.',
+    plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.', plan_prochain:'Prochain jour planifié : {d}', plan_prochain_we:'Prochain week-end', plan_aucun_prochain:'Aucun jour planifié à venir',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
     legend_ziek:'Maladie', legend_verlof:'Congé', legend_recup:'Récup',
     status_ok:'OK', status_wn:'A surveiller', status_al:'Preoccupant', status_cr:'Critique', legend_watch_short:'Surveiller',
@@ -321,6 +291,108 @@ var I18N={
     a11y_role_compte:'Role du compte',
     a11y_onglets:'Sections du tableau de bord',
     trad_indisponible:'Traduction interne indisponible dans ce navigateur (utilise Chrome ou Edge a jour).',
+    lb_leg_absence:'absence',
+    lb_leg_note:'note',
+    lb_trad_auto:'Notes traduites',
+    lb_trad_auto_aide:'Traduit automatiquement les notes SharePoint dans la langue de l\'interface, sur ce PC (aucun service externe).',
+    lb_cmp_btn:'Comparer 2 jours',
+    lb_cmp_hint:'Mode comparaison actif : clique sur deux jours pour les mettre cote a cote.',
+    lb_cmp_titre:'Comparaison de 2 jours',
+    lb_semaine:'Semaine',
+    lb_lire_suite:'Lire la suite',
+    lb_replier:'Replier',
+    lb_absence:'absence',
+    lb_absences:'absences',
+    lb_absences_titre:'Absences',
+    lb_arrets:'arrets',
+    lb_temps_arret:'Temps d\'arret',
+    lb_ras:'RAS',
+    lb_ncp_incertain:'jour, heure incertaine',
+    lb_ncp_incertain_aide:'Heure non fiable : NCP non rattachee a ce poste precis',
+    lb_voir:'Voir',
+    lb_photo:'photo',
+    lb_photos:'photos',
+    lb_photos_choisies:'photo(s) choisie(s)',
+    lb_photos_absentes:'Photos non importees',
+    lb_original:'Original',
+    lb_note_ph:'Ajouter une note / observation...',
+    lb_ajouter_note:'ajouter une note',
+    lb_enregistrement:'Enregistrement...',
+    lb_note_ok:'Note enregistree',
+    lb_note_erreur:'Erreur : note non enregistree',
+    lb_chargement:'Chargement...',
+    lb_reessayer:'Erreur - reessayer',
+    lb_traduction_en_cours:'Traduction...',
+    lb_trad_premiere:'Premiere utilisation : le navigateur telecharge la langue, reclique dans quelques secondes.',
+    lb_trad_erreur:'Erreur de traduction',
+    lb_reserve_admin:'Reserve a l\'admin',
+    mdp_bouton:'Mon mot de passe',
+    mdp_titre:'Mon mot de passe',
+    mdp_titre_premier:'Choisis ton mot de passe',
+    mdp_aide:'Change ton mot de passe quand tu veux. Personne d\'autre ne le connait, pas meme l\'admin.',
+    mdp_aide_premier:'Premiere connexion : remplace le mot de passe provisoire par un mot de passe a toi. Personne d\'autre ne le connaitra, pas meme l\'admin.',
+    mdp_actuel:'Mot de passe actuel',
+    mdp_actuel_provisoire:'Mot de passe provisoire (celui recu)',
+    mdp_nouveau:'Nouveau mot de passe',
+    mdp_confirmer:'Confirme le nouveau mot de passe',
+    mdp_regles:'Au moins 8 caracteres, avec au moins une lettre et un chiffre, sans ton prenom ni ton nom.',
+    mdp_valider:'Enregistrer',
+    mdp_annuler:'Fermer',
+    mdp_en_cours:'Un instant...',
+    mdp_change_ok:'Mot de passe change',
+    mdp_recup_titre:'Mot de passe oublie : adresse de recuperation',
+    mdp_recup_aide:'Facultatif. Indique ton adresse e-mail personnelle : si tu oublies ton mot de passe, tu pourras le reinitialiser toi-meme depuis l\'ecran de connexion. Tu recevras un lien a confirmer ; ensuite tu te connecteras avec cette adresse. Tape aussi ton mot de passe actuel ci-dessus.',
+    mdp_recup_deja:'Ton compte a deja une adresse e-mail : « Mot de passe oublie ? » fonctionne. Tu peux la remplacer ici (tape aussi ton mot de passe actuel ci-dessus).',
+    mdp_recup_email:'Adresse e-mail personnelle',
+    mdp_recup_btn:'Envoyer le lien de confirmation',
+    mdp_recup_envoye:'Lien envoye a {email}. Clique dessus (verifie aussi les spams), puis connecte-toi avec cette adresse.',
+    mdp_err_longueur:'Au moins 8 caracteres.',
+    mdp_err_lettre_chiffre:'Il faut au moins une lettre et un chiffre.',
+    mdp_err_nom:'Ton prenom ou ton nom ne doit pas apparaitre dans le mot de passe.',
+    mdp_err_confirmation:'Les deux nouveaux mots de passe ne sont pas identiques.',
+    mdp_err_identique:'Le nouveau mot de passe doit etre different de l\'actuel.',
+    mdp_err_actuel:'Mot de passe actuel incorrect.',
+    mdp_err_actuel_vide:'Tape d\'abord ton mot de passe actuel.',
+    mdp_err_trop:'Trop d\'essais : reessaie dans quelques minutes.',
+    mdp_err_email:'Adresse e-mail invalide.',
+    mdp_err_email_pris:'Cette adresse est deja utilisee par un autre compte.',
+    mdp_err_reseau:'Pas de connexion internet.',
+    mdp_err_session:'Session expiree : reconnecte-toi.',
+    mdp_oubli_sans_email:'Ce compte n\'a pas encore d\'adresse de recuperation. Demande a ton responsable un mot de passe provisoire, puis ajoute ton adresse perso via « Mon mot de passe ».',
+    session_avertissement:'Deconnexion automatique dans {min} min sans activite.',
+    session_rester:'Rester connecte',
+    journal_titre:'Journal de securite',
+    journal_aide:'Les 200 dernieres actions sensibles (connexions, mots de passe, droits, imports, suppressions). Les entrees ne peuvent pas etre modifiees.',
+    journal_charger:'Afficher le journal',
+    journal_filtre:'Filtrer (personne, action...)',
+    journal_chargement:'Chargement...',
+    journal_vide:'Aucune entree.',
+    journal_erreur:'Lecture impossible :',
+    journal_col_date:'Date',
+    journal_col_qui:'Qui',
+    journal_col_action:'Action',
+    journal_col_details:'Details',
+    journal_act_connexion:'Connexion',
+    journal_act_deconnexion_inactivite:'Deconnexion automatique (inactivite)',
+    journal_act_mot_de_passe_change:'Mot de passe change',
+    journal_act_email_recuperation_demande:'Adresse de recuperation demandee',
+    journal_act_compte_cree:'Compte cree',
+    journal_act_acces_modifie:'Droits modifies',
+    journal_act_employe_cree:'Employe ajoute',
+    journal_act_employe_modifie:'Fiche employe modifiee',
+    journal_act_employe_retire:'Employe retire',
+    journal_act_candidat_supprime:'Candidat supprime',
+    journal_act_formation_supprimee:'Formation supprimee',
+    journal_act_absences_protime_purgees:'Absences Protime purgees',
+    journal_act_doublons_arrets_supprimes:'Doublons d\'arrets supprimes',
+    journal_act_pointages_traites_en_masse:'Pointages traites en masse',
+    journal_act_import_arrets_inpak:'Import arrets Inpak',
+    journal_act_import_bulk:'Import Bulk',
+    journal_act_import_ncp:'Import NCP',
+    journal_act_import_pointages:'Import pointages',
+    journal_act_import_protime_planning:'Import planning Protime',
+    journal_act_equipe_attestation_enregistree:'Equipe d\'attestation enregistree',
+    journal_act_equipe_attestation_supprimee:'Equipe d\'attestation supprimee',
     adm_migration_desactivee:'Ancienne migration desactivee : aucune donnee modifiee.',
     adm_session_title:'Session active', adm_session_connected_as:'Connecte en tant que : ', adm_session_role:'Role : ',
     adm_excel_report_title:'Rapport mensuel Excel', adm_excel_report_btn:'Generer rapport Excel',
@@ -446,10 +518,10 @@ var I18N={
     comptes_actif:'Compte actif', comptes_btn_modif_acces:"Modifier l'accès", comptes_btn_creer:'Créer un compte',
     comptes_edit_planning:'Peut modifier le planning', comptes_btn_enregistrer:'Enregistrer', comptes_btn_annuler:'Annuler',
     comptes_loading:'Chargement...', comptes_confirm_creer:'Créer le compte pour ', comptes_confirm_email:'Email : ',
-    comptes_confirm_pass:'Mot de passe : ', comptes_confirm_role:'Rôle : ', comptes_confirm_onglets:'Onglets : ',
+    comptes_confirm_pass:'Mot de passe provisoire : ', comptes_confirm_role:'Rôle : ', comptes_confirm_onglets:'Onglets : ',
     comptes_confirm_planning:'Modifier planning : ', comptes_oui:'Oui', comptes_non:'Non',
     comptes_toast_cree:'Compte créé pour ', comptes_alert_cree:'Compte créé !\n\nEmail : ',
-    comptes_alert_pass:'\nMot de passe : ', comptes_alert_communique:'\n\nCommunique ces identifiants à ',
+    comptes_alert_pass:'\nMot de passe provisoire (a changer a la 1re connexion) : ', comptes_alert_communique:'\n\nCommunique ces identifiants à ',
     comptes_toast_err_creation:'Erreur création compte : ', comptes_acces_maj:'Accès mis à jour.', comptes_err_generic:'Erreur: '
   },
   nl:{
@@ -460,9 +532,9 @@ var I18N={
     tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin', tab_lb:'Logboek',
     nav_ov:'Start', nav_br:'Prest.', nav_pl:'Planning', nav_espace:'Ruimte', nav_ab:'Afwez.',
     nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logboek',
-    nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer',
+    nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer', rail_group_gestion:'Beheer', rail_reduire:'Menu verkleinen', rail_deplier:'Menunamen tonen', rail_navigation:'Hoofdnavigatie', rail_menu:'Menu',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
-    plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.',
+    plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.', plan_prochain:'Volgende geplande dag: {d}', plan_prochain_we:'Volgend weekend', plan_aucun_prochain:'Geen geplande dagen meer',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
     legend_ziek:'Ziekte', legend_verlof:'Verlof', legend_recup:'Recuperatie',
     status_ok:'OK', status_wn:'Te volgen', status_al:'Zorgwekkend', status_cr:'Kritiek', legend_watch_short:'Te volgen',
@@ -602,6 +674,108 @@ var I18N={
     a11y_role_compte:'Rol van het account',
     a11y_onglets:'Secties van het dashboard',
     trad_indisponible:'Interne vertaling niet beschikbaar in deze browser (gebruik een recente Chrome of Edge).',
+    lb_leg_absence:'afwezigheid',
+    lb_leg_note:'notitie',
+    lb_trad_auto:'Notities vertalen',
+    lb_trad_auto_aide:'Vertaalt de SharePoint-notities automatisch naar de taal van de interface, op deze pc (geen externe dienst).',
+    lb_cmp_btn:'2 dagen vergelijken',
+    lb_cmp_hint:'Vergelijkingsmodus actief: klik op twee dagen om ze naast elkaar te zetten.',
+    lb_cmp_titre:'Vergelijking van 2 dagen',
+    lb_semaine:'Week',
+    lb_lire_suite:'Meer lezen',
+    lb_replier:'Inklappen',
+    lb_absence:'afwezigheid',
+    lb_absences:'afwezigheden',
+    lb_absences_titre:'Afwezigheden',
+    lb_arrets:'stilstanden',
+    lb_temps_arret:'Stilstandtijd',
+    lb_ras:'Niets te melden',
+    lb_ncp_incertain:'dag, uur onzeker',
+    lb_ncp_incertain_aide:'Uur niet betrouwbaar: NCP niet aan deze ploeg gekoppeld',
+    lb_voir:'Bekijk',
+    lb_photo:'foto',
+    lb_photos:'foto\'s',
+    lb_photos_choisies:'foto(\'s) gekozen',
+    lb_photos_absentes:'Foto\'s niet geimporteerd',
+    lb_original:'Origineel',
+    lb_note_ph:'Notitie / vaststelling toevoegen...',
+    lb_ajouter_note:'notitie toevoegen',
+    lb_enregistrement:'Opslaan...',
+    lb_note_ok:'Notitie opgeslagen',
+    lb_note_erreur:'Fout: notitie niet opgeslagen',
+    lb_chargement:'Laden...',
+    lb_reessayer:'Fout - opnieuw proberen',
+    lb_traduction_en_cours:'Vertalen...',
+    lb_trad_premiere:'Eerste gebruik: de browser downloadt de taal, klik over enkele seconden opnieuw.',
+    lb_trad_erreur:'Vertaalfout',
+    lb_reserve_admin:'Alleen voor de beheerder',
+    mdp_bouton:'Mijn wachtwoord',
+    mdp_titre:'Mijn wachtwoord',
+    mdp_titre_premier:'Kies je wachtwoord',
+    mdp_aide:'Wijzig je wachtwoord wanneer je wilt. Niemand anders kent het, ook de beheerder niet.',
+    mdp_aide_premier:'Eerste aanmelding: vervang het tijdelijke wachtwoord door je eigen wachtwoord. Niemand anders zal het kennen, ook de beheerder niet.',
+    mdp_actuel:'Huidig wachtwoord',
+    mdp_actuel_provisoire:'Tijdelijk wachtwoord (het ontvangen wachtwoord)',
+    mdp_nouveau:'Nieuw wachtwoord',
+    mdp_confirmer:'Bevestig het nieuwe wachtwoord',
+    mdp_regles:'Minstens 8 tekens, met minstens een letter en een cijfer, zonder je voor- of achternaam.',
+    mdp_valider:'Opslaan',
+    mdp_annuler:'Sluiten',
+    mdp_en_cours:'Even geduld...',
+    mdp_change_ok:'Wachtwoord gewijzigd',
+    mdp_recup_titre:'Wachtwoord vergeten: herstel-e-mailadres',
+    mdp_recup_aide:'Optioneel. Geef je persoonlijk e-mailadres op: als je je wachtwoord vergeet, kun je het zelf herstellen vanaf het aanmeldscherm. Je krijgt een link om te bevestigen; daarna meld je je aan met dit adres. Typ ook je huidige wachtwoord hierboven.',
+    mdp_recup_deja:'Je account heeft al een e-mailadres: "Wachtwoord vergeten?" werkt. Je kunt het hier vervangen (typ ook je huidige wachtwoord hierboven).',
+    mdp_recup_email:'Persoonlijk e-mailadres',
+    mdp_recup_btn:'Bevestigingslink versturen',
+    mdp_recup_envoye:'Link verstuurd naar {email}. Klik erop (kijk ook in je spam) en meld je daarna aan met dit adres.',
+    mdp_err_longueur:'Minstens 8 tekens.',
+    mdp_err_lettre_chiffre:'Minstens een letter en een cijfer.',
+    mdp_err_nom:'Je voor- of achternaam mag niet in het wachtwoord staan.',
+    mdp_err_confirmation:'De twee nieuwe wachtwoorden zijn niet gelijk.',
+    mdp_err_identique:'Het nieuwe wachtwoord moet verschillen van het huidige.',
+    mdp_err_actuel:'Huidig wachtwoord onjuist.',
+    mdp_err_actuel_vide:'Typ eerst je huidige wachtwoord.',
+    mdp_err_trop:'Te veel pogingen: probeer het over enkele minuten opnieuw.',
+    mdp_err_email:'Ongeldig e-mailadres.',
+    mdp_err_email_pris:'Dit adres wordt al door een ander account gebruikt.',
+    mdp_err_reseau:'Geen internetverbinding.',
+    mdp_err_session:'Sessie verlopen: meld je opnieuw aan.',
+    mdp_oubli_sans_email:'Dit account heeft nog geen herstel-e-mailadres. Vraag je verantwoordelijke een tijdelijk wachtwoord en voeg daarna je persoonlijk adres toe via "Mijn wachtwoord".',
+    session_avertissement:'Automatisch afmelden binnen {min} min zonder activiteit.',
+    session_rester:'Aangemeld blijven',
+    journal_titre:'Beveiligingslogboek',
+    journal_aide:'De 200 laatste gevoelige acties (aanmeldingen, wachtwoorden, rechten, imports, verwijderingen). Items kunnen niet gewijzigd worden.',
+    journal_charger:'Logboek tonen',
+    journal_filtre:'Filteren (persoon, actie...)',
+    journal_chargement:'Laden...',
+    journal_vide:'Geen items.',
+    journal_erreur:'Lezen mislukt:',
+    journal_col_date:'Datum',
+    journal_col_qui:'Wie',
+    journal_col_action:'Actie',
+    journal_col_details:'Details',
+    journal_act_connexion:'Aanmelding',
+    journal_act_deconnexion_inactivite:'Automatisch afgemeld (inactiviteit)',
+    journal_act_mot_de_passe_change:'Wachtwoord gewijzigd',
+    journal_act_email_recuperation_demande:'Herstel-e-mailadres aangevraagd',
+    journal_act_compte_cree:'Account aangemaakt',
+    journal_act_acces_modifie:'Rechten gewijzigd',
+    journal_act_employe_cree:'Medewerker toegevoegd',
+    journal_act_employe_modifie:'Medewerkersfiche gewijzigd',
+    journal_act_employe_retire:'Medewerker verwijderd',
+    journal_act_candidat_supprime:'Kandidaat verwijderd',
+    journal_act_formation_supprimee:'Opleiding verwijderd',
+    journal_act_absences_protime_purgees:'Protime-afwezigheden gewist',
+    journal_act_doublons_arrets_supprimes:'Dubbele stilstanden verwijderd',
+    journal_act_pointages_traites_en_masse:'Prikkingen massaal verwerkt',
+    journal_act_import_arrets_inpak:'Import stilstanden Inpak',
+    journal_act_import_bulk:'Import Bulk',
+    journal_act_import_ncp:'Import NCP',
+    journal_act_import_pointages:'Import prikkingen',
+    journal_act_import_protime_planning:'Import planning Protime',
+    journal_act_equipe_attestation_enregistree:'Attestteam opgeslagen',
+    journal_act_equipe_attestation_supprimee:'Attestteam verwijderd',
     adm_migration_desactivee:'Oude migratie uitgeschakeld: geen gegevens gewijzigd.',
     adm_session_title:'Actieve sessie', adm_session_connected_as:'Aangemeld als: ', adm_session_role:'Rol: ',
     adm_excel_report_title:'Maandelijks Excel-rapport', adm_excel_report_btn:'Excel-rapport genereren',
@@ -727,10 +901,10 @@ var I18N={
     comptes_actif:'Account actief', comptes_btn_modif_acces:'Toegang wijzigen', comptes_btn_creer:'Account aanmaken',
     comptes_edit_planning:'Mag de planning wijzigen', comptes_btn_enregistrer:'Opslaan', comptes_btn_annuler:'Annuleren',
     comptes_loading:'Laden...', comptes_confirm_creer:'Account aanmaken voor ', comptes_confirm_email:'E-mail: ',
-    comptes_confirm_pass:'Wachtwoord: ', comptes_confirm_role:'Rol: ', comptes_confirm_onglets:'Tabbladen: ',
+    comptes_confirm_pass:'Tijdelijk wachtwoord: ', comptes_confirm_role:'Rol: ', comptes_confirm_onglets:'Tabbladen: ',
     comptes_confirm_planning:'Planning wijzigen: ', comptes_oui:'Ja', comptes_non:'Nee',
     comptes_toast_cree:'Account aangemaakt voor ', comptes_alert_cree:'Account aangemaakt!\n\nE-mail: ',
-    comptes_alert_pass:'\nWachtwoord: ', comptes_alert_communique:'\n\nBezorg deze gegevens aan ',
+    comptes_alert_pass:'\nTijdelijk wachtwoord (te wijzigen bij eerste aanmelding): ', comptes_alert_communique:'\n\nBezorg deze gegevens aan ',
     comptes_toast_err_creation:'Fout bij het aanmaken van het account: ', comptes_acces_maj:'Toegang bijgewerkt.', comptes_err_generic:'Fout: '
   },
   en:{
@@ -741,9 +915,9 @@ var I18N={
     tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Home', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Space', nav_ab:'Absences',
     nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
-    nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More',
+    nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More', rail_group_gestion:'Management', rail_reduire:'Collapse menu', rail_deplier:'Show menu labels', rail_navigation:'Main navigation', rail_menu:'Menu',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
-    plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.',
+    plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.', plan_prochain:'Next scheduled day: {d}', plan_prochain_we:'Next weekend', plan_aucun_prochain:'No upcoming scheduled day',
     legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
     legend_ziek:'Sick leave', legend_verlof:'Leave', legend_recup:'Recovery',
     status_ok:'OK', status_wn:'To watch', status_al:'Concerning', status_cr:'Critical', legend_watch_short:'To watch',
@@ -883,6 +1057,108 @@ var I18N={
     a11y_role_compte:'Account role',
     a11y_onglets:'Dashboard sections',
     trad_indisponible:'Built-in translation unavailable in this browser (use an up-to-date Chrome or Edge).',
+    lb_leg_absence:'absence',
+    lb_leg_note:'note',
+    lb_trad_auto:'Translate notes',
+    lb_trad_auto_aide:'Automatically translates SharePoint notes into the interface language, on this PC (no external service).',
+    lb_cmp_btn:'Compare 2 days',
+    lb_cmp_hint:'Comparison mode on: click two days to see them side by side.',
+    lb_cmp_titre:'Comparison of 2 days',
+    lb_semaine:'Week',
+    lb_lire_suite:'Read more',
+    lb_replier:'Collapse',
+    lb_absence:'absence',
+    lb_absences:'absences',
+    lb_absences_titre:'Absences',
+    lb_arrets:'stops',
+    lb_temps_arret:'Downtime',
+    lb_ras:'Nothing to report',
+    lb_ncp_incertain:'day, time uncertain',
+    lb_ncp_incertain_aide:'Unreliable time: NCP not linked to this exact shift',
+    lb_voir:'View',
+    lb_photo:'photo',
+    lb_photos:'photos',
+    lb_photos_choisies:'photo(s) selected',
+    lb_photos_absentes:'Photos not imported',
+    lb_original:'Original',
+    lb_note_ph:'Add a note / observation...',
+    lb_ajouter_note:'add a note',
+    lb_enregistrement:'Saving...',
+    lb_note_ok:'Note saved',
+    lb_note_erreur:'Error: note not saved',
+    lb_chargement:'Loading...',
+    lb_reessayer:'Error - try again',
+    lb_traduction_en_cours:'Translating...',
+    lb_trad_premiere:'First use: the browser is downloading the language, click again in a few seconds.',
+    lb_trad_erreur:'Translation error',
+    lb_reserve_admin:'Admin only',
+    mdp_bouton:'My password',
+    mdp_titre:'My password',
+    mdp_titre_premier:'Choose your password',
+    mdp_aide:'Change your password whenever you like. Nobody else knows it, not even the admin.',
+    mdp_aide_premier:'First login: replace the temporary password with your own. Nobody else will know it, not even the admin.',
+    mdp_actuel:'Current password',
+    mdp_actuel_provisoire:'Temporary password (the one you received)',
+    mdp_nouveau:'New password',
+    mdp_confirmer:'Confirm the new password',
+    mdp_regles:'At least 8 characters, with at least one letter and one digit, without your first or last name.',
+    mdp_valider:'Save',
+    mdp_annuler:'Close',
+    mdp_en_cours:'One moment...',
+    mdp_change_ok:'Password changed',
+    mdp_recup_titre:'Forgotten password: recovery address',
+    mdp_recup_aide:'Optional. Enter your personal e-mail address: if you forget your password, you can reset it yourself from the login screen. You will receive a link to confirm; afterwards you log in with this address. Also type your current password above.',
+    mdp_recup_deja:'Your account already has an e-mail address: "Forgot password?" works. You can replace it here (also type your current password above).',
+    mdp_recup_email:'Personal e-mail address',
+    mdp_recup_btn:'Send confirmation link',
+    mdp_recup_envoye:'Link sent to {email}. Click it (check your spam too), then log in with this address.',
+    mdp_err_longueur:'At least 8 characters.',
+    mdp_err_lettre_chiffre:'At least one letter and one digit.',
+    mdp_err_nom:'Your first or last name must not appear in the password.',
+    mdp_err_confirmation:'The two new passwords do not match.',
+    mdp_err_identique:'The new password must differ from the current one.',
+    mdp_err_actuel:'Current password is incorrect.',
+    mdp_err_actuel_vide:'Type your current password first.',
+    mdp_err_trop:'Too many attempts: try again in a few minutes.',
+    mdp_err_email:'Invalid e-mail address.',
+    mdp_err_email_pris:'This address is already used by another account.',
+    mdp_err_reseau:'No internet connection.',
+    mdp_err_session:'Session expired: log in again.',
+    mdp_oubli_sans_email:'This account has no recovery address yet. Ask your manager for a temporary password, then add your personal address via "My password".',
+    session_avertissement:'Automatic logout in {min} min without activity.',
+    session_rester:'Stay logged in',
+    journal_titre:'Security log',
+    journal_aide:'The last 200 sensitive actions (logins, passwords, permissions, imports, deletions). Entries cannot be modified.',
+    journal_charger:'Show log',
+    journal_filtre:'Filter (person, action...)',
+    journal_chargement:'Loading...',
+    journal_vide:'No entries.',
+    journal_erreur:'Cannot read:',
+    journal_col_date:'Date',
+    journal_col_qui:'Who',
+    journal_col_action:'Action',
+    journal_col_details:'Details',
+    journal_act_connexion:'Login',
+    journal_act_deconnexion_inactivite:'Automatic logout (inactivity)',
+    journal_act_mot_de_passe_change:'Password changed',
+    journal_act_email_recuperation_demande:'Recovery address requested',
+    journal_act_compte_cree:'Account created',
+    journal_act_acces_modifie:'Permissions changed',
+    journal_act_employe_cree:'Employee added',
+    journal_act_employe_modifie:'Employee record changed',
+    journal_act_employe_retire:'Employee removed',
+    journal_act_candidat_supprime:'Candidate deleted',
+    journal_act_formation_supprimee:'Training deleted',
+    journal_act_absences_protime_purgees:'Protime absences purged',
+    journal_act_doublons_arrets_supprimes:'Duplicate stops deleted',
+    journal_act_pointages_traites_en_masse:'Clockings processed in bulk',
+    journal_act_import_arrets_inpak:'Inpak stops import',
+    journal_act_import_bulk:'Bulk import',
+    journal_act_import_ncp:'NCP import',
+    journal_act_import_pointages:'Clockings import',
+    journal_act_import_protime_planning:'Protime schedule import',
+    journal_act_equipe_attestation_enregistree:'Certificate team saved',
+    journal_act_equipe_attestation_supprimee:'Certificate team deleted',
     adm_migration_desactivee:'Legacy migration disabled: no data changed.',
     adm_session_title:'Active session', adm_session_connected_as:'Logged in as: ', adm_session_role:'Role: ',
     adm_excel_report_title:'Monthly Excel report', adm_excel_report_btn:'Generate Excel report',
@@ -1008,10 +1284,10 @@ var I18N={
     comptes_actif:'Account active', comptes_btn_modif_acces:'Edit access', comptes_btn_creer:'Create an account',
     comptes_edit_planning:'Can edit planning', comptes_btn_enregistrer:'Save', comptes_btn_annuler:'Cancel',
     comptes_loading:'Loading...', comptes_confirm_creer:'Create the account for ', comptes_confirm_email:'Email: ',
-    comptes_confirm_pass:'Password: ', comptes_confirm_role:'Role: ', comptes_confirm_onglets:'Tabs: ',
+    comptes_confirm_pass:'Temporary password: ', comptes_confirm_role:'Role: ', comptes_confirm_onglets:'Tabs: ',
     comptes_confirm_planning:'Edit planning: ', comptes_oui:'Yes', comptes_non:'No',
     comptes_toast_cree:'Account created for ', comptes_alert_cree:'Account created!\n\nEmail: ',
-    comptes_alert_pass:'\nPassword: ', comptes_alert_communique:'\n\nShare these credentials with ',
+    comptes_alert_pass:'\nTemporary password (to change at first login): ', comptes_alert_communique:'\n\nShare these credentials with ',
     comptes_toast_err_creation:'Error creating account: ', comptes_acces_maj:'Access updated.', comptes_err_generic:'Error: '
   }
 };
@@ -1064,6 +1340,7 @@ function setLang(l){
   LANG=l;
   try{localStorage.setItem('lang',l);}catch(e){}
   applyI18n();
+  if(typeof buildLogbook==='function'&&document.getElementById('lb-root')&&document.getElementById('lb-root').childElementCount)buildLogbook();
   if(typeof buildPT==='function'&&document.getElementById('ptable'))buildPT();
   if(typeof updKPI==='function'&&document.getElementById('k-ok')&&typeof BD!=='undefined'&&BD.length)updKPI();
   if(typeof buildMiniCal==='function'&&document.getElementById('mini-cal'))buildMiniCal();
@@ -1091,7 +1368,7 @@ var ACCOUNTS={};
 
 
 
-var EMP=[{n:'Aurelien Turchi',g:'TL',r:'Team Leader'},{n:'Nicolas Fettu',g:'INPAK',r:'Coordinateur'},{n:'Julien Demuyter',g:'INPAK',r:'Coordinateur'},{n:'Mohamed Lalaoui',g:'INPAK',r:'Operateur'},{n:'Ramazani Abdulhassan',g:'INPAK',r:'Operateur'},{n:'Halima Laadi',g:'INPAK',r:'Operateur'},{n:'Hakkim Akkouh',g:'INPAK',r:'Operateur'},{n:'Balan Marius',g:'INPAK',r:'Operateur'},{n:'Lyse Musik',g:'INPAK',r:'Labo'},{n:'Max Secember',g:'Prod',r:'Production'},{n:'Larissa Fratutescu',g:'Prod',r:'Production'},{n:'Monir Salmi',g:'Unit',r:'Batter/Cleaning'},{n:'Anthony Raimondi',g:'Unit',r:'Inpak'},{n:'Brahim Akdim',g:'Unit',r:'Batter/Cleaning'},{n:'Lachen Baraik',g:'Unit',r:'Bulk'}];
+var EMP=[]; // charge depuis Firebase
 
 var WEEKS27 = [
   {d:["01/01", "02/01", "03/01"]},
@@ -1149,22 +1426,7 @@ var WEEKS27 = [
   {d:["25/12", "26/12"]},
 ];
 
-var SHIFTS27 = [
-  {n:"Aurelien Turchi",g:"TL",s:["TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL", "TL"]},
-  {n:"Nicolas Fettu",g:"INPAK",s:["coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur"]},
-  {n:"Julien Demuyter",g:"INPAK",s:["coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur", "coordinateur"]},
-  {n:"Mohamed Lalaoui",g:"INPAK",s:["35/36", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "33/34", "33/34", "35/36", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "35/36", "extra", "extra", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36"]},
-  {n:"Ramazani Abdulhassan",g:"INPAK",s:["extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "31/32", "31/32", "extra", "extra", "extra", "extra", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra"]},
-  {n:"Halima Laadi",g:"INPAK",s:["31/32", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "35/36", "35/36", "31/32", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32"]},
-  {n:"Hakkim Akkouh",g:"INPAK",s:["33/34", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "extra", "extra", "33/34", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "extra", "extra", "33/34", "33/34", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34"]},
-  {n:"Balan Marius",g:"INPAK",s:["35/36", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "33/34", "33/34", "35/36", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "extra", "extra", "33/34", "33/34", "35/36", "35/36", "31/32", "31/32", "extra", "extra", "33/34", "33/34", "35/36", "35/36"]},
-  {n:"Lyse Musik",g:"INPAK",s:["Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo", "Labo"]},
-  {n:"Max Secember",g:"Prod",s:["Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod"]},
-  {n:"Larissa Fratutescu",g:"Prod",s:["Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod", "Prod"]},
-  {n:"Monir Salmi",g:"Unit",s:["Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter", "Batter"]},
-  {n:"Anthony Raimondi",g:"Unit",s:["Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak", "Inpak"]},
-  {n:"Brahim Akdim",g:"Unit",s:["Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning", "Cleaning"]},
-  {n:"Lachen Baraik",g:"Unit",s:["Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk", "Bulk"]},
+var SHIFTS27 = [  // lignes des employes : chargees depuis Firebase (aucune donnee personnelle dans ce fichier public)
   {n:"Nettoyeur externe",g:"EXTRA",s:[]},
   {n:"Commentaire",g:"EXTRA",s:[]},
   {n:"Note",g:"EXTRA",s:[]},
@@ -1185,8 +1447,8 @@ var H2027={"01/01": "05h-17h", "02/01": "05h-17h", "03/01": "05h-17h", "09/01": 
    admin et visiteur chargent les absences, un sous-chef qui enregistre le
    planning ecraserait sinon l'historique complet. */
 
-var ABS=[{n:'Nicolas Fettu',a:'04/01/2025',b:'05/01/2025',d:2,y:'2025'},{n:'Nicolas Fettu',a:'26/04/2025',b:'27/04/2025',d:2,y:'2025'},{n:'Nicolas Fettu',a:'22/11/2025',b:'22/11/2025',d:1,y:'2025'},{n:'Mohamed Lalaoui',a:'29/11/2025',b:'30/11/2025',d:2,y:'2025'},{n:'Ramazani Abdulhassan',a:'28/06/2025',b:'29/06/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'07/06/2025',b:'08/06/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'13/09/2025',b:'14/09/2025',d:2,y:'2025'},{n:'Halima Laadi',a:'14/12/2025',b:'14/12/2025',d:1,y:'2025'},{n:'Balan Marius',a:'13/12/2025',b:'14/12/2025',d:2,y:'2025'},{n:'Lyse Musik',a:'14/12/2025',b:'14/12/2025',d:1,y:'2025'},{n:'Max Secember',a:'26/04/2025',b:'27/04/2025',d:2,y:'2025'},{n:'Monir Salmi',a:'08/02/2025',b:'09/02/2025',d:2,y:'2025'},{n:'Anthony Raimondi',a:'15/11/2025',b:'23/11/2025',d:4,y:'2025'},{n:'Nicolas Fettu',a:'07/02/2026',b:'08/02/2026',d:2,y:'2026'},{n:'Julien Demuyter',a:'11/01/2026',b:'11/01/2026',d:1,y:'2026'},{n:'Julien Demuyter',a:'22/03/2026',b:'22/03/2026',d:1,y:'2026'},{n:'Julien Demuyter',a:'25/04/2026',b:'26/04/2026',d:2,y:'2026'},{n:'Mohamed Lalaoui',a:'14/03/2026',b:'22/03/2026',d:4,y:'2026'},{n:'Mohamed Lalaoui',a:'11/04/2026',b:'19/04/2026',d:4,y:'2026'},{n:'Ramazani Abdulhassan',a:'14/02/2026',b:'15/02/2026',d:2,y:'2026'},{n:'Halima Laadi',a:'11/04/2026',b:'12/04/2026',d:2,y:'2026'},{n:'Hakkim Akkouh',a:'27/06/2026',b:'28/06/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'17/01/2026',b:'18/01/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'28/02/2026',b:'01/03/2026',d:2,y:'2026'},{n:'Anthony Raimondi',a:'28/03/2026',b:'29/03/2026',d:2,y:'2026'},{n:'Lachen Baraik',a:'31/01/2026',b:'15/02/2026',d:6,y:'2026'}];
-var BD=[{n:'Aurelien Turchi',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Nicolas Fettu',D:3,S:2,sc:12,T:[0,0,1,0]},{n:'Julien Demuyter',D:4,S:3,sc:36,T:[0,0,0,0]},{n:'Mohamed Lalaoui',D:10,S:3,sc:90,T:[0,0,2,0]},{n:'Ramazani Abdulhassan',D:4,S:2,sc:16,T:[0,0,0,2]},{n:'Halima Laadi',D:5,S:3,sc:45,T:[0,0,0,0]},{n:'Hakkim Akkouh',D:2,S:1,sc:2,T:[0,0,0,0]},{n:'Balan Marius',D:2,S:1,sc:2,T:[0,0,0,0]},{n:'Lyse Musik',D:1,S:1,sc:1,T:[0,0,0,0]},{n:'Max Secember',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Larissa Fratutescu',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Monir Salmi',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Anthony Raimondi',D:10,S:4,sc:160,T:[0,0,0,0]},{n:'Brahim Akdim',D:0,S:0,sc:0,T:[0,0,0,0]},{n:'Lachen Baraik',D:6,S:1,sc:6,T:[0,0,0,0]}];
+var ABS=[]; // charge depuis Firebase
+var BD=[]; // charge depuis Firebase
 
 
 
@@ -1235,6 +1497,8 @@ document.querySelectorAll('.tab[data-tab]').forEach(function(b){
   b.addEventListener('click', function(){
     chargerDonneesOnglet(b.dataset.tab);
     if(typeof majAriaOnglets === 'function') majAriaOnglets();
+    // Planning : arrive toujours sur aujourd'hui / le prochain week-end.
+    if(b.dataset.tab === 'pl' && typeof planningAllerAuJour === 'function') requestAnimationFrame(planningAllerAuJour);
     // Exports Excel (Bradford, rapport admin) : JSZip prechargee en arriere-plan.
     if((b.dataset.tab === 'br' || b.dataset.tab === 'admin') && typeof chargerJSZip === 'function') chargerJSZip().catch(function(){});
   });
@@ -1476,12 +1740,12 @@ window.addEventListener('load',function(){
   var app;
   if(typeof firebase==='undefined'){
     console.error('[Firebase] SDK non charge');
-    try{var el=document.getElementById('splash-screen');if(el){el.innerHTML='<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Connexion a Firebase impossible</div><div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion internet, ou reessaie.</div><button onclick="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button></div>';}}catch(e2){}
+    try{var el=document.getElementById('splash-screen');if(el){el.innerHTML='<div style="position:relative;z-index:1;text-align:center;color:#fff;font-family:Inter,sans-serif;padding:0 24px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Connexion a Firebase impossible</div><div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px">Verifie ta connexion internet, ou reessaie.</div><button data-on-click="location.reload()" style="padding:10px 22px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer">Recharger la page</button></div>';}}catch(e2){}
     return;
   }
   try{app=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(cfg);}catch(e){app=firebase.app();}
   firebase.auth(app).onAuthStateChanged(function(user){
-    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid).once('value').then(function(snap){var uRec=snap.val()||{};var role=uRec.role||'subchef';console.log('[DIAGNOSTIC] UID connecte :', user.uid, '| donnees lues depuis Firebase :', JSON.stringify(uRec), '| role applique :', role);currentUser.role=role;currentUser.tabs=uRec.tabs||null;currentUser.editPlanning=!!uRec.editPlanning;currentUser.nom=uRec.nom||null;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
+    if(user){currentUser=user;document.getElementById('user-email').textContent=user.email;document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='flex';firebase.database(app).ref('users/'+user.uid).once('value').then(function(snap){var uRec=snap.val()||{};var role=uRec.role||'subchef';currentUser.role=role;currentUser.tabs=uRec.tabs||null;currentUser.editPlanning=!!uRec.editPlanning;currentUser.nom=uRec.nom||null;applyRole(role);initFirebase(app);startApp();loadBirthdaysFromFirebase();if(typeof mdpVerifierPremiereConnexion==='function'&&snap.exists())mdpVerifierPremiereConnexion(uRec,user.uid);if(typeof demarrerSurveillanceSession==='function'&&snap.exists())demarrerSurveillanceSession(user);}).catch(function(e){console.error('[DIAGNOSTIC] Erreur de lecture du role :', e);currentUser.role='subchef';applyRole('subchef');initFirebase(app);startApp();loadBirthdaysFromFirebase();});}
     else{document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
   });
 });
@@ -1493,11 +1757,30 @@ window.addEventListener('load',function(){
 
 
 
+/* Planning brut lu dans Firebase, par annee. Les lignes employes sont
+   construites a partir de lui et de EMP (ordre de la fiche employe). */
+var SHIFTS_BRUTS = {};
+function completerLignesPlanning(){
+  [['25', SHIFTS25], ['26', SHIFTS26], ['27', SHIFTS27]].forEach(function(x){
+    var data = SHIFTS_BRUTS[x[0]] || {}, liste = x[1];
+    var premiereExtra = liste.findIndex(function(e){ return e.g === 'EXTRA'; });
+    if(premiereExtra === -1) premiereExtra = liste.length;
+    var ajout = [];
+    EMP.forEach(function(emp){
+      if(!data[emp.n] || liste.find(function(e){ return e.n === emp.n; })) return;
+      ajout.push({ n: emp.n, g: emp.g, s: data[emp.n] });
+    });
+    if(ajout.length) liste.splice.apply(liste, [premiereExtra, 0].concat(ajout));
+  });
+  if(typeof chargerProtimeMap === 'function') chargerProtimeMap();
+}
+
 function startApp(){
   if(db){
     var loaded={s26:false,s25:false,s27:false,abs:false,emp:false};
     function tryBuild(){
       if(loaded.s26&&loaded.s25&&loaded.s27&&loaded.abs&&loaded.emp){
+        completerLignesPlanning();
         recalc();updKPI();initCharts();buildBT();buildPT();buildAbs('all');updAbsLbl();buildMiniCal();buildTodayAbs();buildBirthdayNotif();buildBirthdayCal();loadPointages();chargerEspacePerso();donneesBasePretes();
         buildEmpTable();
       }
@@ -1524,6 +1807,7 @@ function startApp(){
     db.ref('planning/shifts2026').once('value').then(function(snap){
       var data=snap.val();
       if(data){
+        SHIFTS_BRUTS['26']=data;
         SHIFTS26.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});
         // Ajouter les nouveaux employes Firebase pas encore dans SHIFTS26
         Object.keys(data).forEach(function(nm){
@@ -1563,6 +1847,7 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
     db.ref('planning/shifts2025').once('value').then(function(snap){
       var data=snap.val();
       if(data){
+        SHIFTS_BRUTS['25']=data;
         SHIFTS25.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});
         Object.keys(data).forEach(function(nm){
           if(!SHIFTS25.find(function(e){return e.n===nm;})){
@@ -1577,6 +1862,7 @@ if(typeof buildMonEspace==='function'&&document.getElementById('espace-content')
     db.ref('planning/shifts2027').once('value').then(function(snap){
       var data=snap.val();
       if(data){
+        SHIFTS_BRUTS['27']=data;
         SHIFTS27.forEach(function(emp){if(data[emp.n]&&data[emp.n].length)emp.s=data[emp.n];});
         Object.keys(data).forEach(function(nm){
           if(!SHIFTS27.find(function(e){return e.n===nm;})){
@@ -2241,10 +2527,6 @@ var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','lb','formation
 // 23/09/2026 -- calendrier de synthese par poste (P1-P5), voir metier/logbook.js
 // et vues/logbook.js (Calendrier logbook - design.md dans Obsidian).
 var NAV_DIRECT = ['ov','pl','espace'];
-// Admin en rail desktop : ajoute a NAV_DIRECT uniquement pour le rail desktop
-// (voir buildDesktopRail) pour remonter l'icone en haut, sans toucher aux 5
-// emplacements fixes de la barre mobile (admin y reste dans "Plus").
-var NAV_DIRECT_RAIL = NAV_DIRECT.concat(['admin']);
 var NAV_GROUP_EQUIPE = ['br','formations','pt'];
 var NAV_GROUP_PROD = ['arrets','bulk','ncp','lb'];
 var NAV_GROUP_PLUS = ['recrutement','admin'];
@@ -2274,61 +2556,79 @@ function navLabel(id){
   return lbl ? lbl.textContent : (t('tab_'+id) || id);
 }
 
-/* ===== Rail desktop (>=769px) ===== */
+/* ===== Rail desktop (>=769px) =====
+   Tous les onglets autorises sont visibles directement (un seul clic), ranges
+   par rubrique. Deux modes : deplie (icone + nom, par defaut sur grand ecran)
+   ou replie (icones seules, nom en info-bulle). Le choix est memorise sur le PC.
+   Plus de panneaux qui s'ouvrent au survol : ils se refermaient quand la souris
+   traversait l'espace entre l'icone et le panneau. */
+var RAIL_CLE = 'aw3_rail_ouvert';
+function railEstOuvert(){
+  try { var v = localStorage.getItem(RAIL_CLE); if(v === '1') return true; if(v === '0') return false; } catch(e){}
+  return window.innerWidth >= 1280;
+}
+function railBasculer(){
+  var ouvert = !railEstOuvert();
+  try { localStorage.setItem(RAIL_CLE, ouvert ? '1' : '0'); } catch(e){}
+  buildDesktopRail();
+}
 function buildDesktopRail(){
   var rail = document.getElementById('desktop-rail');
   if(!rail) return;
   var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+  var ouvert = railEstOuvert();
+  rail.classList.toggle('ouvert', ouvert);
 
   function itemHtml(id){
     var on = id === activeId ? ' on' : '';
-    return '<div class="rail-item'+on+'" data-rail="'+id+'" onclick="mnavGo(\''+id+'\')">'
-      + (MNAV_ICONS[id] || '') + '<span class="rail-tip">'+navLabel(id)+'</span></div>';
+    var nom = escHtml(navLabel(id));
+    return '<button type="button" class="rail-item'+on+'" data-rail="'+id+'" data-on-click="mnavGo(\''+id+'\')" aria-label="'+nom+'"'+(on?' aria-current="page"':'')+'>'
+      + (MNAV_ICONS[id] || '') + '<span class="rail-lbl">'+nom+'</span><span class="rail-tip" aria-hidden="true">'+nom+'</span></button>';
   }
-  function groupHtml(groupId, ids, icon, label){
-    var visible = navGroupVisible(ids);
-    if(!visible.length) return '';
-    var groupActive = visible.indexOf(activeId) !== -1;
-    var panelItems = visible.map(function(id){
-      var on = id === activeId ? ' on' : '';
-      return '<div class="rail-panel-item'+on+'" onclick="mnavGo(\''+id+'\')">'+(MNAV_ICONS[id]||'')+'<span>'+navLabel(id)+'</span></div>';
-    }).join('');
-    return '<div class="rail-group" data-rail-group="'+groupId+'">'
-      + '<div class="rail-item'+(groupActive?' on':'')+'">'+icon+'<span class="rail-tip">'+label+'</span></div>'
-      + '<div class="rail-panel">'+panelItems+'</div>'
-      + '</div>';
+  function rubrique(titre, ids){
+    var visibles = navGroupVisible(ids);
+    if(!visibles.length) return '';
+    return '<div class="rail-titre">'+escHtml(titre)+'</div>' + visibles.map(itemHtml).join('');
   }
 
-  var direct = navGroupVisible(NAV_DIRECT_RAIL).map(itemHtml).join('');
-  var equipe = groupHtml('equipe', NAV_GROUP_EQUIPE, MNAV_ICONS.group_equipe, t('rail_group_equipe'));
-  var prod = groupHtml('prod', NAV_GROUP_PROD, MNAV_ICONS.group_prod, t('rail_group_prod'));
-  // 'admin' est deja affiche en direct ci-dessus (rail desktop) ; on l'exclut
-  // du panneau "Plus" pour ne pas le dupliquer. Reste dans NAV_GROUP_PLUS pour
-  // la barre mobile (buildMobileNav), ou il n'y a pas de rail direct pour lui.
-  var plusIdsRail = NAV_GROUP_PLUS.filter(function(id){ return id !== 'admin'; });
-  var plus = groupHtml('plus', plusIdsRail, MNAV_ICONS.group_plus, t('rail_group_plus'));
-
+  var basculeNom = escHtml(t(ouvert ? 'rail_reduire' : 'rail_deplier'));
   rail.innerHTML =
-    '<div class="rail-logo">AW3</div>'
-    + direct
-    + ((equipe||prod) ? '<div class="rail-sep"></div>' : '')
-    + equipe + prod
+    '<div class="rail-tete"><span class="rail-nom">'+escHtml(t('rail_menu'))+'</span>'
+    + '<button type="button" class="rail-bascule" data-on-click="railBasculer()" aria-label="'+basculeNom+'" aria-expanded="'+(ouvert?'true':'false')+'" title="'+basculeNom+'">'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="'+(ouvert?'15 18 9 12 15 6':'9 18 15 12 9 6')+'"/></svg></button></div>'
+    + '<nav class="rail-liste" aria-label="'+escHtml(t('rail_navigation'))+'">'
+    + navGroupVisible(NAV_DIRECT).map(itemHtml).join('')
+    + rubrique(t('rail_group_equipe'), NAV_GROUP_EQUIPE)
+    + rubrique(t('rail_group_prod'), NAV_GROUP_PROD)
     + '<div class="rail-spacer"></div>'
-    + plus;
+    + rubrique(t('rail_group_gestion'), NAV_GROUP_PLUS)
+    + '</nav>';
+  railInfoBulles(rail);
+}
 
-  // Ouvre/ferme les panneaux de groupe au clic (en plus du survol CSS, utile
-  // au clavier/tactile). Un seul groupe ouvert a la fois.
-  rail.querySelectorAll('.rail-group').forEach(function(g){
-    g.querySelector('.rail-item').addEventListener('click', function(e){
-      e.stopPropagation();
-      var wasOpen = g.classList.contains('expanded');
-      rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
-      if(!wasOpen) g.classList.add('expanded');
-    });
-  });
-  document.addEventListener('click', function(){
-    rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
-  });
+/* Mode replie : le nom de l'onglet s'affiche a cote de l'icone au survol ou
+   au focus clavier (position fixe : la liste peut defiler). */
+function railInfoBulles(rail){
+  if(rail.dataset.bulles) return;
+  rail.dataset.bulles = '1';
+  function montrer(e){
+    var item = e.target.closest && e.target.closest('.rail-item');
+    rail.querySelectorAll('.rail-tip.visible').forEach(function(x){ if(!item || !item.contains(x)) x.classList.remove('visible'); });
+    if(!item || rail.classList.contains('ouvert')) return;
+    var tip = item.querySelector('.rail-tip'); if(!tip) return;
+    // Le flou de la barre (backdrop-filter) en fait le repere des elements
+    // en position fixe : coordonnees relatives a la barre.
+    var r = item.getBoundingClientRect(), b = rail.getBoundingClientRect();
+    tip.style.top = (r.top - b.top + r.height / 2) + 'px';
+    tip.style.left = (r.right - b.left + 10) + 'px';
+    tip.classList.add('visible');
+  }
+  function cacher(){ rail.querySelectorAll('.rail-tip.visible').forEach(function(x){ x.classList.remove('visible'); }); }
+  rail.addEventListener('mouseover', montrer);
+  rail.addEventListener('focusin', montrer);
+  rail.addEventListener('mouseleave', cacher);
+  rail.addEventListener('focusout', cacher);
+  rail.addEventListener('click', cacher);
 }
 
 /* ===== Barre mobile (<=768px) : 5 entrees fixes, Equipe/Plus ouvrent une feuille ===== */
@@ -2349,15 +2649,15 @@ function buildMobileNav(){
 
   var html = visibleDirect.map(function(id){
     var on = id === activeId ? ' on' : '';
-    return '<div class="mnav-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+    return '<div class="mnav-item'+on+'" data-mnav="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
       + (MNAV_ICONS[id]||'') + '<span>'+t('nav_'+id)+'</span></div>';
   }).join('');
   if(equipeIds.length){
-    html += '<div class="mnav-item'+(activeInEquipe?' on':'')+'" data-mnav="grp-equipe" onclick="openMobileMenu(\'equipe\')">'
+    html += '<div class="mnav-item'+(activeInEquipe?' on':'')+'" data-mnav="grp-equipe" data-on-click="openMobileMenu(\'equipe\')">'
       + MNAV_ICONS.group_equipe + '<span>'+t('nav_equipe')+'</span></div>';
   }
   if(plusIds.length){
-    html += '<div class="mnav-item'+(activeInPlus?' on':'')+'" data-mnav="grp-plus" onclick="openMobileMenu(\'plus\')">'
+    html += '<div class="mnav-item'+(activeInPlus?' on':'')+'" data-mnav="grp-plus" data-on-click="openMobileMenu(\'plus\')">'
       + MNAV_ICONS.group_plus + '<span>'+t('nav_plus')+'</span></div>';
   }
   nav.innerHTML = html;
@@ -2383,7 +2683,7 @@ function openMobileMenu(group){
   if(menuTitle) menuTitle.textContent = group === 'plus' ? t('nav_plus') : t('nav_equipe');
   menuList.innerHTML = ids.map(function(id){
     var on = id === activeId ? ' on' : '';
-    return '<button class="mms-item'+on+'" data-mnav="'+id+'" onclick="mnavGo(\''+id+'\')">'
+    return '<button class="mms-item'+on+'" data-mnav="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
       + (MNAV_ICONS[id] || '') + '<span>'+navLabel(id)+'</span></button>';
   }).join('');
   var sheet = document.getElementById('mobile-menu-sheet');
@@ -2411,12 +2711,7 @@ function updateMobileNavActive(id){
   });
   document.querySelectorAll('.rail-item[data-rail]').forEach(function(el){
     el.classList.toggle('on', el.dataset.rail === id);
-  });
-  // Groupes du rail (Equipe/Production/Plus) : actifs si l'onglet courant en fait partie.
-  var railGroups = {equipe: NAV_GROUP_EQUIPE, prod: NAV_GROUP_PROD, plus: NAV_GROUP_PLUS};
-  Object.keys(railGroups).forEach(function(g){
-    var el = document.querySelector('.rail-group[data-rail-group="'+g+'"] > .rail-item');
-    if(el) el.classList.toggle('on', railGroups[g].indexOf(id) !== -1);
+    if(el.dataset.rail === id) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
   });
 }
 // Ecoute additionnelle sur les vrais boutons d onglets (n interfere pas avec
