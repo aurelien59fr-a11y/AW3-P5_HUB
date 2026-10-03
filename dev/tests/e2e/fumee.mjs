@@ -188,6 +188,23 @@ for (const [nom, fiche] of SCENARIOS) {
     });
     if (process.env.CAPTURE_PLANNING) await page.screenshot({ path: process.env.CAPTURE_PLANNING.replace('.png', '-' + nom.replace(/\W+/g, '_') + '.png') });
   }
+  // Barre laterale : chaque onglet autorise a son bouton (accessible en un clic).
+  const railManquants = await page.evaluate(() => {
+    const appVisible = getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none';
+    if (!appVisible) return [];
+    const dansRail = new Set([...document.querySelectorAll('#desktop-rail .rail-item[data-rail]')].map((b) => b.dataset.rail));
+    return [...document.querySelectorAll('.tab[data-tab]')].filter((b) => b.style.display !== 'none' && b.dataset.tab !== 'ab').map((b) => b.dataset.tab).filter((id) => !dansRail.has(id));
+  });
+  if (process.env.CAPTURE_RAIL && nom === 'admin') {
+    for (const [l, h, mode] of [[1440, 860, null], [1100, 760, null], [1100, 760, 'survol']]) {
+      await page.setViewportSize({ width: l, height: h });
+      await page.evaluate(() => { try { localStorage.removeItem('aw3_rail_ouvert'); } catch (e) {} buildDesktopRail(); });
+      if (mode === 'survol') await page.hover('#desktop-rail .rail-item[data-rail="ncp"]');
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: process.env.CAPTURE_RAIL.replace('.png', '-' + l + (mode ? '-' + mode : '') + '.png') });
+    }
+    await page.setViewportSize({ width: 1280, height: 720 });
+  }
   const accessibilite = await page.evaluate(auditA11y);
   const etat = await page.evaluate(() => ({
     appVisible: getComputedStyle(document.getElementById('app-screen') || document.body).display !== 'none',
@@ -200,7 +217,7 @@ for (const [nom, fiche] of SCENARIOS) {
     espace: (() => { const b = document.querySelector('.tab[data-tab="espace"]'); if (b) b.click(); const c = document.getElementById('espace-content'); return c ? c.textContent.replace(/\s+/g, ' ').slice(0, 4000) : null; })(),
   }));
   const ecoutesFin = await page.evaluate(() => [...new Set(window.__ecoutes || [])].sort());
-  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, planningAujourdhui, ...etat });
+  resultats.push({ nom, boutonsAdminVisibles, actionsIncomprises, accessibilite, onglets, ecoutesDemarrage, ecoutesFin, actions, arretsDemarrage, jszipAuDemarrage, exportExcel, erreurs: [...new Set(erreurs)], bloquees: [...bloquees], saisie, importGlobal, planningAujourdhui, railManquants, ...etat });
   await ctx.close();
 }
 await navigateur.close();
@@ -217,6 +234,7 @@ for (const r of resultats) {
   if (r.actionsIncomprises && r.actionsIncomprises.length) problemes.push(`${r.nom} : actions incomprises ${r.actionsIncomprises.join(' | ')}`);
   if (r.nom === 'visiteur' && r.boutonsAdminVisibles) problemes.push(`visiteur : ${r.boutonsAdminVisibles} bouton(s) d'import visibles`);
   if (r.planningAujourdhui && !r.planningAujourdhui.ok) problemes.push(`${r.nom} : planning pas positionne sur le prochain week-end (${JSON.stringify(r.planningAujourdhui)})`);
+  if (r.railManquants && r.railManquants.length) problemes.push(`${r.nom} : onglets absents de la barre laterale ${r.railManquants.join(', ')}`);
   if (r.pwned) problemes.push(`${r.nom} : injection HTML executee`);
   if (r.migration) problemes.push(`${r.nom} : bouton de migration present`);
   if (r.mdpObligatoire !== (r.nom === 'premiere connexion')) problemes.push(`${r.nom} : fenetre mot de passe ${r.mdpObligatoire ? 'affichee a tort' : 'absente'}`);
