@@ -149,7 +149,7 @@ var I18N={
     tab_pt:'Pointages', tab_arrets:'Arrêts Inpak', tab_cmp2:'Comparaison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Accueil', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Espace', nav_ab:'Absences',
     nav_formations:'Form.', nav_pt:'Point.', nav_arrets:'Arrêts', nav_ncp:'Qualité', nav_recrutement:'Recrut.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
-    nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus',
+    nav_equipe:'Équipe', nav_plus:'Plus', rail_group_equipe:'Équipe', rail_group_prod:'Production', rail_group_plus:'Plus', rail_group_gestion:'Gestion', rail_reduire:'Réduire le menu', rail_deplier:'Afficher les noms du menu', rail_navigation:'Navigation principale', rail_menu:'Menu',
     plan_subtitle:'Cliquez sur un poste pour modifier', plan_all:'Tous', plan_all_btn:'Tout',
     plan_today:'Aujourd’hui', plan_print:'Imprimer', plan_no_today:'Aujourd’hui n’est pas un jour planifié.', plan_prochain:'Prochain jour planifié : {d}', plan_prochain_we:'Prochain week-end', plan_aucun_prochain:'Aucun jour planifié à venir',
     legend_tl:'Team Leader', legend_coord:'Coordinateur', legend_aw1:'Equipe AW1', legend_aw2:'Equipe AW2',
@@ -532,7 +532,7 @@ var I18N={
     tab_pt:'Tijdsregistraties', tab_arrets:'Inpak Stilstanden', tab_cmp2:'Vergelijking', tab_admin:'Admin', tab_lb:'Logboek',
     nav_ov:'Start', nav_br:'Prest.', nav_pl:'Planning', nav_espace:'Ruimte', nav_ab:'Afwez.',
     nav_formations:'Oplei.', nav_pt:'Uren', nav_arrets:'Stops', nav_ncp:'Kwalit.', nav_recrutement:'Werving', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logboek',
-    nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer',
+    nav_equipe:'Team', nav_plus:'Meer', rail_group_equipe:'Team', rail_group_prod:'Productie', rail_group_plus:'Meer', rail_group_gestion:'Beheer', rail_reduire:'Menu verkleinen', rail_deplier:'Menunamen tonen', rail_navigation:'Hoofdnavigatie', rail_menu:'Menu',
     plan_subtitle:'Klik op een post om te wijzigen', plan_all:'Alle', plan_all_btn:'Alles',
     plan_today:'Vandaag', plan_print:'Afdrukken', plan_no_today:'Vandaag is geen geplande dag.', plan_prochain:'Volgende geplande dag: {d}', plan_prochain_we:'Volgend weekend', plan_aucun_prochain:'Geen geplande dagen meer',
     legend_tl:'Team Leader', legend_coord:'Coördinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -915,7 +915,7 @@ var I18N={
     tab_pt:'Time tracking', tab_arrets:'Inpak Stops', tab_cmp2:'Comparison', tab_admin:'Admin', tab_lb:'Logbook',
     nav_ov:'Home', nav_br:'Perf.', nav_pl:'Planning', nav_espace:'Space', nav_ab:'Absences',
     nav_formations:'Train.', nav_pt:'Time', nav_arrets:'Stops', nav_ncp:'Quality', nav_recrutement:'Recruit.', nav_admin:'Admin', nav_menu:'Menu', nav_lb:'Logbook',
-    nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More',
+    nav_equipe:'Team', nav_plus:'More', rail_group_equipe:'Team', rail_group_prod:'Production', rail_group_plus:'More', rail_group_gestion:'Management', rail_reduire:'Collapse menu', rail_deplier:'Show menu labels', rail_navigation:'Main navigation', rail_menu:'Menu',
     plan_subtitle:'Click on a position to edit', plan_all:'All', plan_all_btn:'All',
     plan_today:'Today', plan_print:'Print', plan_no_today:'Today is not a scheduled day.', plan_prochain:'Next scheduled day: {d}', plan_prochain_we:'Next weekend', plan_aucun_prochain:'No upcoming scheduled day',
     legend_tl:'Team Leader', legend_coord:'Coordinator', legend_aw1:'Team AW1', legend_aw2:'Team AW2',
@@ -2527,10 +2527,6 @@ var MNAV_PRIORITY = ['ov','pl','espace','br','ab','ncp','arrets','lb','formation
 // 23/09/2026 -- calendrier de synthese par poste (P1-P5), voir metier/logbook.js
 // et vues/logbook.js (Calendrier logbook - design.md dans Obsidian).
 var NAV_DIRECT = ['ov','pl','espace'];
-// Admin en rail desktop : ajoute a NAV_DIRECT uniquement pour le rail desktop
-// (voir buildDesktopRail) pour remonter l'icone en haut, sans toucher aux 5
-// emplacements fixes de la barre mobile (admin y reste dans "Plus").
-var NAV_DIRECT_RAIL = NAV_DIRECT.concat(['admin']);
 var NAV_GROUP_EQUIPE = ['br','formations','pt'];
 var NAV_GROUP_PROD = ['arrets','bulk','ncp','lb'];
 var NAV_GROUP_PLUS = ['recrutement','admin'];
@@ -2560,61 +2556,79 @@ function navLabel(id){
   return lbl ? lbl.textContent : (t('tab_'+id) || id);
 }
 
-/* ===== Rail desktop (>=769px) ===== */
+/* ===== Rail desktop (>=769px) =====
+   Tous les onglets autorises sont visibles directement (un seul clic), ranges
+   par rubrique. Deux modes : deplie (icone + nom, par defaut sur grand ecran)
+   ou replie (icones seules, nom en info-bulle). Le choix est memorise sur le PC.
+   Plus de panneaux qui s'ouvrent au survol : ils se refermaient quand la souris
+   traversait l'espace entre l'icone et le panneau. */
+var RAIL_CLE = 'aw3_rail_ouvert';
+function railEstOuvert(){
+  try { var v = localStorage.getItem(RAIL_CLE); if(v === '1') return true; if(v === '0') return false; } catch(e){}
+  return window.innerWidth >= 1280;
+}
+function railBasculer(){
+  var ouvert = !railEstOuvert();
+  try { localStorage.setItem(RAIL_CLE, ouvert ? '1' : '0'); } catch(e){}
+  buildDesktopRail();
+}
 function buildDesktopRail(){
   var rail = document.getElementById('desktop-rail');
   if(!rail) return;
   var activeId = (document.querySelector('.tab.on') || {}).dataset ? document.querySelector('.tab.on').dataset.tab : null;
+  var ouvert = railEstOuvert();
+  rail.classList.toggle('ouvert', ouvert);
 
   function itemHtml(id){
     var on = id === activeId ? ' on' : '';
-    return '<div class="rail-item'+on+'" data-rail="'+id+'" data-on-click="mnavGo(\''+id+'\')">'
-      + (MNAV_ICONS[id] || '') + '<span class="rail-tip">'+navLabel(id)+'</span></div>';
+    var nom = escHtml(navLabel(id));
+    return '<button type="button" class="rail-item'+on+'" data-rail="'+id+'" data-on-click="mnavGo(\''+id+'\')" aria-label="'+nom+'"'+(on?' aria-current="page"':'')+'>'
+      + (MNAV_ICONS[id] || '') + '<span class="rail-lbl">'+nom+'</span><span class="rail-tip" aria-hidden="true">'+nom+'</span></button>';
   }
-  function groupHtml(groupId, ids, icon, label){
-    var visible = navGroupVisible(ids);
-    if(!visible.length) return '';
-    var groupActive = visible.indexOf(activeId) !== -1;
-    var panelItems = visible.map(function(id){
-      var on = id === activeId ? ' on' : '';
-      return '<div class="rail-panel-item'+on+'" data-on-click="mnavGo(\''+id+'\')">'+(MNAV_ICONS[id]||'')+'<span>'+navLabel(id)+'</span></div>';
-    }).join('');
-    return '<div class="rail-group" data-rail-group="'+groupId+'">'
-      + '<div class="rail-item'+(groupActive?' on':'')+'">'+icon+'<span class="rail-tip">'+label+'</span></div>'
-      + '<div class="rail-panel">'+panelItems+'</div>'
-      + '</div>';
+  function rubrique(titre, ids){
+    var visibles = navGroupVisible(ids);
+    if(!visibles.length) return '';
+    return '<div class="rail-titre">'+escHtml(titre)+'</div>' + visibles.map(itemHtml).join('');
   }
 
-  var direct = navGroupVisible(NAV_DIRECT_RAIL).map(itemHtml).join('');
-  var equipe = groupHtml('equipe', NAV_GROUP_EQUIPE, MNAV_ICONS.group_equipe, t('rail_group_equipe'));
-  var prod = groupHtml('prod', NAV_GROUP_PROD, MNAV_ICONS.group_prod, t('rail_group_prod'));
-  // 'admin' est deja affiche en direct ci-dessus (rail desktop) ; on l'exclut
-  // du panneau "Plus" pour ne pas le dupliquer. Reste dans NAV_GROUP_PLUS pour
-  // la barre mobile (buildMobileNav), ou il n'y a pas de rail direct pour lui.
-  var plusIdsRail = NAV_GROUP_PLUS.filter(function(id){ return id !== 'admin'; });
-  var plus = groupHtml('plus', plusIdsRail, MNAV_ICONS.group_plus, t('rail_group_plus'));
-
+  var basculeNom = escHtml(t(ouvert ? 'rail_reduire' : 'rail_deplier'));
   rail.innerHTML =
-    '<div class="rail-logo">AW3</div>'
-    + direct
-    + ((equipe||prod) ? '<div class="rail-sep"></div>' : '')
-    + equipe + prod
+    '<div class="rail-tete"><span class="rail-nom">'+escHtml(t('rail_menu'))+'</span>'
+    + '<button type="button" class="rail-bascule" data-on-click="railBasculer()" aria-label="'+basculeNom+'" aria-expanded="'+(ouvert?'true':'false')+'" title="'+basculeNom+'">'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="'+(ouvert?'15 18 9 12 15 6':'9 18 15 12 9 6')+'"/></svg></button></div>'
+    + '<nav class="rail-liste" aria-label="'+escHtml(t('rail_navigation'))+'">'
+    + navGroupVisible(NAV_DIRECT).map(itemHtml).join('')
+    + rubrique(t('rail_group_equipe'), NAV_GROUP_EQUIPE)
+    + rubrique(t('rail_group_prod'), NAV_GROUP_PROD)
     + '<div class="rail-spacer"></div>'
-    + plus;
+    + rubrique(t('rail_group_gestion'), NAV_GROUP_PLUS)
+    + '</nav>';
+  railInfoBulles(rail);
+}
 
-  // Ouvre/ferme les panneaux de groupe au clic (en plus du survol CSS, utile
-  // au clavier/tactile). Un seul groupe ouvert a la fois.
-  rail.querySelectorAll('.rail-group').forEach(function(g){
-    g.querySelector('.rail-item').addEventListener('click', function(e){
-      e.stopPropagation();
-      var wasOpen = g.classList.contains('expanded');
-      rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
-      if(!wasOpen) g.classList.add('expanded');
-    });
-  });
-  document.addEventListener('click', function(){
-    rail.querySelectorAll('.rail-group.expanded').forEach(function(o){ o.classList.remove('expanded'); });
-  });
+/* Mode replie : le nom de l'onglet s'affiche a cote de l'icone au survol ou
+   au focus clavier (position fixe : la liste peut defiler). */
+function railInfoBulles(rail){
+  if(rail.dataset.bulles) return;
+  rail.dataset.bulles = '1';
+  function montrer(e){
+    var item = e.target.closest && e.target.closest('.rail-item');
+    rail.querySelectorAll('.rail-tip.visible').forEach(function(x){ if(!item || !item.contains(x)) x.classList.remove('visible'); });
+    if(!item || rail.classList.contains('ouvert')) return;
+    var tip = item.querySelector('.rail-tip'); if(!tip) return;
+    // Le flou de la barre (backdrop-filter) en fait le repere des elements
+    // en position fixe : coordonnees relatives a la barre.
+    var r = item.getBoundingClientRect(), b = rail.getBoundingClientRect();
+    tip.style.top = (r.top - b.top + r.height / 2) + 'px';
+    tip.style.left = (r.right - b.left + 10) + 'px';
+    tip.classList.add('visible');
+  }
+  function cacher(){ rail.querySelectorAll('.rail-tip.visible').forEach(function(x){ x.classList.remove('visible'); }); }
+  rail.addEventListener('mouseover', montrer);
+  rail.addEventListener('focusin', montrer);
+  rail.addEventListener('mouseleave', cacher);
+  rail.addEventListener('focusout', cacher);
+  rail.addEventListener('click', cacher);
 }
 
 /* ===== Barre mobile (<=768px) : 5 entrees fixes, Equipe/Plus ouvrent une feuille ===== */
@@ -2697,12 +2711,7 @@ function updateMobileNavActive(id){
   });
   document.querySelectorAll('.rail-item[data-rail]').forEach(function(el){
     el.classList.toggle('on', el.dataset.rail === id);
-  });
-  // Groupes du rail (Equipe/Production/Plus) : actifs si l'onglet courant en fait partie.
-  var railGroups = {equipe: NAV_GROUP_EQUIPE, prod: NAV_GROUP_PROD, plus: NAV_GROUP_PLUS};
-  Object.keys(railGroups).forEach(function(g){
-    var el = document.querySelector('.rail-group[data-rail-group="'+g+'"] > .rail-item');
-    if(el) el.classList.toggle('on', railGroups[g].indexOf(id) !== -1);
+    if(el.dataset.rail === id) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
   });
 }
 // Ecoute additionnelle sur les vrais boutons d onglets (n interfere pas avec
